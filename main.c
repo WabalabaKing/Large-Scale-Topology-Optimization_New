@@ -309,5 +309,6 @@ int main(int argc, char *argv[])
     NNEW(ipoinp, ITG, 2 * nentries);
 
     /* conservative estimate of the fields to be allocated */
+    readinput(jobnamec, &inpc, &nline, &nset_, ipoinp, &inp, &ipoinpc, ithermal, &nuel_);
 
 }
