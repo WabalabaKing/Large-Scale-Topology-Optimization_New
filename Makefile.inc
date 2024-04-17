@@ -1,7 +1,8 @@
 SCCXF = \
 stop.f \
 stopwithout201.f \
-closefile.f
+closefile.f \
+openfile.f
 
 SCCXC = \
 strcmp1.c \

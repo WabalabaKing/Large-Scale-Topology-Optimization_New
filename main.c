@@ -9,11 +9,29 @@ int main(int argc, char *argv[])
 {
     FILE *f1;
 
-    char *sideload = NULL, *set = NULL, *matname = NULL, *orname = NULL, *amname = NULL,
-       *filab = NULL, *lakon = NULL, *labmpc = NULL, *prlab = NULL, *prset = NULL,
-       jobnamec[660] = "", jobnamef[132] = "", output[4] = "asc", *typeboun = NULL,
-       *inpc = NULL, *tieset = NULL, *cbody = NULL, fneig[132] = "", *sideloadtemp = NULL,
-       kind1[2] = "T", kind2[2] = "T", *heading = NULL, *objectset = NULL;
+    char *sideload = NULL;  /*!< \brief load label.*/
+    char *set = NULL;       /*!< \brief magnitude of load at end of a step.*/
+    char *matname = NULL;   /*!< \brief name of material.*/
+    char *orname = NULL;    /*!< \brief name of orientation.*/
+    char *amname = NULL;    /*!< \brief name of the amplitude.*/
+    char *filab = NULL;     /*!< \brief label corresponding to outfield.*/
+    char *lakon = NULL;     /*!< \brief element label.*/
+    char *labmpc = NULL;    /*!< \brief label of MPI i.*/
+    char *prlab = NULL;     /*!< \brief label for output request.*/
+    char  *prset = NULL;    /*!< \brief node or element set corresponding to output request i.*/
+    char jobnamec[660] = "";/*!< \brief jobname for C environment. */
+    char jobnamef[132] = "";/*!< \brief jobname for FORTRAN environment. */
+    char output[4] = "asc"; /*!< \brief Output filename character array.*/
+    char *typeboun = NULL;  /*!< \brief SPC type (A=acceleration, B = prescribed b.c, R= Rigidbody)/*/
+    char *inpc = NULL;      /*!< \brief Undefined.*/
+    char *tieset = NULL;    /*!< \brief name of the tie constraint.*/
+    char *cbody = NULL;     /*!< \brief element number or element set to which load i applies.*/
+    char fneig[132] = "";   /*!< \brief Undefined.*/
+    char *sideloadtemp = NULL;/*!< \brief load label temp.*/
+    char  kind1[2] = "T";   /*!< \brief Undefined.*/
+    char kind2[2] = "T";    /*!< \brief Undefined.*/
+    char *heading = NULL;   /*!< \brief Undefined.*/
+    char *objectset = NULL; /*!< \brief Undefined.*/
 
       ITG nk, ne, nboun, nmpc, nforc, nload, nprint = 0, nset, nalset, nentries = 17,
                                          nmethod, neq[3] = {0, 0, 0}, i, mpcfree = 1, mei[4], j, nzl, nam, nbounold = 0,
@@ -210,7 +228,35 @@ int main(int argc, char *argv[])
         pstiff = pSupplied;
     }
 
-  // setenv("CCX_JOBNAME_GETJOBNAME",jobnamec,1);
-  putenv("CCX_JOBNAME_GETJOBNAME=jobnamec");
+    // setenv("CCX_JOBNAME_GETJOBNAME",jobnamec,1);
+    putenv("CCX_JOBNAME_GETJOBNAME=jobnamec");
+
+    FORTRAN(openfile, (jobnamef, output));
+
+    printf("\n************************************************************\n\n");
+    printf("CalculiX Version 2.15 Topology Optimization with SIMP Method, Ghanendra Kumar Das, CDILab, Aerospace Dept, UIUC \n");
+    printf("Original FEA source code:CalculiX by G Dhond.\n");
+    printf("************************************************************\n\n");
+    printf("\n\n");
+    fflush(stdout);
+
+    istep = 0;
+    istat = 0;
+    iprestr = 0;
+    kode = 0;
+
+    #if defined(SGI)
+    isolver = 4;
+    #elif defined(PARDISO)
+    isolver = 7;
+    #elif defined(SPOOLES)
+    isolver = 0;
+    #elif defined(TAUCS)
+    isolver = 5;
+    #else
+    isolver = 3;
+    #endif
+
+    NNEW(ipoinp, ITG, 2 * nentries);
 
 }
