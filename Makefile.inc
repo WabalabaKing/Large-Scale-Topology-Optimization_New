@@ -8,7 +8,12 @@ includefilename.f \
 keystart.f \
 splitline.f \
 restartshort.f \
-skip.f
+skip.f \
+allocation.f \
+inputerror.f \
+getnewline.f \
+userelements.f \
+nidentk.f
 
 
 
@@ -18,6 +23,7 @@ strcmp2.c \
 strcpy1.c \
 u_calloc.c \
 u_realloc.c \
-readinput.c
+readinput.c \
+u_free.c
 
 SCCXCXX = umat_dl.cpp

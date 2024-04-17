@@ -311,4 +311,138 @@ int main(int argc, char *argv[])
     /* conservative estimate of the fields to be allocated */
     readinput(jobnamec, &inpc, &nline, &nset_, ipoinp, &inp, &ipoinpc, ithermal, &nuel_);
 
+    NNEW(set, char, 81 * nset_);
+    NNEW(meminset, ITG, nset_);
+    NNEW(rmeminset, ITG, nset_);
+    NNEW(iuel, ITG, 4 * nuel_);
+
+    FORTRAN(allocation, (&nload_, &nforc_, &nboun_, &nk_, &ne_, &nmpc_, &nset_, &nalset_,
+                       &nmat_, &ntmat_, &npmat_, &norien_, &nam_, &nprint_, mi, &ntrans_,
+                       set, meminset, rmeminset, &ncs_, &namtot_, &ncmat_, &memmpc_, &ne1d,
+                       &ne2d, &nflow, jobnamec, irstrt, ithermal, &nener, &nstate_, &istep,
+                       inpc, ipoinp, inp, &ntie_, &nbody_, &nprop_, ipoinpc, &nevdamp_, &npt_, &nslavs,
+                       &nkon_, &mcs, &mortar, &ifacecount, &nintpoint, infree, &nheading_, &nobject_,
+                       iuel, &iprestr, &nstam, &ndamp, &nef));
+
+    SFREE(set);
+    SFREE(meminset);
+    SFREE(rmeminset);
+    mt = mi[1] + 1;
+    NNEW(heading, char, 66 * nheading_);
+
+    nzs_ = 20000000;
+
+    nload = 0;
+    nbody = 0;
+    nforc = 0;
+    nboun = 0;
+    nk = 0;
+    nmpc = 0;
+    nam = 0;
+
+    nlabel = 48;
+
+    while (istat >= 0)
+    {
+        fflush(stdout);
+
+        /* in order to reduce the number of variables to be transferred to
+       the subroutines, the max. field sizes are (for most fields) copied
+       into the real sizes */
+
+       nzs[1] = nzs_;
+
+       if ((istep == 0) || (irstrt[0] < 0))
+       {
+            ne = ne_;
+            nset = nset_;
+            nmat = nmat_;
+            norien = norien_;
+            ntrans = ntrans_;
+            ntie = ntie_;
+
+            /* allocating space before the first step */
+            /* coordinates and topology */
+
+            NNEW(co, double, 3 * nk_);
+            NNEW(kon, ITG, nkon_);
+            NNEW(ipkon, ITG, ne_);
+            NNEW(lakon, char, 8 * ne_);
+            NNEW(design, double, ne_);
+
+            /* property cards */
+            if (nprop_ > 0)
+            {
+                NNEW(ielprop, ITG, ne_);
+                for (i = 0; i < ne_; i++)
+                {
+                    ielprop[i] = -1;
+                }
+                NNEW(prop, double, nprop_);
+            }
+
+            /* fields for 1-D and 2-D elements */
+            if ((ne1d != 0) || (ne2d != 0))
+                {
+                    NNEW(iponor, ITG, 2 * nkon_);
+                    for (i = 0; i < 2 * nkon_; i++)
+                        iponor[i] = -1;
+                    NNEW(xnor, double, 36 * ne1d + 24 * ne2d);
+                    NNEW(knor, ITG, 24 * (ne1d + ne2d) * (mi[2] + 1));
+                    NNEW(thickn, double, 2 * nk_);
+                    NNEW(thicke, double, mi[2] * nkon_);
+                    NNEW(offset, double, 2 * ne_);
+                    NNEW(iponoel, ITG, nk_);
+                    NNEW(inoel, ITG, 9 * ne1d + 24 * ne2d);
+                    NNEW(rig, ITG, nk_);
+                    if (infree[2] == 0)
+                        infree[2] = 1;
+                 }
+
+            /* SPC's */
+            NNEW(nodeboun, ITG, nboun_);
+            NNEW(ndirboun, ITG, nboun_);
+            NNEW(typeboun, char, nboun_ + 1);
+            if ((istep == 0) || ((irstrt[0] < 0) && (nam_ > 0)))
+                NNEW(iamboun, ITG, nboun_);
+            NNEW(xboun, double, nboun_);
+            NNEW(ikboun, ITG, nboun_);
+            NNEW(ilboun, ITG, nboun_);
+
+            /* MPC's */
+            NNEW(ipompc, ITG, nmpc_);
+            NNEW(nodempc, ITG, 3 * memmpc_);
+
+            for (i = 0; i < 3 * memmpc_; i += 3)
+            {
+                nodempc[i + 2] = i / 3 + 2;
+            }
+            nodempc[3 * memmpc_ - 1] = 0;
+            NNEW(coefmpc, double, memmpc_);
+            NNEW(labmpc, char, 20 * nmpc_ + 1);
+            NNEW(ikmpc, ITG, nmpc_);
+            NNEW(ilmpc, ITG, nmpc_);
+            NNEW(fmpc, double, nmpc_);
+
+            /* nodal loads */
+            NNEW(nodeforc, ITG, 2 * nforc_);
+            NNEW(ndirforc, ITG, nforc_);
+            if ((istep == 0) || ((irstrt[0] < 0) && (nam_ > 0)))
+                NNEW(iamforc, ITG, nforc_);
+
+            NNEW(idefforc, ITG, nforc_);
+            NNEW(xforc, double, nforc_);
+            NNEW(ikforc, ITG, nforc_);
+            NNEW(ilforc, ITG, nforc_);
+
+
+
+
+
+
+
+       }
+
+
+    }
 }
