@@ -13,8 +13,8 @@ allocation.f \
 inputerror.f \
 getnewline.f \
 userelements.f \
-nidentk.f
-
+nidentk.f \
+betacalinput.f
 
 
 SCCXC = \
@@ -24,6 +24,7 @@ strcpy1.c \
 u_calloc.c \
 u_realloc.c \
 readinput.c \
-u_free.c
+u_free.c \
+
 
 SCCXCXX = umat_dl.cpp

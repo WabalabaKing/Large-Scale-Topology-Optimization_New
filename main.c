@@ -435,13 +435,399 @@ int main(int argc, char *argv[])
             NNEW(ikforc, ITG, nforc_);
             NNEW(ilforc, ITG, nforc_);
 
+            /* distributed facial loads */
+            NNEW(nelemload, ITG, 2 * nload_);
+            if ((istep == 0) || ((irstrt[0] < 0) && (nam_ > 0)))
+                NNEW(iamload, ITG, 2 * nload_);
+
+            NNEW(idefload, ITG, nload_);
+            NNEW(sideload, char, 20 * nload_);
+            NNEW(xload, double, 2 * nload_);
+
+            /* distributed volumetric loads */
+            NNEW(cbody, char, 81 * nbody_);
+            NNEW(idefbody, ITG, nbody_);
+            NNEW(ibody, ITG, 3 * nbody_);
+            NNEW(xbody, double, 7 * nbody_);
+            NNEW(xbodyold, double, 7 * nbody_);
+
+            /* printing output */
+            NNEW(prlab, char, 6 * nprint_);
+            NNEW(prset, char, 81 * nprint_);
+
+            /* set definitions */
+            NNEW(set, char, 81 * nset);
+            NNEW(istartset, ITG, nset);
+            NNEW(iendset, ITG, nset);
+            NNEW(ialset, ITG, nalset);
+
+            /* (hyper)elastic constants */
+            NNEW(elcon, double, (ncmat_ + 1) * ntmat_ * nmat);
+            NNEW(nelcon, ITG, 2 * nmat);
+
+            /* density */
+            NNEW(rhcon, double, 2 * ntmat_ * nmat);
+            NNEW(nrhcon, ITG, nmat);
+
+            /* damping */
+            if (ndamp > 0)
+            {
+                NNEW(dacon, double, nmat);
+            }
+
+            /* specific heat */
+            NNEW(shcon, double, 4 * ntmat_ * nmat);
+            NNEW(nshcon, ITG, nmat);
+
+            /* thermal expansion coefficients */
+            NNEW(alcon, double, 7 * ntmat_ * nmat);
+            NNEW(nalcon, ITG, 2 * nmat);
+            NNEW(alzero, double, nmat);
+
+            /* conductivity */
+            NNEW(cocon, double, 7 * ntmat_ * nmat);
+            NNEW(ncocon, ITG, 2 * nmat);
+
+            /* isotropic and kinematic hardening coefficients*/
+
+            if (npmat_ > 0)
+            {
+                NNEW(plicon, double, (2 * npmat_ + 1) * ntmat_ * nmat);
+                NNEW(nplicon, ITG, (ntmat_ + 1) * nmat);
+                NNEW(plkcon, double, (2 * npmat_ + 1) * ntmat_ * nmat);
+                NNEW(nplkcon, ITG, (ntmat_ + 1) * nmat);
+            }
+
+            /* linear dynamic properties */
+            NNEW(xmodal, double, 11 + nevdamp_);
+            xmodal[10] = nevdamp_ + 0.5;
 
 
+            /* internal state variables (nslavs is needed for restart
+            calculations) */
+
+            if (mortar != 1)
+            {
+                NNEW(xstate, double, nstate_ *mi[0] * (ne + nslavs));
+                nxstate = nstate_ * mi[0] * (ne + nslavs);
+            }
+            else if (mortar == 1)
+            {
+                NNEW(xstate, double, nstate_ *mi[0] * (ne + nintpoint));
+                nxstate = nstate_ * mi[0] * (ne + nintpoint);
+            }
+
+            /* material orientation */
+            if ((istep == 0) || ((irstrt[0] < 0) && (norien > 0)))
+            {
+                NNEW(orname, char, 80 * norien);
+                NNEW(orab, double, 7 * norien);
+                NNEW(ielorien, ITG, mi[2] * ne_);
+            }
+
+            /* transformations */
+            if ((istep == 0) || ((irstrt[0] < 0) && (ntrans > 0)))
+            {
+                NNEW(trab, double, 7 * ntrans);
+                NNEW(inotr, ITG, 2 * nk_);
+            }
+
+            /* amplitude definitions */
+            if ((istep == 0) || ((irstrt[0] < 0) && (nam_ > 0)))
+            {
+                NNEW(amname, char, 80 * nam_);
+                NNEW(amta, double, 2 * namtot_);
+                NNEW(namta, ITG, 3 * nam_);
+            }
+
+            if ((istep == 0) || ((irstrt[0] < 0) && (ithermal[0] > 0)))
+            {
+                NNEW(t0, double, nk_);
+                NNEW(t1, double, nk_);
+                if ((ne1d != 0) || (ne2d != 0))
+                {
+                    NNEW(t0g, double, 2 * nk_);
+                    NNEW(t1g, double, 2 * nk_);
+                }
+            }
+
+            /* the number in next line is NOT 1.2357111317 -> points
+            to user input; instead it is a generic nonzero
+            initialization */
+
+            if (istep == 0)
+            {
+                DMEMSET(t0, 0, nk_, 1.2357111319);
+                DMEMSET(t1, 0, nk_, 1.2357111319);
+            }
+
+            if ((istep == 0) || ((irstrt[0] < 0) && (ithermal[0] > 0) && (nam_ > 0)))
+                NNEW(iamt1, ITG, nk_);
+
+            if ((istep == 0) || ((irstrt[0] < 0) && (iprestr > 0)))
+                NNEW(prestr, double, 6 * mi[0] * ne_);
+
+            NNEW(vold, double, mt *nk_);
+            NNEW(veold, double, mt *nk_);
+
+            /* CFD-results */
+            NNEW(vel, double, 8 * nef);
+            NNEW(velo, double, 8 * nef);
+            NNEW(veloo, double, 8 * nef);
+
+            NNEW(ielmat, ITG, mi[2] * ne_);
+
+            NNEW(matname, char, 80 * nmat);
+
+            NNEW(filab, char, 87 * nlabel);
+
+            /* tied constraints */
+            if (ntie_ > 0)
+            {
+                NNEW(tieset, char, 243 * ntie_);
+                NNEW(tietol, double, 3 * ntie_);
+                NNEW(cs, double, 17 * ntie_);
+            }
+
+            /* objectives for sensitivity analysis */
+            if ((ncs_ > 0) || (npt_ > 0))
+            {
+                if (2 * npt_ > 24 * ncs_)
+                {
+                    NNEW(ics, ITG, 2 * npt_);
+                }
+                else
+                {
+                    NNEW(ics, ITG, 24 * ncs_);
+                }
+                if (npt_ > 30 * ncs_)
+                {
+                NNEW(dcs, double, npt_);
+                }
+                else
+                {
+                NNEW(dcs, double, 30 * ncs_);
+                }
+            }
 
 
+            /* temporary fields for cyclic symmetry calculations */
 
+            if ((ncs_ > 0) || (npt_ > 0))
+            {
+                if (2 * npt_ > 24 * ncs_)
+                {       
+                    NNEW(ics, ITG, 2 * npt_);
+                }
+                else
+                {
+                NNEW(ics, ITG, 24 * ncs_);
+                }
+                if (npt_ > 30 * ncs_)
+                {
+                    NNEW(dcs, double, npt_);
+                }
+                else
+                {
+                    NNEW(dcs, double, 30 * ncs_);
+                }
+            }
 
+            /* slave faces */
+            NNEW(islavsurf, ITG, 2 * ifacecount + 2);
        }
+       else
+       {
+            /* allocating and reallocating space for subsequent steps */
+            if ((nmethod != 4) && (nmethod != 5) && (nmethod != 8) && (nmethod != 9) &&
+            ((abs(nmethod) != 1) || (iperturb[0] < 2)))
+            {
+                NNEW(veold, double, mt *nk_);
+            }
+            else
+            {
+                RENEW(veold, double, mt *nk_);
+                DMEMSET(veold, mt * nk, mt * nk_, 0.);
+            }
+
+            RENEW(vold, double, mt *nk_);
+            DMEMSET(vold, mt * nk, mt * nk_, 0.);
+
+            RENEW(nodeboun, ITG, nboun_);
+            RENEW(ndirboun, ITG, nboun_);
+            RENEW(typeboun, char, nboun_ + 1);
+            RENEW(xboun, double, nboun_);
+            RENEW(ikboun, ITG, nboun_);
+            RENEW(ilboun, ITG, nboun_);
+
+            RENEW(nodeforc, ITG, 2 * nforc_);
+            RENEW(ndirforc, ITG, nforc_);
+            NNEW(idefforc, ITG, nforc_);
+            RENEW(xforc, double, nforc_);
+            RENEW(ikforc, ITG, nforc_);
+            RENEW(ilforc, ITG, nforc_);
+
+            RENEW(nelemload, ITG, 2 * nload_);
+            NNEW(idefload, ITG, nload_);
+            RENEW(sideload, char, 20 * nload_);
+            RENEW(xload, double, 2 * nload_);
+
+            RENEW(cbody, char, 81 * nbody_);
+            NNEW(idefbody, ITG, nbody_);
+            RENEW(ibody, ITG, 3 * nbody_);
+            RENEW(xbody, double, 7 * nbody_);
+            RENEW(xbodyold, double, 7 * nbody_);
+
+            for (i = 7 * nbodyold; i < 7 * nbody_; i++)
+                xbodyold[i] = 0;
+
+            if (nam > 0)
+            {
+                RENEW(iamforc, ITG, nforc_);
+                RENEW(iamload, ITG, 2 * nload_);
+                RENEW(iamboun, ITG, nboun_);
+                RENEW(amname, char, 80 * nam_);
+                RENEW(amta, double, 2 * namtot_);
+                RENEW(namta, ITG, 3 * nam_);
+            }
+
+            RENEW(ipompc, ITG, nmpc_);
+            RENEW(labmpc, char, 20 * nmpc_ + 1);
+            RENEW(ikmpc, ITG, nmpc_);
+            RENEW(ilmpc, ITG, nmpc_);
+            RENEW(fmpc, double, nmpc_);
+
+            if (ntrans > 0)
+            {
+                RENEW(inotr, ITG, 2 * nk_);
+                DMEMSET(inotr, 2 * nk, 2 * nk_, 0);
+            }
+
+            RENEW(co, double, 3 * nk_);
+            DMEMSET(co, 3 * nk, 3 * nk_, 0.);
+
+            if (ithermal[0] != 0)
+            {
+                RENEW(t0, double, nk_);
+                DMEMSET(t0, nk, nk_, 0.);
+                RENEW(t1, double, nk_);
+                DMEMSET(t1, nk, nk_, 0.);
+
+                if ((ne1d != 0) || (ne2d != 0))
+                {
+                    RENEW(t0g, double, 2 * nk_);
+                    DMEMSET(t0g, 2 * nk, 2 * nk_, 0.);
+                    RENEW(t1g, double, 2 * nk_);
+                    DMEMSET(t1g, 2 * nk, 2 * nk_, 0.);
+                }
+
+                if (nam > 0)
+                {
+                    RENEW(iamt1, ITG, nk_);
+                }
+            }
+       }
+
+       /* allocation of fields in the restart file */
+
+       if (irstrt[0] < 0)
+       {
+            NNEW(nodebounold, ITG, nboun_);
+            NNEW(ndirbounold, ITG, nboun_);
+            NNEW(xbounold, double, nboun_);
+            NNEW(xforcold, double, nforc_);
+            NNEW(xloadold, double, 2 * nload_);
+
+            if (ithermal[0] != 0)
+                NNEW(t1old, double, nk_);
+
+            NNEW(sti, double, 6 * mi[0] * ne);
+            NNEW(eme, double, 6 * mi[0] * ne);
+
+            if (nener == 1)
+                NNEW(ener, double, mi[0] * ne * 2);
+            if (mcs > ntie_)
+                RENEW(cs, double, 17 * mcs);
+            if (mortar == 1)
+            {
+                NNEW(pslavsurf, double, 3 * nintpoint);
+                NNEW(clearini, double, 3 * 9 * ifacecount);
+            }
+       }
+
+        nenerold = nener;
+        nkold = nk;
+
+        /* opening the eigenvalue file and checking for cyclic symmetry */
+        strcpy(fneig, jobnamec);
+        strcat(fneig, ".eig");
+        cyclicsymmetry = 0;
+        if ((f1 = fopen(fneig, "rb")) != NULL)
+        {
+            if (fread(&cyclicsymmetry, sizeof(ITG), 1, f1) != 1)
+            {
+                printf("*ERROR reading the information whether cyclic symmetry is involved in the eigenvalue file");
+                exit(0);
+            }
+            fclose(f1);
+        }
+
+        nmpcold = nmpc;
+
+        /* reading the input file */
+
+        if (istep == 0)
+            mortar = -1;
+
+        FORTRAN(betacalinput, (co, &nk, kon, ipkon, lakon, &nkon, &ne,
+                       nodeboun, ndirboun, xboun, &nboun,
+                       ipompc, nodempc, coefmpc, &nmpc, &nmpc_, nodeforc, ndirforc, xforc, &nforc,
+                       &nforc_, nelemload, sideload, xload, &nload, &nload_,
+                       &nprint, prlab, prset, &mpcfree, &nboun_, mei, set, istartset, iendset,
+                       ialset, &nset, &nalset, elcon, nelcon, rhcon, nrhcon, alcon, nalcon,
+                       alzero, t0, t1, matname, ielmat, orname, orab, ielorien, amname,
+                       amta, namta, &nam, &nmethod, iamforc, iamload, iamt1,
+                       ithermal, iperturb, &istat, &istep, &nmat, &ntmat_, &norien, prestr,
+                       &iprestr, &isolver, fei, veold, timepar,
+                       xmodal, filab, jout, &nlabel, &idrct,
+                       jmax, &iexpl, &alpha, iamboun, plicon, nplicon,
+                       plkcon, nplkcon, &iplas, &npmat_, mi, &nk_, trab, inotr, &ntrans,
+                       ikboun, ilboun, ikmpc, ilmpc, ics, dcs, &ncs_, &namtot_, cs, &nstate_,
+                       &ncmat_, &iumat, &mcs, labmpc, iponor, xnor, knor, thickn, thicke,
+                       ikforc, ilforc, offset, iponoel, inoel, rig, infree, nshcon, shcon,
+                       cocon, ncocon, physcon, &nflow,
+                       ctrl, &maxlenmpc, &ne1d, &ne2d, &nener, vold, nodebounold,
+                       ndirbounold, xbounold, xforcold, xloadold, t1old, eme,
+                       sti, ener, xstate, jobnamec, irstrt, &ttime,
+                       qaold, output, typeboun, inpc, ipoinp, inp, tieset, tietol,
+                       &ntie, fmpc, cbody, ibody, xbody, &nbody, &nbody_, xbodyold, &nam_,
+                       ielprop, &nprop, &nprop_, prop, &itpamp, &iviewfile, ipoinpc,
+                       &nslavs, t0g, t1g, &network, &cyclicsymmetry, idefforc, idefload,
+                       idefbody, &mortar, &ifacecount, islavsurf, pslavsurf, clearini,
+                       heading, &iaxial, &nobject, objectset, &nprint_, iuel, &nuel_,
+                       nodempcref, coefmpcref, ikmpcref, &memmpcref_, &mpcfreeref,
+                       &maxlenmpcref, &memmpc_, &isens, &namtot, &nstam, dacon, vel, &nef,
+                       velo, veloo));
+
+
+
+
+
+
+
+
+
+
+            
+
+
+
+
+
+
+
+
+       
 
 
     }
