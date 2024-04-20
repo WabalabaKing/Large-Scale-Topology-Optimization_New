@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
     readinput(jobnamec, &inpc, &nline, &nset_, ipoinp, &inp, &ipoinpc, ithermal, &nuel_);
     printf("Done! \n");
     
-    SFREE(ipoinp);
+    //SFREE(ipoinp);
 
     NNEW(set, char, 81 * nset_);
     NNEW(meminset, ITG, nset_);
