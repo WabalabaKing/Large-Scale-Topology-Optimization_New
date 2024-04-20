@@ -96,6 +96,10 @@
             exit
          endif
       enddo
+
+      do i=1,nentries
+         print *, 'ipoinp(1, ', i, ') = ', ipoinp(1, i)
+      enddo
 !
       istat=0
 !
