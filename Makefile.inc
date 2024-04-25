@@ -83,7 +83,11 @@ gen3dboun.f \
 mpcrem.f \
 forcadd.f \
 selectcyclicsymmetrymodess.f \
-spcmatch.f 
+spcmatch.f \
+genadvecelem.f \
+ufaceload.f \
+restartwrite.f \
+mafillsmvectorfilter.f
 
 
 
@@ -98,7 +102,21 @@ readinput.c \
 u_free.c \
 rho.c \
 writeheading.c \
-linstatic.c
+elementPassiveTreatment.c \
+filterVector.c \
+dVoldRhoPhys.c \
+cascade.c \
+mastructcs.c \
+getSubstring2.c \
+insert.c \
+mastruct.c \
+insertfreq.c \
+mafillsmmain_Vectorfilter.c \
+elementcpuload.c \
+elementcpuload_density.c \
+getSystemCPUs.c
+
+
 
 
 SCCXCXX = umat_dl.cpp
