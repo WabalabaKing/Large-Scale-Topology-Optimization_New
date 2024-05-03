@@ -37,13 +37,13 @@ ITG myid = 0, nproc = 0;
 int main(int argc,char *argv[])
 {
 
-FILE *f1;
+  FILE *f1;
 
-char *sideload=NULL, *set=NULL, *matname=NULL, *orname=NULL, *amname=NULL,
-     *filab=NULL, *lakon=NULL, *labmpc=NULL, *prlab=NULL, *prset=NULL,
-     jobnamec[660]="",jobnamef[132]="",output[4]="asc", *typeboun=NULL,
-     *inpc=NULL,*tieset=NULL,*cbody=NULL,fneig[132]="",*sideloadtemp=NULL,
-     kind1[2]="T",kind2[2]="T",*heading=NULL,*objectset=NULL;
+  char *sideload=NULL, *set=NULL, *matname=NULL, *orname=NULL, *amname=NULL,
+      *filab=NULL, *lakon=NULL, *labmpc=NULL, *prlab=NULL, *prset=NULL,
+      jobnamec[660]="",jobnamef[132]="",output[4]="asc", *typeboun=NULL,
+      *inpc=NULL,*tieset=NULL,*cbody=NULL,fneig[132]="",*sideloadtemp=NULL,
+      kind1[2]="T",kind2[2]="T",*heading=NULL,*objectset=NULL;
 
 ITG *kon=NULL, *nodeboun=NULL, *ndirboun=NULL, *ipompc=NULL,
     *nodempc=NULL, *nodeforc=NULL, *ndirforc=NULL,
@@ -125,73 +125,97 @@ MPI_Comm_rank(MPI_COMM_WORLD, &myid) ;
 MPI_Comm_size(MPI_COMM_WORLD, &nproc) ;
 #endif
 
-if(argc==1){printf("Usage: Flags: -i jobname -p PENALTY -q HIGHERORDERFILTER -r RADIUS -v VOLUMEFRACTION -s ITERATION -f FILTERNNZ\n");FORTRAN(stop,());}
-else{
-  for(i=1;i<argc;i++){
-    if(strcmp1(argv[i],"-i")==0) {
-    strcpy(jobnamec,argv[i+1]);strcpy1(jobnamef,argv[i+1],132);jin++;break;}
-    if(strcmp1(argv[i],"-v")==0) {
-	printf("\nThis is Version 2.15 modified for Topology Optimization with SIMP method: Ghanendra Kumar Das,CDILab, AE, UIUC\n\n");
-  printf("Last edit:8 April to add q \n\n");
-	FORTRAN(stop,());
+if(argc==1)
+{
+  printf("Usage: Flags: -i jobname -p PENALTY -q HIGHERORDERFILTER -r RADIUS -v VOLUMEFRACTION -s ITERATION -f FILTERNNZ\n");FORTRAN(stop,());
+}
+
+else
+{
+  for(i=1;i<argc;i++)
+  {
+    if(strcmp1(argv[i],"-i")==0)
+    {
+      strcpy(jobnamec,argv[i+1]);strcpy1(jobnamef,argv[i+1],132);jin++;break;
+    }
+
+    if(strcmp1(argv[i],"-v")==0)
+    {
+	    printf("\nThis is Version 2.15 modified for Topology Optimization with SIMP method: Ghanendra Kumar Das,CDILab, AE, UIUC\n\n");
+      printf("Last edit:8 April to add q \n\n");
+	    FORTRAN(stop,());
     }
   }
-  if(jin==0){strcpy(jobnamec,argv[1]);strcpy1(jobnamef,argv[1],132);}
+  if(jin==0)
+  {
+    strcpy(jobnamec,argv[1]);strcpy1(jobnamef,argv[1],132);
+  }
 
-  for(i=1;i<argc;i++){
-    if(strcmp1(argv[i],"-o")==0) {
-    strcpy(output,argv[i+1]);break;}
+  for(i=1;i<argc;i++)
+  {
+    if(strcmp1(argv[i],"-o")==0)
+    {
+      strcpy(output,argv[i+1]);break;
+    }
   }
 
   // Read penalty p
-  for(i=1;i<argc;i++){
-    if(strcmp1(argv[i],"-p")==0) {
-    pSupplied=atof(argv[i+1]);
+  for(i=1;i<argc;i++)
+  {
+    if(strcmp1(argv[i],"-p")==0) 
+    {
+      pSupplied=atof(argv[i+1]);
       break;
     }
   }
 
-// Read filter radius r
-  for(i=1;i<argc;i++){
-    if(strcmp1(argv[i],"-r")==0) {
-    rmin=atof(argv[i+1]);
-  
-    break;
+  // Read filter radius r
+  for(i=1;i<argc;i++)
+  {
+    if(strcmp1(argv[i],"-r")==0)
+    {
+      rmin=atof(argv[i+1]);
+      break;
     }
   }
 
-// Read filter order q
-  for(i=1;i<argc;i++){
-    if(strcmp1(argv[i],"-q")==0) {
-    qfilter=atof(argv[i+1]);
-  
-    break;
+  // Read filter order q
+  for(i=1;i<argc;i++)
+  {
+    if(strcmp1(argv[i],"-q")==0) 
+    {
+      qfilter=atof(argv[i+1]);
+      break;
     }
   }  
 
-// Read volume fraction v
-  for(i=1;i<argc;i++){
-    if(strcmp1(argv[i],"-v")==0) {
-    volfrac=atof(argv[i+1]);
-    break;
+  // Read volume fraction v
+  for(i=1;i<argc;i++)
+  {
+    if(strcmp1(argv[i],"-v")==0) 
+    {
+      volfrac=atof(argv[i+1]);
+      break;
     }
   }
 
-// Read expected non zeros in filtermatrix
-  for(i=1;i<argc;i++){
-    if(strcmp1(argv[i],"-f")==0) {
-    fnnzassumed=atoi(argv[i+1]);
-    break;
+  // Read expected non zeros in filtermatrix
+  for(i=1;i<argc;i++)
+  {
+    if(strcmp1(argv[i],"-f")==0) 
+    {
+      fnnzassumed=atoi(argv[i+1]);
+      break;
     }
   }
 
-
-
-// Read iteration number
-  for(i=1;i<argc;i++){
-    if(strcmp1(argv[i],"-s")==0) {
-    itertop=atoi(argv[i+1]);
-    break;
+  // Read iteration number
+  for(i=1;i<argc;i++)
+  {
+    if(strcmp1(argv[i],"-s")==0) 
+    {
+      itertop=atoi(argv[i+1]);
+      break;
     }
   }
 
@@ -199,12 +223,14 @@ else{
 
 //printf("\n */*/*/* rmin= %f\n",rmin);
 
-if (pSupplied==0.0) {
+if (pSupplied==0.0) 
+  {
     pstiff=1.0;
-    }
-else {
-     pstiff=pSupplied;
-   }
+  }
+else 
+  {
+    pstiff=pSupplied;
+  }
 
 //printf("\n*/*/*/*pstiff= %f\n",pstiff);
 
@@ -247,11 +273,11 @@ kode=0;
  isolver=3;
 #endif
 
- NNEW(ipoinp,ITG,2*nentries);
+NNEW(ipoinp,ITG,2*nentries);
 
 /* conservative estimate of the fields to be allocated */
 
- readinput(jobnamec,&inpc,&nline,&nset_,ipoinp,&inp,&ipoinpc,ithermal,&nuel_);
+readinput(jobnamec,&inpc,&nline,&nset_,ipoinp,&inp,&ipoinpc,ithermal,&nuel_);
 
 NNEW(set,char,81*nset_);
 NNEW(meminset,ITG,nset_);
@@ -282,8 +308,8 @@ nload=0;nbody=0;nforc=0;nboun=0;nk=0;nmpc=0;nam=0;
 
 nlabel=48;
 
-while(istat>=0) {
-
+while(istat>=0)
+{
   fflush(stdout);
 
   /* in order to reduce the number of variables to be transferred to
@@ -291,9 +317,10 @@ while(istat>=0) {
      into the real sizes */
 
   nzs[1]=nzs_;
-//  nprint=nprint_;
+  //  nprint=nprint_;
 
-  if((istep==0)||(irstrt[0]<0)) {
+  if((istep==0)||(irstrt[0]<0)) 
+  {
     ne=ne_;
     nset=nset_;
     nalset=nalset_;
@@ -301,7 +328,7 @@ while(istat>=0) {
     norien=norien_;
     ntrans=ntrans_;
     ntie=ntie_;
-//    nobject=nobject_;
+  //    nobject=nobject_;
 
     /* allocating space before the first step */
 
@@ -315,26 +342,31 @@ while(istat>=0) {
 
     /* property cards */
 
-    if(nprop_>0){
-	NNEW(ielprop,ITG,ne_);
-	for(i=0;i<ne_;i++) ielprop[i]=-1;
-	NNEW(prop,double,nprop_);
+    if(nprop_>0)
+    {
+	    NNEW(ielprop,ITG,ne_);
+
+	    for(i=0;i<ne_;i++) ielprop[i]=-1;
+
+	    NNEW(prop,double,nprop_);
     }
 
     /* fields for 1-D and 2-D elements */
 
-    if((ne1d!=0)||(ne2d!=0)){
-	NNEW(iponor,ITG,2*nkon_);
-	for(i=0;i<2*nkon_;i++) iponor[i]=-1;
-	NNEW(xnor,double,36*ne1d+24*ne2d);
-	NNEW(knor,ITG,24*(ne1d+ne2d)*(mi[2]+1));
-	NNEW(thickn,double,2*nk_);
-	NNEW(thicke,double,mi[2]*nkon_);
-	NNEW(offset,double,2*ne_);
-	NNEW(iponoel,ITG,nk_);
-	NNEW(inoel,ITG,9*ne1d+24*ne2d);
-	NNEW(rig,ITG,nk_);
-	if(infree[2]==0)infree[2]=1;
+    if((ne1d!=0)||(ne2d!=0))
+    {
+	    NNEW(iponor,ITG,2*nkon_);
+	    for(i=0;i<2*nkon_;i++) iponor[i]=-1;
+	    NNEW(xnor,double,36*ne1d+24*ne2d);
+	    NNEW(knor,ITG,24*(ne1d+ne2d)*(mi[2]+1));
+	    NNEW(thickn,double,2*nk_);
+	    NNEW(thicke,double,mi[2]*nkon_);
+	    NNEW(offset,double,2*ne_);
+	    NNEW(iponoel,ITG,nk_);
+	    NNEW(inoel,ITG,9*ne1d+24*ne2d);
+	    NNEW(rig,ITG,nk_);
+
+	    if(infree[2]==0)infree[2]=1;
     }
 
     /* SPC's */
@@ -342,7 +374,9 @@ while(istat>=0) {
     NNEW(nodeboun,ITG,nboun_);
     NNEW(ndirboun,ITG,nboun_);
     NNEW(typeboun,char,nboun_+1);
+
     if((istep == 0)||((irstrt[0]<0)&&(nam_>0)))NNEW(iamboun,ITG,nboun_);
+
     NNEW(xboun,double,nboun_);
     NNEW(ikboun,ITG,nboun_);
     NNEW(ilboun,ITG,nboun_);
@@ -351,7 +385,12 @@ while(istat>=0) {
 
     NNEW(ipompc,ITG,nmpc_);
     NNEW(nodempc,ITG,3*memmpc_);
-    for(i=0;i<3*memmpc_;i+=3){nodempc[i+2]=i/3+2;}
+
+    for(i=0;i<3*memmpc_;i+=3)
+    {
+      nodempc[i+2]=i/3+2;
+    }
+
     nodempc[3*memmpc_-1]=0;
     NNEW(coefmpc,double,memmpc_);
     NNEW(labmpc,char,20*nmpc_+1);
@@ -363,7 +402,9 @@ while(istat>=0) {
 
     NNEW(nodeforc,ITG,2*nforc_);
     NNEW(ndirforc,ITG,nforc_);
+
     if((istep == 0)||((irstrt[0]<0)&&(nam_>0)))NNEW(iamforc,ITG,nforc_);
+    
     NNEW(idefforc,ITG,nforc_);
     NNEW(xforc,double,nforc_);
     NNEW(ikforc,ITG,nforc_);
@@ -372,7 +413,9 @@ while(istat>=0) {
     /* distributed facial loads */
 
     NNEW(nelemload,ITG,2*nload_);
+
     if((istep == 0)||((irstrt[0]<0)&&(nam_>0)))NNEW(iamload,ITG,2*nload_);
+    
     NNEW(idefload,ITG,nload_);
     NNEW(sideload,char,20*nload_);
     NNEW(xload,double,2*nload_);
@@ -409,7 +452,10 @@ while(istat>=0) {
 
     /* damping */
 
-    if(ndamp>0){NNEW(dacon,double,nmat);}
+    if(ndamp>0)
+    {
+      NNEW(dacon,double,nmat);
+    }
 
     /* specific heat */
 
@@ -429,11 +475,12 @@ while(istat>=0) {
 
     /* isotropic and kinematic hardening coefficients*/
 
-    if(npmat_>0){
-	NNEW(plicon,double,(2*npmat_+1)*ntmat_*nmat);
-	NNEW(nplicon,ITG,(ntmat_+1)*nmat);
-	NNEW(plkcon,double,(2*npmat_+1)*ntmat_*nmat);
-	NNEW(nplkcon,ITG,(ntmat_+1)*nmat);
+    if(npmat_>0)
+    {
+	    NNEW(plicon,double,(2*npmat_+1)*ntmat_*nmat);
+	    NNEW(nplicon,ITG,(ntmat_+1)*nmat);
+	    NNEW(plkcon,double,(2*npmat_+1)*ntmat_*nmat);
+	    NNEW(nplkcon,ITG,(ntmat_+1)*nmat);
     }
 
     /* linear dynamic properties */
@@ -444,58 +491,74 @@ while(istat>=0) {
     /* internal state variables (nslavs is needed for restart
        calculations) */
 
-    if(mortar!=1){
-	NNEW(xstate,double,nstate_*mi[0]*(ne+nslavs));
-	nxstate=nstate_*mi[0]*(ne+nslavs);
-    }else if(mortar==1){
-	NNEW(xstate,double,nstate_*mi[0]*(ne+nintpoint));
-	nxstate=nstate_*mi[0]*(ne+nintpoint);
+    if(mortar!=1)
+    {
+	    NNEW(xstate,double,nstate_*mi[0]*(ne+nslavs));
+	    nxstate=nstate_*mi[0]*(ne+nslavs);
+    }
+    else if(mortar==1)
+    {
+	    NNEW(xstate,double,nstate_*mi[0]*(ne+nintpoint));
+	    nxstate=nstate_*mi[0]*(ne+nintpoint);
     }
 
     /* material orientation */
 
-    if((istep == 0)||((irstrt[0]<0)&&(norien>0))) {
-	NNEW(orname,char,80*norien);
-	NNEW(orab,double,7*norien);
-	NNEW(ielorien,ITG,mi[2]*ne_);
+    if((istep == 0)||((irstrt[0]<0)&&(norien>0))) 
+    {
+	    NNEW(orname,char,80*norien);
+	    NNEW(orab,double,7*norien);
+	    NNEW(ielorien,ITG,mi[2]*ne_);
     }
 
     /* transformations */
 
-    if((istep == 0)||((irstrt[0]<0)&&(ntrans>0))) {
-	NNEW(trab,double,7*ntrans);
-	NNEW(inotr,ITG,2*nk_);
+    if((istep == 0)||((irstrt[0]<0)&&(ntrans>0))) 
+    {
+	    NNEW(trab,double,7*ntrans);
+	    NNEW(inotr,ITG,2*nk_);
     }
 
     /* amplitude definitions */
 
-    if((istep == 0)||((irstrt[0]<0)&&(nam_>0))) {
-	NNEW(amname,char,80*nam_);
-	NNEW(amta,double,2*namtot_);
-	NNEW(namta,ITG,3*nam_);
+    if((istep == 0)||((irstrt[0]<0)&&(nam_>0))) 
+    {
+	    NNEW(amname,char,80*nam_);
+	    NNEW(amta,double,2*namtot_);
+	    NNEW(namta,ITG,3*nam_);
     }
 
-    if((istep == 0)||((irstrt[0]<0)&&(ithermal[0]>0))) {
-	NNEW(t0,double,nk_);
-	NNEW(t1,double,nk_);
-	if((ne1d!=0)||(ne2d!=0)){
-	    NNEW(t0g,double,2*nk_);
-	    NNEW(t1g,double,2*nk_);
-	}
+    if((istep == 0)||((irstrt[0]<0)&&(ithermal[0]>0))) 
+    {
+	    NNEW(t0,double,nk_);
+	    NNEW(t1,double,nk_);
+
+	    if((ne1d!=0)||(ne2d!=0))
+      {
+	      NNEW(t0g,double,2*nk_);
+	      NNEW(t1g,double,2*nk_);
+	    }
     }
 
     /* the number in next line is NOT 1.2357111317 -> points
        to user input; instead it is a generic nonzero
        initialization */
 
-    if(istep==0){
-	DMEMSET(t0,0,nk_,1.2357111319);
-	DMEMSET(t1,0,nk_,1.2357111319);
+    if(istep==0)
+    {
+	    DMEMSET(t0,0,nk_,1.2357111319);
+	    DMEMSET(t1,0,nk_,1.2357111319);
     }
 
-    if((istep == 0)||((irstrt[0]<0)&&(ithermal[0]>0)&&(nam_>0)))NNEW(iamt1,ITG,nk_);
+    if((istep == 0)||((irstrt[0]<0)&&(ithermal[0]>0)&&(nam_>0)))
+    {
+      NNEW(iamt1,ITG,nk_);
+    }
 
-    if((istep==0)||((irstrt[0]<0)&&(iprestr>0)))NNEW(prestr,double,6*mi[0]*ne_);
+    if((istep==0)||((irstrt[0]<0)&&(iprestr>0)))
+    {
+      NNEW(prestr,double,6*mi[0]*ne_);
+    }
 
     NNEW(vold,double,mt*nk_);
     NNEW(veold,double,mt*nk_);
@@ -514,7 +577,8 @@ while(istat>=0) {
 
     /* tied constraints */
 
-    if(ntie_>0){
+    if(ntie_>0)
+    {
       NNEW(tieset,char,243*ntie_);
       NNEW(tietol,double,3*ntie_);
       NNEW(cs,double,17*ntie_);
@@ -522,23 +586,31 @@ while(istat>=0) {
 
     /* objectives for sensitivity analysis */
 
-    if(nobject_>0){
+    if(nobject_>0)
+    {
       NNEW(objectset,char,324*nobject_);
       for(i=0;i<324*nobject_;i++){objectset[i]=' ';}
     }
 
     /* temporary fields for cyclic symmetry calculations */
 
-    if((ncs_>0)||(npt_>0)){
-      if(2*npt_>24*ncs_){
-	NNEW(ics,ITG,2*npt_);
-      }else{
-	NNEW(ics,ITG,24*ncs_);
+    if((ncs_>0)||(npt_>0))
+    {
+      if(2*npt_>24*ncs_)
+      {
+	      NNEW(ics,ITG,2*npt_);
       }
-      if(npt_>30*ncs_){
-	  NNEW(dcs,double,npt_);
-      }else{
-	  NNEW(dcs,double,30*ncs_);
+      else
+      {
+	      NNEW(ics,ITG,24*ncs_);
+      }
+      if(npt_>30*ncs_)
+      {
+	      NNEW(dcs,double,npt_);
+      }
+      else
+      {
+	      NNEW(dcs,double,30*ncs_);
       }
     }
 
@@ -547,18 +619,22 @@ while(istat>=0) {
     NNEW(islavsurf,ITG,2*ifacecount+2);
 
   }
-  else {
+  else 
+  {
 
-      /* allocating and reallocating space for subsequent steps */
+    /* allocating and reallocating space for subsequent steps */
 
-      if((nmethod!=4)&&(nmethod!=5)&&(nmethod!=8)&&(nmethod!=9)&&
-       ((abs(nmethod)!=1)||(iperturb[0]<2))){
-        NNEW(veold,double,mt*nk_);
-    }
-    else{
+    if((nmethod!=4)&&(nmethod!=5)&&(nmethod!=8)&&(nmethod!=9)&&
+       ((abs(nmethod)!=1)||(iperturb[0]<2)))
+       {
+          NNEW(veold,double,mt*nk_);
+       }
+    else
+    {
       RENEW(veold,double,mt*nk_);
       DMEMSET(veold,mt*nk,mt*nk_,0.);
     }
+
     RENEW(vold,double,mt*nk_);
     DMEMSET(vold,mt*nk,mt*nk_,0.);
 
@@ -586,9 +662,11 @@ while(istat>=0) {
     RENEW(ibody,ITG,3*nbody_);
     RENEW(xbody,double,7*nbody_);
     RENEW(xbodyold,double,7*nbody_);
+
     for(i=7*nbodyold;i<7*nbody_;i++) xbodyold[i]=0;
 
-    if(nam > 0) {
+    if(nam > 0) 
+    {
       RENEW(iamforc,ITG,nforc_);
       RENEW(iamload,ITG,2*nload_);
       RENEW(iamboun,ITG,nboun_);
@@ -604,65 +682,79 @@ while(istat>=0) {
     RENEW(ilmpc,ITG,nmpc_);
     RENEW(fmpc,double,nmpc_);
 
-    if(ntrans > 0){
+    if(ntrans > 0)
+    {
       RENEW(inotr,ITG,2*nk_);DMEMSET(inotr,2*nk,2*nk_,0);
     }
 
     RENEW(co,double,3*nk_);DMEMSET(co,3*nk,3*nk_,0.);
 
-    if(ithermal[0] != 0){
-	RENEW(t0,double,nk_);DMEMSET(t0,nk,nk_,0.);
-	RENEW(t1,double,nk_);DMEMSET(t1,nk,nk_,0.);
-	if((ne1d!=0)||(ne2d!=0)){
-	    RENEW(t0g,double,2*nk_);DMEMSET(t0g,2*nk,2*nk_,0.);
-	    RENEW(t1g,double,2*nk_);DMEMSET(t1g,2*nk,2*nk_,0.);
-	}
-	if(nam > 0) {RENEW(iamt1,ITG,nk_);}
-    }
+    if(ithermal[0] != 0)
+    {
+	    RENEW(t0,double,nk_);DMEMSET(t0,nk,nk_,0.);
+	    RENEW(t1,double,nk_);DMEMSET(t1,nk,nk_,0.);
 
-  }
+	    if((ne1d!=0)||(ne2d!=0))
+      {
+	      RENEW(t0g,double,2*nk_);DMEMSET(t0g,2*nk,2*nk_,0.);
+	      RENEW(t1g,double,2*nk_);DMEMSET(t1g,2*nk,2*nk_,0.);
+	    }
+
+	    if(nam > 0) 
+      {
+        RENEW(iamt1,ITG,nk_);
+      }
+    }
+  } //end else
 
   /* allocation of fields in the restart file */
 
-  if(irstrt[0]<0){
+  if(irstrt[0]<0)
+  {
     NNEW(nodebounold,ITG,nboun_);
     NNEW(ndirbounold,ITG,nboun_);
     NNEW(xbounold,double,nboun_);
     NNEW(xforcold,double,nforc_);
     NNEW(xloadold,double,2*nload_);
+
     if(ithermal[0]!=0) NNEW(t1old,double,nk_);
+
     NNEW(sti,double,6*mi[0]*ne);
     NNEW(eme,double,6*mi[0]*ne);
+
     if(nener==1)NNEW(ener,double,mi[0]*ne*2);
     if(mcs>ntie_) RENEW(cs,double,17*mcs);
-    if(mortar==1){
-	NNEW(pslavsurf,double,3*nintpoint);
-	NNEW(clearini,double,3*9*ifacecount);
-    }
 
+    if(mortar==1)
+    {
+	    NNEW(pslavsurf,double,3*nintpoint);
+	    NNEW(clearini,double,3*9*ifacecount);
+    }
   }
 
   nenerold=nener;
   nkold=nk;
 
   /* opening the eigenvalue file and checking for cyclic symmetry */
-
   strcpy(fneig,jobnamec);
   strcat(fneig,".eig");
   cyclicsymmetry=0;
-  if((f1=fopen(fneig,"rb"))!=NULL){
-      if(fread(&cyclicsymmetry,sizeof(ITG),1,f1)!=1){
-	  printf("*ERROR reading the information whether cyclic symmetry is involved in the eigenvalue file");
-	  exit(0);
-      }
-      fclose(f1);
+
+  if((f1=fopen(fneig,"rb"))!=NULL)
+  {
+    if(fread(&cyclicsymmetry,sizeof(ITG),1,f1)!=1)
+    {
+	    printf("*ERROR reading the information whether cyclic symmetry is involved in the eigenvalue file");
+	    exit(0);
+    }
+    fclose(f1);
   }
 
   nmpcold=nmpc;
 
   /* reading the input file */
-
   if(istep==0)mortar=-1;
+
   FORTRAN(calinput,(co,&nk,kon,ipkon,lakon,&nkon,&ne,
             nodeboun,ndirboun,xboun,&nboun,
 	    ipompc,nodempc,coefmpc,&nmpc,&nmpc_,nodeforc,ndirforc,xforc,&nforc,
@@ -693,10 +785,10 @@ while(istat>=0) {
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
 
-/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-    rho(design,ne);
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  rho(design,ne);
 
- /* FILE *rhoFile;
+  /* FILE *rhoFile;
 
     rhoFile=fopen("densityout.dat","w"); //open in write mode
 
@@ -707,23 +799,28 @@ while(istat>=0) {
                 fprintf(rhoFile,"%.15f \n",design[i]);
             }
         fclose(rhoFile);
-*/
+  */
 
-/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 
 
-#ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
-  for(i=0;i!=nmat;++i){
+  #ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
+  for(i=0;i!=nmat;++i)
+  {
     calculix_registerExternalBehaviour(matname+80*i);
   }
-#endif /* CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT */
+  #endif /* CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT */
 
-  if((istep==1)&&(mortar==-1)){mortar=0;}else{icontact=1;}
+  if((istep==1)&&(mortar==-1))
+  {
+    mortar=0;}else{icontact=1;
+  }
 
   nload0=nload;SFREE(idefforc);SFREE(idefload);SFREE(idefbody);
 
-  if(nheading_>=0){
+  if(nheading_>=0)
+  {
       writeheading(jobnamec,heading,&nheading_);
       SFREE(heading);
       nheading_=-1;
@@ -731,15 +828,15 @@ while(istat>=0) {
 
   if((abs(nmethod)!=1)||(iperturb[0]<2))icascade=0;
 
-//	FORTRAN(writeboun,(nodeboun,ndirboun,xboun,typeboun,&nboun));
+  //	FORTRAN(writeboun,(nodeboun,ndirboun,xboun,typeboun,&nboun));
 
   if(istat<0) break;
 
-  if(istep == 1) {
-
+  if(istep == 1) 
+  {
     SFREE(iuel);
 
-  /* tied contact constraints: generate appropriate MPC's */
+    /* tied contact constraints: generate appropriate MPC's */
 
     tiedcontact(&ntie, tieset, &nset, set,istartset, iendset, ialset,
        lakon, ipkon, kon,tietol,&nmpc, &mpcfree, &memmpc_,
@@ -760,28 +857,40 @@ while(istat>=0) {
 
     /* residual stresses/strains */
 
-    if(iprestr==1) {
-	RENEW(prestr,double,6*mi[0]*ne);
-	for(i=0;i<ne;i++){
-	    for(j=0;j<mi[0];j++){
-		for(k=0;k<6;k++){
-		    sti[6*mi[0]*i+6*j+k]=prestr[6*mi[0]*i+6*j+k];
-		}
+    if(iprestr==1) 
+    {
+	    RENEW(prestr,double,6*mi[0]*ne);
+
+	    for(i=0;i<ne;i++)
+      {
+	      for(j=0;j<mi[0];j++)
+        {
+		      for(k=0;k<6;k++)
+          {
+		        sti[6*mi[0]*i+6*j+k]=prestr[6*mi[0]*i+6*j+k];
+		      }
+	      }
 	    }
-	}
     }
-    else if(iprestr==2){
-	RENEW(prestr,double,6*mi[0]*ne);
-	for(i=0;i<ne;i++){
-	    for(j=0;j<mi[0];j++){
-		for(k=0;k<6;k++){
-		    eme[6*mi[0]*i+6*j+k]=prestr[6*mi[0]*i+6*j+k];
-		}
+    else if(iprestr==2)
+    {
+	    RENEW(prestr,double,6*mi[0]*ne);
+
+	    for(i=0;i<ne;i++)
+      {
+	      for(j=0;j<mi[0];j++)
+        {
+		      for(k=0;k<6;k++)
+          {
+		        eme[6*mi[0]*i+6*j+k]=prestr[6*mi[0]*i+6*j+k];
+		      }
+	      }
 	    }
-	}
     }
-    else {
-	SFREE(prestr);
+
+    else 
+    {
+	    SFREE(prestr);
     }
 
     NNEW(nodebounold,ITG,nboun);
@@ -792,18 +901,22 @@ while(istat>=0) {
 
     /* initial temperatures: store in the "old" boundary conditions */
 
-    if(ithermal[0]>1){
-	for(i=0;i<nboun;i++){
-	    if(strcmp1(&typeboun[i],"F")==0) continue;
-	    if(ndirboun[i]==0){
-		xbounold[i]=vold[mt*(nodeboun[i]-1)];
+    if(ithermal[0]>1)
+    {
+	    for(i=0;i<nboun;i++)
+      {
+	      if(strcmp1(&typeboun[i],"F")==0) continue;
+	      if(ndirboun[i]==0)
+        {
+		      xbounold[i]=vold[mt*(nodeboun[i]-1)];
+	      }
 	    }
-	}
     }
 
     /* initial temperatures: store in the "old" temperature field */
 
-    if(ithermal[0]!=0){
+    if(ithermal[0]!=0)
+    {
       NNEW(t1old,double,nk);
       for(i=0;i<nk;i++) t1old[i]=t0[i];
     }
@@ -816,25 +929,29 @@ while(istat>=0) {
 
     /* property cards */
 
-    if(nprop>0){
-	RENEW(ielprop,ITG,ne);
-	RENEW(prop,double,nprop);
-    }else{
-	SFREE(ielprop);SFREE(prop);
+    if(nprop>0)
+    {
+	    RENEW(ielprop,ITG,ne);
+	    RENEW(prop,double,nprop);
+    }
+    else
+    {
+	    SFREE(ielprop);SFREE(prop);
     }
 
     /* fields for 1-D and 2-D elements */
 
-    if((ne1d!=0)||(ne2d!=0)){
-	RENEW(iponor,ITG,2*nkon);
-	RENEW(xnor,double,infree[0]);
-	RENEW(knor,ITG,infree[1]);
-	SFREE(thickn);
-	RENEW(thicke,double,mi[2]*nkon);
-	RENEW(offset,double,2*ne);
-	RENEW(inoel,ITG,3*(infree[2]-1));
-	RENEW(iponoel,ITG,infree[3]);
-	RENEW(rig,ITG,infree[3]);
+    if((ne1d!=0)||(ne2d!=0))
+    {
+	    RENEW(iponor,ITG,2*nkon);
+	    RENEW(xnor,double,infree[0]);
+	    RENEW(knor,ITG,infree[1]);
+	    SFREE(thickn);
+	    RENEW(thicke,double,mi[2]*nkon);
+	    RENEW(offset,double,2*ne);
+	    RENEW(inoel,ITG,3*(infree[2]-1));
+	    RENEW(iponoel,ITG,infree[3]);
+	    RENEW(rig,ITG,infree[3]);
     }
 
     /* set definitions */
@@ -852,7 +969,10 @@ while(istat>=0) {
     RENEW(rhcon,double,2*ntmat_*nmat);
     RENEW(nrhcon,ITG,nmat);
 
-    if(ndamp>0){RENEW(dacon,double,nmat);}
+    if(ndamp>0)
+    {
+      RENEW(dacon,double,nmat);
+    }
 
     RENEW(shcon,double,4*ntmat_*nmat);
     RENEW(nshcon,ITG,nmat);
@@ -869,44 +989,60 @@ while(istat>=0) {
 
     /* allocating space for the state variables */
 
-    if(mortar!=1){
-	RENEW(xstate,double,nstate_*mi[0]*(ne+nslavs));
-	for(i=nxstate;i<nstate_*mi[0]*(ne+nslavs);i++){xstate[i]=0.;}
-    }else if(mortar==1){
-	RENEW(xstate,double,nstate_*mi[0]*(ne+nintpoint));
-	for(i=nxstate;i<nstate_*mi[0]*(ne+nintpoint);i++){xstate[i]=0.;}
+    if(mortar!=1)
+    {
+	    RENEW(xstate,double,nstate_*mi[0]*(ne+nslavs));
+
+	    for(i=nxstate;i<nstate_*mi[0]*(ne+nslavs);i++)
+      {
+        xstate[i]=0.;
+      }
+    }
+    else if(mortar==1)
+    {
+	    RENEW(xstate,double,nstate_*mi[0]*(ne+nintpoint));
+
+	    for(i=nxstate;i<nstate_*mi[0]*(ne+nintpoint);i++)
+      {
+        xstate[i]=0.;
+      }
     }
 
     /* next statements for plastic materials and nonlinear springs */
 
-    if(npmat_>0){
-	RENEW(plicon,double,(2*npmat_+1)*ntmat_*nmat);
-	RENEW(nplicon,ITG,(ntmat_+1)*nmat);
-	RENEW(plkcon,double,(2*npmat_+1)*ntmat_*nmat);
-	RENEW(nplkcon,ITG,(ntmat_+1)*nmat);
+    if(npmat_>0)
+    {
+	    RENEW(plicon,double,(2*npmat_+1)*ntmat_*nmat);
+	    RENEW(nplicon,ITG,(ntmat_+1)*nmat);
+	    RENEW(plkcon,double,(2*npmat_+1)*ntmat_*nmat);
+	    RENEW(nplkcon,ITG,(ntmat_+1)*nmat);
     }
 
     /* material orientation */
 
-    if(norien > 0) {
+    if(norien > 0) 
+    {
       RENEW(orname,char,80*norien);
       RENEW(ielorien,ITG,mi[2]*ne);
       RENEW(orab,double,7*norien);
     }
-    else {
-	SFREE(orname);
-	SFREE(ielorien);
-	SFREE(orab);
+    else 
+    {
+	    SFREE(orname);
+	    SFREE(ielorien);
+	    SFREE(orab);
     }
 
     /* amplitude definitions */
 
-    if(nam > 0) {
+    if(nam > 0) 
+    {
       RENEW(amname,char,80*nam);
       RENEW(namta,ITG,3*nam);
       RENEW(amta,double,2*namta[3*nam-2]);
     }
-    else {
+    else 
+    {
       SFREE(amname);
       SFREE(amta);
       SFREE(namta);
@@ -915,30 +1051,49 @@ while(istat>=0) {
       SFREE(iamboun);
     }
 
-    if(ntrans > 0){
+    if(ntrans > 0)
+    {
       RENEW(trab,double,7*ntrans);
     }
-    else{SFREE(trab);SFREE(inotr);}
-
-    if(ithermal[0] == 0){SFREE(t0);SFREE(t1);SFREE(t0g);SFREE(t1g);}
-    if((ithermal[0] == 0)||(nam<=0)){SFREE(iamt1);}
-
-    if(ncs_>0){
-      RENEW(ics,ITG,ncs_);
-//      SFREE(dcs);
-    }else if(npt_>0){SFREE(ics);}
-    SFREE(dcs);
-
-    if(mcs>0){
-	RENEW(cs,double,17*mcs);
-    }else{
-	SFREE(cs);
+    else
+    {
+      SFREE(trab);SFREE(inotr);
     }
 
- }else{
+    if(ithermal[0] == 0)
+    {
+      SFREE(t0);SFREE(t1);SFREE(t0g);SFREE(t1g);
+    }
 
+    if((ithermal[0] == 0)||(nam<=0))
+    {
+      SFREE(iamt1);
+    }
+
+    if(ncs_>0)
+    {
+      RENEW(ics,ITG,ncs_);
+      //      SFREE(dcs);
+    }
+    else if(npt_>0)
+    {
+      SFREE(ics);
+    }
+    SFREE(dcs);
+
+    if(mcs>0)
+    {
+	    RENEW(cs,double,17*mcs);
+    }
+    else
+    {
+	    SFREE(cs);
+    }
+
+  }
+  else
+  {
     /* reallocating space in all but the first step (>1) */
-
     RENEW(vold,double,mt*nk);
 
     /* if the SPC boundary conditions were changed in the present step,
@@ -949,11 +1104,14 @@ while(istat>=0) {
 
     NNEW(reorder,double,nboun);
     NNEW(nreorder,ITG,nboun);
-    if(nbounold<nboun){
+
+    if(nbounold<nboun)
+    {
       RENEW(xbounold,double,nboun);
       RENEW(nodebounold,ITG,nboun);
       RENEW(ndirbounold,ITG,nboun);
     }
+
     FORTRAN(spcmatch,(xboun,nodeboun,ndirboun,&nboun,xbounold,nodebounold,
 		      ndirbounold,&nbounold,ikboun,ilboun,vold,reorder,nreorder,
                       mi));
@@ -967,16 +1125,20 @@ while(istat>=0) {
        previous steps are initialized */
 
     RENEW(xforcold,double,nforc);
+
     for(i=nforcold;i<nforc;i++) xforcold[i]=0;
 
     RENEW(xloadold,double,2*nload);
+
     for(i=2*nloadold;i<2*nload;i++) xloadold[i]=0;
 
-    if(ithermal[0]!=0){
+    if(ithermal[0]!=0)
+    {
       RENEW(t1old,double,nk);
     }
 
-    if(nam > 0) {
+    if(nam > 0) 
+    {
       RENEW(amname,char,80*nam);
       RENEW(namta,ITG,3*nam);
       RENEW(amta,double,2*namta[3*nam-2]);
@@ -1003,14 +1165,21 @@ while(istat>=0) {
 
   /* temperature loading */
 
-  if(ithermal[0] != 0){
+  if(ithermal[0] != 0)
+  {
       RENEW(t0,double,nk);
       RENEW(t1,double,nk);
-      if((ne1d!=0)||(ne2d!=0)){
-	  RENEW(t0g,double,2*nk);
-	  RENEW(t1g,double,2*nk);
+
+      if((ne1d!=0)||(ne2d!=0))
+      {
+	      RENEW(t0g,double,2*nk);
+	      RENEW(t1g,double,2*nk);
       }
-      if(nam > 0) {RENEW(iamt1,ITG,nk);}
+
+      if(nam > 0)
+      {
+        RENEW(iamt1,ITG,nk);
+      }
   }
 
   RENEW(nelemload,ITG,2*nload);
@@ -1030,9 +1199,12 @@ while(istat>=0) {
 
   /* energy */
 
-  if((nener==1)&&(nenerold==0)){
+  if((nener==1)&&(nenerold==0))
+  {
     NNEW(ener,double,mi[0]*ne*2);
-    if((istep>1)&&(iperturb[0]>1)){
+
+    if((istep>1)&&(iperturb[0]>1))
+    {
       printf(" *ERROR in CalculiX: in nonlinear calculations\n");
       printf("        energy output must be selected in the first step\n\n");
       FORTRAN(stop,());
@@ -1042,16 +1214,22 @@ while(istat>=0) {
   /* initial velocities and accelerations */
 
   if((nmethod==4)||(nmethod==5)||(nmethod==8)||(nmethod==9)||
-     ((abs(nmethod)==1)&&(iperturb[0]>=2))){
-    RENEW(veold,double,mt*nk);
+     ((abs(nmethod)==1)&&(iperturb[0]>=2)))
+     {
+        RENEW(veold,double,mt*nk);
+     }
+  else 
+  {
+    SFREE(veold);
   }
-  else {SFREE(veold);}
 
-  if((nmethod == 4)&&(iperturb[0]>1)) {
+  if((nmethod == 4)&&(iperturb[0]>1)) 
+  {
     NNEW(accold,double,mt*nk);
-    }
+  }
 
-  if(nam > 0) {
+  if(nam > 0) 
+  {
     RENEW(iamforc,ITG,nforc);
     RENEW(iamload,ITG,2*nload);
     RENEW(iamboun,ITG,nboun);
@@ -1059,81 +1237,95 @@ while(istat>=0) {
 
   /* generate force convection elements */
 
-//  if(network==1){
-  if(network>0){
-      ne0=ne;nkon0=nkon;nload1=nload;
-      RENEW(ipkon,ITG,ne+nload);
-      RENEW(lakon,char,8*(ne+nload));
-      RENEW(kon,ITG,nkon+9*nload);
-      NNEW(inodesd,ITG,nk);
-      RENEW(nelemload,ITG,4*nload);
-      RENEW(sideload,char,40*nload);
+  //  if(network==1){
+  if(network>0)
+  {
+    ne0=ne;nkon0=nkon;nload1=nload;
+    RENEW(ipkon,ITG,ne+nload);
+    RENEW(lakon,char,8*(ne+nload));
+    RENEW(kon,ITG,nkon+9*nload);
+    NNEW(inodesd,ITG,nk);
+    RENEW(nelemload,ITG,4*nload);
+    RENEW(sideload,char,40*nload);
 
-      FORTRAN(genadvecelem,(inodesd,ipkon,&ne,lakon,kon,&nload,
+    FORTRAN(genadvecelem,(inodesd,ipkon,&ne,lakon,kon,&nload,
 			    sideload,nelemload,&nkon,&network));
 
-      SFREE(inodesd);
-      RENEW(ipkon,ITG,ne);
-      RENEW(lakon,char,8*ne);
-      RENEW(kon,ITG,nkon);
-      RENEW(sti,double,6*mi[0]*ne);
-      RENEW(eme,double,6*mi[0]*ne);
-      if(iprestr>0) RENEW(prestr,double,6*mi[0]*ne);
-      if(nprop>0) RENEW(ielprop,ITG,ne);
-      if((ne1d!=0)||(ne2d!=0)) RENEW(offset,double,2*ne);
-      RENEW(nelemload,ITG,2*nload);
-      RENEW(sideload,char,20*nload);
-      RENEW(xload,double,2*nload);
-      RENEW(xloadold,double,2*nload);
-      if(nam>0){
-	  RENEW(iamload,ITG,2*nload);
-	  for(i=2*nload1;i<2*nload;i++)iamload[i]=0;
-      }
-      if(nener==1)RENEW(ener,double,mi[0]*ne*2);
-      if(norien>0)RENEW(ielorien,ITG,mi[2]*ne);
-      RENEW(ielmat,ITG,mi[2]*ne);
-      for(i=mi[2]*ne0;i<mi[2]*ne;i++)ielmat[i]=1;
+    SFREE(inodesd);
+    RENEW(ipkon,ITG,ne);
+    RENEW(lakon,char,8*ne);
+    RENEW(kon,ITG,nkon);
+    RENEW(sti,double,6*mi[0]*ne);
+    RENEW(eme,double,6*mi[0]*ne);
+
+    if(iprestr>0) RENEW(prestr,double,6*mi[0]*ne);
+    if(nprop>0) RENEW(ielprop,ITG,ne);
+    if((ne1d!=0)||(ne2d!=0)) RENEW(offset,double,2*ne);
+    RENEW(nelemload,ITG,2*nload);
+    RENEW(sideload,char,20*nload);
+    RENEW(xload,double,2*nload);
+    RENEW(xloadold,double,2*nload);
+
+    if(nam>0)
+    {
+	    RENEW(iamload,ITG,2*nload);
+
+	    for(i=2*nload1;i<2*nload;i++)iamload[i]=0;
+    }
+
+    if(nener==1)RENEW(ener,double,mi[0]*ne*2);
+    if(norien>0)RENEW(ielorien,ITG,mi[2]*ne);
+    RENEW(ielmat,ITG,mi[2]*ne);
+    for(i=mi[2]*ne0;i<mi[2]*ne;i++)ielmat[i]=1;
   }
 
-  if(ntrans > 0){
+  if(ntrans > 0)
+  {
     RENEW(inotr,ITG,2*nk);
   }
 
   /*   calling the user routine ufaceload (can be empty) */
 
-  if(ithermal[1]>=2){
-      NNEW(sideloadtemp,char,20*nload);
-      for(i=0;i<nload;i++){
-	  strcpy1(&sideloadtemp[20*i],&sideload[20*i],20);
-	  if((strcmp1(&sideload[20*i]," ")==0)&&
-	     (strcmp1(&sideload[20*i+1]," ")!=0)){
-	      strcpy1(&sideloadtemp[20*i],"F",1);
-	  }
-      }
-      FORTRAN(ufaceload,(co,ipkon,kon,lakon,&nboun,nodeboun,
+  if(ithermal[1]>=2)
+  {
+    NNEW(sideloadtemp,char,20*nload);
+    for(i=0;i<nload;i++)
+    {
+	    strcpy1(&sideloadtemp[20*i],&sideload[20*i],20);
+	    if((strcmp1(&sideload[20*i]," ")==0)&&
+	     (strcmp1(&sideload[20*i+1]," ")!=0))
+       {
+	        strcpy1(&sideloadtemp[20*i],"F",1);
+	      }
+    }
+
+    FORTRAN(ufaceload,(co,ipkon,kon,lakon,&nboun,nodeboun,
               nelemload,sideloadtemp,&nload,&ne,&nk));
       SFREE(sideloadtemp);
   }
 
-      /* storing the undecascaded MPC's */
+  /* storing the undecascaded MPC's */
 
-  if(mpcfreeref==-1){
-      memmpcref_=memmpc_;mpcfreeref=mpcfree;maxlenmpcref=maxlenmpc;
-      NNEW(nodempcref,ITG,3*memmpc_);memcpy(nodempcref,nodempc,sizeof(ITG)*3*memmpc_);
-      NNEW(coefmpcref,double,memmpc_);memcpy(coefmpcref,coefmpc,sizeof(double)*memmpc_);
-      NNEW(ikmpcref,ITG,nmpc);memcpy(ikmpcref,ikmpc,sizeof(ITG)*nmpc);
+  if(mpcfreeref==-1)
+  {
+    memmpcref_=memmpc_;mpcfreeref=mpcfree;maxlenmpcref=maxlenmpc;
+    NNEW(nodempcref,ITG,3*memmpc_);memcpy(nodempcref,nodempc,sizeof(ITG)*3*memmpc_);
+    NNEW(coefmpcref,double,memmpc_);memcpy(coefmpcref,coefmpc,sizeof(double)*memmpc_);
+    NNEW(ikmpcref,ITG,nmpc);memcpy(ikmpcref,ikmpc,sizeof(ITG)*nmpc);
   }
 
   /* decascading MPC's only necessary if MPC's changed */
 
-  if(((istep == 1)||(ntrans>0)||(mpcend<0)||(nk!=nkold)||(nmpc!=nmpcold))&&(icascade==0)) {
-//  if(icascade==0) {
+  if(((istep == 1)||(ntrans>0)||(mpcend<0)||(nk!=nkold)||(nmpc!=nmpcold))&&(icascade==0)) 
+  {
+    //  if(icascade==0) {
 
     /* decascading the MPC's */
 
     printf(" Decascading the MPC's\n\n");
 
     callfrommain=1;
+
     cascade(ipompc,&coefmpc,&nodempc,&nmpc,
 	    &mpcfree,nodeboun,ndirboun,&nboun,ikmpc,
 	    ilmpc,ikboun,ilboun,&mpcend,
@@ -1149,37 +1341,55 @@ while(istat>=0) {
   NNEW(mast1,ITG,nzs[1]);
   NNEW(irow,ITG,1);
 
-  if((mcs==0)||(cs[1]<0)){
+  if((mcs==0)||(cs[1]<0))
+  {
 
-      NNEW(icol,ITG,mt*nk);
-      NNEW(jq,ITG,mt*nk+1);
-      NNEW(ipointer,ITG,mt*nk);
+    NNEW(icol,ITG,mt*nk);
+    NNEW(jq,ITG,mt*nk+1);
+    NNEW(ipointer,ITG,mt*nk);
 
-      if((icascade==0)&&((nmethod<8)||(nmethod>10))){
-	  if(nmethod==11){nmethodl=2;}else{nmethodl=nmethod;}
-	  mastruct(&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,&nboun,ipompc,
+    if((icascade==0)&&((nmethod<8)||(nmethod>10)))
+    {
+	    if(nmethod==11)
+      {
+        nmethodl=2;
+      }
+      else
+      {
+        nmethodl=nmethod;
+      }
+	    mastruct(&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,&nboun,ipompc,
 		   nodempc,&nmpc,nactdof,icol,jq,&mast1,&irow,&isolver,neq,
 		   ikmpc,ilmpc,ipointer,nzs,&nmethodl,ithermal,
                    ikboun,ilboun,iperturb,mi,&mortar,typeboun,labmpc,
 		   &iit,&icascade,&network);
-      }
-      else{neq[0]=1;neq[1]=1;neq[2]=1;}
+    }
+
+    else
+    {
+      neq[0]=1;neq[1]=1;neq[2]=1;
+    }
   }
-  else{
+  else
+  {
 
-      NNEW(icol,ITG,8*nk);
-      NNEW(jq,ITG,8*nk+1);
-      NNEW(ipointer,ITG,8*nk);
+    NNEW(icol,ITG,8*nk);
+    NNEW(jq,ITG,8*nk+1);
+    NNEW(ipointer,ITG,8*nk);
 
-      mastructcs(&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,&nboun,
+    mastructcs(&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,&nboun,
 		 ipompc,nodempc,&nmpc,nactdof,icol,jq,&mast1,&irow,&isolver,
 		 neq,ikmpc,ilmpc,ipointer,nzs,&nmethod,
 		 ics,cs,labmpc,&mcs,mi,&mortar);
   }
 
-  SFREE(ipointer);SFREE(mast1);
-  if((icascade==0)&&(nmethod<8))RENEW(irow,ITG,nzs[2]);
+  SFREE(ipointer);
+  SFREE(mast1);
 
+  if((icascade==0)&&(nmethod<8))
+  {
+    RENEW(irow,ITG,nzs[2]);
+  }
   /* nmethod=1: static analysis   */
   /* nmethod=2: frequency analysis  */
   /* nmethod=3: buckling analysis */
@@ -1195,76 +1405,72 @@ while(istat>=0) {
 
 
   if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
+  {
+	  if(iperturb[0]<2)
     {
-	if(iperturb[0]<2){
+	    mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
+	    mpcinfo[3]=maxlenmpc;
 
-	mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
-	mpcinfo[3]=maxlenmpc;
+	    if(icascade!=0)
+      {
+	      printf(" *ERROR in CalculiX: the matrix structure may");
+	      printf("        change due to nonlinear equations;");
+	      printf("        a purely linear calculation is not");
+	      printf("        feasible; use NLGEOM on the *STEP card.");
+	      FORTRAN(stop,());
+	    }
 
-	if(icascade!=0){
-	    printf(" *ERROR in CalculiX: the matrix structure may");
-	    printf("        change due to nonlinear equations;");
-	    printf("        a purely linear calculation is not");
-	    printf("        feasible; use NLGEOM on the *STEP card.");
-	    FORTRAN(stop,());
-	}
+      printf("\n ***********************\n\n");
+      printf("Penalty= %f\n",pstiff);
+      printf("Density filter radius= %f\n",rmin);
+      printf("Volume fraction= %f\n",volfrac);
+      printf("Topology Optimization Step= %d\n",itertop);
+      printf("Non zeros in Filtermatrix assumed= %d \n", fnnzassumed);
+      printf("Filter Order= %f \n", qfilter);
+      printf("\n ***********************\n\n");
+      fflush(stdout);
 
-
-
-
-
-
-
-
-printf("\n ***********************\n\n");
-printf("Penalty= %f\n",pstiff);
-printf("Density filter radius= %f\n",rmin);
-printf("Volume fraction= %f\n",volfrac);
-printf("Topology Optimization Step= %d\n",itertop);
-printf("Non zeros in Filtermatrix assumed= %d \n", fnnzassumed);
-printf("Filter Order= %f \n", qfilter);
-printf("\n ***********************\n\n");
-fflush(stdout);
-
- if(pSupplied!=0){
+      if(pSupplied!=0)
+      {
+        NNEW(FilterMatrixs,double,fnnzassumed*ne_); //Sparse filter matrix stored as row,colum,value with fassumed nnzs per element assumed
     
-    NNEW(FilterMatrixs,double,fnnzassumed*ne_); //Sparse filter matrix stored as row,colum,value with fassumed nnzs per element assumed
+        NNEW(rowFilters,ITG,fnnzassumed*ne_);
     
-    NNEW(rowFilters,ITG,fnnzassumed*ne_);
+        NNEW(colFilters,ITG,fnnzassumed*ne_);
     
-    NNEW(colFilters,ITG,fnnzassumed*ne_);
+        NNEW(filternnzElems,ITG,ne_);
+        NNEW(designFiltered,double,ne_);
     
-    NNEW(filternnzElems,ITG,ne_);
-    NNEW(designFiltered,double,ne_);
-    
-    printf("\nCalculating Density Filter... \n");
+        printf("\nCalculating Density Filter... \n");
 
-time_t start, end; 
-	start = time(NULL);
+        time_t start, end; 
+	      start = time(NULL);
 
-    densityfilter(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
+        densityfilter(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
                   &rmin,&filternnz,
                   FilterMatrixs,rowFilters,colFilters,filternnzElems,itertop,&fnnzassumed);
 
+        printf("\n Density Filter Obtained \n");
 
-printf("\n Density Filter Obtained \n");
+        end = time(NULL); 
+        printf("\n Time taken for density filter %.2f seconds \n", 
+        difftime(end, start)); 
 
-end = time(NULL); 
-printf("\n Time taken for density filter %.2f seconds \n", 
-difftime(end, start)); 
+        filterVector(&ipkon,design,designFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter Design variables
+        rhoPhys=designFiltered;
+      }
+      else
+      {
+        rhoPhys=design;
+      }
 
-filterVector(&ipkon,design,designFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter Design variables
-    rhoPhys=designFiltered;
-  }else{
-    rhoPhys=design;
+      printf("\n ***********************\n\n");
+      printf("\n For stiffness, penalty considered= %f \n",pstiff);
 
-  }
+      time_t startl, endl; 
+	    startl = time(NULL);
 
-printf("\n ***********************\n\n");
-printf("\n For stiffness, penalty considered= %f \n",pstiff);
-time_t startl, endl; 
-	startl = time(NULL); 
-	linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
+	    linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
 	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc, nelemload,sideload,xload,&nload,
 	     nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
@@ -1282,24 +1488,30 @@ time_t startl, endl;
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
 	     orname,rhoPhys,&pstiff);
 
-endl = time(NULL); 
-	printf("\n Time taken for linstatic.c is %.2f seconds \n", 
-		difftime(endl, startl)); 
+      endl = time(NULL);
 
+	    printf("\n Time taken for linstatic.c is %.2f seconds \n", 
+		  difftime(endl, startl)); 
 
-	for(i=0;i<3;i++){nzsprevstep[i]=nzs[i];}
-
-	memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
-        maxlenmpc=mpcinfo[3];
-
+	    for(i=0;i<3;i++)
+      {
+        nzsprevstep[i]=nzs[i];
       }
 
-      else{
+	    memmpc_=mpcinfo[0];
+      mpcfree=mpcinfo[1];
+      icascade=mpcinfo[2];
+      maxlenmpc=mpcinfo[3];
+    } // end if(iperturb[0]<2)
 
-	mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
-	mpcinfo[3]=maxlenmpc;
+    else
+    {
+	    mpcinfo[0]=memmpc_;
+      mpcinfo[1]=mpcfree;
+      mpcinfo[2]=icascade;
+	    mpcinfo[3]=maxlenmpc;
 
-	nonlingeo(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
+	    nonlingeo(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
 	     &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc,&nelemload,&sideload,xload,&nload,
 	     nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,&ikmpc,
@@ -1324,23 +1536,30 @@ endl = time(NULL);
 	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
 	     velo,veloo, rhoPhys,&pstiff);
 
-	memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
+	      memmpc_=mpcinfo[0];
+        mpcfree=mpcinfo[1];
+        icascade=mpcinfo[2];
         maxlenmpc=mpcinfo[3];
 
-	for(i=0;i<3;i++){nzsprevstep[i]=nzs[i];}
-
+	    for(i=0;i<3;i++)
+      {
+        nzsprevstep[i]=nzs[i];
       }
-    }else if(nmethod==2){
+    } // end else
+  } //end if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
 
-      /* FREQUENCY ANALYSIS */
+  else if(nmethod==2)
+  {
+    /* FREQUENCY ANALYSIS */
+    if((mcs==0)||(cs[1]<0))
+    {
+      #ifdef ARPACK
+	    mpcinfo[0]=memmpc_;
+      mpcinfo[1]=mpcfree;
+      mpcinfo[2]=icascade;
+	    mpcinfo[3]=maxlenmpc;
 
-      if((mcs==0)||(cs[1]<0)){
-#ifdef ARPACK
-
-	  mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
-	  mpcinfo[3]=maxlenmpc;
-
-	  arpack(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
+	    arpack(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
 	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc, nelemload,sideload,xload,&nload,
 	     nactdof,icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
@@ -1358,24 +1577,32 @@ endl = time(NULL);
 	     &islavsurf,&pslavsurf,&clearini,&nmat,typeboun,ielprop,prop,
              orname,rhoPhys,&pstiff);
 
-	  memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
-	  maxlenmpc=mpcinfo[3];
+	    memmpc_=mpcinfo[0];
+      mpcfree=mpcinfo[1];
+      icascade=mpcinfo[2];
+	    maxlenmpc=mpcinfo[3];
 
-	  for(i=0;i<3;i++){nzsprevstep[i]=nzs[i];}
+	    for(i=0;i<3;i++)
+      {
+        nzsprevstep[i]=nzs[i];
+      }
 
-#else
-	  printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
-	  FORTRAN(stop,());
-#endif
+      #else
+	    printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
+	    FORTRAN(stop,());
+      #endif
 
-      }else{
+    }
+    else
+    {
+      #ifdef ARPACK
 
-#ifdef ARPACK
+	    mpcinfo[0]=memmpc_;
+      mpcinfo[1]=mpcfree;
+      mpcinfo[2]=icascade;
+	    mpcinfo[3]=maxlenmpc;
 
-	  mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
-	  mpcinfo[3]=maxlenmpc;
-
-	  arpackcs(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
+	    arpackcs(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
              xboun,&nboun,
 	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc, nelemload,sideload,xload,&nload,
@@ -1394,21 +1621,25 @@ endl = time(NULL);
 	     &pslavsurf,&clearini,&nmat,typeboun,ielprop,prop,orname,rhoPhys,
        &pstiff);
 
-	  memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
-	  maxlenmpc=mpcinfo[3];
+	    memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
+	    maxlenmpc=mpcinfo[3];
 
-	  for(i=0;i<3;i++){nzsprevstep[i]=nzs[i];}
-
-#else
-	  printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
-	  FORTRAN(stop,());
-#endif
-
+	    for(i=0;i<3;i++)
+      {
+        nzsprevstep[i]=nzs[i];
       }
-  }else if(nmethod==3){
+      #else
+	      printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
+	      FORTRAN(stop,());
+      #endif
 
-#ifdef ARPACK
-	arpackbu(co,&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
+    }
+  }
+  else if(nmethod==3)
+  {
+
+    #ifdef ARPACK
+	  arpackbu(co,&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
 	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc,
 	     nelemload,sideload,xload,&nload,
@@ -1423,14 +1654,15 @@ endl = time(NULL);
              prset,&nener,&isolver,trab,inotr,&ntrans,&ttime,fmpc,cbody,
 	     ibody,xbody,&nbody,thicke,jobnamec,&nmat,ielprop,prop,
 	     orname,typeboun,rhoPhys,&pstiff);
-#else
-            printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
-            FORTRAN(stop,());
-#endif
-    }
+    #else
+      printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
+      FORTRAN(stop,());
+    #endif
+  }
   else if(nmethod==4)
+  {
+	  if((ne1d!=0)||(ne2d!=0))
     {
-	if((ne1d!=0)||(ne2d!=0)){
 	    printf(" *WARNING: 1-D or 2-D elements may cause problems in modal dynamic calculations\n");
 	    printf("           ensure that point loads defined in a *MODAL DYNAMIC step\n");
 	    printf("           and applied to nodes belonging to 1-D or 2-D elements have been\n");
@@ -1458,37 +1690,39 @@ endl = time(NULL);
 	    &ntie,tieset,&idrct,jmax,ctrl,&itpamp,tietol,&nalset,
 	    ikforc,ilforc,thicke,&nslavs,&nmat,typeboun,ielprop,prop,orname);
     }
-  else if(nmethod==5)
+    else if(nmethod==5)
     {
-	  if((ne1d!=0)||(ne2d!=0)){
+	    if((ne1d!=0)||(ne2d!=0))
+      {
 	      printf(" *WARNING: 1-D or 2-D elements may cause problems in steady state calculations\n");
 	      printf("           ensure that point loads defined in a *STEADY STATE DYNAMICS step\n");
 	      printf("           and applied to nodes belonging to 1-D or 2-D elements have been\n");
 	      printf("           applied to the same nodes in the preceding FREQUENCY step with\n");
-	      printf("           magnitude zero; look at example shellf.inp for a guideline.\n\n");}
+	      printf("           magnitude zero; look at example shellf.inp for a guideline.\n\n");
+      }
 
       printf(" Composing the steady state response from the eigenmodes\n\n");
 
       steadystate(&co,&nk,&kon,&ipkon,&lakon,&ne,&nodeboun,&ndirboun,&xboun,&nboun,
-	    &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,&nforc,
-	    nelemload,sideload,xload,&nload,
-	    &nactdof,neq,&nzl,icol,irow,&nmethod,&ikmpc,&ilmpc,&ikboun,&ilboun,
+	      &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,&nforc,
+	      nelemload,sideload,xload,&nload,
+	      &nactdof,neq,&nzl,icol,irow,&nmethod,&ikmpc,&ilmpc,&ikboun,&ilboun,
             elcon,nelcon,rhcon,nrhcon,cocon,ncocon,
             alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,&t0,
-	    &t1,ithermal,prestr,&iprestr,&vold,iperturb,sti,nzs,
-	    timepar,xmodal,&veold,amname,amta,
-	    namta,&nam,iamforc,iamload,&iamt1,
-	    jout,&kode,filab,&eme,xforcold,xloadold,
+	      &t1,ithermal,prestr,&iprestr,&vold,iperturb,sti,nzs,
+	      timepar,xmodal,&veold,amname,amta,
+	      namta,&nam,iamforc,iamload,&iamt1,
+	      jout,&kode,filab,&eme,xforcold,xloadold,
             &t1old,&iamboun,&xbounold,&iexpl,plicon,
             nplicon,plkcon,nplkcon,xstate,&npmat_,matname,
             mi,&ncmat_,&nstate_,&ener,jobnamec,&ttime,set,&nset,
             istartset,iendset,ialset,&nprint,prlab,
             prset,&nener,trab,&inotr,&ntrans,&fmpc,cbody,ibody,xbody,&nbody,
-	    xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,ics,cs,&mpcend,
-	    ctrl,ikforc,ilforc,thicke,&nmat,typeboun,ielprop,prop,orname,
-	    &ndamp,dacon);
+	      xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,ics,cs,&mpcend,
+	      ctrl,ikforc,ilforc,thicke,&nmat,typeboun,ielprop,prop,orname,
+	      &ndamp,dacon);
     }
-  else if((nmethod==6)||(nmethod==7))
+    else if((nmethod==6)||(nmethod==7))
     {
 
       printf(" Composing the complex eigenmodes from the real eigenmodes\n\n");
@@ -1513,12 +1747,14 @@ endl = time(NULL);
 	    ikforc,ilforc,thicke,jobnamef,mei,&nmat,ielprop,prop,orname,
             typeboun);
     }
-  else if((nmethod>7)&&(nmethod<12)){
+    else if((nmethod>7)&&(nmethod<12))
+    {
+	    mpcinfo[0]=memmpc_;
+      mpcinfo[1]=mpcfree;
+      mpcinfo[2]=icascade;
+	    mpcinfo[3]=maxlenmpc;
 
-	mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
-	mpcinfo[3]=maxlenmpc;
-
-	electromagnetics(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,
+	    electromagnetics(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,
              ndirboun,xboun,&nboun,
 	     &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc,&nelemload,&sideload,xload,&nload,
@@ -1542,31 +1778,28 @@ endl = time(NULL);
 	     ics,&nalset,&nmpc_,&nmat,typeboun,&iaxial,&nload_,&nprop,
 	     &network,orname,rhoPhys,&pstiff);
 
-	memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
-        maxlenmpc=mpcinfo[3];
-  }
+	    memmpc_=mpcinfo[0];
+      mpcfree=mpcinfo[1];
+      icascade=mpcinfo[2];
+      maxlenmpc=mpcinfo[3];
+    }
 
-  else if(pSupplied!=0){
-  printf("\n For compliance, penalty=%f \n",pstiff);
+    else if(pSupplied!=0)
+    {
+      printf("\n For compliance, penalty=%f \n",pstiff);
 
-  
-  NNEW(gradCompl,double,ne_);  //allocate memory to gradcompliance, initialize to 0
-  NNEW(elCompl,double,ne_);  //allocate memory to compliance, initialize to 0
-  NNEW(elCG,double,3*ne_);  //allocate memory to element CG, initialize to 0
-  NNEW(eleVol,double,ne_);  //allocate memory to element volume, initialize to 0
+      NNEW(gradCompl,double,ne_);  //allocate memory to gradcompliance, initialize to 0
+      NNEW(elCompl,double,ne_);  //allocate memory to compliance, initialize to 0
+      NNEW(elCG,double,3*ne_);  //allocate memory to element CG, initialize to 0
+      NNEW(eleVol,double,ne_);  //allocate memory to element volume, initialize to 0
 
-  NNEW(gradComplFiltered,double,ne_);  //allocate memory to gradcompliance, initialize to 0
-  NNEW(eleVolFiltered,double,ne_);  //allocate memory to element volume, initialize to 0
+      NNEW(gradComplFiltered,double,ne_);  //allocate memory to gradcompliance, initialize to 0
+      NNEW(eleVolFiltered,double,ne_);  //allocate memory to element volume, initialize to 0
 
+      time_t starts, ends; 
+	    starts = time(NULL);
 
-
-
-
-
-
-time_t starts, ends; 
-	starts = time(NULL); 
-	sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
+	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
 	     nactdof,icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
@@ -1586,60 +1819,59 @@ time_t starts, ends;
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
 
 
-filterVector(&ipkon,gradCompl,gradComplFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter Compliance sensitivity
-filterVector(&ipkon,eleVol,eleVolFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter volume sensitivity
-ends = time(NULL); 
-	printf("Time taken for sensitivity.c is %.2f seconds \n", 
-		difftime(ends, starts)); 
+      filterVector(&ipkon,gradCompl,gradComplFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter Compliance sensitivity
 
+      filterVector(&ipkon,eleVol,eleVolFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter volume sensitivity
+      ends = time(NULL);
 
-// Write gradient of compliance to a file
+	    printf("Time taken for sensitivity.c is %.2f seconds \n", 
+		  difftime(ends, starts)); 
+
+      // Write gradient of compliance to a file
       FILE *gradC;
       FILE *elC_file;
       FILE *elV_file;
-   
 
-    gradC=fopen("sens_compliance.dat","w"); //open in write mode
-    elC_file=fopen("objectives.dat","w"); //open in write mode
-    elV_file=fopen("sens_volume.dat","w"); //open in write mode
-  // rho_file=fopen("rhos.dat","w"); //open in write mode
-    double compliance_sum=0; //total compliance
-    double initialVol_sum=0; //total volume with rho=1
-    double designVol_sum=0; //total volume with current filtered density
-        for (int iii=0;iii<ne;iii++)
-            {
-                fprintf(gradC,"%.15f  ,  %.15f \n",gradCompl[iii],gradComplFiltered[iii]);
+      gradC=fopen("sens_compliance.dat","w"); //open in write mode
+      elC_file=fopen("objectives.dat","w"); //open in write mode
+      elV_file=fopen("sens_volume.dat","w"); //open in write mode
+      // rho_file=fopen("rhos.dat","w"); //open in write mode
+      double compliance_sum=0; //total compliance
+      double initialVol_sum=0; //total volume with rho=1
+      double designVol_sum=0; //total volume with current filtered density
 
+      for (int iii=0;iii<ne;iii++)
+      {
+        fprintf(gradC,"%.15f  ,  %.15f \n",gradCompl[iii],gradComplFiltered[iii]);
+
+        compliance_sum+=elCompl[iii];
+        initialVol_sum+=eleVol[iii];
+        designVol_sum+=(eleVol[iii]*rhoPhys[iii]);
+
+        fprintf(elV_file,"%.15f, %.15f, %.15f \n",eleVol[iii],eleVol[iii]*rhoPhys[iii], eleVolFiltered[iii]);
                 
-                compliance_sum+=elCompl[iii];
-                initialVol_sum+=eleVol[iii];
-                designVol_sum+=(eleVol[iii]*rhoPhys[iii]);
+      }
 
-                fprintf(elV_file,"%.15f, %.15f, %.15f \n",eleVol[iii],eleVol[iii]*rhoPhys[iii], eleVolFiltered[iii]);
-                
-            }
-
-                            fprintf(elC_file,"%.15f , %.15f , %.15f , %.15f \n",compliance_sum,designVol_sum-volfrac*initialVol_sum, initialVol_sum,designVol_sum);
-                            fflush(elC_file);
-                            fflush(gradC);
-                            fflush(elV_file);
-        fclose(gradC);
-        fclose(elC_file);
-        fclose(elV_file);
+      fprintf(elC_file,"%.15f , %.15f , %.15f , %.15f \n",compliance_sum,designVol_sum-volfrac*initialVol_sum, initialVol_sum,designVol_sum);
+      fflush(elC_file);
+      fflush(gradC);
+      fflush(elV_file);
+      fclose(gradC);
+      fclose(elC_file);
+      fclose(elV_file);
    
+      //Evaluate discreteness
+      double mnd;
+      mnd=0.0;
 
-  //Evaluate discreteness
-  double mnd;
-  mnd=0.0;
-
-  for (int iii=0;iii<ne;iii++)
-            {
-               mnd+=(rhoPhys[iii]*(1-rhoPhys[iii]));               
-            }
+      for (int iii=0;iii<ne;iii++)
+      {
+        mnd+=(rhoPhys[iii]*(1-rhoPhys[iii]));               
+      }
   
-  mnd=(4*mnd*100/ne); //average mnd %
+      mnd=(4*mnd*100/ne); //average mnd %
   
-   //Write the outputs to screen
+      //Write the outputs to screen
      printf("*************************");
      printf("\n Total Compliance (No Scaling) : %.15f \n",compliance_sum);
      printf("Total domain volume (No Scaling) : %.15f \n", initialVol_sum);
@@ -1647,98 +1879,128 @@ ends = time(NULL);
      printf("Volume constraint violation (No Scaling) : %.15f \n",designVol_sum-volfrac*initialVol_sum);
      printf("Discreteness, mnd, percent : %.15f \n",mnd);
      printf("*************************");
-  }
-fflush(stdout);
+    }
+    fflush(stdout);
 
-FILE *rho_file;
-rho_file=fopen("rhos.dat","w"); //open in write mode
-for (int iii=0;iii<ne;iii++)
-            {
-                fprintf(rho_file,"%.15f  ,  %.15f \n",design[iii],rhoPhys[iii]);
+    FILE *rho_file;
+    rho_file=fopen("rhos.dat","w"); //open in write mode
+
+    for (int iii=0;iii<ne;iii++)
+    {
+      fprintf(rho_file,"%.15f  ,  %.15f \n",design[iii],rhoPhys[iii]);
                 
-            }
-fclose(rho_file);
+    }
+    fclose(rho_file);
 
+    SFREE(nactdof);
+    SFREE(icol);
+    SFREE(jq);
+    SFREE(irow);
 
+    /* deleting the perturbation loads and temperatures */
 
-
-
-  SFREE(nactdof);
-  SFREE(icol);
-  SFREE(jq);
-  SFREE(irow);
-
-  /* deleting the perturbation loads and temperatures */
-
-  if((iperturb[0] == 1)&&(nmethod==3)) {
+    if((iperturb[0] == 1)&&(nmethod==3)) 
+    {
       nforc=0;
       nload=0;
       nbody=0;
-      if(ithermal[0] == 1) {
-	  for(k=0;k<nk;++k){
-	      t1[k]=t0[k];
-	  }
+      if(ithermal[0] == 1) 
+      {
+	      for(k=0;k<nk;++k)
+        {
+	        t1[k]=t0[k];
+	      }
       }
-  }else{
+    }
+    else
+    {
       nbounold=nboun;
-      for (i=0;i<nboun;i++) {
-	  nodebounold[i]=nodeboun[i];
-	  ndirbounold[i]=ndirboun[i];
+
+      for (i=0;i<nboun;i++) 
+      {
+	      nodebounold[i]=nodeboun[i];
+	      ndirbounold[i]=ndirboun[i];
       }
       nforcold=nforc;
       nloadold=nload;
       nbodyold=nbody;
 
-    /* resetting the amplitude to none except for time=total time amplitudes */
+      /* resetting the amplitude to none except for time=total time amplitudes */
 
-      if(nam > 0) {
-	  for (i=0;i<nboun;i++) {
-	      if(iamboun[i]>0){
-		  if(namta[3*iamboun[i]-1]>0){
-		      iamboun[i]=0;
-		      xboun[i]=xbounold[i];}
+      if(nam > 0) 
+      {
+	      for (i=0;i<nboun;i++) 
+        {
+	        if(iamboun[i]>0)
+          {
+		        if(namta[3*iamboun[i]-1]>0)
+            {
+		          iamboun[i]=0;
+		          xboun[i]=xbounold[i];
+            }
+	        }
 	      }
-	  }
-	  for (i=0;i<nforc;i++){
-	      if(iamforc[i]>0){
-		  if(namta[3*iamforc[i]-1]>0){
-		      iamforc[i]=0;
-		      xforc[i]=xforcold[i];}
+
+	      for (i=0;i<nforc;i++)
+        {
+	        if(iamforc[i]>0)
+          {
+		        if(namta[3*iamforc[i]-1]>0)
+            {
+		          iamforc[i]=0;
+		          xforc[i]=xforcold[i];
+            }
+	        }
 	      }
-	  }
-	  for (i=0;i<2*nload;i++){
-	      if(iamload[i]>0){
-		  if(namta[3*iamload[i]-1]>0){
-		      iamload[i]=0;
-		      xload[i]=xloadold[i];}
+
+	      for (i=0;i<2*nload;i++)
+        {
+	        if(iamload[i]>0)
+          {
+		        if(namta[3*iamload[i]-1]>0)
+            {
+		          iamload[i]=0;
+		          xload[i]=xloadold[i];
+            }
+	        }
 	      }
-	  }
-	  for (i=1;i<3*nbody;i=i+3){
-	      if(ibody[i]>0){
-		  if(namta[3*ibody[i]-1]>0){
-		      ibody[i]=0;
-		      xbody[7*(i-1)/3]=xbodyold[7*(i-1)/3];}
+
+	      for (i=1;i<3*nbody;i=i+3)
+        {
+	        if(ibody[i]>0)
+          {
+		        if(namta[3*ibody[i]-1]>0)
+            {
+		          ibody[i]=0;
+		          xbody[7*(i-1)/3]=xbodyold[7*(i-1)/3];
+            }
+	        }
 	      }
-	  }
-	  if(ithermal[0]==1) {
-	      if(iamt1[i]>0){
-		  if(namta[3*iamt1[i]-1]>0){
-		      iamt1[i]=0;
-		      t1[i]=t1old[i];}
+	      if(ithermal[0]==1) 
+        {
+	        if(iamt1[i]>0)
+          {
+		        if(namta[3*iamt1[i]-1]>0)
+            {
+		          iamt1[i]=0;
+		          t1[i]=t1old[i];
+            }
+	        }
 	      }
-	  }
       }
-  }
+    }
 
-  /* removing the advective elements, if any */
+    /* removing the advective elements, if any */
 
-  if(network>0){
+    if(network>0)
+    {
       ne=ne0;nkon=nkon0;
       RENEW(ipkon,ITG,ne);
       RENEW(lakon,char,8*ne);
       RENEW(kon,ITG,nkon);
       RENEW(sti,double,6*mi[0]*ne);
       RENEW(eme,double,6*mi[0]*ne);
+
       if(iprestr>0) RENEW(prestr,double,6*mi[0]*ne);
       if(nprop>0) RENEW(ielprop,ITG,ne);
       if((ne1d!=0)||(ne2d!=0)) RENEW(offset,double,2*ne);
@@ -1748,22 +2010,29 @@ fclose(rho_file);
 
       /* reactivating the original load labels */
 
-      for(i=nload-1;i>=nload0;i--){
-	  if(strcmp2(&sideload[20*i],"                    ",20)==0){
-	      iload=nelemload[2*i+1];
-	      strcpy1(&sideload[20*(iload-1)],"F",1);
-	  }
+      for(i=nload-1;i>=nload0;i--)
+      {
+	      if(strcmp2(&sideload[20*i],"                    ",20)==0)
+        {
+	        iload=nelemload[2*i+1];
+	        strcpy1(&sideload[20*(iload-1)],"F",1);
+	      }
       }
-
-  }
+    }
 
   nload=nload0;
 
-  if((nmethod == 4)&&(iperturb[0]>1)) SFREE(accold);
+  if((nmethod == 4)&&(iperturb[0]>1))
+  {
+    SFREE(accold);
+  }
 
-  if(irstrt[0]>0){
+  if(irstrt[0]>0)
+  {
     jrstrt++;
-    if(jrstrt>=irstrt[0]){
+
+    if(jrstrt>=irstrt[0])
+    {
       jrstrt=0;
       FORTRAN(restartwrite,(&istep,&nset,&nload,&nforc,&nboun,&nk,&ne,
         &nmpc,&nalset,&nmat,&ntmat_,&npmat_,&norien,&nam,&nprint,
@@ -1780,31 +2049,31 @@ fclose(rho_file);
         ndirbounold,xbounold,xforcold,xloadold,t1old,eme,
         iponor,xnor,knor,thicke,offset,iponoel,inoel,rig,
         shcon,nshcon,cocon,ncocon,ics,
-	sti,ener,xstate,jobnamec,infree,prestr,&iprestr,cbody,
-	ibody,xbody,&nbody,xbodyold,&ttime,qaold,cs,&mcs,output,
-	physcon,ctrl,typeboun,fmpc,tieset,&ntie,tietol,&nslavs,t0g,t1g,
-	&nprop,ielprop,prop,&mortar,&nintpoint,&ifacecount,islavsurf,
-	pslavsurf,clearini,irstrt,vel,&nef,velo,veloo));
+	      sti,ener,xstate,jobnamec,infree,prestr,&iprestr,cbody,
+	      ibody,xbody,&nbody,xbodyold,&ttime,qaold,cs,&mcs,output,
+	      physcon,ctrl,typeboun,fmpc,tieset,&ntie,tietol,&nslavs,t0g,t1g,
+	      &nprop,ielprop,prop,&mortar,&nintpoint,&ifacecount,islavsurf,
+	      pslavsurf,clearini,irstrt,vel,&nef,velo,veloo));
     }
   }
-
-}
+} // end while(istat>=0)
 
 FORTRAN(closefile,());
 
 strcpy(fneig,jobnamec);
 strcat(fneig,".frd");
-if((f1=fopen(fneig,"ab"))==NULL){
-    printf("*ERROR in frd: cannot open frd file for writing...");
-    exit(0);
+
+if((f1=fopen(fneig,"ab"))==NULL)
+{
+  printf("*ERROR in frd: cannot open frd file for writing...");
+  exit(0);
 }
+
 fprintf(f1," 9999\n");
 fclose(f1);
 
 /* deallocating the fields
    this section is addressed immediately after leaving calinput */
-
-
 
 //free up space
 /* if(pSupplied!=0){SFREE(filternnzElem);SFREE(FilterMatrix);SFREE(rowFilter);SFREE(colFilter);
