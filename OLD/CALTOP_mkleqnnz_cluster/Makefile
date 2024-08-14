@@ -1,74 +1,45 @@
-# Note that in order to run PARDISO with Multithreading, 
-# the environment variable OMP_NUM_THREADS needs to be set to
-# the desired number of cpus, before compiling and before running ccx
-# e.g. by entering 
-#	>export OMP_NUM_THREADS=2
-# in terminal to run PARDISO with 2 cpus
-# More info in ccx user manual section 2
-ARPACK          = /home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization/OLD/Deps/ARPACK
-OPT = -g -O2
-CFLAGS = -Wall $(OPT) -fopenmp -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I{MKL_INCLUDE}
-FFLAGS = -Wall $(OPT) $(OPTIONS) -I$(MKL_INCLUDE) -fopenmp
+# Define paths for SPOOLES and ARPACK
+SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/Spooles/src
+ARPACK_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/ARPACK
 
-#ARPACK
-CFLAGS+= -I /usr/local/ARPACK -DARPACK
+# Compiler and flags
+CFLAGS = -Wall -O3 -I $(SPOOLES_PATH) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT
+FFLAGS = -Wall -O3 -fallow-argument-mismatch
 
-#SPOOLES
-#CFLAGS+= -I /usr/local/SPOOLES.2.2 -DSPOOLES
+CC = cc
+FC = gfortran
 
-#BLAS and LAPACK
-#CFLAGS+= -llpack -lblas
-
-CC=gcc
-FC=gfortran
-
-OPTIONS = -w -fno-second-underscore -fcray-pointer -x f77-cpp-input
-FPPSTOP= -x none
-
-#INTEL MKL
-#INTEL MKL
-MKL_LIB= //opt/intel/oneapi/mkl/2022.2.0/lib/intel64
-MKL_INCLUDE=//opt/intel/oneapi/mkl/2022.2.0/include
-CMPLR_PATH= //opt/intel/oneapi/compiler/2022.2.0/linux/compiler/lib/intel64_lin
-
-
-
-.c.o :
+# Object file rules
+.c.o:
 	$(CC) $(CFLAGS) -c $<
-.f.o :
+
+.f.o:
 	$(FC) $(FFLAGS) -c $<
 
+# Include additional makefile if necessary
 include Makefile.inc
 
+# Source files and objects
 SCCXMAIN = ccx_2.15.c
-
-OCCXF = $(SCCXF:.f=.o) 
+OCCXF = $(SCCXF:.f=.o)
 OCCXC = $(SCCXC:.c=.o)
 OCCXMAIN = $(SCCXMAIN:.c=.o)
 
+# Libraries
+LIBS = \
+	$(SPOOLES_PATH)/spooles.a \
+	$(ARPACK_PATH)/libarpack_INTEL.a \
+	-lpthread -lm -lc
 
-# OS-specific options
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-        LIBS += $(ARPACK)/libarpack_MAC.a
-else
-        LIBS += $(ARPACK)/libarpack_INTEL.a
-        LIBS += -lpthread -lm -lc
-endif
+# Build executable
+calTop: $(OCCXMAIN) ccx_2.15.a $(LIBS)
+	./date.pl; $(CC) $(CFLAGS) -c ccx_2.15.c; $(FC) -Wall -O3 -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
 
-ccx_2.15_PR: $(OCCXMAIN) ccx_2.15_PR.a $(LDFLAGS) $(LIBS)\
-        ./date.pl; $(CC) $(CFLAGS) -c ccx_2.15.c; \
-        $(FC) $(OPT)p $(FFLAGS) -o $@ $(FPPSTOP) $(OCCXMAIN) ccx_2.15_PR.a $(LDFLAGS) $(LIBS)\
-         -Wl,--start-group \
-        $(MKL_LIB)/libmkl_gf_lp64.a \
-        $(MKL_LIB)/libmkl_gnu_thread.a \
-        $(MKL_LIB)/libmkl_core.a \
-        $(MKL_LIB)/libmkl_blacs_openmpi_lp64.a \
-         -Wl,--end-group \
-        -L$(CMPLR_PATH) -lgomp -lpthread -lm -ldl
-
-ccx_2.15_PR.a: $(OCCXF) $(OCCXC)
+# Build static library
+ccx_2.15.a: $(OCCXF) $(OCCXC)
 	ar vr $@ $?
-clean:
-	rm *.a *.o ccx_2.15_PR
 
+
+# Clean up binaries and object files
+clean:
+	rm -f *.o calTop ccx_2.15.a
