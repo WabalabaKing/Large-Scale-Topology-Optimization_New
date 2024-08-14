@@ -32,8 +32,10 @@ LIBS = \
 	-lpthread -lm -lc
 
 # Build executable
-calTop: $(OCCXMAIN) ccx_2.15.a $(LIBS)
+# Build executable
+calTop.exe: $(OCCXMAIN) ccx_2.15.a $(LIBS)
 	./date.pl; $(CC) $(CFLAGS) -c ccx_2.15.c; $(FC) -Wall -O3 -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
+	@echo "Build successful!"
 
 # Build static library
 ccx_2.15.a: $(OCCXF) $(OCCXC)
