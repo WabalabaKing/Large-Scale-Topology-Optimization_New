@@ -1345,7 +1345,7 @@ while(istat>=0)
 
     /* decascading the MPC's */
 
-    printf(" Decascading the MPC's\n\n");
+    printf("Decascading the MPC's\n\n");
 
     callfrommain=1;
 
@@ -1358,7 +1358,7 @@ while(istat>=0)
 
   /* determining the matrix structure: changes if SPC's have changed */
 
-  if((icascade==0)&&(nmethod<8)) printf(" Determining the structure of the matrix:\n");
+  if((icascade==0)&&(nmethod<8)) printf("Determining the structure of the matrix:\n");
 
   NNEW(nactdof,ITG,mt*nk);
   NNEW(mast1,ITG,nzs[1]);
@@ -1443,7 +1443,7 @@ while(istat>=0)
 	      FORTRAN(stop,());
 	    }
 
-      printf("\n ***********************\n\n");
+      printf("\n***********************\n\n");
       printf("Penalty= %f\n",pstiff);
       printf("Density filter radius= %f\n",rmin);
       printf("Volume fraction= %f\n",volfrac);
@@ -1513,7 +1513,7 @@ while(istat>=0)
 
       endl = time(NULL);
 
-	    printf("\n Time taken for linstatic.c is %.2f seconds \n", 
+	    printf("\n Time taken for linstatic.c is %.8f seconds \n", 
 		  difftime(endl, startl)); 
 
 	    for(i=0;i<3;i++)

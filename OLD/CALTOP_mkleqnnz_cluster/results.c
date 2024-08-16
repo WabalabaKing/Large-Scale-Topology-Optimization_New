@@ -177,9 +177,10 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     /* calculating the stresses and material tangent at the 
        integration points; calculating the internal forces */
 
-    if(((ithermal[0]<=1)||(ithermal[0]>=3))&&(intpointvarm==1)){
+    if(((ithermal[0]<=1)||(ithermal[0]>=3))&&(intpointvarm==1))
+    {
     
-        /* determining the element bounds in each thread */
+    /* determining the element bounds in each thread */
 
 	NNEW(neapar,ITG,num_cpus);
 	NNEW(nebpar,ITG,num_cpus);
@@ -210,33 +211,39 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
 	/* calculating the stresses */
 	
-	if(((*nmethod!=4)&&(*nmethod!=5))||(iperturb[0]>1)){
+	if(((*nmethod!=4)&&(*nmethod!=5))||(iperturb[0]>1))
+    {
 		printf(" Using up to %" ITGFORMAT " cpu(s) for the stress calculation.\n\n", num_cpus);
 	}
-	
+
 	/* create threads and wait */
 	
 	NNEW(ithread,ITG,num_cpus);
-	for(i=0; i<num_cpus; i++)  {
+	for(i=0; i<num_cpus; i++)  
+    {
 	    ithread[i]=i;
 	    pthread_create(&tid[i], NULL, (void *)resultsmechmt, (void *)&ithread[i]);
 	}
 	for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 	
-	for(i=0;i<mt**nk;i++){
+	for(i=0;i<mt**nk;i++)
+    {
 	    fn[i]=fn1[i];
 	}
-	for(i=0;i<mt**nk;i++){
-	    for(j=1;j<num_cpus;j++){
+	for(i=0;i<mt**nk;i++)
+    {
+	    for(j=1;j<num_cpus;j++)
+        {
 		fn[i]+=fn1[i+j*mt**nk];
 	    }
 	}
 	SFREE(fn1);SFREE(ithread);SFREE(neapar);SFREE(nebpar);
 	
-        /* determine the internal force */
+    /* determine the internal force */
 
 	qa[0]=qa1[0];
-	for(j=1;j<num_cpus;j++){
+	for(j=1;j<num_cpus;j++)
+    {
 	    qa[0]+=qa1[j*4];
 	}
 
@@ -285,21 +292,22 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     /* calculating the thermal flux and material tangent at the 
        integration points; calculating the internal point flux */
 
-    if((ithermal[0]>=2)&&(intpointvart==1)){
+    if((ithermal[0]>=2)&&(intpointvart==1))
+    {
     
         /* determining the element bounds in each thread */
 
-	NNEW(neapar,ITG,num_cpus);
-	NNEW(nebpar,ITG,num_cpus);
-	elementcpuload(neapar,nebpar,ne,ipkon,&num_cpus);
+	    NNEW(neapar,ITG,num_cpus);
+	    NNEW(nebpar,ITG,num_cpus);
+	    elementcpuload(neapar,nebpar,ne,ipkon,&num_cpus);
 
-	NNEW(fn1,double,num_cpus*mt**nk);
-	NNEW(qa1,double,num_cpus*4);
-	NNEW(nal,ITG,num_cpus);
+	    NNEW(fn1,double,num_cpus*mt**nk);
+	    NNEW(qa1,double,num_cpus*4);
+	    NNEW(nal,ITG,num_cpus);
 
-	co1=co;kon1=kon;ipkon1=ipkon;lakon1=lakon;v1=v;
+	    co1=co;kon1=kon;ipkon1=ipkon;lakon1=lakon;v1=v;
         elcon1=elcon;nelcon1=nelcon;rhcon1=rhcon;nrhcon1=nrhcon;
-	ielmat1=ielmat;ielorien1=ielorien;norien1=norien;orab1=orab;
+	    ielmat1=ielmat;ielorien1=ielorien;norien1=norien;orab1=orab;
         ntmat1_=ntmat_;t01=t0;iperturb1=iperturb;iout1=iout;vold1=vold;
         ipompc1=ipompc;nodempc1=nodempc;coefmpc1=coefmpc;nmpc1=nmpc;
         dtime1=dtime;time1=time;ttime1=ttime;plkcon1=plkcon;
@@ -314,50 +322,59 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         pslavsurf1=pslavsurf;pmastsurf1=pmastsurf;mortar1=mortar;
         clearini1=clearini;plicon1=plicon;nplicon1=nplicon;ne1=ne;
         ielprop1=ielprop,prop1=prop;iponoel1=iponoel;inoel1=inoel;
-	network1=network;ipobody1=ipobody;ibody1=ibody;xbody1=xbody;
+	    network1=network;ipobody1=ipobody;ibody1=ibody;xbody1=xbody;
 
-	/* calculating the heat flux */
+	    /* calculating the heat flux */
 	
-	printf(" Using up to %" ITGFORMAT " cpu(s) for the heat flux calculation.\n\n", num_cpus);
+	    printf(" Using up to %" ITGFORMAT " cpu(s) for the heat flux calculation.\n\n", num_cpus);
 	
-	/* create threads and wait */
+	    /* create threads and wait */
 	
-	NNEW(ithread,ITG,num_cpus);
-	for(i=0; i<num_cpus; i++)  {
-	    ithread[i]=i;
-	    pthread_create(&tid[i], NULL, (void *)resultsthermmt, (void *)&ithread[i]);
-	}
-	for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
-	
-	for(i=0;i<*nk;i++){
-		fn[mt*i]=fn1[mt*i];
-	}
-	for(i=0;i<*nk;i++){
-	    for(j=1;j<num_cpus;j++){
-		fn[mt*i]+=fn1[mt*i+j*mt**nk];
+	    NNEW(ithread,ITG,num_cpus);
+	    for(i=0; i<num_cpus; i++)  
+        {
+	        ithread[i]=i;
+	        pthread_create(&tid[i], NULL, (void *)resultsthermmt, (void *)&ithread[i]);
 	    }
-	}
-	SFREE(fn1);SFREE(ithread);SFREE(neapar);SFREE(nebpar);
+	    for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+	
+	    for(i=0;i<*nk;i++)
+        {
+		    fn[mt*i]=fn1[mt*i];
+	    }
+	    for(i=0;i<*nk;i++)
+        {
+	        for(j=1;j<num_cpus;j++)
+            {
+		        fn[mt*i]+=fn1[mt*i+j*mt**nk];
+	        }
+	    }
+	    SFREE(fn1);SFREE(ithread);SFREE(neapar);SFREE(nebpar);
 	
         /* determine the internal concentrated heat flux */
 
-	qa[1]=qa1[1];
-	for(j=1;j<num_cpus;j++){
-	    qa[1]+=qa1[1+j*4];
-	}
-	
-	SFREE(qa1);
-	
-	for(j=1;j<num_cpus;j++){
-	    nal[0]+=nal[j];
-	}
-
-	if(calcul_qa==1){
-	    if(nal[0]>0){
-		qa[1]/=nal[0];
+	    qa[1]=qa1[1];
+	    for(j=1;j<num_cpus;j++)
+        {
+	        qa[1]+=qa1[1+j*4];
 	    }
-	}
-	SFREE(nal);
+	
+	    SFREE(qa1);
+	
+	    for(j=1;j<num_cpus;j++)
+        {
+	        nal[0]+=nal[j];
+	    }
+
+	    if(calcul_qa==1)
+        {
+	        if(nal[0]>0)
+            {
+		        qa[1]/=nal[0];
+	        }
+	    }
+        
+	    SFREE(nal);
     }
 
     /* calculating the matrix system internal force vector */
