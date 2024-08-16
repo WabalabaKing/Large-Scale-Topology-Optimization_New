@@ -1,1 +1,7 @@
 *.o
+*.exe
+*.dat
+*.12d
+*.sta
+*.frd
+*.cvg

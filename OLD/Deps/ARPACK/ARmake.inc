@@ -25,7 +25,7 @@
 # | other than your home directory.      |
 # %--------------------------------------%
 #
-home =/home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization/OLD/Deps/ARPACK
+home =/home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/ARPACK
 
 
 
@@ -103,7 +103,7 @@ ALIBS =  $(ARPACKLIB) $(LAPACKLIB) $(BLASLIB)
 # | for your system.                        |
 # %-----------------------------------------%
 #
-FC      = gfortran
+FC      = gfortran -fallow-argument-mismatch
 #FFLAGS	= -O -cg89
 
 LDFLAGS = 
