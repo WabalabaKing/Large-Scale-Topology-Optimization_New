@@ -58,27 +58,43 @@
       mt=mi(2)+1
 
       !Open the .vtk file for writing
-      open(unit=10, file='output.vtk', status='unknown')
+      open(unit=10, file='elastic_field.dat', status='unknown')
 
+      !Write Tecplot 360 file header
+      write(10,*) 'TITLE = "Simulation Results"'
+      write(10, '(A)') 'VARIABLES = ''X'', ''Y'', ''Z'',' //
+     &                '''DispX'', ''DispY'', ''DispZ'''
 
-      !     Write VTK file header
-      write(10,*) '# vtk DataFile Version 3.0'
-      write(10,*) 'CalculiX Output Data'
-      write(10,*) 'ASCII'
-      write(10,*) 'DATASET UNSTRUCTURED_GRID'
+     
+
+    ! Inspect lakon to identify element type
+      select case (lakon(1))
+      case ('C3D8')  ! 8-node quad element
+       write(10, '(A)') 'ZONE STRANDID=1,'
+       write(10, '(A)') ' SOLUTIONTIME=1,'
+       write(10, '(A, I0)') ' NODES=', nk
+       write(10, '(A, I0)') ' ELEMENTS=', ne
+       write(10, '(A)') ', DATAPACKING=POINT,'
+       write(10, '(A)') ' ZONETYPE=FEQUADRILATERAL'
+      
+
+      case ('C3D4')  ! 4-node tetrahedral element
+       write(10, '(A)') 'ZONE STRANDID=1,'
+       write(10, '(A)') ' SOLUTIONTIME=1,'
+       write(10, '(A, I0)') ' NODES=', nk
+       write(10, '(A, I0)') ' ELEMENTS=', ne
+       write(10, '(A)') ', DATAPACKING=POINT,'
+       write(10, '(A)') ' ZONETYPE=TETRAHEDRON'
+      end select
 
       !     Write nodal coordinates
-      write(10,*) 'POINTS', nk, 'float'
-      do node=1, nk
-         write(10, '(3F12.5)') co(1,node), co(2,node), co(3,node)
-      enddo
-
-      do ielem=1, ne
-        select case (lakon(ielem)(1:2))
-        case ('C3D8')  ! 8-node quad element
-            print*, 'Eight node quad element'
-        end select
+      do node = 1, nk
+        write(10, '(3F12.5)') co(1,node), co(2,node), co(3,node)
       end do
+
+
+          
+
 
       close(10)
 
