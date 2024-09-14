@@ -39,65 +39,284 @@ int main(int argc,char *argv[])
 
   FILE *f1;
 
-  char *sideload=NULL, *set=NULL, *matname=NULL, *orname=NULL, *amname=NULL,
-      *filab=NULL, *lakon=NULL, *labmpc=NULL, *prlab=NULL, *prset=NULL,
-      jobnamec[660]="",jobnamef[132]="",output[4]="asc", *typeboun=NULL,
-      *inpc=NULL,*tieset=NULL,*cbody=NULL,fneig[132]="",*sideloadtemp=NULL,
-      kind1[2]="T",kind2[2]="T",*heading=NULL,*objectset=NULL;
+  char *sideload=NULL;    /**< decription. */
+  char *set=NULL;         /**< decription. */
+  char *matname=NULL;     /**< decription. */
+  char *orname=NULL;      /**< decription. */
+  char *amname=NULL;      /**< decription. */
+  char *filab=NULL;       /**< decription. */
+  char *lakon=NULL;       /**< decription. */
+  char *labmpc=NULL;      /**< decription. */
+  char *prlab=NULL;       /**< decription. */
+  char *prset=NULL;       /**< decription. */
+  char  jobnamec[660]=""; /**< decription. */
+  char  jobnamef[132]=""; /**< decription. */
+  char  output[4]="asc";  /**< decription. */
+  char  *typeboun=NULL;   /**< decription. */
+  char  *inpc=NULL;       /**< decription. */
+  char  *tieset=NULL;     /**< decription. */
+  char  *cbody=NULL;      /**< decription. */
+  char  fneig[132]="";    /**< decription. */
+  char  *sideloadtemp=NULL; /**< decription. */
+  char  kind1[2]="T";     /**< decription. */
+  char  kind2[2]="T";     /**< decription. */
+  char  *heading=NULL;    /**< decription. */
+  char  *objectset=NULL;  /**< decription. */
 
-  ITG *kon=NULL, *nodeboun=NULL, *ndirboun=NULL, *ipompc=NULL,
-    *nodempc=NULL, *nodeforc=NULL, *ndirforc=NULL,
-    *nelemload=NULL,im,*inodesd=NULL,nload1,*idefforc=NULL,
-    *nactdof=NULL, *icol=NULL,*ics=NULL,
-    *jq=NULL, *mast1=NULL, *irow=NULL, *rig=NULL,*idefbody=NULL,
-    *ikmpc=NULL, *ilmpc=NULL, *ikboun=NULL, *ilboun=NULL,
-    *nreorder=NULL,*ipointer=NULL,*idefload=NULL,
-    *istartset=NULL, *iendset=NULL, *ialset=NULL, *ielmat=NULL,
-    *ielorien=NULL, *nrhcon=NULL, *nodebounold=NULL, *ndirbounold=NULL,
-    *nelcon=NULL, *nalcon=NULL, *iamforc=NULL,  *iamload=NULL,
-    *iamt1=NULL, *namta=NULL, *ipkon=NULL, *iamboun=NULL,
-    *nplicon=NULL, *nplkcon=NULL, *inotr=NULL, *iponor=NULL, *knor=NULL,
-    *ikforc=NULL, *ilforc=NULL, *iponoel=NULL, *inoel=NULL, *nshcon=NULL,
-    *ncocon=NULL,*ibody=NULL,*ielprop=NULL,*islavsurf=NULL,
-    *ipoinpc=NULL,mt,nxstate,nload0,iload,*iuel=NULL;
+  ITG *kon=NULL;
+  ITG *nodeboun=NULL;
+  ITG *ndirboun=NULL;
+  ITG *ipompc=NULL;
+  ITG *nodempc=NULL;
+  ITG *nodeforc=NULL;
+  ITG *ndirforc=NULL;
+  ITG  *nelemload=NULL;
+  ITG im;
+  ITG *inodesd=NULL;
+  ITG nload1;
+  ITG *idefforc=NULL;
+  ITG  *nactdof=NULL;
+  ITG *icol=NULL;
+  ITG *ics=NULL;
+  ITG  *jq=NULL;
+  ITG *mast1=NULL;
+  ITG *irow=NULL;
+  ITG *rig=NULL;
+  ITG *idefbody=NULL;
+  ITG  *ikmpc=NULL;
+  ITG *ilmpc=NULL;
+  ITG *ikboun=NULL;
+  ITG *ilboun=NULL;
+  ITG  *nreorder=NULL;
+  ITG *ipointer=NULL;
+  ITG *idefload=NULL;
+  ITG  *istartset=NULL;
+  ITG *iendset=NULL;
+  ITG *ialset=NULL;
+  ITG *ielmat=NULL;
+  ITG *ielorien=NULL;
+  ITG *nrhcon=NULL;
+  ITG *nodebounold=NULL;
+  ITG *ndirbounold=NULL;
+  ITG *nelcon=NULL;
+  ITG *nalcon=NULL;
+  ITG *iamforc=NULL;
+  ITG *iamload=NULL;
+  ITG *iamt1=NULL;
+  ITG *namta=NULL;
+  ITG *ipkon=NULL;
+  ITG *iamboun=NULL;
+  ITG *nplicon=NULL;
+  ITG *nplkcon=NULL;
+  ITG *inotr=NULL;
+  ITG *iponor=NULL;
+  ITG *knor=NULL;
+  ITG *ikforc=NULL;
+  ITG *ilforc=NULL;
+  ITG *iponoel=NULL;
+  ITG *inoel=NULL;
+  ITG *nshcon=NULL;
+  ITG *ncocon=NULL;
+  ITG *ibody=NULL;
+  ITG *ielprop=NULL;
+  ITG *islavsurf=NULL;
+  ITG *ipoinpc=NULL;
+  ITG mt;
+  ITG nxstate;
+  ITG nload0;
+  ITG iload;
+  ITG *iuel=NULL;
 
-  ITG nk,ne,nboun,nmpc,nforc,nload,nprint=0,nset,nalset,nentries=17,
-  nmethod,neq[3]={0,0,0},i,mpcfree=1,mei[4],j,nzl,nam,nbounold=0,
-  nforcold=0,nloadold=0,nbody,nbody_=0,nbodyold=0,network=0,nheading_=0,
-  k,nzs[3],nmpc_=0,nload_=0,nforc_=0,istep,istat,nboun_=0,nintpoint=0,
-  iperturb[2]={0,0},nmat,ntmat_=0,norien,ithermal[2]={0,0},nmpcold,
-  iprestr,kode,isolver=0,nslavs=0,nkon_=0,ne0,nkon0,mortar=0,
-  jout[2]={1,1},nlabel,nkon=0,idrct,jmax[2],iexpl,nevtot=0,ifacecount=0,
-  iplas=0,npmat_=0,mi[3]={0,3,1},ntrans,mpcend=-1,namtot_=0,iumat=0,
-  icascade=0,maxlenmpc,mpcinfo[4],ne1d=0,ne2d=0,infree[4]={0,0,0,0},
-  callfrommain,nflow=0,jin=0,irstrt[2]={0,0},nener=0,jrstrt=0,nenerold,
-  nline,*ipoinp=NULL,*inp=NULL,ntie,ntie_=0,mcs=0,nprop_=0,
-  nprop=0,itpamp=0,iviewfile,nkold,nevdamp_=0,npt_=0,cyclicsymmetry,
-  nmethodl,iaxial=1,inext=0,icontact=0,nobject=0,nobject_=0,iit=-1,
-  nzsprevstep[3],memmpcref_,mpcfreeref=-1,maxlenmpcref,*nodempcref=NULL,
-  *ikmpcref=NULL,isens=0,namtot=0,nstam=0,ndamp=0,nef=0;
+  ITG nk;
+  ITG ne;
+  ITG nboun;
+  ITG nmpc;
+  ITG nforc;
+  ITG nload;
+  ITG nprint=0;
+  ITG nset;
+  ITG nalset;
+  ITG nentries=17;
+  ITG nmethod;
+  ITG neq[3]={0,0,0};
+  ITG i;
+  ITG mpcfree=1;
+  ITG mei[4];
+  ITG j;
+  ITG nzl;
+  ITG nam;
+  ITG nbounold=0;
+  ITG nforcold=0;
+  ITG nloadold=0;
+  ITG nbody,nbody_=0;
+  ITG nbodyold=0;
+  ITG network=0;
+  ITG nheading_=0;
+  ITG k;
+  ITG nzs[3];
+  ITG nmpc_=0;
+  ITG nload_=0;
+  ITG nforc_=0;
+  ITG istep;
+  ITG istat;
+  ITG nboun_=0;
+  ITG nintpoint=0;
+  ITG iperturb[2]={0,0};
+  ITG nmat;
+  ITG ntmat_=0;
+  ITG norien;
+  ITG ithermal[2]={0,0};
+  ITG nmpcold;
+  ITG iprestr;
+  ITG kode;
+  ITG isolver=0;
+  ITG nslavs=0;
+  ITG nkon_=0;
+  ITG ne0;
+  ITG nkon0;
+  ITG mortar=0;
+  ITG jout[2]={1,1};
+  ITG nlabel;
+  ITG nkon=0;
+  ITG idrct;
+  ITG jmax[2];
+  ITG iexpl;
+  ITG nevtot=0;
+  ITG ifacecount=0;
+  ITG iplas=0;
+  ITG npmat_=0;
+  ITG mi[3]={0,3,1};
+  ITG ntrans;
+  ITG mpcend=-1;
+  ITG namtot_=0;
+  ITG iumat=0;
+  ITG icascade=0;
+  ITG maxlenmpc;
+  ITG mpcinfo[4];
+  ITG ne1d=0;
+  ITG ne2d=0;
+  ITG infree[4]={0,0,0,0};
+  ITG callfrommain;
+  ITG nflow=0;
+  ITG jin=0;
+  ITG irstrt[2]={0,0};
+  ITG nener=0;
+  ITG jrstrt=0;
+  ITG nenerold;
+  ITG nline;
+  ITG *ipoinp=NULL;
+  ITG *inp=NULL;
+  ITG ntie;
+  ITG ntie_=0;
+  ITG mcs=0;
+  ITG nprop_=0;
+  ITG nprop=0;
+  ITG itpamp=0;
+  ITG iviewfile;
+  ITG nkold;
+  ITG nevdamp_=0;
+  ITG npt_=0;
+  ITG cyclicsymmetry;
+  ITG nmethodl;
+  ITG iaxial=1;
+  ITG inext=0;
+  ITG icontact=0;
+  ITG nobject=0;
+  ITG nobject_=0;
+  ITG iit=-1;
+  ITG nzsprevstep[3];
+  ITG memmpcref_;
+  ITG mpcfreeref=-1;
+  ITG maxlenmpcref;
+  ITG *nodempcref=NULL;
+  ITG *ikmpcref=NULL;
+  ITG isens=0;
+  ITG namtot=0;
+  ITG nstam=0;
+  ITG ndamp=0;
+  ITG nef=0;
 
-  ITG *meminset=NULL,*rmeminset=NULL;
+  ITG *meminset=NULL;
+  ITG *rmeminset=NULL;
 
-  ITG nzs_,nk_=0,ne_=0,nset_=0,nalset_=0,nmat_=0,norien_=0,nam_=0,
-    ntrans_=0,ncs_=0,nstate_=0,ncmat_=0,memmpc_=0,nprint_=0,nuel_=0;
+  ITG nzs_;
+  ITG nk_=0;
+  ITG ne_=0;
+  ITG nset_=0;
+  ITG nalset_=0;
+  ITG nmat_=0;
+  ITG norien_=0;
+  ITG nam_=0;
+  ITG ntrans_=0;
+  ITG ncs_=0;
+  ITG nstate_=0;
+  ITG ncmat_=0;
+  ITG memmpc_=0;
+  ITG nprint_=0;
+  ITG nuel_=0;
 
 
-  double *co=NULL, *xboun=NULL, *coefmpc=NULL, *xforc=NULL,*clearini=NULL,
-	*xload=NULL, *xbounold=NULL, *xforcold=NULL,
-	*vold=NULL, *sti=NULL, *xloadold=NULL, *xnor=NULL,
-	*reorder=NULL,*dcs=NULL, *thickn=NULL, *thicke=NULL, *offset=NULL,
-	*elcon=NULL, *rhcon=NULL, *alcon=NULL, *alzero=NULL, *t0=NULL, *t1=NULL,
-	*prestr=NULL, *orab=NULL, *amta=NULL, *veold=NULL, *accold=NULL,
-        *t1old=NULL, *eme=NULL, *plicon=NULL, *pslavsurf=NULL, *plkcon=NULL,
-	*xstate=NULL, *trab=NULL, *ener=NULL, *shcon=NULL, *cocon=NULL,
-        *cs=NULL,*tietol=NULL,*fmpc=NULL,*prop=NULL,*t0g=NULL,*t1g=NULL,
-        *xbody=NULL,*xbodyold=NULL,*coefmpcref=NULL,*dacon=NULL,*vel=NULL,
-        *velo=NULL,*veloo=NULL,*design=NULL,*rhoPhys=NULL;
+  double *co=NULL;
+  double  *xboun=NULL;
+  double  *coefmpc=NULL;
+  double  *xforc=NULL;
+  double *clearini=NULL;
+  double  *xload=NULL;
+  double  *xbounold=NULL;
+  double  *xforcold=NULL;
+	double *vold=NULL;
+  double  *sti=NULL;
+  double  *xloadold=NULL;
+  double  *xnor=NULL;
+  double *reorder=NULL;
+  double *dcs=NULL;
+  double  *thickn=NULL;
+  double  *thicke=NULL;
+  double  *offset=NULL;
+  double *elcon=NULL;
+  double  *rhcon=NULL;
+  double  *alcon=NULL;
+  double  *alzero=NULL;
+  double  *t0=NULL;
+  double  *t1=NULL;
+	double *prestr=NULL;
+  double  *orab=NULL;
+  double  *amta=NULL;
+  double *veold=NULL;
+  double  *accold=NULL;
+  double  *t1old=NULL;
+  double  *eme=NULL;
+  double  *plicon=NULL;
+  double  *pslavsurf=NULL;
+  double  *plkcon=NULL;
+	double *xstate=NULL;
+  double *trab=NULL;
+  double *ener=NULL;
+  double *shcon=NULL;
+  double *cocon=NULL;
+  double *cs=NULL;
+  double *tietol=NULL;
+  double *fmpc=NULL;
+  double *prop=NULL;
+  double *t0g=NULL;
+  double *t1g=NULL;
+  double *xbody=NULL;
+  double *xbodyold=NULL;
+  double *coefmpcref=NULL;
+  double *dacon=NULL;
+  double *vel=NULL;
+  double *velo=NULL;
+  double *veloo=NULL;
+  double *design=NULL;
+  double *rhoPhys=NULL;
 
-double *gradCompl=NULL, *elCompl=NULL,*elCG=NULL,*eleVol=NULL; //gradCompl=compliance gradient of each element,elcompl=compliance of elements
-double *designFiltered=NULL,*gradComplFiltered=NULL,*eleVolFiltered=NULL;
-
+  double *gradCompl=NULL;
+  double *elCompl=NULL;
+  double *elCG=NULL;
+  double *eleVol=NULL; //gradCompl=compliance gradient of each element,elcompl=compliance of elements
+  double *designFiltered=NULL;
+  double *gradComplFiltered=NULL;
+  double *eleVolFiltered=NULL;
 
 
 double ctrl[56]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5};
