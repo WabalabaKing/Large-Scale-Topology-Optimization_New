@@ -39,48 +39,48 @@ int main(int argc,char *argv[])
 
   FILE *f1;
 
-  char *sideload=NULL;    /**< decription. */
-  char *set=NULL;         /**< decription. */
-  char *matname=NULL;     /**< decription. */
-  char *orname=NULL;      /**< decription. */
-  char *amname=NULL;      /**< decription. */
-  char *filab=NULL;       /**< decription. */
-  char *lakon=NULL;       /**< decription. */
-  char *labmpc=NULL;      /**< decription. */
-  char *prlab=NULL;       /**< decription. */
-  char *prset=NULL;       /**< decription. */
-  char  jobnamec[660]=""; /**< decription. */
-  char  jobnamef[132]=""; /**< decription. */
-  char  output[4]="asc";  /**< decription. */
-  char  *typeboun=NULL;   /**< decription. */
-  char  *inpc=NULL;       /**< decription. */
-  char  *tieset=NULL;     /**< decription. */
-  char  *cbody=NULL;      /**< decription. */
-  char  fneig[132]="";    /**< decription. */
-  char  *sideloadtemp=NULL; /**< decription. */
+  char *sideload=NULL;    /**< load label for distributed loads. */
+  char *set=NULL;         /**< node set or element set */
+  char *matname=NULL;     /**< material name */
+  char *orname=NULL;      /**< name of orientation of element */
+  char *amname=NULL;      /**< amplitude name. */
+  char *filab=NULL;       /**< field label (U, S,..) */
+  char *lakon=NULL;       /**< element label */
+  char *labmpc=NULL;      /**< MPC label. */
+  char *prlab=NULL;       /**< output request */
+  char *prset=NULL;       /**< node or element set assiciated with output request.*/
+  char  jobnamec[660]=""; /**< jobname */
+  char  jobnamef[132]=""; /**< jobname for fluid analysis. */
+  char  output[4]="asc";  /**< output type */
+  char  *typeboun=NULL;   /**< boundary condition type */
+  char  *inpc=NULL;       /**< processed inp file content */
+  char  *tieset=NULL;     /**< tie constraints */
+  char  *cbody=NULL;      /**< element set to which body load applies */
+  char  fneig[132]="";    /**< file name for eigenvalue calculations */
+  char  *sideloadtemp=NULL; /**< temperature value associated with a sideload. */
   char  kind1[2]="T";     /**< decription. */
   char  kind2[2]="T";     /**< decription. */
   char  *heading=NULL;    /**< decription. */
   char  *objectset=NULL;  /**< decription. */
 
-  ITG *kon=NULL;
-  ITG *nodeboun=NULL;
-  ITG *ndirboun=NULL;
-  ITG *ipompc=NULL;
-  ITG *nodempc=NULL;
-  ITG *nodeforc=NULL;
-  ITG *ndirforc=NULL;
-  ITG  *nelemload=NULL;
-  ITG im;
-  ITG *inodesd=NULL;
-  ITG nload1;
-  ITG *idefforc=NULL;
-  ITG  *nactdof=NULL;
-  ITG *icol=NULL;
-  ITG *ics=NULL;
-  ITG  *jq=NULL;
-  ITG *mast1=NULL;
-  ITG *irow=NULL;
+  ITG *kon=NULL;          /**< Element topology vector */
+  ITG *nodeboun=NULL;     /**< boundary nodes (SPC) */
+  ITG *ndirboun=NULL;     /**< directions of SPC at nodeboun */
+  ITG *ipompc=NULL;       /**< index of node with MPCs */ 
+  ITG *nodempc=NULL;      /**< node numbers with MPCs and DOFs */
+  ITG *nodeforc=NULL;     /**< node numbers where forces are applied */
+  ITG *ndirforc=NULL;     /**< direction of applied forces */
+  ITG  *nelemload=NULL;   /**< elements associated with facial distributed loads */
+  ITG im;                 /**< general purpose loop variable */
+  ITG *inodesd=NULL;      /**< node numbers associated with active D.O.Fs */
+  ITG nload1;             /**< number of facial distributed loads applied to elements */
+  ITG *idefforc=NULL;     /**< indicates whether a load is effectively applied to  specific node and direction */
+  ITG  *nactdof=NULL;     /**< active D.O.Fs for nodes in system */
+  ITG *icol=NULL;         /**< stores the column numbers for the sparse matrix storage of D.O.Fs */
+  ITG *ics=NULL;          /**< array for identifying whether a certain node belongs to a constraint set */
+  ITG  *jq=NULL;          /**< stores the row numbers for the spatse matrix structure of global stiffness matrix */
+  ITG *mast1=NULL;        /**< master D.O.Fs for the MPC system */
+  ITG *irow=NULL;         /**< row indices of non-zero entries in a sparse matrix represenation */
   ITG *rig=NULL;
   ITG *idefbody=NULL;
   ITG  *ikmpc=NULL;
@@ -319,67 +319,89 @@ int main(int argc,char *argv[])
   double *eleVolFiltered=NULL;
 
 
-double ctrl[56]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5};
+  double ctrl[56]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5};
 
-double fei[3],*xmodal=NULL,timepar[5],
-    alpha,ttime=0.,qaold[2]={0.,0.},physcon[13]={0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
+  double fei[3];
+  double *xmodal=NULL;
+  double timepar[5];
 
-double pSupplied=0.0, pstiff=0.0, rmin=0.000000000001, volfrac=1.00, qfilter = 3;
+  double  alpha;
+  double ttime=0.;
+  double qaold[2]={0.,0.};
+  double physcon[13]={0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
 
-ITG itertop= 1; //counter for iteration number in topology optimization
-ITG fnnzassumed = 500; //We assume 500 non zeros in each row of filtermatrix 
-//filternnz=total number of nonzeros in filtermatrix,filternnzElem=no of nonzeros in each row of filtermatrix
-ITG filternnz=0;  //For actual nnz values in filter matrix
+  double pSupplied=0.0;
+  double pstiff=0.0;
+  double  rmin=0.000000000001;
+  double  volfrac=1.00;
+  double  qfilter = 3;
 
-ITG *filternnzElems=NULL;
+  ITG itertop= 1; //counter for iteration number in topology optimization
+  ITG fnnzassumed = 500; //We assume 500 non zeros in each row of filtermatrix 
+  //filternnz=total number of nonzeros in filtermatrix,filternnzElem=no of nonzeros in each row of filtermatrix
+  ITG filternnz=0;  //For actual nnz values in filter matrix
 
-double *FilterMatrixs=NULL; //Pointer to filter matrix
+  ITG *filternnzElems=NULL;
 
-ITG *rowFilters=NULL; //Pointer to row index
-ITG *colFilters=NULL; //Pointer to column matrix
+  double *FilterMatrixs=NULL; //Pointer to filter matrix
 
-#ifdef CALCULIX_MPI
-MPI_Init(&argc, &argv) ;
-MPI_Comm_rank(MPI_COMM_WORLD, &myid) ;
-MPI_Comm_size(MPI_COMM_WORLD, &nproc) ;
-#endif
+  ITG *rowFilters=NULL; //Pointer to row index
+  ITG *colFilters=NULL; //Pointer to column matrix
+
+  #ifdef CALCULIX_MPI
+  MPI_Init(&argc, &argv) ;
+  MPI_Comm_rank(MPI_COMM_WORLD, &myid) ;
+  MPI_Comm_size(MPI_COMM_WORLD, &nproc) ;
+  #endif
 
 if(argc==1)
-{
-  printf("Usage: Flags: -i jobname -p PENALTY -q HIGHERORDERFILTER -r RADIUS -v VOLUMEFRACTION -s ITERATION -f FILTERNNZ\n");FORTRAN(stop,());
+{ 
+  /* Inadequate input arguments */
+  printf("Usage: Flags: -i jobname -p PENALTY -q HIGHERORDERFILTER -r RADIUS -v VOLUMEFRACTION -s ITERATION -f FILTERNNZ\n");
+  FORTRAN(stop,());
 }
 
 else
 {
-  for(i=1;i<argc;i++)
+  /* Loop over all input arguments */
+  for(i=1; i<argc; i++)
   {
     if(strcmp1(argv[i],"-i")==0)
     {
-      strcpy(jobnamec,argv[i+1]);strcpy1(jobnamef,argv[i+1],132);jin++;break;
+      /* Input file found, allocate  forjob name */
+      strcpy(jobnamec,argv[i+1]);
+      strcpy1(jobnamef,argv[i+1],132);
+      jin++;
+      break;
     }
 
     if(strcmp1(argv[i],"-v")==0)
     {
-	    printf("\nThis is Version 2.15 modified for Topology Optimization with SIMP method: Ghanendra Kumar Das,CDILab, AE, UIUC\n\n");
-      printf("Last edit:8 April to add q \n\n");
+      /* Print version */
+	    printf("\nThis is CALTOP v2.15 modified for Topology Optimization with SIMP method: Ghanendra Kumar Das,CDILab, AE, UIUC\n\n");
+      printf(" Authors: Prateek Ranjan, Massachusetts Institute of Technology \n");
+      printf(" Authors: Ghanendra Das, Georgia Institute of Technology \n");
+      printf(" Kai. A James, Georgia Institute of Technology \n");
 	    FORTRAN(stop,());
     }
   }
+
   if(jin==0)
   {
     strcpy(jobnamec,argv[1]);strcpy1(jobnamef,argv[1],132);
   }
 
-  for(i=1;i<argc;i++)
+  for(i=1; i<argc; i++)
   {
     if(strcmp1(argv[i],"-o")==0)
     {
-      strcpy(output,argv[i+1]);break;
+      strcpy(output,argv[i+1]);
+      break;
     }
   }
 
-  // Read penalty p
-  for(i=1;i<argc;i++)
+  /* Read penalty parameter */
+  for(i=1; i<argc; i++)
   {
     if(strcmp1(argv[i],"-p")==0) 
     {
@@ -388,8 +410,8 @@ else
     }
   }
 
-  // Read filter radius r
-  for(i=1;i<argc;i++)
+  /* Read filter radius */
+  for(i=1; i<argc; i++)
   {
     if(strcmp1(argv[i],"-r")==0)
     {
@@ -398,8 +420,8 @@ else
     }
   }
 
-  // Read filter order q
-  for(i=1;i<argc;i++)
+  /* Read filter order */
+  for(i=1; i<argc; i++)
   {
     if(strcmp1(argv[i],"-q")==0) 
     {
@@ -408,8 +430,8 @@ else
     }
   }  
 
-  // Read volume fraction v
-  for(i=1;i<argc;i++)
+  /* Read volume fraction */
+  for(i=1; i<argc; i++)
   {
     if(strcmp1(argv[i],"-v")==0) 
     {
@@ -418,8 +440,8 @@ else
     }
   }
 
-  // Read expected non zeros in filtermatrix
-  for(i=1;i<argc;i++)
+  /* Read expected non-zeros in filter matrix */
+  for(i=1; i<argc; i++)
   {
     if(strcmp1(argv[i],"-f")==0) 
     {
@@ -428,8 +450,8 @@ else
     }
   }
 
-  // Read iteration number
-  for(i=1;i<argc;i++)
+  /* Read iteration number */
+  for(i=1; i<argc; i++)
   {
     if(strcmp1(argv[i],"-s")==0) 
     {
@@ -442,6 +464,7 @@ else
 
 //printf("\n */*/*/* rmin= %f\n",rmin);
 
+/* Assign default values */
 if (pSupplied==0.0) 
   {
     pstiff=1.0;
@@ -466,33 +489,26 @@ FORTRAN(uexternaldb,(&lop,&lrestart,time,&dtime,&kstep,&kinc));
 
 FORTRAN(openfile,(jobnamef,output));
 
-printf("************************************************************\n");
-printf("*                                                          *\n");
-printf("*                     CalTOP Framework                     *\n");
-printf("*                                                          *\n");
-printf("************************************************************\n");
-printf("*                                                          *\n");
-printf("*              _____________                               *\n");
-printf("*             /|          /|                               *\n");
-printf("*            /_|_________/ |                               *\n");
-printf("*           |  |   |    |  |                               *\n");
-printf("*           |  |___|____|  |                               *\n");
-printf("*           |  |   |    |  |                               *\n");
-printf("*           |  |___|____|  |                               *\n");
-printf("*           |  |   |    |  |                               *\n");
-printf("*           |  |___|____|_/                                *\n");
-printf("*           | /_________|/                                 *\n");
-printf("*                                                          *\n");
-printf("*    Calculix-based Topology Optimization Framework v1.0   *\n");
-printf("*                                                          *\n");
-printf("************************************************************\n");
 
+printf("  #####    #####   ##        #######  #####   ######  \n");
+printf(" ##       ##   ##  ##           ##   ##   ##  ##   ## \n");
+printf(" ##       #######  ##           ##   ##   ##  ######  \n");
+printf(" ##       ##   ##  ##           ##   ##   ##  ##      \n");
+printf("  #####   ##   ##  #######      ##    #####   ##      \n");
+    
 
-printf("Prateek Ranjan, Dept. of Aerospace Engineering, University of Illinois at Urbana-Champaign\n");
-printf("Ghanendra Kumar Das, Dept. of Aerospace Engineering, University of Illinois at Urbana-Champaign\n");
-printf("Kai A. James, Dept. of Aerospace Engineering, Georgia Institute of Technology\n");
-printf("\nOriginal FEA source code: CalculiX by G. Dhondt\n");
+printf("************************************************************\n");
+printf("* Contributors:\n");
+printf("* Prateek Ranjan, Dept. of Aerospace Engineering,\n");
+printf("* University of Illinois at Urbana-Champaign\n");
+printf("* Ghanendra Kumar Das, Dept. of Aerospace Engineering,\n");
+printf("* University of Illinois at Urbana-Champaign\n");
+printf("* Kai A. James, Dept. of Aerospace Engineering,\n");
+printf("* Georgia Institute of Technology\n");
 printf("************************************************************\n\n");
+printf("Original FEA source code: CalculiX by Guido Dhondt\n");
+printf("************************************************************\n\n");
+
 
 
 istep=0;

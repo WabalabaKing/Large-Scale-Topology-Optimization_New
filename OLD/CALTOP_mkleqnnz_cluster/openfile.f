@@ -16,22 +16,40 @@
 !     along with this program; if not, write to the Free Software
 !     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !
+
+!> \brief Subroutine for opening and managing input/output files.
+!>
+!> This subroutine checks the job name, ensures the filename does not
+!> exceed 128 characters, and manages several types of files requred
+!> for finite element analysis. It deletes old files and creates new ones
+!> when necesary
+
+!> \param[in] jobname Character array containing the name of the job.
+!> \param[in] output character array for output type (unused)
       subroutine openfile(jobname,output)
 !
       implicit none
 !
 c      logical exi
+!> Character array specifying the output file type
       character*3 output
+
+!> Character array containing the job name (up to 132 characters) 
       character*132 jobname,fndat,fnfrd,fnsta,fncvg,fncel
+
+!> Local variables
       integer i
 !
 !     opening the input and output file
-!
+!> Checks for trailing spaces in the job name and ensures the job name
+      !> does not exced 128 characters
       do i=1,132
          if(jobname(i:i).eq.' ') exit
       enddo
+
       i=i-1
       if(i.gt.128) then
+!> Error if the job name is too long 
          write(*,*) '*ERROR in openfile: input file name is too long:'
          write(*,'(a132)') jobname(1:132)
          write(*,*) '       exceeds 128 characters'
@@ -47,13 +65,13 @@ c         write(*,*) '*ERROR in openfile: input file ',fnin
 c         write(*,*) 'does not exist'
 c         call exit(201)
 c      endif
-!
+!> Open the .dat file for the job. If it exists, delete it, then recreate it
       fndat=jobname(1:i)//'.dat'
       open(5,file=fndat(1:i+4),status='unknown',err=51)
       close(5,status='delete',err=52)
       open(5,file=fndat(1:i+4),status='unknown',err=51)
 !
-!     delete the .frd file (it is reopened in frd.c)
+!>     delete the .frd file (it is reopened in frd.c)
 !
       fnfrd=jobname(1:i)//'.frd'
       open(7,file=fnfrd(1:i+4),status='unknown',err=71)
@@ -72,7 +90,7 @@ c      close(13,status='delete',err=73)
       close(12,status='delete',err=73)
 !
 !     .sta-file
-!
+!> Open and initialize the .sta file with job information
       fnsta=jobname(1:i)//'.sta'
       open(8,file=fnsta(1:i+4),status='unknown',err=81)
       close(8,status='delete',err=82)
@@ -84,7 +102,7 @@ c      close(13,status='delete',err=73)
      &    INC TIME')
 !
 !     .cvg-file
-!
+!> Open and initialize the .cvg file with convergence information
       fncvg=jobname(1:i)//'.cvg'
       open(11,file=fncvg(1:i+4),status='unknown',err=91)
       close(11,status='delete',err=92)
@@ -102,22 +120,30 @@ c      close(13,status='delete',err=73)
      &     (%)         (%)')
 !
 !     contact elements
-!
+!> Handle contact element file 
       fncel=jobname(1:i)//'.cel'
       open(27,file=fncel(1:i+4),status='unknown',err=93)
       close(27,status='delete',err=94)
-!
+
+!> Return after sucessful completetion
       return
 !
 c 1    write(*,*) '*ERROR in openfile: could not open file ',fnin(1:i+4)
 c      call exit(201)
+
+!> Error handling code for various failures in opening/deleting files.
+!> Error: COuld not open .dat file
  51   write(*,*) '*ERROR in openfile: could not open file ',fndat(1:i+4)
       call exit(201)
+
+!> Error: Could not delete .dat file
  52   write(*,*) '*ERROR in openfile: could not delete file ',
      &  fndat(1:i+4)
       call exit(201)
+      !> Error: Could not open .frd file
  71   write(*,*) '*ERROR in openfile: could not open file ',fnfrd(1:i+4)
       call exit(201)
+      !> Error: COuld not delete .frd file 
  72   write(*,*) '*ERROR in openfile: could not delete file ',
      &  fnfrd(1:i+4)
       call exit(201)
