@@ -127,188 +127,188 @@ int main(int argc,char *argv[])
   ITG iload; /**< loop counter for handling loads in system */
   ITG *iuel=NULL; /**< element numbers involved in user-defined subroutines */
 
-  ITG nk;
-  ITG ne;
-  ITG nboun;
-  ITG nmpc;
-  ITG nforc;
-  ITG nload;
-  ITG nprint=0;
-  ITG nset;
-  ITG nalset;
-  ITG nentries=17;
-  ITG nmethod;
-  ITG neq[3]={0,0,0};
-  ITG i;
-  ITG mpcfree=1;
-  ITG mei[4];
-  ITG j;
-  ITG nzl;
-  ITG nam;
-  ITG nbounold=0;
-  ITG nforcold=0;
-  ITG nloadold=0;
-  ITG nbody,nbody_=0;
-  ITG nbodyold=0;
-  ITG network=0;
-  ITG nheading_=0;
-  ITG k;
-  ITG nzs[3];
-  ITG nmpc_=0;
-  ITG nload_=0;
-  ITG nforc_=0;
-  ITG istep;
-  ITG istat;
-  ITG nboun_=0;
-  ITG nintpoint=0;
-  ITG iperturb[2]={0,0};
-  ITG nmat;
-  ITG ntmat_=0;
-  ITG norien;
-  ITG ithermal[2]={0,0};
-  ITG nmpcold;
-  ITG iprestr;
-  ITG kode;
-  ITG isolver=0;
-  ITG nslavs=0;
-  ITG nkon_=0;
-  ITG ne0;
-  ITG nkon0;
-  ITG mortar=0;
-  ITG jout[2]={1,1};
-  ITG nlabel;
-  ITG nkon=0;
-  ITG idrct;
-  ITG jmax[2];
-  ITG iexpl;
-  ITG nevtot=0;
-  ITG ifacecount=0;
-  ITG iplas=0;
-  ITG npmat_=0;
-  ITG mi[3]={0,3,1};
-  ITG ntrans;
-  ITG mpcend=-1;
-  ITG namtot_=0;
-  ITG iumat=0;
-  ITG icascade=0;
-  ITG maxlenmpc;
-  ITG mpcinfo[4];
-  ITG ne1d=0;
-  ITG ne2d=0;
-  ITG infree[4]={0,0,0,0};
-  ITG callfrommain;
-  ITG nflow=0;
-  ITG jin=0;
-  ITG irstrt[2]={0,0};
-  ITG nener=0;
-  ITG jrstrt=0;
-  ITG nenerold;
-  ITG nline;
-  ITG *ipoinp=NULL;
-  ITG *inp=NULL;
-  ITG ntie;
-  ITG ntie_=0;
-  ITG mcs=0;
-  ITG nprop_=0;
-  ITG nprop=0;
-  ITG itpamp=0;
-  ITG iviewfile;
-  ITG nkold;
-  ITG nevdamp_=0;
-  ITG npt_=0;
-  ITG cyclicsymmetry;
-  ITG nmethodl;
-  ITG iaxial=1;
-  ITG inext=0;
-  ITG icontact=0;
-  ITG nobject=0;
-  ITG nobject_=0;
-  ITG iit=-1;
-  ITG nzsprevstep[3];
-  ITG memmpcref_;
-  ITG mpcfreeref=-1;
-  ITG maxlenmpcref;
-  ITG *nodempcref=NULL;
-  ITG *ikmpcref=NULL;
-  ITG isens=0;
-  ITG namtot=0;
-  ITG nstam=0;
-  ITG ndamp=0;
-  ITG nef=0;
+  ITG nk; /**< number of nodes in the system */
+  ITG ne; /**< number of elements in the system */
+  ITG nboun; /**< number of boundary conditions (SPCs) in the system */
+  ITG nmpc; /**< number of MPCs in the system */
+  ITG nforc; /**< number of concentrated forces applied */
+  ITG nload; /**< number of load cases to model */
+  ITG nprint=0; /**< number of print requests to zero */
+  ITG nset; /**< number of elements or node sets in specific set */
+  ITG nalset; /**< number of elements or nodes in a specific set */
+  ITG nentries=17; /**< number of entries ? */
+  ITG nmethod; /**< numerical method */
+  ITG neq[3]={0,0,0}; /**< number if equations in different stages of analysis */
+  ITG i; /**< general-purpose integer variable */
+  ITG mpcfree=1; /**< index for free MPIC slots */
+  ITG mei[4]; /**< mechanical element indices used in assembly process */
+  ITG j; /**< general-purpose integer variable */
+  ITG nzl; /**< number of non-zero entries in sparse matrix  */
+  ITG nam; /** number of amplitude definitions in the input */
+  ITG nbounold=0; /**< number of boundary conditions from previous step */
+  ITG nforcold=0; /**< old number of concentrated forces */ 
+  ITG nloadold=0; /**< old number of load cases */
+  ITG nbody,nbody_=0; /**< body forces applied in the model */
+  ITG nbodyold=0; /**< body forces from previous step */
+  ITG network=0; /**< network analysis */
+  ITG nheading_=0; /**< heading of a particular input section */
+  ITG k; /**< general-purpose integer variable */
+  ITG nzs[3]; /**< number of non-zero entries in different stages of a sparse matrix */ 
+  ITG nmpc_=0; /**< number of multiple point constraints */
+  ITG nload_=0; /**< number of load cases to zero */
+  ITG nforc_=0; /**< number of concentrated forces */
+  ITG istep; /**< current analysis step number */
+  ITG istat; /**< status variable used to track the success or failure for a specific operation */
+  ITG nboun_=0; /**< number to boundary conditions to zero */
+  ITG nintpoint=0; /**< number of integration points to zero */
+  ITG iperturb[2]={0,0}; /**< array indicating whether a perturbation analysis is being conducted */
+  ITG nmat; /**< number of materials added in the model */
+  ITG ntmat_=0; /**< number of material types to zero */
+  ITG norien; /**< number of orientations defined in the model */
+  ITG ithermal[2]={0,0}; /**< array indicating whether thermal analysis is being conducted */
+  ITG nmpcold; /**< old number of MPCs from previous step */
+  ITG iprestr; /**< prestress */
+  ITG kode; /**< unknown */
+  ITG isolver=0; /**< specified the solver being used */
+  ITG nslavs=0; /**< number of slave nodes in contact problems  */
+  ITG nkon_=0; /**< total number of entries in k-vector (?) */
+  ITG ne0; /**< original nnumber of elements */
+  ITG nkon0; /**< original number of entries in k-vector(?) */
+  ITG mortar=0; /**< mortar contact */
+  ITG jout[2]={1,1}; /**< array for output control */
+  ITG nlabel; /**< number of labels in the model */
+  ITG nkon=0; /**< number ofd entries in the connectivity vector to zero */
+  ITG idrct; /**< direction of loading or displacement constraints */
+  ITG jmax[2]; /**< array for storing maximum values of certain parameters */
+  ITG iexpl; /**< explicit analysis flag */
+  ITG nevtot=0; /**< total number of events or load steps to zero */
+  ITG ifacecount=0; /**< counter for contact faces to zero */
+  ITG iplas=0; /**< plasticity flag to zero */
+  ITG npmat_=0; /**< number of material points to zero */
+  ITG mi[3]={0,3,1}; /**< array of ints storing model information such as D.O.Fs */
+  ITG ntrans; /**< number of transformations applied in the analysis */
+  ITG mpcend=-1; /**< index for the end of MPC list to -1 */
+  ITG namtot_=0; /**< total number of amplitide defs to zero */
+  ITG iumat=0; /**< flag for material subroutines */
+  ITG icascade=0; /**< cascading load or boundary condition definitions to zero */
+  ITG maxlenmpc; /**< max. length of the MPC definitions */
+  ITG mpcinfo[4]; /**< MPIC information */
+  ITG ne1d=0; /**< number of 1D elements in the model to zero */
+  ITG ne2d=0; /**< number of 2D elements in the model to zero */
+  ITG infree[4]={0,0,0,0}; /**< array indicating free indices for node or element arrays */ 
+  ITG callfrommain; /**< flag for subroutine being called from the main program */
+  ITG nflow=0; /**< number of flow conditions to zero */
+  ITG jin=0; /**< general-purpose integer variable */
+  ITG irstrt[2]={0,0}; /**< flag for restart analysis */
+  ITG nener=0; /**< number of energy variables to zero */
+  ITG jrstrt=0; /**< flag for restart analysis */
+  ITG nenerold; /**< number of energy variables from the previous step */
+  ITG nline; /**< number of lines in the output or input */
+  ITG *ipoinp=NULL; /**< position of input data in the input deck */
+  ITG *inp=NULL; /**< input data array */
+  ITG ntie; /**< number of tie constraints *(?) */
+  ITG ntie_=0; /**< number of tie constraints to zero */
+  ITG mcs=0; /**< number ofd constraint sets in the model */
+  ITG nprop_=0; /**< number ofd property defintions to zero */
+  ITG nprop=0; /**< unknown (double definiton ?) */
+  ITG itpamp=0; /**< index for time-amplitude definitions */
+  ITG iviewfile; /**< flag for a view file is being used */
+  ITG nkold; /**< number of nodes in the previous step of analysis */
+  ITG nevdamp_=0; /**< number of viscous damping elements to zero */ 
+  ITG npt_=0; /**< number of plasticity related terms to zero */
+  ITG cyclicsymmetry; /**< flag for using cyclic symmetry */
+  ITG nmethodl; /**< flag for number of methods being used in the analysis */
+  ITG iaxial=1; /**< flag for axial symmetry */
+  ITG inext=0; /**< next iteration number initialized to zero */
+  ITG icontact=0; /**< number of contact definitions to zero */
+  ITG nobject=0; /**< number of objects defined in the model to zero */
+  ITG nobject_=0; /**< number of objects to zero (?) */ 
+  ITG iit=-1; /**< current iteration number, initialized to -1 */
+  ITG nzsprevstep[3]; /**< number of non-zero entries in the previous step's matrix */
+  ITG memmpcref_; /**< memoery allocated for MPC references */
+  ITG mpcfreeref=-1; /**< initializes the free index for MPC referecs to -1 */
+  ITG maxlenmpcref; /**< max. length of the MPC references */
+  ITG *nodempcref=NULL; /**< node numbers for the MPC references */
+  ITG *ikmpcref=NULL; /**< sorted D.O.Fs for MPC references */
+  ITG isens=0; /**< flag for sensitivity analysis to zero */
+  ITG namtot=0; /**< total number of amplitude definitions to zero */
+  ITG nstam=0; /**< number of sate varibles in  the model to zero */
+  ITG ndamp=0; /**< number of damping elements in the model */
+  ITG nef=0; /**< number of F.E element entities in the model to zero */
 
-  ITG *meminset=NULL;
-  ITG *rmeminset=NULL;
+  ITG *meminset=NULL; /**< pointer to memeory locations related to element or node sets */
+  ITG *rmeminset=NULL; /**< real memory locations associated with element or node sets */
 
-  ITG nzs_;
-  ITG nk_=0;
-  ITG ne_=0;
-  ITG nset_=0;
-  ITG nalset_=0;
-  ITG nmat_=0;
-  ITG norien_=0;
-  ITG nam_=0;
-  ITG ntrans_=0;
-  ITG ncs_=0;
-  ITG nstate_=0;
-  ITG ncmat_=0;
-  ITG memmpc_=0;
-  ITG nprint_=0;
-  ITG nuel_=0;
+  ITG nzs_;    /**< number of non-zero entries in a sparse matix */
+  ITG nk_=0;  /**< number of nodes to zero */
+  ITG ne_=0;  /** number of elements to zero */
+  ITG nset_=0; /**< number of element or node sets to zero */
+  ITG nalset_=0; /**< number of elements or nodes in a set to zero */
+  ITG nmat_=0; /**< number of material definitions to zero */
+  ITG norien_=0; /**< orientation to zero */
+  ITG nam_=0;  /**< number of material definitions to zero */
+  ITG ntrans_=0; /**< number ofd transformations to zero */
+  ITG ncs_=0; /**< number of constraint sets to zero */
+  ITG nstate_=0; /**< number of state variables to zero */
+  ITG ncmat_=0; /**< number of constitutive material models to zero */
+  ITG memmpc_=0; /**< memoery allocated for MPCs to zero */
+  ITG nprint_=0; /**< print flags set to zero*/
+  ITG nuel_=0; /**< number of user-defined elements to zero */
 
 
-  double *co=NULL;
-  double  *xboun=NULL;
-  double  *coefmpc=NULL;
-  double  *xforc=NULL;
-  double *clearini=NULL;
-  double  *xload=NULL;
-  double  *xbounold=NULL;
-  double  *xforcold=NULL;
-	double *vold=NULL;
-  double  *sti=NULL;
-  double  *xloadold=NULL;
-  double  *xnor=NULL;
-  double *reorder=NULL;
-  double *dcs=NULL;
-  double  *thickn=NULL;
-  double  *thicke=NULL;
-  double  *offset=NULL;
-  double *elcon=NULL;
-  double  *rhcon=NULL;
-  double  *alcon=NULL;
-  double  *alzero=NULL;
-  double  *t0=NULL;
-  double  *t1=NULL;
-	double *prestr=NULL;
-  double  *orab=NULL;
-  double  *amta=NULL;
-  double *veold=NULL;
-  double  *accold=NULL;
-  double  *t1old=NULL;
-  double  *eme=NULL;
-  double  *plicon=NULL;
-  double  *pslavsurf=NULL;
-  double  *plkcon=NULL;
-	double *xstate=NULL;
-  double *trab=NULL;
-  double *ener=NULL;
-  double *shcon=NULL;
-  double *cocon=NULL;
-  double *cs=NULL;
-  double *tietol=NULL;
-  double *fmpc=NULL;
-  double *prop=NULL;
-  double *t0g=NULL;
-  double *t1g=NULL;
-  double *xbody=NULL;
-  double *xbodyold=NULL;
-  double *coefmpcref=NULL;
-  double *dacon=NULL;
-  double *vel=NULL;
-  double *velo=NULL;
-  double *veloo=NULL;
-  double *design=NULL;
-  double *rhoPhys=NULL;
+  double *co=NULL;   /**< coordinates of all nodes */
+  double  *xboun=NULL; /**< values of SPCS applied at nodes */
+  double  *coefmpc=NULL; /**< coeffs for MPCs */
+  double  *xforc=NULL; /**< magnitudes of concentrated forces applied to nodes */
+  double *clearini=NULL; /**< initial clearance values between slave nodes and master surfaces in contact analysis */
+  double  *xload=NULL; /**< distriubuted load magnitudes */
+  double  *xbounold=NULL; /**< values of SPCs at the start of a step */
+  double  *xforcold=NULL; /**< magnitudes of concentrated forces applied to nodes at an old step */
+	double *vold=NULL; /**< Unknown (?) */
+  double  *sti=NULL; /**< Unknown (?) */
+  double  *xloadold=NULL; /**< magnitudes of distributed loads at an old step */
+  double  *xnor=NULL; /**< Unknown (?) */
+  double *reorder=NULL; /**< Unknown (?) */
+  double *dcs=NULL; /**< Unknown (?) */
+  double  *thickn=NULL; /**< shell element thickness vales */
+  double  *thicke=NULL; /**< element thickness values */
+  double  *offset=NULL; /**< offsets in elementrs like beams or shells where nodes are not necessarily positioned at the centeriod */
+  double *elcon=NULL; /**< material properties related elasticity for the elements */
+  double  *rhcon=NULL; /**< material properties related to thermal conductivity */
+  double  *alcon=NULL; /**< material properties related to specific material type */
+  double  *alzero=NULL; /**< material properties related to thermal expansion for isotropic materials */
+  double  *t0=NULL; /**< initial temperature values for nodes or elemenrts */
+  double  *t1=NULL; /**< final temperature values at the end of a step */
+	double *prestr=NULL; /**< prestress values in elements */
+  double  *orab=NULL; /**< orientation information for material anisotropy */
+  double  *amta=NULL; /**< amplitude definitions that scale loads and other parameters */
+  double *veold=NULL; /**< velocity values from the previous increment */
+  double  *accold=NULL; /**< acceleration values from previous increment */
+  double  *t1old=NULL; /**< temperature values at the start of a step */
+  double  *eme=NULL; /**< strain values at the integration points in each element */
+  double  *plicon=NULL; /**< plasticity-related constants for materials undergoing pastic deformation */
+  double  *pslavsurf=NULL; /**< slace surface properties in contact analysis */
+  double  *plkcon=NULL; /**< plasticity-related constants */
+	double *xstate=NULL; /**< internal state variables of the elements */
+  double *trab=NULL; /**< coordinates for transformations between global and local coordinate systems */
+  double *ener=NULL; /**< energy values at integration points */
+  double *shcon=NULL; /**< shell conductivty values */
+  double *cocon=NULL; /**< convective heat transfer properties for elements */
+  double *cs=NULL; /**< transformation matrices for coordinate systems */
+  double *tietol=NULL; /**, tie constraint tolerance */
+  double *fmpc=NULL; /**< values of MPC at each increment */
+  double *prop=NULL; /**< element property values */
+  double *t0g=NULL; /**< global temperature values at start */
+  double *t1g=NULL; /**< global temperature values at the end of step */
+  double *xbody=NULL; /**< body force values from current step */
+  double *xbodyold=NULL; /**< body force values from old step */
+  double *coefmpcref=NULL; /**< coefficients of reference MPCs */
+  double *dacon=NULL; /**< damping constants for dynamic analysis */
+  double *vel=NULL;  /**< velocity values from current step */
+  double *velo=NULL; /**< velocity values from a previous step */
+  double *veloo=NULL; /**< velocity values from old-old step */
+  double *design=NULL; /**< design variables for topology optimization */
+  double *rhoPhys=NULL; /**< phyiscal element densities */
 
   double *gradCompl=NULL;
   double *elCompl=NULL;
