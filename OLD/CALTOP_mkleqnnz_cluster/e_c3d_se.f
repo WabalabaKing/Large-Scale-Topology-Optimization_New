@@ -2040,7 +2040,7 @@ c            alp=.2215d0
 !     -------------------------------------------------------------
 !
 
-      !         Evaluate k*u
+!         Evaluate k*u
 !
          do i=1,3*nope
             do j=1,3*nope
@@ -2065,11 +2065,7 @@ c            alp=.2215d0
 !         else
                elvol=dabs(elvol)*expansion
 !         endif
-         
-         
-         
-         
-         
+                        
 c        close(200)
  !        close(300)
       return

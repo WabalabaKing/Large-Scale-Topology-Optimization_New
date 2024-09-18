@@ -32,7 +32,7 @@
    #include "pardiso.h"
 #endif
 
-void sensitivity(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
+void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
              ITG *ne, 
              ITG *nodeboun, ITG *ndirboun, double *xboun, ITG *nboun, 
              ITG *ipompc, ITG *nodempc, double *coefmpc, char *labmpc,

@@ -32,12 +32,12 @@ void mafillsmmain_Vectorfilter(ITG *ipkon,double *Vector,double *VectorFiltered,
     double *FilterMatrix,ITG *filternnzElem,
            ITG *rowFilter,ITG *colFilter,
 	       ITG *ne,double *ttime,double *time,
-	       ITG *ne0, ITG *fnnzassumed, double *q){
+	       ITG *ne0, ITG *fnnzassumed, double *q)
+{
 
     ITG i,j;
 
     /* variables for multithreading procedure */
-
     ITG sys_cpus,*ithread=NULL;
     char *env,*envloc,*envsys;
 
@@ -45,49 +45,60 @@ void mafillsmmain_Vectorfilter(ITG *ipkon,double *Vector,double *VectorFiltered,
     sys_cpus=0;
 
     /* explicit user declaration prevails */
-
     envsys=getenv("NUMBER_OF_CPUS");
-    if(envsys){
-	sys_cpus=atoi(envsys);
-	if(sys_cpus<0) sys_cpus=0;
+
+    if(envsys)
+    {
+	    sys_cpus=atoi(envsys);
+	    if(sys_cpus<0) sys_cpus=0;
     }
 
 //    sys_cpus=1;
 
     /* automatic detection of available number of processors */
 
-    if(sys_cpus==0){
-	sys_cpus = getSystemCPUs();
-	if(sys_cpus<1) sys_cpus=1;
+    if(sys_cpus==0)
+    {
+	    sys_cpus = getSystemCPUs();
+	    if(sys_cpus<1) sys_cpus=1;
     }
 
+
     /* local declaration prevails, if strictly positive */
-
     envloc = getenv("CCX_NPROC_STIFFNESS");
-    if(envloc){
-	num_cpus=atoi(envloc);
-	if(num_cpus<0){
-	    num_cpus=0;
-	}else if(num_cpus>sys_cpus){
-	    num_cpus=sys_cpus;
-	}
-
+    if(envloc)
+    {
+	    num_cpus=atoi(envloc);
+	    if(num_cpus<0)
+        {
+	        num_cpus=0;
+	    }
+        
+        else if(num_cpus>sys_cpus)
+        {
+	        num_cpus=sys_cpus;
+	    }
     }
 
     /* else global declaration, if any, applies */
 
     env = getenv("OMP_NUM_THREADS");
-    if(num_cpus==0){
-	if (env)
-	    num_cpus = atoi(env);
-	if (num_cpus < 1) {
-	    num_cpus=1;
-	}else if(num_cpus>sys_cpus){
-	    num_cpus=sys_cpus;
-	}
+    
+    if(num_cpus==0)
+    {
+	    if (env)
+	        num_cpus = atoi(env);
+	    if (num_cpus < 1) 
+        {
+	        num_cpus=1;
+	    }
+        else if(num_cpus>sys_cpus)
+        {
+	        num_cpus=sys_cpus;
+	    }
     }
 
-// next line is to be inserted in a similar way for all other paralell parts
+// next line is to be inserted in a similar way for all other parallel parts
 
 // num_cpus=1;// overwrite for now to 1 CPU only
 
@@ -118,37 +129,35 @@ void mafillsmmain_Vectorfilter(ITG *ipkon,double *Vector,double *VectorFiltered,
 
     /* FilterVector */
 
-    printf(" Using up to %" ITGFORMAT " cpu(s) for the filtering of vector.\n\n", num_cpus);
+    printf(" Using up to %" ITGFORMAT " cpu(s) to filter vector.\n\n", num_cpus);
 
     /* create threads and wait */
-
     NNEW(ithread,ITG,num_cpus);
-    for(i=0; i<num_cpus; i++)  {
-	ithread[i]=i;
-	pthread_create(&tid[i], NULL, (void *)mafillsmVectorfiltermt, (void *)&ithread[i]);
+
+    for(i=0; i<num_cpus; i++)  
+    {
+	    ithread[i]=i;
+	    pthread_create(&tid[i], NULL, (void *)mafillsmVectorfiltermt, (void *)&ithread[i]);
     }
+
     for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 
-    SFREE(ithread);SFREE(neapar);SFREE(nebpar);
+    SFREE(ithread);
+    SFREE(neapar);
+    SFREE(nebpar);
 
     /*      for(i=0;i<num_cpus;i++){
       for(k=i*neq[1];k<i*neq[1]+neq[1];++k){printf("fext=%" ITGFORMAT ",%f\n",k-i*neq[1],fext1[k]);}
       for(k=i*neq[1];k<i*neq[1]+neq[1];++k){printf("ad=%" ITGFORMAT ",%f\n",k-i*neq[1],ad1[k]);}
       for(k=i*nzs[2];k<i*nzs[2]+nzs[2];++k){printf("au=%" ITGFORMAT ",%f\n",k-i*nzs[2],au1[k]);}
       }*/
-
-
-
-
-
-
   return;
 
 }
 
 /* subroutine for multithreading of mafillsm */
-
-void *mafillsmVectorfiltermt(ITG *i){
+void *mafillsmVectorfiltermt(ITG *i)
+{
 
     ITG nea,neb;
 
@@ -166,8 +175,6 @@ void *mafillsmVectorfiltermt(ITG *i){
                 fprintf(rhoFile,"%f \n",design1[i]);
             }
         fclose(rhoFile);*/
-
-
 
 
     FORTRAN(mafillsmvectorfilter,(ne1,ttime1,time1,ne01,&nea,&neb,

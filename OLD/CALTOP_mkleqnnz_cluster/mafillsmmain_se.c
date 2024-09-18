@@ -97,48 +97,56 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
     sys_cpus=0;
 
     /* explicit user declaration prevails */
-
     envsys=getenv("NUMBER_OF_CPUS");
-    if(envsys){
-	sys_cpus=atoi(envsys);
-	if(sys_cpus<0) sys_cpus=0;
+
+    if(envsys)
+    {
+	    sys_cpus=atoi(envsys);
+	    if(sys_cpus<0) sys_cpus=0;
     }
 
 //    sys_cpus=1;
 
     /* automatic detection of available number of processors */
 
-    if(sys_cpus==0){
-	sys_cpus = getSystemCPUs();
-	if(sys_cpus<1) sys_cpus=1;
+    if(sys_cpus==0)
+    {
+	    sys_cpus = getSystemCPUs();
+	    if(sys_cpus<1) sys_cpus=1;
     }
 
     /* local declaration prevails, if strictly positive */
 
     envloc = getenv("CCX_NPROC_SENS");
-    if(envloc){
-	num_cpus=atoi(envloc);
-	if(num_cpus<0){
-	    num_cpus=0;
-	}else if(num_cpus>sys_cpus){
-	    num_cpus=sys_cpus;
-	}
-
+    if(envloc)
+    {
+	    num_cpus=atoi(envloc);
+	    if(num_cpus<0)
+        {
+	        num_cpus=0;
+	    }
+        else if(num_cpus>sys_cpus)
+        {
+	        num_cpus=sys_cpus;
+	    }
     }
 
     /* else global declaration, if any, applies */
-
     env = getenv("OMP_NUM_THREADS");
-    if(num_cpus==0){
-	if (env)
-	    num_cpus = atoi(env);
-	if (num_cpus < 1) {
-	    num_cpus=1;
-	}else if(num_cpus>sys_cpus){
-	    num_cpus=sys_cpus;
-	}
-    }
 
+    if(num_cpus==0)
+    {
+	    if (env)
+	    num_cpus = atoi(env);
+	    if (num_cpus < 1) 
+        {
+	        num_cpus=1;
+	    }
+        else if(num_cpus>sys_cpus)
+        {
+	        num_cpus=sys_cpus;
+	    }
+    }
 // next line is to be inserted in a similar way for all other paralell parts
 
     if(*ne<num_cpus) num_cpus=*ne;
@@ -155,12 +163,15 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 
     /* maximum 20 design variables per element (20-node element) */
 
-    if(!*cyclicsymmetry){
-	NNEW(dfl1,double,num_cpus*60*20);
-	NNEW(df1,double,num_cpus**nzss);
-    }else{
-	NNEW(dfl1,double,num_cpus*120*20);
-	NNEW(df1,double,num_cpus*2**nzss);
+    if(!*cyclicsymmetry)
+    {
+	    NNEW(dfl1,double,num_cpus*60*20);
+	    NNEW(df1,double,num_cpus**nzss);
+    }
+    else
+    {
+	    NNEW(dfl1,double,num_cpus*120*20);
+	    NNEW(df1,double,num_cpus*2**nzss);
     }
 
     /* allocating memory for nmethod; if the Jacobian determinant
@@ -168,8 +179,10 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
        zero */
 
     NNEW(nmethod1,ITG,num_cpus);
-    for(j=0;j<num_cpus;j++){
-	nmethod1[j]=*nmethod;
+
+    for(j=0;j<num_cpus;j++)
+    {
+	    nmethod1[j]=*nmethod;
     }
 
     /* calculating the stiffness and/or mass matrix
@@ -216,86 +229,114 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
     /* create threads and wait */
 
     NNEW(ithread,ITG,num_cpus);
-    for(i=0; i<num_cpus; i++)  {
-	ithread[i]=i;
-	pthread_create(&tid[i], NULL, (void *)mafillsmsemt, (void *)&ithread[i]);
+
+    for(i=0; i<num_cpus; i++)  
+    {
+	    ithread[i]=i;
+	    pthread_create(&tid[i], NULL, (void *)mafillsmsemt, (void *)&ithread[i]);
     }
+
     for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 
-    SFREE(ithread);SFREE(neapar);SFREE(nebpar);
+    SFREE(ithread);
+    SFREE(neapar);
+    SFREE(nebpar);
 
-    for(j=0;j<num_cpus;j++){
-	if(nmethod1[j]==0){
-	    *nmethod=0;
-	    break;
-	}
+    for(j=0;j<num_cpus;j++)
+    {
+	    if(nmethod1[j]==0)
+        {
+	        *nmethod=0;
+	        break;
+	    }
     }
+
     SFREE(nmethod1);
 
     /* passing of df */
 
-    if(!*cyclicsymmetry){
-//	if((iperturb[1]==1)&&(*ieigenfrequency!=1)){
-	if(*ieigenfrequency!=1){
+    if(!*cyclicsymmetry)
+    {
+        //	if((iperturb[1]==1)&&(*ieigenfrequency!=1)){
+	    if(*ieigenfrequency!=1)
+        {
 
             /* nonlinear geometric: add df to df from results_se */
 
-	    for(i=0;i<*nzss;i++){
-		df[i]+=df1[i];
+	        for(i=0;i<*nzss;i++)
+            {
+		        df[i]+=df1[i];
+	        }
 	    }
-	}else{
-
-	    for(i=0;i<*nzss;i++){
-		df[i]=df1[i];
+        else
+        {
+	        for(i=0;i<*nzss;i++)
+            {
+		        df[i]=df1[i];
+	        }
 	    }
-	}
-	for(i=0;i<*nzss;i++){
-	    for(j=1;j<num_cpus;j++){
-		df[i]+=df1[i+j**nzss];
+	    for(i=0;i<*nzss;i++)
+        {
+	        for(j=1;j<num_cpus;j++)
+            {
+		        df[i]+=df1[i+j**nzss];
+	        }
 	    }
-	}
-    }else{
-	for(i=0;i<2**nzss;i++){
-	    df[i]=df1[i];
-	}
-	for(i=0;i<2**nzss;i++){
-	    for(j=1;j<num_cpus;j++){
-		df[i]+=df1[i+j*2**nzss];
-	    }
-	}
     }
-    SFREE(df1);SFREE(dfl1);
+    else
+    {
+	    for(i=0;i<2**nzss;i++)
+        {
+	        df[i]=df1[i];
+	    }
 
-        return;
+	    for(i=0;i<2**nzss;i++)
+        {
+	        for(j=1;j<num_cpus;j++)
+            {
+		        df[i]+=df1[i+j*2**nzss];
+	        }
+	    }
+    }
+
+    SFREE(df1);
+    SFREE(dfl1);
+
+    return;
 
 }
 
 /* subroutine for multithreading of mafillsm */
 
-void *mafillsmsemt(ITG *i){
-
+void *mafillsmsemt(ITG *i)
+{
     ITG indexdf,indexdfl,nea,neb;
 
-    if(!*cyclicsymmetry1){
-	indexdf=*i**nzss1;
-	indexdfl=*i*60*20;
-//	indexdfl=*i*60**ndesi1;
-    }else{
-	indexdf=*i*2**nzss1;
-	indexdfl=*i*120*20;
-//	indexdfl=*i*120**ndesi1;
+    if(!*cyclicsymmetry1)
+    {
+	    indexdf=*i**nzss1;
+	    indexdfl=*i*60*20;
+        //	indexdfl=*i*60**ndesi1;
+    }
+    else
+    {
+	    indexdf=*i*2**nzss1;
+	    indexdfl=*i*120*20;
+        //	indexdfl=*i*120**ndesi1;
     }
 
-/*    nedelta=(ITG)floor(*ne1/(double)num_cpus);
-    nea=*i*nedelta+1;
-    neb=(*i+1)*nedelta;
-    if((*i==num_cpus-1)&&(neb<*ne1)) neb=*ne1;*/
+    /*    nedelta=(ITG)floor(*ne1/(double)num_cpus);
+        nea=*i*nedelta+1;
+        neb=(*i+1)*nedelta;
+        if((*i==num_cpus-1)&&(neb<*ne1)) neb=*ne1;*/
 
     nea=neapar[*i]+1;
     neb=nebpar[*i]+1;
 
-    if(!*cyclicsymmetry1){
-	FORTRAN(mafillsmse,(co1,kon1,ipkon1,lakon1,ne1,ipompc1,nodempc1,
+    if(!*cyclicsymmetry1)
+    { 
+        /* Used for topology optimization */
+	    FORTRAN(mafillsmse,(co1,kon1,ipkon1,lakon1,ne1,ipompc1,nodempc1,
 	    coefmpc1,nmpc1,nelemload1,sideload1,xload1,nload1,xbody1,
 	    ipobody1,nbody1,cgr1,nactdof1,neq1,&nmethod1[*i],ikmpc1,
 	    ilmpc1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
@@ -312,8 +353,10 @@ void *mafillsmsemt(ITG *i){
 	    icoordinate1,dxstiff1,xdesi1,istartelem1,ialelem1,v1,sigma1,
             ieigenfrequency1,design1,penal1,gradCompl1,elCompl1,
             elCG1,eleVol1));
-    }else{
-	FORTRAN(mafillsmcsse,(co1,kon1,ipkon1,lakon1,ne1,ipompc1,nodempc1,
+    }
+    else
+    {
+	    FORTRAN(mafillsmcsse,(co1,kon1,ipkon1,lakon1,ne1,ipompc1,nodempc1,
 	    coefmpc1,nmpc1,nelemload1,sideload1,xload1,nload1,xbody1,
 	    ipobody1,nbody1,cgr1,nactdof1,neq1,&nmethod1[*i],ikmpc1,
 	    ilmpc1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
