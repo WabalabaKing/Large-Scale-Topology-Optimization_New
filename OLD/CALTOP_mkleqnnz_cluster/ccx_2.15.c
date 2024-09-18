@@ -76,7 +76,7 @@ int main(int argc,char *argv[])
   ITG nload1;             /**< number of facial distributed loads applied to elements */
   ITG *idefforc=NULL;     /**< indicates whether a load is effectively applied to  specific node and direction */
   ITG  *nactdof=NULL;     /**< active D.O.Fs for nodes in system */
-  ITG *icol=NULL;         /**< stores the column numbers for the sparse matrix storage of D.O.Fs */
+  ITG *icol=NULL;         /**<stores the column numbers for the sparse matrix storage of D.O.Fs */
   ITG *ics=NULL;          /**< array for identifying whether a certain node belongs to a constraint set */
   ITG  *jq=NULL;          /**< stores the row numbers for the spatse matrix structure of global stiffness matrix */
   ITG *mast1=NULL;        /**< master D.O.Fs for the MPC system */
@@ -310,13 +310,13 @@ int main(int argc,char *argv[])
   double *design=NULL; /**< design variables for topology optimization */
   double *rhoPhys=NULL; /**< phyiscal element densities */
 
-  double *gradCompl=NULL;
-  double *elCompl=NULL;
-  double *elCG=NULL;
-  double *eleVol=NULL; //gradCompl=compliance gradient of each element,elcompl=compliance of elements
-  double *designFiltered=NULL;
-  double *gradComplFiltered=NULL;
-  double *eleVolFiltered=NULL;
+  double *gradCompl=NULL;   /**< compliance gradient */
+  double *elCompl=NULL; /**<  element complaince */
+  double *elCG=NULL; /**< element CG */
+  double *eleVol=NULL; /**< element voluime */
+  double *designFiltered=NULL; /**< filtered densitites */
+  double *gradComplFiltered=NULL; /**< filtered compliance  sensitivities */ 
+  double *eleVolFiltered=NULL; /**< filtered element volume sensitivities */
 
 
   double ctrl[56]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5};
@@ -330,23 +330,23 @@ int main(int argc,char *argv[])
   double qaold[2]={0.,0.};
   double physcon[13]={0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
 
-  double pSupplied=0.0;
-  double pstiff=0.0;
-  double  rmin=0.000000000001;
-  double  volfrac=1.00;
-  double  qfilter = 3;
+  double pSupplied=0.0;   /**< user-defined penalty paramter */
+  double pstiff=0.0;      /**< some penalty paramter */
+  double  rmin=0.000000000001; /**< minimum radius */
+  double  volfrac=1.00; /**< volume fraction */
+  double  qfilter = 3; /**< q-filter value */
 
-  ITG itertop= 1; //counter for iteration number in topology optimization
-  ITG fnnzassumed = 500; //We assume 500 non zeros in each row of filtermatrix 
+  ITG itertop= 1; /**<iteration counter in topology optimization */
+  ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
   //filternnz=total number of nonzeros in filtermatrix,filternnzElem=no of nonzeros in each row of filtermatrix
-  ITG filternnz=0;  //For actual nnz values in filter matrix
+  ITG filternnz=0;  /**< actual nnz values in filter matrix */
 
   ITG *filternnzElems=NULL;
 
-  double *FilterMatrixs=NULL; //Pointer to filter matrix
+  double *FilterMatrixs=NULL; /**<filter matrix */
 
-  ITG *rowFilters=NULL; //Pointer to row index
-  ITG *colFilters=NULL; //Pointer to column matrix
+  ITG *rowFilters=NULL; /**<row index */
+  ITG *colFilters=NULL; /**<column matrix */
 
   #ifdef CALCULIX_MPI
   MPI_Init(&argc, &argv) ;
@@ -549,12 +549,21 @@ FORTRAN(allocation,(&nload_,&nforc_,&nboun_,&nk_,&ne_,&nmpc_,&nset_,&nalset_,
    &nkon_,&mcs,&mortar,&ifacecount,&nintpoint,infree,&nheading_,&nobject_,
    iuel,&iprestr,&nstam,&ndamp,&nef));
 
-SFREE(set);SFREE(meminset);SFREE(rmeminset);mt=mi[1]+1;
+SFREE(set);
+SFREE(meminset);
+SFREE(rmeminset);
+mt=mi[1]+1;
 NNEW(heading,char,66*nheading_);
 
 nzs_=20000000;
 
-nload=0;nbody=0;nforc=0;nboun=0;nk=0;nmpc=0;nam=0;
+nload=0;
+nbody=0;
+nforc=0;
+nboun=0;
+nk=0;
+nmpc=0;
+nam=0;
 
 /* caveat: if changing next line:
    - change noelfiles appropriately
