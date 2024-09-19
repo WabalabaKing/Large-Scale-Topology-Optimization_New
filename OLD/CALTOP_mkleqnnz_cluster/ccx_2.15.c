@@ -1807,6 +1807,7 @@ while(istat>=0)
       mpcfree=mpcinfo[1];
       icascade=mpcinfo[2];
       maxlenmpc=mpcinfo[3];
+
     } // end if(iperturb[0]<2)
 
     else /* non-linear analysis from here */
@@ -1851,11 +1852,12 @@ while(istat>=0)
         nzsprevstep[i]=nzs[i];
       }
     } // end else
+    printf("Current STEP is: %d ", istep);
   } //end if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
-
+  
+  
   else if(nmethod==2)
   {
-    /* FREQUENCY ANALYSIS */
     if((mcs==0)||(cs[1]<0))
     {
       #ifdef ARPACK
@@ -1898,6 +1900,7 @@ while(istat>=0)
       #endif
 
     }
+    
     else
     {
       #ifdef ARPACK
@@ -1937,9 +1940,9 @@ while(istat>=0)
 	      printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
 	      FORTRAN(stop,());
       #endif
-
     }
   }
+  /*
   else if(nmethod==3)
   {
 
@@ -1963,7 +1966,8 @@ while(istat>=0)
       printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
       FORTRAN(stop,());
     #endif
-  }
+  } */
+  /*
   else if(nmethod==4)
   {
 	  if((ne1d!=0)||(ne2d!=0))
@@ -1994,7 +1998,8 @@ while(istat>=0)
             xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,&mpcend,ics,cs,
 	    &ntie,tieset,&idrct,jmax,ctrl,&itpamp,tietol,&nalset,
 	    ikforc,ilforc,thicke,&nslavs,&nmat,typeboun,ielprop,prop,orname);
-    }
+    } */
+    /*
     else if(nmethod==5)
     {
 	    if((ne1d!=0)||(ne2d!=0))
@@ -2026,7 +2031,8 @@ while(istat>=0)
 	      xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,ics,cs,&mpcend,
 	      ctrl,ikforc,ilforc,thicke,&nmat,typeboun,ielprop,prop,orname,
 	      &ndamp,dacon);
-    }
+    } */
+    /*
     else if((nmethod==6)||(nmethod==7))
     {
 
@@ -2051,7 +2057,8 @@ while(istat>=0)
 	    &ntie,tieset,&idrct,jmax,ctrl,&itpamp,tietol,&nalset,
 	    ikforc,ilforc,thicke,jobnamef,mei,&nmat,ielprop,prop,orname,
             typeboun);
-    }
+    } */
+    /*
     else if((nmethod>7)&&(nmethod<12))
     {
 	    mpcinfo[0]=memmpc_;
@@ -2087,10 +2094,10 @@ while(istat>=0)
       mpcfree=mpcinfo[1];
       icascade=mpcinfo[2];
       maxlenmpc=mpcinfo[3];
-    }
+    } */
     
     /* adjoint sensitivity calculation */
-    else if(pSupplied!=0)
+    if(pSupplied!=0)
     {
       printf("Performing adjoint sensitivty calculations...");
       //printf("\n For compliance, penalty=%f \n",pstiff);
@@ -2230,7 +2237,7 @@ while(istat>=0)
       printf("Volume constraint violation (No Scaling) : %.15f \n",designVol_sum-volfrac*initialVol_sum);
       printf("Discreteness, mnd, percent : %.15f \n",mnd);
       printf("*************************");
-    }
+    } // end adjoint calculation
 
     
     fflush(stdout);
