@@ -714,12 +714,17 @@ void mastruct(ITG *nk, ITG *kon, ITG *ipkon, char *lakon, ITG *ne,
     nzs[1]=jq[neq[1]]-1;
 
     /* summary */
-
+	
+	/*
     printf(" number of equations\n");
     printf(" %" ITGFORMAT "\n",neq[1]);
     printf(" number of nonzero lower triangular matrix elements\n");
     printf(" %" ITGFORMAT "\n",nmast);
     printf("\n");
+	*/
+
+	printf("Number of equations: %" ITGFORMAT "\n", neq[1]);
+	printf("Non-zero lower triangular matrix elements: %" ITGFORMAT "\n", nmast);
 
     /* determining irow, jq and icol for the boundary stiffness matrix (only
        for frequency and modal dynamic calculations) 

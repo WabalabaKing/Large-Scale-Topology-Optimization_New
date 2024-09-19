@@ -1107,6 +1107,7 @@ while(istat>=0)
 
   if(istat<0) break;
 
+  /* first step of F.E analysis */
   if(istep == 1) 
   {
     SFREE(iuel);
@@ -1134,6 +1135,7 @@ while(istat>=0)
 
     if(iprestr==1) 
     {
+      printf("CAUTION: Structure is pre-stressed! \n");
 	    RENEW(prestr,double,6*mi[0]*ne);
 
 	    for(i=0;i<ne;i++)
@@ -1163,6 +1165,7 @@ while(istat>=0)
 	    }
     }
 
+    /* Structure is not pre-stressed, free variable */
     else 
     {
 	    SFREE(prestr);
@@ -1189,7 +1192,6 @@ while(istat>=0)
     }
 
     /* initial temperatures: store in the "old" temperature field */
-
     if(ithermal[0]!=0)
     {
       NNEW(t1old,double,nk);
@@ -1215,7 +1217,6 @@ while(istat>=0)
     }
 
     /* fields for 1-D and 2-D elements */
-
     if((ne1d!=0)||(ne2d!=0))
     {
 	    RENEW(iponor,ITG,2*nkon);
@@ -1266,6 +1267,7 @@ while(istat>=0)
 
     if(mortar!=1)
     {
+  
 	    RENEW(xstate,double,nstate_*mi[0]*(ne+nslavs));
 
 	    for(i=nxstate;i<nstate_*mi[0]*(ne+nslavs);i++)
@@ -1284,7 +1286,6 @@ while(istat>=0)
     }
 
     /* next statements for plastic materials and nonlinear springs */
-
     if(npmat_>0)
     {
 	    RENEW(plicon,double,(2*npmat_+1)*ntmat_*nmat);
@@ -1294,7 +1295,6 @@ while(istat>=0)
     }
 
     /* material orientation */
-
     if(norien > 0) 
     {
       RENEW(orname,char,80*norien);
@@ -1309,7 +1309,6 @@ while(istat>=0)
     }
 
     /* amplitude definitions */
-
     if(nam > 0) 
     {
       RENEW(amname,char,80*nam);
@@ -1332,12 +1331,16 @@ while(istat>=0)
     }
     else
     {
-      SFREE(trab);SFREE(inotr);
+      SFREE(trab);
+      SFREE(inotr);
     }
 
     if(ithermal[0] == 0)
     {
-      SFREE(t0);SFREE(t1);SFREE(t0g);SFREE(t1g);
+      SFREE(t0);
+      SFREE(t1);
+      SFREE(t0g);
+      SFREE(t1g);
     }
 
     if((ithermal[0] == 0)||(nam<=0))
@@ -1354,6 +1357,7 @@ while(istat>=0)
     {
       SFREE(ics);
     }
+
     SFREE(dcs);
 
     if(mcs>0)
@@ -1365,9 +1369,11 @@ while(istat>=0)
 	    SFREE(cs);
     }
 
-  }
+  } // end if(istep == 1)
   else
   {
+    printf("CAUTION: Analysis is in second step. Not valid for static analysis!");
+
     /* reallocating space in all but the first step (>1) */
     RENEW(vold,double,mt*nk);
 
@@ -1422,7 +1428,6 @@ while(istat>=0)
   }
 
   /* reallocating fields for all steps (>=1) */
-
   RENEW(co,double,3*nk);
 
   RENEW(nodeboun,ITG,nboun);
@@ -1486,23 +1491,35 @@ while(istat>=0)
     }
   }
 
-  /* initial velocities and accelerations */
+  /* following segment executed if solving:
 
+      Linear dynamic analysis
+      Steady state dynamics
+      Magnetostatics
+      Static analysis with material and geometric non-linearities
+  */
+
+  /* initial velocities and accelerations */
   if((nmethod==4)||(nmethod==5)||(nmethod==8)||(nmethod==9)||
      ((abs(nmethod)==1)&&(iperturb[0]>=2)))
      {
         RENEW(veold,double,mt*nk);
      }
+
+  /* not being used so free memory */
   else 
   {
     SFREE(veold);
   }
+
+  /* if solving linear dynamic system with geometric non-linearities */
 
   if((nmethod == 4)&&(iperturb[0]>1)) 
   {
     NNEW(accold,double,mt*nk);
   }
 
+  /* if non-zero amplitude definition */
   if(nam > 0) 
   {
     RENEW(iamforc,ITG,nforc);
@@ -1536,6 +1553,7 @@ while(istat>=0)
     if(iprestr>0) RENEW(prestr,double,6*mi[0]*ne);
     if(nprop>0) RENEW(ielprop,ITG,ne);
     if((ne1d!=0)||(ne2d!=0)) RENEW(offset,double,2*ne);
+
     RENEW(nelemload,ITG,2*nload);
     RENEW(sideload,char,20*nload);
     RENEW(xload,double,2*nload);
@@ -1552,7 +1570,7 @@ while(istat>=0)
     if(norien>0)RENEW(ielorien,ITG,mi[2]*ne);
     RENEW(ielmat,ITG,mi[2]*ne);
     for(i=mi[2]*ne0;i<mi[2]*ne;i++)ielmat[i]=1;
-  }
+  } // end network > 0
 
   if(ntrans > 0)
   {
@@ -1577,27 +1595,27 @@ while(istat>=0)
     FORTRAN(ufaceload,(co,ipkon,kon,lakon,&nboun,nodeboun,
               nelemload,sideloadtemp,&nload,&ne,&nk));
       SFREE(sideloadtemp);
-  }
+  } // end ithermal[1] >=2
 
   /* storing the undecascaded MPC's */
-
   if(mpcfreeref==-1)
   {
+    printf("Storing uncascaded MPCs...");
     memmpcref_=memmpc_;mpcfreeref=mpcfree;maxlenmpcref=maxlenmpc;
     NNEW(nodempcref,ITG,3*memmpc_);memcpy(nodempcref,nodempc,sizeof(ITG)*3*memmpc_);
     NNEW(coefmpcref,double,memmpc_);memcpy(coefmpcref,coefmpc,sizeof(double)*memmpc_);
     NNEW(ikmpcref,ITG,nmpc);memcpy(ikmpcref,ikmpc,sizeof(ITG)*nmpc);
+    printf("done! \n");
   }
 
   /* decascading MPC's only necessary if MPC's changed */
-
+  /* Necesary for all analysis types */
   if(((istep == 1)||(ntrans>0)||(mpcend<0)||(nk!=nkold)||(nmpc!=nmpcold))&&(icascade==0)) 
   {
     //  if(icascade==0) {
 
     /* decascading the MPC's */
-
-    printf("Decascading the MPC's\n\n");
+    printf("Decascading the MPC's...");
 
     callfrommain=1;
 
@@ -1606,11 +1624,13 @@ while(istat>=0)
 	    ilmpc,ikboun,ilboun,&mpcend,
 	    labmpc,&nk,&memmpc_,&icascade,&maxlenmpc,
             &callfrommain,iperturb,ithermal);
+
+    printf("done \n");
   }
 
   /* determining the matrix structure: changes if SPC's have changed */
 
-  if((icascade==0)&&(nmethod<8)) printf("Determining the structure of the matrix:\n");
+  if((icascade==0)&&(nmethod<8))
 
   NNEW(nactdof,ITG,mt*nk);
   NNEW(mast1,ITG,nzs[1]);
@@ -1633,6 +1653,8 @@ while(istat>=0)
       {
         nmethodl=nmethod;
       }
+
+      printf("Analyzing matrix structure...done!\n");
 	    mastruct(&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,&nboun,ipompc,
 		   nodempc,&nmpc,nactdof,icol,jq,&mast1,&irow,&isolver,neq,
 		   ikmpc,ilmpc,ipointer,nzs,&nmethodl,ithermal,
@@ -1642,12 +1664,14 @@ while(istat>=0)
 
     else
     {
-      neq[0]=1;neq[1]=1;neq[2]=1;
+      neq[0]=1;
+      neq[1]=1;
+      neq[2]=1;
     }
   }
+  /* following not active for static aero-elasticity */
   else
   {
-
     NNEW(icol,ITG,8*nk);
     NNEW(jq,ITG,8*nk+1);
     NNEW(ipointer,ITG,8*nk);
@@ -1679,11 +1703,14 @@ while(istat>=0)
   /* nmethod=12: sensitivity analysis  */
 
 
+  /* if solving static analysis or green function calculation */
   if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
   {
 	  if(iperturb[0]<2)
     {
-	    mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
+	    mpcinfo[0]=memmpc_;
+      mpcinfo[1]=mpcfree;
+      mpcinfo[2]=icascade;
 	    mpcinfo[3]=maxlenmpc;
 
 	    if(icascade!=0)
@@ -1695,18 +1722,20 @@ while(istat>=0)
 	      FORTRAN(stop,());
 	    }
 
-      printf("\n***********************\n\n");
-      printf("Penalty= %f\n",pstiff);
-      printf("Density filter radius= %f\n",rmin);
-      printf("Volume fraction= %f\n",volfrac);
-      printf("Topology Optimization Step= %d\n",itertop);
-      printf("Non zeros in Filtermatrix assumed= %d \n", fnnzassumed);
-      printf("Filter Order= %f \n", qfilter);
-      printf("\n ***********************\n\n");
+      printf("\n#------------------------------TOPOLOGY OPTIMIZATION PARAMTERS----------------------------#\n");
+      printf("Penalty parameter                 %.2f\n", pstiff);
+      printf("Density filter radius             %.2f\n", rmin);
+      printf("Filter Order                      %.2f\n", qfilter);
+      printf("Volume fraction                   %.2f\n", volfrac);
+      printf("Non zeros in Filtermatrix         %d\n", fnnzassumed);
+      printf("Topology Optimization Step        %d\n", itertop);
+      printf("#-----------------------------------------------------------------------------------------#\n");
+     
       fflush(stdout);
 
       if(pSupplied!=0)
       {
+        printf("\nNon-default penalization paramter --> constructing filter matix...");
         NNEW(FilterMatrixs,double,fnnzassumed*ne_); //Sparse filter matrix stored as row,colum,value with fassumed nnzs per element assumed
     
         NNEW(rowFilters,ITG,fnnzassumed*ne_);
@@ -1715,8 +1744,6 @@ while(istat>=0)
     
         NNEW(filternnzElems,ITG,ne_);
         NNEW(designFiltered,double,ne_);
-    
-        printf("\nCalculating Density Filter... \n");
 
         time_t start, end; 
 	      start = time(NULL);
@@ -1725,22 +1752,25 @@ while(istat>=0)
                   &rmin,&filternnz,
                   FilterMatrixs,rowFilters,colFilters,filternnzElems,itertop,&fnnzassumed);
 
-        printf("\n Density Filter Obtained \n");
+        printf("done!\n");
 
         end = time(NULL); 
         printf("\n Time taken for density filter %.2f seconds \n", 
         difftime(end, start)); 
 
+        /* apply the filter matrix on rhoPhys to get designFiltered */ 
         filterVector(&ipkon,design,designFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter Design variables
         rhoPhys=designFiltered;
       }
       else
       {
+        printf("\nNo penalization parameter found, initializing all densities to one \n");
+        /* design was initialized to 1.0 in rho.c */
         rhoPhys=design;
       }
 
-      printf("\n ***********************\n\n");
-      printf("\n For stiffness, penalty considered= %f \n",pstiff);
+      
+      //printf("\n For stiffness, penalty considered= %f \n",pstiff);
 
       time_t startl, endl; 
 	    startl = time(NULL);
@@ -1779,7 +1809,7 @@ while(istat>=0)
       maxlenmpc=mpcinfo[3];
     } // end if(iperturb[0]<2)
 
-    else
+    else /* non-linear analysis from here */
     {
 	    mpcinfo[0]=memmpc_;
       mpcinfo[1]=mpcfree;
@@ -2058,10 +2088,12 @@ while(istat>=0)
       icascade=mpcinfo[2];
       maxlenmpc=mpcinfo[3];
     }
-
+    
+    /* adjoint sensitivity calculation */
     else if(pSupplied!=0)
     {
-      printf("\n For compliance, penalty=%f \n",pstiff);
+      printf("Performing adjoint sensitivty calculations...");
+      //printf("\n For compliance, penalty=%f \n",pstiff);
 
       /* allocate memory for compliance gradient and initialize to zero */
       NNEW(gradCompl,double,ne_);
@@ -2112,9 +2144,10 @@ while(istat>=0)
       /* Filter element volume gradient */
       filterVector(&ipkon,eleVol,eleVolFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter volume sensitivity
       ends = time(NULL);
-
-	    printf("Time taken for sensitivity calculation: %.2f seconds \n", 
-		  difftime(ends, starts)); 
+      
+      printf("done! \n");
+	    //printf("Time taken for sensitivity calculation: %.2f seconds \n", 
+		  //difftime(ends, starts)); 
 
       /* write compliance gradient to file */
       FILE *gradC;
@@ -2217,7 +2250,7 @@ while(istat>=0)
     /* all operations done, close file */
     fclose(rho_file);
 
-    
+
     SFREE(nactdof);
     SFREE(icol);
     SFREE(jq);
@@ -2400,6 +2433,8 @@ while(istat>=0)
 
 /* deallocating the fields
    this section is addressed immediately after leaving calinput */
+
+  printf("De-allocating memory...");
 
 //free up space
 /* if(pSupplied!=0){SFREE(filternnzElem);SFREE(FilterMatrix);SFREE(rowFilter);SFREE(colFilter);
@@ -2606,6 +2641,6 @@ while(istat>=0)
   #ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
   calculix_freeExternalBehaviours();
   #endif /* CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT */
-
+  printf("done! \n");
   return 0;
 }

@@ -37,6 +37,7 @@ void cascade(ITG *ipompc, double **coefmpcp, ITG **nodempcp, ITG *nmpc,
    char *labmpc, ITG *nk, ITG *memmpc_, ITG *icascade, ITG *maxlenmpc,
    ITG *callfrommain, ITG *iperturb, ITG *ithermal){
 
+
  /*   detects cascaded mpc's and decascades them; checks multiple
      occurrence of the same dependent DOF's in different mpc/spc's
 

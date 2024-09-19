@@ -24,6 +24,11 @@
 \node [DataInter] (main-allocation) {$\text{nload,..,nef}$};&
 \node [DataInter] (main-calinput) {$\text{cp,..,veloo}$};&
 \node [DataInter] (main-rho) {$\text{design,ne}$};&
+\node [DataInter] (main-writeheading) {$\text{jobnamec,..,nheading}$};&
+\node [DataInter] (main-tiedcontact) {$\text{ntie,..,kind2}$};&
+\node [DataInter] (main-cascade) {$\text{ipompc,..,ithermal}$};&
+\node [DataInter] (main-mastruct) {$\text{nk,..,network}$};&
+\node [DataInter] (main-densityfilter) {$\text{co,..,fnnzassumed}$};&
 \node [DataInter] (main-linstatic) {$\text{co,...,pstiff}$};&
 \node [DataInter] (main-nonlingeo) {$\text{co,..,pstiff}$};&
 \node [DataInter] (main-sensitivity) {$\text{co,..,eleVol}$};&
@@ -39,6 +44,11 @@
 &
 &
 \node [Group] (readinput) {$\text{readinput.c}$};&
+&
+&
+&
+&
+&
 &
 &
 &
@@ -70,6 +80,11 @@
 &
 &
 &
+&
+&
+&
+&
+&
 \\
 %Row 3
 &
@@ -77,6 +92,11 @@
 &
 &
 \node [Group] (calinput) {$\text{calinput.f}$};&
+&
+&
+&
+&
+&
 &
 &
 &
@@ -106,6 +126,11 @@
 &
 &
 &
+&
+&
+&
+&
+&
 \\
 %Row 5
 &
@@ -114,7 +139,12 @@
 &
 &
 &
-\node [Group] (linstatic) {$\text{linstatic.c}$};&
+\node [Group] (writeheading) {$\text{writeheading.c}$};&
+&
+&
+&
+&
+&
 &
 &
 &
@@ -133,7 +163,12 @@
 &
 &
 &
-\node [Group] (nonlingeo) {$\text{nonlingeo.c}$};&
+\node [Group] (tiedcontact) {$\text{tiedcontact.c}$};&
+&
+&
+&
+&
+&
 &
 &
 &
@@ -152,13 +187,18 @@
 &
 &
 &
-\node [Group] (sensitivity) {$\text{sensitivity.c}$};&
+\node [Group] (cascade) {$\text{cascade.c}$};&
 &
 &
 &
 &
 &
-\node [DataInter] (sensitivity-mafillsmmainse) {$\text{co,..,eleVol}$};&
+&
+&
+&
+&
+&
+&
 &
 \\
 %Row 8
@@ -171,8 +211,13 @@
 &
 &
 &
-\node [Group] (filterVector) {$\text{filterVector.c}$};&
-\node [DataInter] (filterVector-mafillsmmainVectorfilter) {$\text{ipkon,..,q}$};&
+\node [Group] (mastruct) {$\text{mastruct.c}$};&
+&
+&
+&
+&
+&
+&
 &
 &
 &
@@ -190,10 +235,15 @@
 &
 &
 &
-\node [Function] (mafillsmmainVectorfilter) {$\text{mafillsmmainVectorfilter.c}$};&
-\node [DataInter] (mafillsmmainVectorfilter-mafillsmmainVectorfiltermt) {$\text{ipkon,..,q}$};&
+\node [Group] (densityfilter) {$\text{densityfilter.c}$};&
 &
-\node [DataInter] (mafillsmmainVectorfilter-elementcpuload) {$\text{neapar,..,cpus}$};&
+&
+&
+&
+&
+&
+&
+&
 &
 &
 \\
@@ -209,8 +259,13 @@
 &
 &
 &
-\node [Function] (mafillsmmainVectorfiltermt) {$\text{mafillsmmainVectorfiltermt.c}$};&
-\node [DataInter] (mafillsmmainVectorfiltermt-mafillsmvectorfilter) {$\text{ne1,..,q1}$};&
+\node [Group] (linstatic) {$\text{linstatic.c}$};&
+&
+&
+&
+&
+&
+&
 &
 &
 &
@@ -228,7 +283,12 @@
 &
 &
 &
-\node [Function] (mafillsmvectorfilter) {$\text{mafillsmvectorfilter.f}$};&
+\node [Group] (nonlingeo) {$\text{nonlingeo.c}$};&
+&
+&
+&
+&
+&
 &
 &
 &
@@ -247,8 +307,13 @@
 &
 &
 &
-\node [Function] (elementcpuload) {$\text{elementcpuload.c}$};&
+\node [Group] (sensitivity) {$\text{sensitivity.c}$};&
 &
+&
+&
+&
+&
+\node [DataInter] (sensitivity-mafillsmmainse) {$\text{co,..,eleVol}$};&
 &
 \\
 %Row 13
@@ -266,8 +331,13 @@
 &
 &
 &
-\node [Function] (mafillsmmainse) {$\text{mafillsmmainse.f}$};&
-\node [DataInter] (mafillsmmainse-mafillsmse) {$\text{co1,..,eleVol1}$};&
+\node [Group] (filterVector) {$\text{filterVector.c}$};&
+\node [DataInter] (filterVector-mafillsmmainVectorfilter) {$\text{ipkon,..,q}$};&
+&
+&
+&
+&
+&
 \\
 %Row 14
 &
@@ -285,9 +355,129 @@
 &
 &
 &
+\node [Function] (mafillsmmainVectorfilter) {$\text{mafillsmmainVectorfilter.c}$};&
+\node [DataInter] (mafillsmmainVectorfilter-mafillsmmainVectorfiltermt) {$\text{ipkon,..,q}$};&
+&
+\node [DataInter] (mafillsmmainVectorfilter-elementcpuload) {$\text{neapar,..,cpus}$};&
+&
+&
+\\
+%Row 15
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+\node [Function] (mafillsmmainVectorfiltermt) {$\text{mafillsmmainVectorfiltermt.c}$};&
+\node [DataInter] (mafillsmmainVectorfiltermt-mafillsmvectorfilter) {$\text{ne1,..,q1}$};&
+&
+&
+&
+\\
+%Row 16
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+\node [Function] (mafillsmvectorfilter) {$\text{mafillsmvectorfilter.f}$};&
+&
+&
+&
+\\
+%Row 17
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+\node [Function] (elementcpuload) {$\text{elementcpuload.c}$};&
+&
+&
+\\
+%Row 18
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+\node [Function] (mafillsmmainse) {$\text{mafillsmmainse.f}$};&
+\node [DataInter] (mafillsmmainse-mafillsmse) {$\text{co1,..,eleVol1}$};&
+\\
+%Row 19
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
 \node [Function] (mafillsmse) {$\text{mafillsmse.f}$};&
 \node [DataInter] (mafillsmse-ec3dse) {$\text{co1,..,zcg}$};\\
-%Row 15
+%Row 20
 \node [DataIO] (left_output_ec3dse) {$\nabla *$};&
 &
 &
@@ -304,8 +494,18 @@
 &
 &
 &
+&
+&
+&
+&
+&
 \node [Function] (ec3dse) {$\text{ec3dse.f}$};\\
-%Row 16
+%Row 21
+&
+&
+&
+&
+&
 &
 &
 &
@@ -342,10 +542,15 @@
 (main) edge [DataLine] (main-allocation)
 (main) edge [DataLine] (main-calinput)
 (main) edge [DataLine] (main-rho)
+(main) edge [DataLine] (main-writeheading)
+(main) edge [DataLine] (main-tiedcontact)
+(main) edge [DataLine] (main-cascade)
+(main) edge [DataLine] (main-mastruct)
+(main) edge [DataLine] (main-densityfilter)
+(main) edge [DataLine] (main-filterVector)
 (main) edge [DataLine] (main-linstatic)
 (main) edge [DataLine] (main-nonlingeo)
 (main) edge [DataLine] (main-sensitivity)
-(main) edge [DataLine] (main-filterVector)
 (ec3dse) edge [DataLine] (left_output_ec3dse)
 % Vertical edges
 (sensitivity-mafillsmmainse) edge [DataLine] (mafillsmmainse)
@@ -359,10 +564,15 @@
 (main-allocation) edge [DataLine] (allocation)
 (main-calinput) edge [DataLine] (calinput)
 (main-rho) edge [DataLine] (rho)
+(main-writeheading) edge [DataLine] (writeheading)
+(main-tiedcontact) edge [DataLine] (tiedcontact)
+(main-cascade) edge [DataLine] (cascade)
+(main-mastruct) edge [DataLine] (mastruct)
+(main-densityfilter) edge [DataLine] (densityfilter)
+(main-filterVector) edge [DataLine] (filterVector)
 (main-linstatic) edge [DataLine] (linstatic)
 (main-nonlingeo) edge [DataLine] (nonlingeo)
-(main-sensitivity) edge [DataLine] (sensitivity)
-(main-filterVector) edge [DataLine] (filterVector);
+(main-sensitivity) edge [DataLine] (sensitivity);
 \end{pgfonlayer}
 
 \end{tikzpicture}

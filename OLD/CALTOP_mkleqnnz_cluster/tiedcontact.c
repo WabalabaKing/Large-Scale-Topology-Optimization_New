@@ -29,8 +29,9 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
                double **fmpcp, ITG **nodempcp, double **coefmpcp,
 	       ITG *ithermal, double *co, double *vold, ITG *nef,
 	       ITG *nmpc_, ITG *mi, ITG *nk,ITG *istep,ITG *ikboun,
-	       ITG *nboun,char *kind1,char *kind2){
-
+	       ITG *nboun,char *kind1,char *kind2)
+         
+{  
   char *labmpc=NULL;
 
   ITG *itietri=NULL,*koncont=NULL,nconf,i,k,*nx=NULL,im,
@@ -43,24 +44,33 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
   double *xo=NULL,*yo=NULL,*zo=NULL,*x=NULL,*y=NULL,*z=NULL,
     *cg=NULL,*straight=NULL,*fmpc=NULL,*coefmpc=NULL;
 
-  ipompc=*ipompcp;labmpc=*labmpcp;ikmpc=*ikmpcp;ilmpc=*ilmpcp;
-  fmpc=*fmpcp;nodempc=*nodempcp;coefmpc=*coefmpcp;
+  ipompc=*ipompcp;
+  labmpc=*labmpcp;
+  ikmpc=*ikmpcp;
+  ilmpc=*ilmpcp;
+  fmpc=*fmpcp;
+  nodempc=*nodempcp;
+  coefmpc=*coefmpcp;
 
   /* identifying the slave surfaces as nodal or facial surfaces */
-
   NNEW(ifaceslave,ITG,*ntie);
 
+  printf("Identifying slave surfaces as nodal or facial surfaces...");
   FORTRAN(identifytiedface,(tieset,ntie,set,nset,ifaceslave,kind1));
+  printf("done!\n");
 
   /* determining the number of triangles of the triangulation
      of the master surface and the number of entities on the
      slave side */
 
+  printf("Detemining number of triangles needed for triangulation...");
   FORTRAN(allocont,(&ncont,ntie,tieset,nset,set,istartset,iendset,
 	  ialset,lakon,&ncone,tietol,&ismallsliding,kind1,
 	  kind2,&mortar,istep));
+  printf("done! \n");
 
-  if(ncont==0){
+  if(ncont==0)
+  {
       SFREE(ifaceslave);return;
   }
 
@@ -74,9 +84,10 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
 
   /* triangulation of the master surface */
 
+  printf("Performing triangulation...");
   FORTRAN(triangucont,(&ncont,ntie,tieset,nset,set,istartset,iendset,
 	  ialset,itietri,lakon,ipkon,kon,koncont,kind1,kind2,co,nk));
-  
+  printf("done \n");
   /* catalogueing the neighbors of the master triangles */
   
   RENEW(ipe,ITG,*nk);
@@ -85,10 +96,13 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
   DMEMSET(ime,0,12*ncont,0.);
   NNEW(imastop,ITG,3*ncont);
 
+  printf("Identifying neighbours...");
   FORTRAN(trianeighbor,(ipe,ime,imastop,&ncont,koncont,
 		        &ifreeme));
+  printf("done!\n");
 
-  SFREE(ipe);SFREE(ime);
+  SFREE(ipe);
+  SFREE(ime);
 
   /* allocation of space for the center of gravity of the triangles
      and the 4 describing planes */
@@ -96,10 +110,11 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
   NNEW(cg,double,3*ncont);
   NNEW(straight,double,16*ncont);
   
+  printf("Evaluating CG of triangles...");
   FORTRAN(updatecont,(koncont,&ncont,co,vold,cg,straight,mi));
-  
-  /* determining the nodes belonging to the slave face surfaces */
+  printf("done \n");
 
+  /* determining the nodes belonging to the slave face surfaces */
   NNEW(istartfield,ITG,*ntie);
   NNEW(iendfield,ITG,*ntie);
   NNEW(ifield,ITG,8*ncone);
@@ -110,21 +125,33 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
 
   /* determining the maximum number of equations neq */
 
-  if(*nef>0){
-    if(ithermal[1]<=1){
+  if(*nef>0)
+  {
+    if(ithermal[1]<=1)
+    {
       neq=4;
-    }else{
+    }
+    else
+    {
       neq=5;
     }
-  }else{
-    if(ithermal[1]<=1){
+  }
+  else
+  {
+    if(ithermal[1]<=1)
+    {
       neq=3;
-    }else if(ithermal[1]==2){
+    }
+    else if(ithermal[1]==2)
+    {
       neq=1;
-    }else{
+    }
+    else
+    {
       neq=4;
     }
   }
+
   neq*=(ncone+nconf);
 
   /* reallocating the MPC fields for the new MPC's
@@ -144,20 +171,27 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
   neqterms=9*neq;
   index=*memmpc_;
   (*memmpc_)+=neqterms;
+
   RENEW(nodempc,ITG,3**memmpc_);
   RENEW(coefmpc,double,*memmpc_);
-  for(k=index;k<*memmpc_;k++){
+
+  for(k=index;k<*memmpc_;k++)
+  {
       nodempc[3*k-1]=k+1;
   }
+
   nodempc[3**memmpc_-1]=0;
 
   /* determining the size of the auxiliary fields */
   
   ntrimax=0;
-  for(i=0;i<*ntie;i++){
+
+  for(i=0;i<*ntie;i++)
+  {
     if(itietri[2*i+1]-itietri[2*i]+1>ntrimax)
       ntrimax=itietri[2*i+1]-itietri[2*i]+1;
   }
+
   NNEW(xo,double,ntrimax);
   NNEW(yo,double,ntrimax);
   NNEW(zo,double,ntrimax);
@@ -179,11 +213,25 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
 
   (*nmpc_)+=nmpctied;
   
-  SFREE(xo);SFREE(yo);SFREE(zo);SFREE(x);SFREE(y);SFREE(z);SFREE(nx);
-  SFREE(ny);SFREE(nz);SFREE(imastop);
+  SFREE(xo);
+  SFREE(yo);
+  SFREE(zo);
+  SFREE(x);
+  SFREE(y);
+  SFREE(z);
+  SFREE(nx);
+  SFREE(ny);
+  SFREE(nz);
+  SFREE(imastop);
 
-  SFREE(ifaceslave);SFREE(istartfield);SFREE(iendfield);SFREE(ifield);
-  SFREE(itietri);SFREE(koncont);SFREE(cg);SFREE(straight);
+  SFREE(ifaceslave);
+  SFREE(istartfield);
+  SFREE(iendfield);
+  SFREE(ifield);
+  SFREE(itietri);
+  SFREE(koncont);
+  SFREE(cg);
+  SFREE(straight);
 
   /* reallocating the MPC fields */
 
@@ -193,8 +241,13 @@ void tiedcontact(ITG *ntie, char *tieset, ITG *nset, char *set,
   RENEW(ilmpc,ITG,nmpc_);
   RENEW(fmpc,double,nmpc_);*/
 
-  *ipompcp=ipompc;*labmpcp=labmpc;*ikmpcp=ikmpc;*ilmpcp=ilmpc;
-  *fmpcp=fmpc;*nodempcp=nodempc;*coefmpcp=coefmpc;
+  *ipompcp=ipompc;
+  *labmpcp=labmpc;
+  *ikmpcp=ikmpc;
+  *ilmpcp=ilmpc;
+  *fmpcp=fmpc;
+  *nodempcp=nodempc;
+  *coefmpcp=coefmpc;
 
   /*  for(i=0;i<*nmpc;i++){
     j=i+1;
