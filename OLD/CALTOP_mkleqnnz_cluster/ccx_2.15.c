@@ -2484,7 +2484,8 @@ while(istat>=0)
 
    
    
-//SFREE(designFiltered);
+  SFREE(designFiltered);
+  rhoPhys = NULL;
 
   SFREE(ipoinpc);
   SFREE(inpc);
@@ -2508,7 +2509,7 @@ while(istat>=0)
   
 
   //free(rhoPhys);
-  //SFREE(rhoPhys);
+ 
 
   
 
@@ -2659,7 +2660,6 @@ while(istat>=0)
   
 
   SFREE(vold);
-  printf("vold\n");
   SFREE(veold);
 
   
