@@ -1,3 +1,5 @@
+.PHONY: all clean
+
 # Define paths for SPOOLES and ARPACK
 SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/Spooles/src
 ARPACK_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/ARPACK
@@ -11,14 +13,15 @@ FC = gfortran
 
 #Directories
 SRC_DIR = src
+OBJ_DIR = obj
 
+# Defauilt target
+all: calTop.exe
 
-# Object file rules
-.c.o:
-	$(CC) $(CFLAGS) -c $<
+# Ensure object directory exists
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-.f.o:
-	$(FC) $(FFLAGS) -c $<
 
 # Include additional makefile if necessary
 include Makefile.inc
@@ -26,14 +29,9 @@ include Makefile.inc
 # Source files and objects
 SCCXMAIN = $(SRC_DIR)/ccx_2.15.c
 
-OCCXF = $(SCCXF:$(SRC_DIR)/%.f=%.o)
-OCCXC = $(SCCXC:$(SRC_DIR)/%.c=%.o)
-#OCCXMAIN = $(SCCXMAIN:.c=.o)
-OCCXMAIN = ccx_2.15.o
-
-#OCCXF = $(SCCXF:.f=.o)
-#OCCXC = $(SCCXC:.c=.o)
-#OCCXMAIN = $(SCCXMAIN:.c=.o)
+OCCXF = $(SCCXF:$(SRC_DIR)/%.f=$(OBJ_DIR)/%.o)
+OCCXC = $(SCCXC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OCCXMAIN = $(OBJ_DIR)/ccx_2.15.o
 
 # Libraries
 LIBS = \
@@ -43,22 +41,23 @@ LIBS = \
 
 
 # Object file compilation rules
-%.o: $(SRC_DIR)/%.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-%.o: $(SRC_DIR)/%.f
-	$(FC) $(FFLAGS) -c $< -o $(notdir $@)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f | $(OBJ_DIR)
+	$(FC) $(FFLAGS) -c $< -o $@
 
 # Build executable
-calTop.exe: $(OCCXMAIN) ccx_2.15.a $(LIBS)
-	./date.pl; $(CC) $(CFLAGS) -c $(SRC_DIR)/ccx_2.15.c; $(FC) -Wall -O3 -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
+calTop.exe: $(OCCXMAIN) ccx_2.15.a $(LIBS) | $(OBJ_DIR)
+	./date.pl
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ccx_2.15.c -o $(OBJ_DIR)/ccx_2.15.o
+	$(FC) -Wall -O3 -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
 	@echo "Build successful!"
 
 # Build static library
-ccx_2.15.a: $(OCCXF) $(OCCXC)
-	ar vr $@ $?
+ccx_2.15.a: $(OCCXF) $(OCCXC) | $(OBJ_DIR)
+	ar vr $@ $^
 
 
-# Clean up binaries and object files
 clean:
-	rm -f *.o calTop.exe ccx_2.15.a
+	rm -f $(OBJ_DIR)/*.o calTop.exe ccx_2.15.a
