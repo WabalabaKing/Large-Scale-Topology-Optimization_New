@@ -9,6 +9,10 @@ FFLAGS = -Wall -O3 -fallow-argument-mismatch
 CC = cc
 FC = gfortran
 
+#Directories
+SRC_DIR = src
+
+
 # Object file rules
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -20,10 +24,16 @@ FC = gfortran
 include Makefile.inc
 
 # Source files and objects
-SCCXMAIN = ccx_2.15.c
-OCCXF = $(SCCXF:.f=.o)
-OCCXC = $(SCCXC:.c=.o)
-OCCXMAIN = $(SCCXMAIN:.c=.o)
+SCCXMAIN = $(SRC_DIR)/ccx_2.15.c
+
+OCCXF = $(SCCXF:$(SRC_DIR)/%.f=%.o)
+OCCXC = $(SCCXC:$(SRC_DIR)/%.c=%.o)
+#OCCXMAIN = $(SCCXMAIN:.c=.o)
+OCCXMAIN = ccx_2.15.o
+
+#OCCXF = $(SCCXF:.f=.o)
+#OCCXC = $(SCCXC:.c=.o)
+#OCCXMAIN = $(SCCXMAIN:.c=.o)
 
 # Libraries
 LIBS = \
@@ -31,10 +41,17 @@ LIBS = \
 	$(ARPACK_PATH)/libarpack_INTEL.a \
 	-lpthread -lm -lc
 
-# Build executable
+
+# Object file compilation rules
+%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: $(SRC_DIR)/%.f
+	$(FC) $(FFLAGS) -c $< -o $(notdir $@)
+
 # Build executable
 calTop.exe: $(OCCXMAIN) ccx_2.15.a $(LIBS)
-	./date.pl; $(CC) $(CFLAGS) -c ccx_2.15.c; $(FC) -Wall -O3 -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
+	./date.pl; $(CC) $(CFLAGS) -c $(SRC_DIR)/ccx_2.15.c; $(FC) -Wall -O3 -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
 	@echo "Build successful!"
 
 # Build static library
