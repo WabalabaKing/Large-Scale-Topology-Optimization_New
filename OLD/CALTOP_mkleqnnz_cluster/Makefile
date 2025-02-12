@@ -4,16 +4,19 @@
 SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/Spooles/src
 ARPACK_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/ARPACK
 
+#Directories
+SRC_DIR = src
+OBJ_DIR = obj
+INCLUDE_DIR = include
+
 # Compiler and flags
-CFLAGS = -Wall -O3 -I $(SPOOLES_PATH) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT
+CFLAGS = -Wall -O3 -I $(SPOOLES_PATH) -I $(INCLUDE_DIR) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT
 FFLAGS = -Wall -O3 -fallow-argument-mismatch
 
 CC = cc
 FC = gfortran
 
-#Directories
-SRC_DIR = src
-OBJ_DIR = obj
+
 
 # Defauilt target
 all: calTop.exe
