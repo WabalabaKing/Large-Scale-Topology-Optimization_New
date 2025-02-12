@@ -64,4 +64,4 @@ ccx_2.15.a: $(OCCXF) $(OCCXC) | $(OBJ_DIR)
 
 
 clean:
-	rm -f $(OBJ_DIR)/*.o $(BIN_DIR) ccx_2.15.a
+	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*.* ccx_2.15.a
