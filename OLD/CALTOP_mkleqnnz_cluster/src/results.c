@@ -385,7 +385,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     /* storing results in the .dat file
        extrapolation of integration point values to the nodes
        interpolation of 3d results for 1d/2d elements */
-
+    
+    /*
     FORTRAN(resultsprint,(co,nk,kon,ipkon,lakon,ne,v,stn,inum,
        stx,ielorien,norien,orab,t1,ithermal,filab,een,iperturb,fn,
        nactdof,iout,vold,nodeboun,ndirboun,nboun,nmethod,ttime,xstate,
@@ -397,7 +398,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        cdn,mortar,islavnode,nslavnode,ntie,islavsurf,time,ielprop,prop,
        veold,ne0,nmpc,ipompc,nodempc,labmpc,energyini,energy,orname,
        xload));
-  
+    */
   return;
 
 }

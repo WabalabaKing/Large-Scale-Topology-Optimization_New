@@ -498,12 +498,12 @@ printf(" ##       ##   ##  ##           ##   ##   ##  ##      \n");
 printf("  #####   ##   ##  #######      ##    #####   ##      \n");
     
 
-printf("************************************************************\n");
+
 printf("* Contributors:\n");
 printf("* Prateek Ranjan, Dept. of Aerospace Engineering,\n");
-printf("* University of Illinois at Urbana-Champaign\n");
+printf("* Massachusetts Institute of Technology \n");
 printf("* Ghanendra Kumar Das, Dept. of Aerospace Engineering,\n");
-printf("* University of Illinois at Urbana-Champaign\n");
+printf("* Georgia Institute of Technology\n");
 printf("* Kai A. James, Dept. of Aerospace Engineering,\n");
 printf("* Georgia Institute of Technology\n");
 printf("************************************************************\n\n");
