@@ -497,7 +497,7 @@ printf(" ##       #######  ##           ##   ##   ##  ######  \n");
 printf(" ##       ##   ##  ##           ##   ##   ##  ##      \n");
 printf("  #####   ##   ##  #######      ##    #####   ##      \n");
     
-
+printf("\n");
 
 printf("* Contributors:\n");
 printf("* Prateek Ranjan, Dept. of Aerospace Engineering,\n");
