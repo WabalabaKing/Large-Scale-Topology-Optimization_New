@@ -1,4 +1,10 @@
+
+import os
+from collections import defaultdict
+
 # Final correction: Add element index in the first column while removing the first and last columns from the SU2 file
+
+
 def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh.nam"):
     """
     Extracts node coordinates and element connectivity from a SU2 file,
@@ -179,8 +185,84 @@ def get_root_nodes(su2_filepath, output_filepath="Nfix1.nam"):
 
     #return f"Successfully extracted {len(root_nodes)} ROOT nodes with offset, written one per line with comma (original order preserved), saved to {output_filepath}"
 
-# Run the function to extract ROOT node indices without sorting, with a comma per line
+def extract_skin_node_triplets(su2_filepath):
+    """
+    Extracts node triplets associated with the marker 'skin' from a SU2 file.
+    """
+    with open(su2_filepath, "r") as file:
+        lines = file.readlines()
+    
+    skin_section = False
+    skin_triplets = []
+    
+    for line in lines:
+        if "MARKER_TAG= skin" in line:
+            skin_section = True
+            continue 
+        
+        if skin_section:
+            if "MARKER_ELEMS=" in line:
+                continue
+            elif "MARKER_TAG=" in line:  
+                break
+            else:
+                elements = line.strip().split()
+                if len(elements) == 4:
+                    node_triplet = tuple(map(int, elements[1:]))
+                    skin_triplets.append(node_triplet)
+    return skin_triplets
+
+
+def find_all_tetrahedral_elements_for_skin_optimized(su2_filepath, skin_triplets, output_filepath="skin_tetra_elements.nam"):
+    """
+    Finds the tetrahedral element IDs that contain the given node triplets from the skin marker.
+    """
+    with open(su2_filepath, "r") as file:
+        lines = file.readlines()
+    
+    tetrahedral_elements = {}
+    node_to_elements = defaultdict(set)
+    element_section = False
+    
+    for line in lines:
+        if "NELEM=" in line:
+            element_section = True
+            continue
+        
+        if element_section:
+            elements = line.strip().split()
+            if len(elements) == 6 and elements[0].isdigit():
+                element_id = int(elements[-1])
+                node_indices = set(map(int, elements[1:5]))
+                tetrahedral_elements[element_id] = node_indices
+                for node in node_indices:
+                    node_to_elements[node].add(element_id)
+    
+    skin_to_tetra_mapping = {}
+    
+    for triplet in skin_triplets:
+        possible_elements = set.intersection(*(node_to_elements[node] for node in triplet))
+        for elem_id in possible_elements:
+            if set(triplet).issubset(tetrahedral_elements[elem_id]):
+                skin_to_tetra_mapping[triplet] = elem_id
+                break  
+    
+    with open(output_filepath, "w") as output_file:
+        output_file.write("*ELEMENTS_MAPPING, ELSET=EALL\n")
+        for triplet, elem_id in skin_to_tetra_mapping.items():
+            output_file.write(f"{elem_id}, {triplet[0]}, {triplet[1]}, {triplet[2]}\n")
+    
+    return skin_to_tetra_mapping
+
+
 get_root_nodes("SU2_MESH/CRMWS_WINGBOX.su2")
 get_skin_nodes("SU2_MESH/CRMWS_WINGBOX.su2")
 extract_su2_mesh_data_with_element_index("SU2_MESH/CRMWS_WINGBOX.su2")
 
+
+
+skin_triplets = extract_skin_node_triplets("SU2_MESH/CRMWS_WINGBOX.su2")
+
+
+output_filepath = "skin_tetra_elements.nam"
+find_all_tetrahedral_elements_for_skin_optimized("SU2_MESH/CRMWS_WINGBOX.su2", skin_triplets, output_filepath)
