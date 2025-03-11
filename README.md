@@ -11,15 +11,21 @@ CalTop is a high-performance topology optimization framework built upon **Calcul
 - **Sensitivities:** Computes analytical sensitivities for mass, compliance, center of gravity and material stress
 - **SU2_CFD Integration:** Utilized preCICE coupling adapter for force-displacement and adjoint sensitivties  tranfer to/from SU2.
 
-## Installation
-### Prerequisites
-Ensure that the following dependencies are installed:
-- **IPOPT**
-- **C and Fortran Compilers** (e.g., `gcc`, `gfortran`)
-- **BLAS and LAPACK** (for numerical computations)
 
-
-### Build Instructions
+## File Structure
+```
+├── CalTop/                # Density-based Finite Element Analysis     
+    ├── src/               # Source code density-based CalculiX 2.15
+│       ├── ccx_2.15.c     # Main CalculiX driver
+│       ├── add_file_1     # Optimization routine
+│       ├── add_file_2     # Density filtering and sensitivity analysis
+│       └── add_file_3     # Utility functions
+    ├── include/
+         ├── ccx_2.15.h     # Main CalculiX driver header
+├── CalGeo/                 # Mesh passive element identifier
+└── README.md               # This file
+```
+## Build Instructions
 
 1. Clone the repository:
    ```sh
@@ -33,10 +39,10 @@ Ensure that the following dependencies are installed:
    wget https://web.archive.org/web/20220526222500fw_/https://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz
    ```
    Open ARmake.inc and make the following changes:
-   - ***Line 28:*** Change `home = $(HOME)/ARPACK` to the path where ARPACK is extracted.
-   - ***Line 115:*** Change `MAKE=/bin/make` to `MAKE=make`
-   - ***Line 120:*** Change `SHELL =/bin/sh` to `SHELL=sh`
-   - ***Lines 104-105:*** Set Fortran compiler flags:
+   - **Line 28:** Change `home = $(HOME)/ARPACK` to the path where ARPACK is extracted.
+   - **Line 115:** Change `MAKE=/bin/make` to `MAKE=make`
+   - **Line 120:** Change `SHELL =/bin/sh` to `SHELL=sh`
+   - **Lines 104-105:** Set Fortran compiler flags:
    ```sh
    FC = gfortran
    ```
