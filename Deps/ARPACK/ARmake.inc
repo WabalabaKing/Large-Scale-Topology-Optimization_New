@@ -25,7 +25,7 @@
 # | other than your home directory.      |
 # %--------------------------------------%
 #
-home =/home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/ARPACK
+home =/home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/ARPACK
 
 
 
