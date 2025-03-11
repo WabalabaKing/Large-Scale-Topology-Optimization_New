@@ -2114,7 +2114,7 @@ while(istat>=0)
 
     /* Write elastic fields to a vtu file */
     printf("Post-processing results...");
-    tecplot_vtu(nk, ne, co, kon, ipkon, vold);
+    //tecplot_vtu(nk, ne, co, kon, ipkon, vold);
     printf("done!");
     /* adjoint sensitivity calculation */
     if(pSupplied!=0)
