@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all clean install uninstall
 
 # Define paths for SPOOLES and ARPACK
 SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/OLD/Deps/Spooles/src
@@ -9,6 +9,12 @@ SRC_DIR = src
 OBJ_DIR = obj
 INCLUDE_DIR = include
 BIN_DIR = bin
+
+# Installation Prefix (Default: Current Directory)
+PREFIX ?= $(shell pwd)
+BINDIR = $(PREFIX)/bin
+
+
 
 # Compiler and flags
 CFLAGS = -Wall -O3 -I $(SPOOLES_PATH) -I $(INCLUDE_DIR) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT
@@ -62,6 +68,19 @@ $(BIN_DIR)/calTop.exe: $(OCCXMAIN) ccx_2.15.a $(LIBS) | $(BIN_DIR) $(OBJ_DIR)
 ccx_2.15.a: $(OCCXF) $(OCCXC) | $(OBJ_DIR)
 	ar vr $@ $^
 
+
+# Install target (default: install in current directory)
+install: $(BIN_DIR)/calTop.exe
+	@echo "Installing calTop.exe to $(BINDIR)"
+	mkdir -p $(BINDIR)
+	cp $(BIN_DIR)/calTop.exe $(BINDIR)/
+	chmod +x $(BINDIR)/calTop.exe
+
+
+# Uninstall target
+uninstall:
+	@echo "Removing calTop.exe from $(BINDIR)"
+	rm -f $(BINDIR)/calTop.exe
 
 clean:
 	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*.* ccx_2.15.a
