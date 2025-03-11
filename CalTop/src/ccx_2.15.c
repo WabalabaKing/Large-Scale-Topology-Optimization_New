@@ -1750,9 +1750,14 @@ while(istat>=0)
      
       fflush(stdout);
 
+      printf("\n");
       if(pSupplied!=0)
       {
-        printf("building filter matix...");
+        printf("NON-ZERO PENALIZATION PARAMTER SPECIFIED -> WILL COMPUTE FILTER MATIX + SENSITIVITIES \n");
+      }
+      if(pSupplied!=0)
+      {
+        printf("Building filter matix for topology optimization...");
         NNEW(FilterMatrixs,double,fnnzassumed*ne_); //Sparse filter matrix stored as row,colum,value with fassumed nnzs per element assumed
     
         NNEW(rowFilters,ITG,fnnzassumed*ne_);
@@ -2113,9 +2118,11 @@ while(istat>=0)
     } */
 
     /* Write elastic fields to a vtu file */
-    printf("Post-processing results...");
+    printf("Skipping:Post-processing results...");
     //tecplot_vtu(nk, ne, co, kon, ipkon, vold);
     printf("done!");
+
+    printf("Non-zero penalization parameter issued, computing sensitivities...");
     /* adjoint sensitivity calculation */
     if(pSupplied!=0)
     {
@@ -2145,7 +2152,7 @@ while(istat>=0)
 
 
       /* Evaluate sensitivities */
-      printf("Adjoint sensitivity analysis...");
+      printf("  Adjoint sensitivity analysis...");
 	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
@@ -2166,12 +2173,12 @@ while(istat>=0)
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
       printf("done! \n");
 
-      printf("Filter compliance gradient...");
+      printf("  Filter compliance gradient...");
       /* Filter compliance gradient */
       filterVector(&ipkon,gradCompl,gradComplFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter Compliance sensitivity
       printf("done! \n");
 
-      printf("Filter element volume gradient...");
+      printf("  Filter element volume gradient...");
       /* Filter element volume gradient */
       filterVector(&ipkon,eleVol,eleVolFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter volume sensitivity
       ends = time(NULL);
