@@ -2208,7 +2208,9 @@ while(istat>=0)
       write_compliance_sensitivities(ne,gradCompl,gradComplFiltered,elCompl,&compliance_sum);
       printf("Done!");
 
-
+      printf("Writing volume sensitivities...\n");
+      write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
+      printf("Done!");
       /* initialize for total materal volume with rho = 1 */
       double initialVol_sum=0;
 

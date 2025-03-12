@@ -101,9 +101,18 @@ void write_compliance_sensitivities(int ne,
 	const double *elComp,
 	double *compliance_sum);
 
+void write_volume_sensitivities(int ne,
+		const double *eleVol,
+		const double *rhoPhys,
+		const double *eleVolFiltered);
+
+
 void rho(double *design,int ne);
 
 void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v);
+
+
+
 
 
 void FORTRAN(actideacti,(char *set,ITG *nset,ITG *istartset,ITG *iendset,
