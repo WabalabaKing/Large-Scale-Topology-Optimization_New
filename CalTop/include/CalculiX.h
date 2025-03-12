@@ -95,6 +95,11 @@
 #define ITGFORMAT "d"
 #endif
 
+void write_compliance_sensitivities(int ne,
+	const double *gradCompl,
+	const double *gradComplFiltered,
+	const double *elComp,
+	double *compliance_sum);
 
 void rho(double *design,int ne);
 
