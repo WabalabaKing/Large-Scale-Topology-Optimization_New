@@ -2192,7 +2192,7 @@ while(istat>=0)
       FILE *elV_file;
 
       /* write compliance sensitivity */
-      //gradC=fopen("sens_compliance.dat","w");
+      gradC=fopen("sens_compliance.dat","w");
 
       /* write compliance value */
       elC_file=fopen("objectives.dat","w");
@@ -2204,9 +2204,11 @@ while(istat>=0)
       /* initialize for compliance */
       double compliance_sum=0;
       
-
+      printf("Writing compliance sensitivities...\n");
       write_compliance_sensitivities(ne,gradCompl,gradComplFiltered,elCompl,&compliance_sum);
+      printf("Done!");
 
+      
       /* initialize for total materal volume with rho = 1 */
       double initialVol_sum=0;
 
