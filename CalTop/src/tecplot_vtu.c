@@ -1,6 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * @file tecplot_vtu.c
+ * @brief Exports an elastic field solution to a VTU (VTK Unstructured Grid) file.
+ *
+ * This function writes nodal coordinates, connectivity information, and 
+ * displacement field data to a VTU file (`elastic_Field.vtu`) for visualization 
+ * in ParaView or other VTU-compatible software.
+ *
+ * @param nk     Number of nodes in the mesh.
+ * @param ne     Number of elements in the mesh.
+ * @param co     Array of nodal coordinates (size: 3 * nk).
+ * @param kon    Element connectivity array, storing node indices per element.
+ * @param ipkon  Index array mapping elements to the connectivity array.
+ * @param v      Nodal displacement array (size: 3 * nk).
+ *
+ * @details
+ * The function writes the data in VTK Unstructured Grid (.vtu) format, including:
+ * - **Nodal coordinates**: Each node's (x, y, z) position.
+ * - **Element connectivity**: Defines elements by listing their node indices.
+ * - **Offsets**: Specifies the end position of each element's connectivity in the list.
+ * - **Cell types**: Assumes quadrilateral elements (VTK type 10).
+ * - **Nodal displacements**: Exports displacement vectors at each node.
+ *
+ * @note 
+ * - The function assumes 4-node quadrilateral elements.
+ * - The generated file uses ASCII format for readability.
+ * - The function does not return any value but writes the data to `elastic_Field.vtu`.
+ * - If the file cannot be opened, an error is printed, and the function returns.
+ *
+ * @usage
+ * ```c
+ * int nk = 100; // Example number of nodes
+ * int ne = 50;  // Example number of elements
+ * double co[300];  // Node coordinates (3 per node)
+ * int kon[200];  // Connectivity array (4 nodes per element)
+ * int ipkon[50]; // Index mapping elements to connectivity array
+ * double v[300];  // Nodal displacements (3 per node)
+ * 
+ * tecplot_vtu(nk, ne, co, kon, ipkon, v);
+ * ```
+ */
+
 void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v) 
     
     {
