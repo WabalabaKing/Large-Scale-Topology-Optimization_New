@@ -2192,7 +2192,7 @@ while(istat>=0)
       FILE *elV_file;
 
       /* write compliance sensitivity */
-      gradC=fopen("sens_compliance.dat","w");
+      //gradC=fopen("sens_compliance.dat","w");
 
       /* write compliance value */
       elC_file=fopen("objectives.dat","w");
@@ -2212,18 +2212,12 @@ while(istat>=0)
       /* initialize for total materal volume with rho = 1 */
       double initialVol_sum=0;
 
-      /* initialize for total material volume with current rho */
-      double designVol_sum=0; //total volume with current filtered density
+      /* initialize for total material volume with optimized rho */
+      double designVol_sum=0;
 
       /* loop over all elements to compute summed values */
       for (int iii=0;iii<ne;iii++)
       {
-        /* write raw and filtered compliance gradient to file */
-        fprintf(gradC,"%.15f  ,  %.15f \n",gradCompl[iii],gradComplFiltered[iii]);
-        
-        /* compute total compliance */
-        //compliance_sum+=elCompl[iii];
-
         /* compute initial volume */
         initialVol_sum+=eleVol[iii];
 
@@ -2240,11 +2234,9 @@ while(istat>=0)
 
       /* ensure any buffered data is written to file */
       fflush(elC_file); 
-      fflush(gradC);
       fflush(elV_file);
 
       /* close all files */
-      fclose(gradC);
       fclose(elC_file);
       fclose(elV_file);
    
