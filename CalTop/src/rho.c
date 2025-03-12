@@ -52,11 +52,11 @@ void rho(double *design,int ne)
     /* If the density file does not exist, create one */
     if(rhoFile==NULL)
     {
-        printf("\n...density.dat not found, initialized to 1");
+        printf("density.dat not found, creating a density.dat with uniform densities \n");
 
         rhoFile=fopen("density.dat","w");
 
-        for (i=0;i<ne;i++)
+        for (i=0; i<ne; i++)
         {
             fprintf(rhoFile,"%.15f \n",design[i]);
         }
@@ -65,6 +65,7 @@ void rho(double *design,int ne)
     /* desinty file exists, read and populate design[] */
     else
     {
+        printf("density.dat found, populating design array for linear elastic analysis \n");
         for (i=0;i<ne;i++)
         {
             fscanf(rhoFile,"%lf",&design[i]);
