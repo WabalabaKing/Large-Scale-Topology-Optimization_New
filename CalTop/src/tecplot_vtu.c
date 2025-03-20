@@ -72,7 +72,7 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v)
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
     for (int ielem = 0; ielem < ne; ielem++) {
         for (int j = 0; j < 4; j++) {  // Assuming quadrilateral elements
-            fprintf(fp, " %d", kon[ipkon[ielem] + j]);
+            fprintf(fp, " %d", kon[ipkon[ielem] + j]-1);
         }
         fprintf(fp, "\n");
     }
