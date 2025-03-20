@@ -111,7 +111,7 @@ void rho(double *design,int ne);
 
 void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v);
 
-
+void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum);
 
 
 

@@ -1056,26 +1056,9 @@ while(istat>=0)
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
 
-  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+  /* Read element desitiies from .dat file, if absent, initialize the design to one */    
   rho(design,ne);
-
-
-
-  /* FILE *rhoFile;
-
-    rhoFile=fopen("densityout.dat","w"); //open in write mode
-
-
-    int i;  //counter
-        for (i=0;i<ne;i++)
-            {
-                fprintf(rhoFile,"%.15f \n",design[i]);
-            }
-        fclose(rhoFile);
-  */
-
-  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
 
 
   #ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
@@ -2152,7 +2135,7 @@ while(istat>=0)
 
 
       /* Evaluate sensitivities */
-      printf("  Adjoint sensitivity analysis...");
+      printf("Performing adjoint sensitivity analysis...");
 	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
@@ -2173,12 +2156,12 @@ while(istat>=0)
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
       printf("done! \n");
 
-      printf("  Filter compliance gradient...");
+      printf("Filter compliance gradient...");
       /* Filter compliance gradient */
       filterVector(&ipkon,gradCompl,gradComplFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter Compliance sensitivity
       printf("done! \n");
 
-      printf("  Filter element volume gradient...");
+      printf("Filter element volume gradient...");
       /* Filter element volume gradient */
       filterVector(&ipkon,eleVol,eleVolFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter volume sensitivity
       ends = time(NULL);
@@ -2188,12 +2171,12 @@ while(istat>=0)
 
       /* write compliance gradient to file */
       FILE *gradC;
-      FILE *elC_file;
+      //FILE *elC_file;
       FILE *elV_file;
 
 
       /* write compliance value */
-      elC_file=fopen("objectives.dat","w");
+      //elC_file=fopen("objectives.dat","w");
 
 
       /* initialize for compliance */
@@ -2207,32 +2190,35 @@ while(istat>=0)
       write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
       printf("Done!\n");
 
+      printf("Writing objectives...");
+      write_objectives(ne, eleVol, rhoPhys, &compliance_sum);
+      printf("Done!\n");
 
       /* initialize for total materal volume with rho = 1 */
-      double initialVol_sum=0;
+      //double initialVol_sum=0;
 
       /* initialize for total material volume with optimized rho */
-      double designVol_sum=0;
+      //double designVol_sum=0;
 
       /* loop over all elements to compute summed values */
-      for (int iii=0;iii<ne;iii++)
-      {
+      //for (int iii=0;iii<ne;iii++)
+      //{
         /* compute initial volume */
-        initialVol_sum+=eleVol[iii];
+      //  initialVol_sum+=eleVol[iii];
 
         /* compute current design volume */
-        designVol_sum+=(eleVol[iii]*rhoPhys[iii]);
+      //  designVol_sum+=(eleVol[iii]*rhoPhys[iii]);
                 
-      }
+      //}
 
       /* write summed compliance and volume fraction values to file */
-      fprintf(elC_file,"%.15f , %.15f , %.15f , %.15f \n",compliance_sum,designVol_sum-volfrac*initialVol_sum, initialVol_sum,designVol_sum);
+      //fprintf(elC_file,"%.15f , %.15f , %.15f , %.15f \n",compliance_sum,designVol_sum-volfrac*initialVol_sum, initialVol_sum,designVol_sum);
 
       /* ensure any buffered data is written to file */
-      fflush(elC_file); 
+      //fflush(elC_file); 
 
       /* close all files */
-      fclose(elC_file);
+      //fclose(elC_file);
    
       /* evaluate discreteness of the structure*/
       /* discreteness is a metric often used in topology optimization problems to assess hpw close the design
@@ -2252,11 +2238,11 @@ while(istat>=0)
   
      /* print output */
       
-      printf("\nTotal Compliance (No Scaling):          %.6f \n",compliance_sum);
-      printf("Total domain volume (No Scaling):         %.6f \n",initialVol_sum);
-      printf("Current domain volume (No Scaling):       %.6f \n",designVol_sum);
-      printf("Volume constraint violation (No Scaling): %.6f \n",designVol_sum-volfrac*initialVol_sum);
-      printf("Discreteness, mnd, percent:               %.6f \n",mnd);
+      //printf("\nTotal Compliance (No Scaling):          %.6f \n",compliance_sum);
+      //printf("Total domain volume (No Scaling):         %.6f \n",initialVol_sum);
+      //printf("Current domain volume (No Scaling):       %.6f \n",designVol_sum);
+      //printf("Volume constraint violation (No Scaling): %.6f \n",designVol_sum-volfrac*initialVol_sum);
+      //printf("Discreteness, mnd, percent:               %.6f \n",mnd);
 
     } // end adjoint calculation
 
