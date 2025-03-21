@@ -310,6 +310,7 @@ int main(int argc,char *argv[])
   double *veloo=NULL; /**< velocity values from old-old step */
   double *design=NULL; /**< design variables for topology optimization */
   double *rhoPhys=NULL; /**< phyiscal element densities */
+  double *stx = NULL;   /**< 1D array for element stress */
 
   double *gradCompl=NULL;   /**< compliance gradient */
   double *elCompl=NULL; /**<  element complaince */
@@ -609,6 +610,8 @@ while(istat>=0)
     NNEW(ipkon,ITG,ne_);
     NNEW(lakon,char,8*ne_);
     NNEW(design,double,ne_);
+
+
 
     /* property cards */
 
@@ -1059,6 +1062,9 @@ while(istat>=0)
 
   /* Read element desitiies from .dat file, if absent, initialize the design to one */    
   rho(design,ne);
+
+  /* Define stress array here, pass to linstatic and then plot in write_vtu.c */
+  NNEW(stx,double,6*mi[0]*ne);
 
 
   #ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
@@ -1779,7 +1785,7 @@ while(istat>=0)
 
       time_t startl, endl; 
 	    startl = time(NULL);
-
+      
 	    linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
 	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc, nelemload,sideload,xload,&nload,
@@ -1796,7 +1802,7 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff);
+	     orname,rhoPhys,&pstiff, stx);
 
       endl = time(NULL);
 
@@ -2482,6 +2488,7 @@ while(istat>=0)
   SFREE(eleVolFiltered);
   SFREE(designFiltered);
   rhoPhys = NULL;
+  
 
   SFREE(ipoinpc);
   SFREE(inpc);
@@ -2529,6 +2536,7 @@ while(istat>=0)
   SFREE(ibody);
   SFREE(xbody);
   SFREE(xbodyold);
+  SFREE(stx);
   if(nam>0)
   {
     SFREE(iamboun);

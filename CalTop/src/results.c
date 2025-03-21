@@ -213,31 +213,39 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	
 	if(((*nmethod!=4)&&(*nmethod!=5))||(iperturb[0]>1))
     {
-		printf(" Using up to %" ITGFORMAT " cpu(s) for the stress calculation.\n\n", num_cpus);
+        printf("I am in results.c \n");
+        printf("Look at resultsmech.f to see how stresses are computed");
+		printf("Using up to %" ITGFORMAT " cpu(s) for the stress calculation.\n\n", num_cpus);
 	}
 
 	/* create threads and wait */
 	
 	NNEW(ithread,ITG,num_cpus);
+
 	for(i=0; i<num_cpus; i++)  
     {
 	    ithread[i]=i;
 	    pthread_create(&tid[i], NULL, (void *)resultsmechmt, (void *)&ithread[i]);
 	}
+
 	for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 	
 	for(i=0;i<mt**nk;i++)
     {
 	    fn[i]=fn1[i];
 	}
+
 	for(i=0;i<mt**nk;i++)
     {
 	    for(j=1;j<num_cpus;j++)
         {
-		fn[i]+=fn1[i+j*mt**nk];
+		    fn[i]+=fn1[i+j*mt**nk];
 	    }
 	}
-	SFREE(fn1);SFREE(ithread);SFREE(neapar);SFREE(nebpar);
+	SFREE(fn1);
+    SFREE(ithread);
+    SFREE(neapar);
+    SFREE(nebpar);
 	
     /* determine the internal force */
 
