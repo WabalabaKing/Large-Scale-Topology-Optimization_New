@@ -97,7 +97,7 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v)
     fprintf(fp, "      <PointData Scalars=\"Displacement\">\n");
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Displacement\" NumberOfComponents=\"3\" format=\"ascii\">\n");
     for (int node = 0; node < nk; node++) {
-        fprintf(fp, "        %.8f %.8f %.8f\n", v[3 * node], v[3 * node + 1], v[3 * node + 2]);
+        fprintf(fp, "        %.8f %.8f %.8f\n", v[4*node+1], v[4*node+2], v[4* node+3]);
     }
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </PointData>\n");
