@@ -67,7 +67,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     double *thicke, char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design, double *penal){
+             char *orname,double *design, double *penal, double *stx)
+			 {
 
   char description[13]="            ",*lakon=NULL,stiffmatrix[132]="",
        fneig[132]="",jobnamef[396]="";
@@ -89,7 +90,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   double *stn=NULL,*v=NULL,*een=NULL,cam[5],*xstiff=NULL,*stiini=NULL,*tper,
          *f=NULL,*fn=NULL,qa[4],*fext=NULL,*epn=NULL,*xstateini=NULL,
-         *vini=NULL,*stx=NULL,*enern=NULL,*xbounact=NULL,*xforcact=NULL,
+         *vini=NULL,*enern=NULL,*xbounact=NULL,*xforcact=NULL,
          *xloadact=NULL,*t1act=NULL,*ampli=NULL,*xstaten=NULL,*eei=NULL,
          *enerini=NULL,*cocon=NULL,*shcon=NULL,*physcon=NULL,*qfx=NULL,
          *qfn=NULL,sigma=0.,*cgr=NULL,*xbodyact=NULL,*vr=NULL,*vi=NULL,
@@ -362,7 +363,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   	iout=-1;
   	NNEW(v,double,mt**nk);
   	NNEW(fn,double,mt**nk);
-  	NNEW(stx,double,6*mi[0]**ne);
+  	//NNEW(stx,double,6*mi[0]**ne); No passing stx as an input argument to linstatic
   	NNEW(inum,ITG,*nk);
 
   	results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
@@ -386,7 +387,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   	SFREE(v);
 	SFREE(fn);
-	SFREE(stx);
+	//SFREE(stx); No free stx in main driver
 	SFREE(inum);
   	iout=1;
 
@@ -608,7 +609,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	      			NNEW(fn,double,mt**nk);
 	      			NNEW(stn,double,6**nk);
 	      			NNEW(inum,ITG,*nk);
-	      			NNEW(stx,double,6*mi[0]**ne);
+	      			//NNEW(stx,double,6*mi[0]**ne);
 
 	      			if(strcmp1(&filab[261],"E   ")==0) NNEW(een,double,6**nk);
 	      			if(strcmp1(&filab[2697],"ME  ")==0) NNEW(emn,double,6**nk);
@@ -651,7 +652,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	      				SFREE(v);
 						SFREE(stn);
 						SFREE(inum);
-						SFREE(stx);
+						//SFREE(stx);
 
 	      				if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
 	      				if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
@@ -804,7 +805,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	      				NNEW(fn,double,mt**nk);
 	      				NNEW(stn,double,6**nk);
 	      				NNEW(inum,ITG,*nk);
-	      				NNEW(stx,double,6*mi[0]**ne);
+	      				//NNEW(stx,double,6*mi[0]**ne);
 
 	      				if(strcmp1(&filab[261],"E   ")==0) NNEW(een,double,6**nk);
 	      				if(strcmp1(&filab[2697],"ME  ")==0) NNEW(emn,double,6**nk);
@@ -886,7 +887,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	      					}
 
 	     	 				SFREE(v);SFREE(stn);SFREE(inum);
-	      					SFREE(stx);SFREE(fn);
+	      					//SFREE(stx);
+							SFREE(fn);
 
 	      					if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
 	      					if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
@@ -1040,7 +1042,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     				NNEW(fn,double,mt**nk);
     				NNEW(stn,double,6**nk);
     				NNEW(inum,ITG,*nk);
-    				NNEW(stx,double,6*mi[0]**ne);
+    				//NNEW(stx,double,6*mi[0]**ne);
 
     				if(strcmp1(&filab[261],"E   ")==0) NNEW(een,double,6**nk);
     				if(strcmp1(&filab[2697],"ME  ")==0) NNEW(emn,double,6**nk);
@@ -1124,7 +1126,9 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     				FORTRAN(writesta,(istep,&iinc,&icutb,&iitsta,ttime,&time,&dtime));
 
     				SFREE(v);SFREE(stn);SFREE(inum);
-    				SFREE(b);SFREE(stx);SFREE(fn);
+    				SFREE(b);
+					//SFREE(stx);
+					SFREE(fn);
 
     				if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
     				if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);

@@ -120,6 +120,8 @@
          if(lakonl(1:7).eq.'DCOUP3D') cycle
 !
 !        user elements
+
+
 !
          if(lakonl(1:1).eq.'U') then
             call resultsmech_u(co,kon,ipkon,lakon,ne,v,

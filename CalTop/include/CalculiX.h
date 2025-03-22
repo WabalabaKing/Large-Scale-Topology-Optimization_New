@@ -111,7 +111,7 @@ void rho(double *design,int ne);
 
 void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v);
 
-
+void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum);
 
 
 
@@ -2222,7 +2222,7 @@ void linstatic(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     double *thicke,char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design,double *penal);
+             char *orname,double *design,double *penal, double *stx);
 
 
 void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,

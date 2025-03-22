@@ -310,6 +310,7 @@ int main(int argc,char *argv[])
   double *veloo=NULL; /**< velocity values from old-old step */
   double *design=NULL; /**< design variables for topology optimization */
   double *rhoPhys=NULL; /**< phyiscal element densities */
+  double *stx = NULL;   /**< 1D array for element stress */
 
   double *gradCompl=NULL;   /**< compliance gradient */
   double *elCompl=NULL; /**<  element complaince */
@@ -609,6 +610,8 @@ while(istat>=0)
     NNEW(ipkon,ITG,ne_);
     NNEW(lakon,char,8*ne_);
     NNEW(design,double,ne_);
+
+
 
     /* property cards */
 
@@ -1056,26 +1059,12 @@ while(istat>=0)
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
 
-  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+  /* Read element desitiies from .dat file, if absent, initialize the design to one */    
   rho(design,ne);
 
-
-
-  /* FILE *rhoFile;
-
-    rhoFile=fopen("densityout.dat","w"); //open in write mode
-
-
-    int i;  //counter
-        for (i=0;i<ne;i++)
-            {
-                fprintf(rhoFile,"%.15f \n",design[i]);
-            }
-        fclose(rhoFile);
-  */
-
-  /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
+  /* Define stress array here, pass to linstatic and then plot in write_vtu.c */
+  NNEW(stx,double,6*mi[0]*ne);
 
 
   #ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
@@ -1796,7 +1785,7 @@ while(istat>=0)
 
       time_t startl, endl; 
 	    startl = time(NULL);
-
+      
 	    linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
 	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc, nelemload,sideload,xload,&nload,
@@ -1813,12 +1802,36 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff);
+	     orname,rhoPhys,&pstiff, stx);
 
       endl = time(NULL);
 
 	    printf("\n Time taken for linstatic.c is %.8f seconds \n", 
 		  difftime(endl, startl)); 
+
+      /* Debug snippt to write stress to a .dat file */
+
+      FILE *fp = fopen("stresses.dat", "w");
+
+      if (fp == NULL) 
+      {
+        printf("[write_stress_output] Could not open stresses.dat for writing.\n");
+        return;
+      }
+
+      fprintf(fp, "Elem SXX SYY SZZ SXY SXZ SYZ\n");
+
+      ITG i, j;
+      for(i = 0; i < ne; i++){
+          fprintf(fp, "%d", i+1);
+          for(j = 0; j < 6; j++){
+              fprintf(fp, " % .6e", stx[6*mi[0]*i + j]);
+          }
+          fprintf(fp, "\n");
+      }
+  
+      fclose(fp);
+     printf("[write_stress_output] Wrote stresses to stresses.dat\n");
 
 	    for(i=0;i<3;i++)
       {
@@ -2152,7 +2165,7 @@ while(istat>=0)
 
 
       /* Evaluate sensitivities */
-      printf("  Adjoint sensitivity analysis...");
+      printf("Performing adjoint sensitivity analysis...");
 	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
@@ -2173,12 +2186,12 @@ while(istat>=0)
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
       printf("done! \n");
 
-      printf("  Filter compliance gradient...");
+      printf("Filter compliance gradient...");
       /* Filter compliance gradient */
       filterVector(&ipkon,gradCompl,gradComplFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter Compliance sensitivity
       printf("done! \n");
 
-      printf("  Filter element volume gradient...");
+      printf("Filter element volume gradient...");
       /* Filter element volume gradient */
       filterVector(&ipkon,eleVol,eleVolFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter); //Filter volume sensitivity
       ends = time(NULL);
@@ -2188,12 +2201,12 @@ while(istat>=0)
 
       /* write compliance gradient to file */
       FILE *gradC;
-      FILE *elC_file;
+      //FILE *elC_file;
       FILE *elV_file;
 
 
       /* write compliance value */
-      elC_file=fopen("objectives.dat","w");
+      //elC_file=fopen("objectives.dat","w");
 
 
       /* initialize for compliance */
@@ -2207,32 +2220,35 @@ while(istat>=0)
       write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
       printf("Done!\n");
 
+      printf("Writing objectives...");
+      write_objectives(ne, eleVol, rhoPhys, &compliance_sum);
+      printf("Done!\n");
 
       /* initialize for total materal volume with rho = 1 */
-      double initialVol_sum=0;
+      //double initialVol_sum=0;
 
       /* initialize for total material volume with optimized rho */
-      double designVol_sum=0;
+      //double designVol_sum=0;
 
       /* loop over all elements to compute summed values */
-      for (int iii=0;iii<ne;iii++)
-      {
+      //for (int iii=0;iii<ne;iii++)
+      //{
         /* compute initial volume */
-        initialVol_sum+=eleVol[iii];
+      //  initialVol_sum+=eleVol[iii];
 
         /* compute current design volume */
-        designVol_sum+=(eleVol[iii]*rhoPhys[iii]);
+      //  designVol_sum+=(eleVol[iii]*rhoPhys[iii]);
                 
-      }
+      //}
 
       /* write summed compliance and volume fraction values to file */
-      fprintf(elC_file,"%.15f , %.15f , %.15f , %.15f \n",compliance_sum,designVol_sum-volfrac*initialVol_sum, initialVol_sum,designVol_sum);
+      //fprintf(elC_file,"%.15f , %.15f , %.15f , %.15f \n",compliance_sum,designVol_sum-volfrac*initialVol_sum, initialVol_sum,designVol_sum);
 
       /* ensure any buffered data is written to file */
-      fflush(elC_file); 
+      //fflush(elC_file); 
 
       /* close all files */
-      fclose(elC_file);
+      //fclose(elC_file);
    
       /* evaluate discreteness of the structure*/
       /* discreteness is a metric often used in topology optimization problems to assess hpw close the design
@@ -2252,11 +2268,11 @@ while(istat>=0)
   
      /* print output */
       
-      printf("\nTotal Compliance (No Scaling):          %.6f \n",compliance_sum);
-      printf("Total domain volume (No Scaling):         %.6f \n",initialVol_sum);
-      printf("Current domain volume (No Scaling):       %.6f \n",designVol_sum);
-      printf("Volume constraint violation (No Scaling): %.6f \n",designVol_sum-volfrac*initialVol_sum);
-      printf("Discreteness, mnd, percent:               %.6f \n",mnd);
+      //printf("\nTotal Compliance (No Scaling):          %.6f \n",compliance_sum);
+      //printf("Total domain volume (No Scaling):         %.6f \n",initialVol_sum);
+      //printf("Current domain volume (No Scaling):       %.6f \n",designVol_sum);
+      //printf("Volume constraint violation (No Scaling): %.6f \n",designVol_sum-volfrac*initialVol_sum);
+      //printf("Discreteness, mnd, percent:               %.6f \n",mnd);
 
     } // end adjoint calculation
 
@@ -2496,6 +2512,7 @@ while(istat>=0)
   SFREE(eleVolFiltered);
   SFREE(designFiltered);
   rhoPhys = NULL;
+  
 
   SFREE(ipoinpc);
   SFREE(inpc);
@@ -2543,6 +2560,7 @@ while(istat>=0)
   SFREE(ibody);
   SFREE(xbody);
   SFREE(xbodyold);
+  SFREE(stx);
   if(nam>0)
   {
     SFREE(iamboun);
