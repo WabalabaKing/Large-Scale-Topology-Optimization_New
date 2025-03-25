@@ -7,7 +7,8 @@
 # More info in ccx user manual section 2
 ARPACK          = /home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization/OLD/Deps/ARPACK
 OPT = -g -O2
-CFLAGS = -Wall $(OPT) -fopenmp -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I{MKL_INCLUDE}
+CFLAGS = -Wall $(OPT) -fopenmp -DARCH="Linux" -DARPACK -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I{MKL_INCLUDE}
+#CFLAGS = -Wall $(OPT) -fopenmp -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I{MKL_INCLUDE}
 FFLAGS = -Wall $(OPT) $(OPTIONS) -I$(MKL_INCLUDE) -fopenmp
 
 #ARPACK
@@ -27,9 +28,10 @@ FPPSTOP= -x none
 
 #INTEL MKL
 #INTEL MKL
-MKL_LIB= //opt/intel/oneapi/mkl/2022.2.0/lib/intel64
-MKL_INCLUDE=//opt/intel/oneapi/mkl/2022.2.0/include
-CMPLR_PATH= //opt/intel/oneapi/compiler/2022.2.0/linux/compiler/lib/intel64_lin
+MKL_LIB= //opt/intel/oneapi/mkl/2025.1/lib/intel64
+MKL_INCLUDE=//opt/intel/oneapi/mkl/2025.1/include
+#CMPLR_PATH= //opt/intel/oneapi/compiler/2022.2.0/linux/compiler/lib/intel64_lin
+CMPLR_PATH=/opt/intel/oneapi/compiler/2025.1/bin
 
 
 
