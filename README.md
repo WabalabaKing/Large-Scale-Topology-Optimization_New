@@ -158,13 +158,13 @@ CalTop can be run in one of two modes at a time:
 
 ### Mode 1: Pure FEA mode with user-defined or default element densities (density.dat)
 ``` sh
-calTop.exe <filename_without_extension (.inp)> 
+calTop.exe <filename_without_extension> 
 ```
 This mode will result in evaluation of the linear elastic response and an `elastic_Field.vtu` file for visualizing element densities, stresses and nodal displacements.
 
 ### Mode 2: FEA + Adjoint sensitivity analysis + Filtering with user-defined or default element densities (density.dat)
 ```sh
- calTop.exe <filename_without_extension (.inp)> -p 2 
+ calTop.exe <filename_without_extension> -p 2 
  ```
 
 where `p` is the penalization parameter.
@@ -176,9 +176,14 @@ This mode will result in evaluation of the linear elastic response and the follo
 3. **center_of_gravity_sens.csv**: Element C.G sensitivities
 
 Additionally, the following files are also written:
-1.  Filtered sensitivities are written to **rhos.dat**: Filtered element densities
+1. **rhos.dat**: Filtered element densities
 2. **objectives.csv**: Structure compliance, volume fraction and C.G
 
+** NOTE**: When running in a shared-memeory environment, set the number of processes as:
+
+``` sh
+export OMP_NUM_THREADS = <num_procs>
+```
 
 ## License
 This project is licensed under [MIT License](LICENSE).
