@@ -156,11 +156,13 @@ CalTop is a high-performance topology optimization framework built upon **Calcul
 ## Usage
 CalTop can be run in one of two modes at a time:
 
-### Pure FEA mode with user-defined or default element densities (density.dat)
-``` calTop.exe <filename> ```
+### Mode 1: Pure FEA mode with user-defined or default element densities (density.dat)
+``` sh
+calTop.exe <filename> 
+```
 This mode will result in evaluation of the linear elastic response and an `elastic_Field.vtu` file for visualizing element densities, stresses and nodal displacements.
 
-### FEA mode + Adjoint sensitivity analysis + Filtering with user-defined or default element densities (density.dat)
+### Mode 2: FEA + Adjoint sensitivity analysis + Filtering with user-defined or default element densities (density.dat)
 ``` calTop.exe <filename> -p 2 ```
 
 where `p` is the penalization parameter.
