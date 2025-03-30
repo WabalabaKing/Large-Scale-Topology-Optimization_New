@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<precice-configuration>
+  <participants>
+    <participant name="FluidSolver"/>
+    <participant name="StructureSolver"/>
+  </participants>
+
+  <meshes>
+    <mesh name="MeshFSI" dimensions="3"/>
+  </meshes>
+
+  <data>
+    <data name="Force" type="vector" dimensions="3"/>
+    <data name="Displacement" type="vector" dimensions="3"/>
+  </data>
+
+  <mapping:nearest-neighbor/>
+
+  <coupling-scheme:serial-implicit>
+    <from participant="FluidSolver" to="StructureSolver">
+      <mesh name="MeshFSI">
+        <write-data name="Force"/>
+        <read-data name="Displacement"/>
+      </mesh>
+    </from>
+  </coupling-scheme:serial-implicit>
+
+  <time-window-size value="1.0"/>
+  <timestep-length value="1.0"/>
+</precice-configuration>
