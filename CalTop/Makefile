@@ -1,8 +1,7 @@
 
 .PHONY: all clean install uninstall
 
-# Define paths for SPOOLES and ARPACK
-SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/Spooles/src
+# Define path for ARPACK
 ARPACK_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/ARPACK
 
 #Directories
