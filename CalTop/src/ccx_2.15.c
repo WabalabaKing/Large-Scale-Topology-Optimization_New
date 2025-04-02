@@ -2196,10 +2196,11 @@ while(istat>=0)
       printf("Writing volume sensitivities...");
       write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
       printf("Done!\n");
-
+      
       printf("Writing objectives...");
       write_objectives(ne, eleVol, rhoPhys, &compliance_sum);
       printf("Done!\n");
+
 
       /* initialize for total materal volume with rho = 1 */
       //double initialVol_sum=0;
@@ -2245,11 +2246,11 @@ while(istat>=0)
   
      /* print output */
       
-      //printf("\nTotal Compliance (No Scaling):          %.6f \n",compliance_sum);
-      //printf("Total domain volume (No Scaling):         %.6f \n",initialVol_sum);
-      //printf("Current domain volume (No Scaling):       %.6f \n",designVol_sum);
-      //printf("Volume constraint violation (No Scaling): %.6f \n",designVol_sum-volfrac*initialVol_sum);
-      //printf("Discreteness, mnd, percent:               %.6f \n",mnd);
+      printf("\nTotal Compliance:          %.12f \n",compliance_sum);
+      //printf("Total domain volume:         %.6f \n",initialVol_sum);
+      //printf("Current domain volume:       %.6f \n",designVol_sum);
+      //printf("Volume constraint violation:: %.6f \n",designVol_sum-volfrac*initialVol_sum);
+      printf("Discreteness, mnd, percent:               %.6f \n",mnd);
 
     } // end adjoint calculation
 

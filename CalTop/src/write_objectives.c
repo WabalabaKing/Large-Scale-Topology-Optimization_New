@@ -50,9 +50,8 @@ void write_objectives(int ne,
         //fprintf(sens_file, "%.15f,%.15f,%.15f\n", eleVol[i], eleVol[i] * rhoPhys[i], eleVolFiltered[i]);
     }
 
-
     /* Write structure compliance and volume to file */
-    fprintf(obj_file, "%.15f, %.15f, %.15f \n", compliance_sum, initialVol_sum, designVol_sum);
+    fprintf(obj_file, "%.15f, %.15f, %.15f \n", *compliance_sum, initialVol_sum, designVol_sum);
     
     fclose(obj_file);
 }

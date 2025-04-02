@@ -124,7 +124,7 @@ lib :
 	cd ZV               ; make lib
 	cd misc             ; make lib
 #cd MPI              ; make lib
-#cd MT               ; make lib
+    cd MT               ; make lib
 
 global :
 	cd A2/src             ; make -f makeGlobalLib
@@ -166,4 +166,4 @@ global :
 	cd ZV/src             ; make -f makeGlobalLib
 	cd misc/src           ; make -f makeGlobalLib
 #cd MPI/src            ; make -f makeGlobalLib
-#cd MT/src             ; make -f makeGlobalLib
+    cd MT/src             ; make -f makeGlobalLib
