@@ -1095,11 +1095,12 @@ while(istat>=0)
 
     printf("\n");
 
-      
-
 
   /* Read element desitiies from .dat file, if absent, initialize the design to one */    
   rho(design,ne);
+
+  /* Set thhe element density of passive elements to 1 */
+  filterOutPassiveElems(design, ne, passiveIDs, numPassive);
 
   /* Define stress array here, pass to linstatic and then plot in write_vtu.c */
   NNEW(stx,double,6*mi[0]*ne);

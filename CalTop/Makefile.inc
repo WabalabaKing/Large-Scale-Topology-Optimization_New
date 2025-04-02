@@ -1041,7 +1041,9 @@ $(SRC_DIR)/tecplot_vtu.c \
 $(SRC_DIR)/write_complianceSens.c \
 $(SRC_DIR)/write_volumeSens.c \
 $(SRC_DIR)/write_objectives.c \
-$(SRC_DIR)/passive.c
+$(SRC_DIR)/passive.c \
+$(SRC_DIR)/filterPassiveElements.c
+
 
 
 SCCXCXX = $(SRC_DIR)/umat_dl.cpp

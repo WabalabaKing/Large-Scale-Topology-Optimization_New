@@ -110,6 +110,8 @@ void write_volume_sensitivities(int ne,
 
 int* passiveElements(char *filename, int *numPassive);
 
+void filterOutPassiveElems_density(double *design, int ne, int *passiveIDs, int numPassive);
+
 void rho(double *design,int ne);
 
 void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy);
