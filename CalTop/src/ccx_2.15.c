@@ -2224,6 +2224,8 @@ while(istat>=0)
       /* write compliance value */
       //elC_file=fopen("objectives.dat","w");
 
+      /* set the filtered complience sens of passive elements to 0 */
+      filterOutPassiveElems_compSens(gradComplFiltered, ne, passiveIDs, numPassive);
 
       /* initialize for compliance */
       double compliance_sum=0;
@@ -2272,7 +2274,8 @@ while(istat>=0)
        is to a "0-1" or binary solution. */
 
       double mnd = 0.0;
-    
+        
+
 
       /* loop over all element density values */
       for (int iii=0;iii<ne;iii++)
