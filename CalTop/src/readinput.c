@@ -61,29 +61,36 @@ void readinput(char *jobnamec, char **inpcp, ITG *nline, ITG *nset,
 
   strcpy(fninp,jobnamec);
   strcat(fninp,".inp");
-  if((f1[in]=fopen(fninp,"r"))==NULL){
-      printf("*ERROR in readinput: cannot open file %s\n",fninp);
+
+  if((f1[in]=fopen(fninp,"r"))==NULL)
+  {
+      printf("*ERROR in readinput.c: cannot open file %s\n",fninp);
       exit(0);
   }
 
   /* starting to read the input file */
 
-  do{
-      if(fgets(buff,1320,f1[in])==NULL){
-	  fclose(f1[in]);
-	  if(in!=0){
-	      in--;
-	      continue;
-	  }
-	  else{break;}
+  do
+  {
+      if(fgets(buff,1320,f1[in])==NULL)
+      {
+	      fclose(f1[in]);
+	      if(in!=0)
+        {
+	        in--;
+	        continue;
+	      }
+	      else{break;}
       }
 	  
       /* check for heading lines: should not be changed */
 
-      if(iheading==1){
-	  if((buff[0]=='*')&&(buff[1]!='*')){
-	      iheading=0;
-	  }
+      if(iheading==1)
+      {
+	      if((buff[0]=='*')&&(buff[1]!='*'))
+        {
+	        iheading=0;
+	      }
       }
 
       /* storing the significant characters */
@@ -91,61 +98,80 @@ void readinput(char *jobnamec, char **inpcp, ITG *nline, ITG *nset,
 	
       k=0;
       i=-1;
-      if(iheading==0){
-	  do{
-	      i++;
-	      if((buff[i]=='\0')||(buff[i]=='\n')||(buff[i]=='\r')||(k==1320)) break;
-	      if((buff[i]==' ')||(buff[i]=='\t')) continue;
-	      buff[k]=buff[i];
-	      k++;
-	  }while(1);
-      }else{
-	  do{
-	      i++;
-	      if((buff[i]=='\0')||(buff[i]=='\n')||(buff[i]=='\r')||(k==1320)) break;
-	      buff[k]=buff[i];
-	      k++;
-	  }while(1);
+      if(iheading==0)
+      {
+	      do
+          {
+	          i++;
+	          if((buff[i]=='\0')||(buff[i]=='\n')||(buff[i]=='\r')||(k==1320)) break;
+	          if((buff[i]==' ')||(buff[i]=='\t')) continue;
+	          buff[k]=buff[i];
+	          k++;
+	        }
+          while(1);
+      }
+      else
+      {
+	      do
+        {
+	        i++;
+	        if((buff[i]=='\0')||(buff[i]=='\n')||(buff[i]=='\r')||(k==1320)) break;
+	        buff[k]=buff[i];
+	        k++;
+	      }
+        while(1);
       }
 	
       /* check for blank lines and comments */
-
       if(k==0) continue;
       if(strcmp1(&buff[0],"**")==0) continue;
 
       /* changing to uppercase except filenames */
 
-      if(iheading==0){
-	  j=0;
-	  ifile=0;
-	  do{
-	      if(j>=6){
-		  if(strcmp1(&buff[j-6],"INPUT=")==0) ifile=1;
-	      }
-	      if(j>=7){
-		  if(strcmp1(&buff[j-7],"OUTPUT=")==0) ifile=1;
-	      }
-	      if(j>=9){
-		  if(strcmp1(&buff[j-9],"FILENAME=")==0) ifile=1;
-	      }
-	      if(ifile==1){
-		  do{
-		      if(strcmp1(&buff[j],",")!=0){
-			  j++;
-		      }else{
-			  ifile=0;
-			  break;
-		      }
-		  }while(j<k);
-	      }else{
-		  buff[j]=toupper(buff[j]);
-	      }
-	      j++;
-	  }while(j<k);
-      }
+      if(iheading==0)
+      {
+	      j=0;
+	      ifile=0;
+	      do
+          {
+	          if(j>=6)
+            {
+		          if(strcmp1(&buff[j-6],"INPUT=")==0) ifile=1;
+	          }
+	          if(j>=7)
+            {
+		          if(strcmp1(&buff[j-7],"OUTPUT=")==0) ifile=1;
+	          }
+	          if(j>=9)
+            {
+		          if(strcmp1(&buff[j-9],"FILENAME=")==0) ifile=1;
+	          }
+	          if(ifile==1)
+            {
+		          do
+                {
+		              if(strcmp1(&buff[j],",")!=0)
+                  {
+			              j++;
+		              }
+                  else
+                  {
+			              ifile=0;
+			              break;
+		              }
+		            }
+                while(j<k);
+	           }
+             else
+             {
+		            buff[j]=toupper(buff[j]);
+	           }
+	            j++;
+	          }
+            while(j<k);
+            }
 
       /* check for a *HEADING card */
-
       if(strcmp1(&buff[0],"*HEADING")==0){
 	  iheading=1;
       }
