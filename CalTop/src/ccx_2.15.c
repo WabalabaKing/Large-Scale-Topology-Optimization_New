@@ -319,6 +319,8 @@ int main(int argc,char *argv[])
   double *designFiltered=NULL; /**< filtered densitites */
   double *gradComplFiltered=NULL; /**< filtered compliance  sensitivities */ 
   double *eleVolFiltered=NULL; /**< filtered element volume sensitivities */
+  int *passiveIDs = NULL;
+  int numPassive = 0;
 
 
   double ctrl[56]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5};
@@ -1061,19 +1063,15 @@ while(istat>=0)
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
 
-  /* Read the number of passive elements */
-  int *passives = NULL;
-  int npassives = 0;
 
-  passives = passiveElements("skinElementList.nam", &npassives);
-
-  printf("Read %d passive elements.\n", npassives);
-
-  // Optional: Print a few
-  for (int i = 0; i < npassives && i < 5; ++i) 
-  {
-    printf("passives[%d] = %d\n", i, passives[i]);
-  }
+      
+    passiveIDs = passiveElements("skinElementList.nam", &numPassive);
+      
+      printf("Read %d passive elements.\n", numPassive);
+      for (int i = 0; i < numPassive; i++) {
+          printf("Passive Element ID: %d\n", passiveIDs[i]);
+      }
+      
 
 
   /* Read element desitiies from .dat file, if absent, initialize the design to one */    
