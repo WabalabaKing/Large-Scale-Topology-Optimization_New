@@ -30,6 +30,7 @@
 #include "CalculiX.h"
 #include <time.h>
 #include <unistd.h>
+#include <sys/stat.h> 
 
 #ifdef CALCULIX_MPI
 ITG myid = 0, nproc = 0;
@@ -1063,14 +1064,37 @@ while(istat>=0)
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
 
+    struct stat buffer;
 
-      
-    passiveIDs = passiveElements("skinElementList.nam", &numPassive);
+    if (stat("skinElementList.nam", &buffer) != 0) 
+    {
+        printf("File 'skinElementList.nam' not found.\n");
+    } 
+    else
+    /* Read the element indies from skinElementList.nam */ 
+    {
+      passiveIDs = passiveElements("skinElementList.nam", &numPassive);
       
       printf("Read %d passive elements.\n", numPassive);
-      for (int i = 0; i < numPassive; i++) {
+
+      for (int i = 0; i < 5; i++) 
+      {
           printf("Passive Element ID: %d\n", passiveIDs[i]);
       }
+
+      printf(".\n");
+      printf(".\n");
+      printf(".\n");
+
+      for (int i = numPassive - 5; i < numPassive; i++) 
+      {
+          printf("Passive Element ID: %d\n", passiveIDs[i]);
+      }
+
+    }
+
+    printf("\n");
+
       
 
 
