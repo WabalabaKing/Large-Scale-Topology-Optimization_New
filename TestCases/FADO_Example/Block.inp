@@ -1,0 +1,42 @@
+**Block file for optimization
+*INCLUDE, INPUT=/home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization_IPOPT/TestCases/FADO_Example/mesh.nam
+*INCLUDE, INPUT=/home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization_IPOPT/TestCases/FADO_Example/Nfix1.nam
+*INCLUDE, INPUT= /home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization_IPOPT/TestCases/FADO_Example/Cload.nam
+
+**Add Boundary file
+*BOUNDARY
+Nfix1,1,2
+
+**Add material named EL with elastic properties
+*MATERIAL,NAME=EL
+*ELASTIC
+1e6,0.33
+
+*SOLID SECTION, ELSET=EALL, MATERIAL=EL
+*NSET, NSET=DES
+1
+
+*DESIGNVARIABLES, TYPE=COORDINATE
+DES
+
+
+*STEP
+*STATIC
+**Begin setup for static analysi
+*CLOAD
+LOADED, 2, 5
+*END STEP
+
+
+*NODE FILE
+ U
+***EL FILE
+** S, E
+*END STEP
+
+
+*STEP
+*SENSITIVITY
+*OBJECTIVE
+STRAINENERGY
+*END STEP
