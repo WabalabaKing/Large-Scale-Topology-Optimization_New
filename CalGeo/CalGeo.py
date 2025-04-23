@@ -172,13 +172,13 @@ def get_traction_nodes(su2_filepath, output_filepath="NSurface.nam"):
     # Ensure nodes were extracted
     if not skin_nodes:
         return "Error: No nodes found for marker 'surface'. Check SU2 file format."
-
+    new_skin_nodes = list(set(skin_nodes))
     # Write the extracted surface node indices to the output file with one entry per line, comma-separated
     with open(output_filepath, "w") as output_file:
         output_file.write("*NSET, NSET=Nsurface\n")
         
         # Write nodes one per line, with a comma after each entry
-        for node in skin_nodes:
+        for node in new_skin_nodes:
             output_file.write(f"{node},\n")
 
     #return f"Successfully extracted {len(skin_nodes)} skin nodes with offset, written one per line with comma (original order preserved), saved to {output_filepath}"
@@ -226,11 +226,12 @@ def get_fixed_nodes(su2_filepath, output_filepath="Nfix1.nam"):
         return "Error: No nodes found for marker 'fixed'. Check SU2 file format."
 
     # Write the extracted fixed node indices to the output file with one entry per line, comma-separated
+    new_root_nodes = list(set(root_nodes))
     with open(output_filepath, "w") as output_file:
         output_file.write("*NSET, NSET=Nfix1\n")
         
         # Write nodes one per line, with a comma after each entry
-        for node in root_nodes:
+        for node in new_root_nodes:
             output_file.write(f"{node},\n")
 
     #return f"Successfully extracted {len(root_nodes)} ROOT nodes with offset, written one per line with comma (original order preserved), saved to {output_filepath}"
@@ -260,7 +261,7 @@ def extract_skin_node_triplets(su2_filepath):
                 if len(elements) == 4:
                     node_triplet = tuple(map(int, elements[1:]))
                     skin_triplets.append(node_triplet)
-    return skin_triplets
+    return list(set(skin_triplets))
 
 
 def find_all_tetrahedral_elements_for_skin_optimized(su2_filepath, skin_triplets, output_filepath="skin_tetra_elements.nam"):
@@ -304,18 +305,18 @@ def find_all_tetrahedral_elements_for_skin_optimized(su2_filepath, skin_triplets
     
     return skin_to_tetra_mapping
 
-
+su2path = "../TestCases/Short_Cantelever_Beam/SCB.su2"
 # Extract all "fixed" nodes and write to Nfix1.nam
-get_fixed_nodes("SU2_MESH/SCB_EL_5MM.su2")
+get_fixed_nodes(su2path)
 
 #get_skin_nodes("SU2_MESH/CRMWS_WINGBOX.su2")
 
 # Extract all "surface" nodes and write to Nsurface.nam
-get_traction_nodes("SU2_MESH/SCB_EL_5MM.su2")
+get_traction_nodes(su2path)
 
 
 # Read all coordinates and connectivity matrix and write to mesh.nam
-extract_su2_mesh_data_with_element_index("SU2_MESH/SCB_EL_5MM.su2")
+extract_su2_mesh_data_with_element_index(su2path)
 
 
 
