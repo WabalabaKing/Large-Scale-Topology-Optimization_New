@@ -19,11 +19,11 @@ import os
 # Design variables of the problem
 # this defines initial value and how they are written to an arbitrary file
 NCPU = 4
-penalty = 3
-rmin = 0.1
-volfrac=0.5
+penalty = 5
+rmin = 0.7
+volfrac=0.8
 InputFileName="SCB"
-nDV = 81220
+nDV = 14189
 
 
 
