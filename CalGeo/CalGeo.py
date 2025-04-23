@@ -1,9 +1,16 @@
 
 import os
+import numpy as np
 from collections import defaultdict
 
 # Final correction: Add element index in the first column while removing the first and last columns from the SU2 file
 
+def signed_tet_volume(a, b, c, d):
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    d = np.array(d)
+    return np.dot(np.cross(b - a, c - a), d - a) / 6.0
 
 def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh.nam"):
     """
@@ -32,10 +39,13 @@ def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh
         
         if node_section:
             if len(node_data) < node_count:
-                node_data.append(line.strip())
+                nd = (line.split())
+                nd = nd[0:3]
+                nd = [float(x) for x in nd]
+                node_data.append(nd)
             else:
                 node_section = False  # Stop after collecting all nodes
-    
+    node_data = np.array(node_data)
     # Extract element connectivity
     element_section = False
     element_count = 0
@@ -52,15 +62,24 @@ def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh
                 elements = line.strip().split()
                 if len(elements) > 2:  # Ensure valid element data with more than two entries
                     intelem = [int(x)+1 for x in elements[1:-1]]
-                    formatted_element = ",".join(str(x) for x in intelem)  # Exclude first and last column
+                    a = node_data[intelem[0]-1]
+                    b = node_data[intelem[1]-1]
+                    c = node_data[intelem[2]-1]
+                    d = node_data[intelem[3]-1]
+                    vol = signed_tet_volume(a, b, c, d)
+                    if vol>0:
+                        formatted_element = [intelem[0],intelem[1],intelem[2],intelem[3]]  # Exclude first and last column
+                    elif vol<=0:
+                        formatted_element = [intelem[0],intelem[2],intelem[1],intelem[3]]
+                        print("There was an inverted volume! It has been fixed")
                     element_data.append(formatted_element)
             else:
                 break  # Stop after collecting all elements
-    
+    element_data = np.array(element_data)
     # Ensure node data was extracted correctly
-    if not node_data:
+    if not node_data.any:
         return "Error: No node data extracted. Check SU2 file format."
-
+    
     # Write extracted data to the output file
     with open(output_filepath, "w") as output_file:
         output_file.write("**This file contains mesh information\n")
@@ -68,8 +87,9 @@ def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh
         
         # Writing nodal coordinates with node index starting from 1
         for idx, node in enumerate(node_data, start=1):
-            coords = node.split()  # Assume space-separated coordinates
-            formatted_line = f"{idx}, {coords[0]}, {coords[1]}, {coords[2]}"
+
+            #coords = node.split()  # Assume space-separated coordinates
+            formatted_line = f"      {idx}, {node[0]}, {node[1]}, {node[2]}"
             output_file.write(formatted_line + "\n")
         
         # Add a blank line before the element section
@@ -78,7 +98,7 @@ def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh
         
         # Writing element connectivity, adding element index as the first column
         for idx, elem in enumerate(element_data, start=1):
-            formatted_element = f"{idx},{elem}"
+            formatted_element = f"    {idx}, {elem[0]}, {elem[1]}, {elem[2]}, {elem[3]}"
             output_file.write(formatted_element + "\n")
 
     #print (f"Successfully formatted {len(node_data)} nodes and {len(element_data)} elements with indexed elements, saved to {output_filepath}"_
@@ -306,7 +326,8 @@ def find_all_tetrahedral_elements_for_skin_optimized(su2_filepath, skin_triplets
     
     return skin_to_tetra_mapping
 
-su2path = "../TestCases/Short_Cantelever_Beam/SCB.su2"
+#su2path = "../TestCases/Short_Cantelever_Beam/SCB.su2"
+su2path = "TestCube/TestCube.su2"
 # Extract all "fixed" nodes and write to Nfix1.nam
 get_fixed_nodes(su2path)
 
