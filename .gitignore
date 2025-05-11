@@ -5,7 +5,6 @@
 *.sta
 *.frd
 *.cvg
-*.su2
 *.vtu
 *.csv
 *.swp
