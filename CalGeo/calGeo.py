@@ -2,8 +2,32 @@
 import os
 import numpy as np
 from collections import defaultdict
+import argparse
 
 # Final correction: Add element index in the first column while removing the first and last columns from the SU2 file
+
+def print_banner():
+    print("\n")
+    print("   #####     ###    #       #####   #######   #####   ")
+    print("  #         #   #   #      #       #         #     #  ")
+    print("  #        #     #  #      #       #         #     #  ")
+    print("  #        #######  #      #  ###  #####     #     #  ")
+    print("  #        #     #  #      #     # #         #     #  ")
+    print("  #     #  #     #  #      #     # #         #     #  ")
+    print("   #####   #     #  #####   #####  #######   ##### #  ")
+    print("\n")
+    print(" A mesh pre-processing tool for CalTop.exe ")
+    print("\n")
+    print("* Contributors:")
+    print("* Prateek Ranjan, Dept. of Aerospace Engineering,")
+    print("* Massachusetts Institute of Technology")
+    print("* Wanzheng Zheng, Dept. of Aerospace Engineering,")
+    print("* University of Illinois at Urbana-Champaign")
+    print("* Kai A. James, Dept. of Aerospace Engineering,")
+    print("* Georgia Institute of Technology")
+    print("\n")
+
+
 
 def signed_tet_volume(a, b, c, d):
     a = np.array(a)
@@ -23,6 +47,8 @@ def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh
     su2_filepath (str): Path to the input SU2 file.
     output_filepath (str): Path to the output text file (default: mesh.nam).
     """
+
+    print("Extracting mesh coordinates and element connectivity information ...", end = '')
     with open(su2_filepath, "r") as file:
         lines = file.readlines()
     
@@ -101,6 +127,13 @@ def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh
             formatted_element = f"    {idx}, {elem[0]}, {elem[1]}, {elem[2]}, {elem[3]}"
             output_file.write(formatted_element + "\n")
 
+        print("done!") 
+
+    # Number of design variables (nDV) = element count
+    nDV = len(element_data)  
+
+    return nDV
+
     #print (f"Successfully formatted {len(node_data)} nodes and {len(element_data)} elements with indexed elements, saved to {output_filepath}"_
 
 # Function to extract node indices associated with the "root" marker without sorting and with a comma per line
@@ -116,6 +149,8 @@ def get_skin_nodes(su2_filepath, output_filepath="NSurface.nam"):
     su2_filepath (str): Path to the input SU2 file.
     output_filepath (str): Path to the output text file (default: Nfix1.nam).
     """
+
+    print("Extracting skin node indices ...", std=' ')
     with open(su2_filepath, "r") as file:
         lines = file.readlines()
 
@@ -152,6 +187,7 @@ def get_skin_nodes(su2_filepath, output_filepath="NSurface.nam"):
         for node in skin_nodes:
             output_file.write(f"{node},\n")
 
+    print("done!")
     #return f"Successfully extracted {len(skin_nodes)} skin nodes with offset, written one per line with comma (original order preserved), saved to {output_filepath}"
 
 def get_traction_nodes(su2_filepath, output_filepath="NSurface.nam"):
@@ -166,6 +202,8 @@ def get_traction_nodes(su2_filepath, output_filepath="NSurface.nam"):
     su2_filepath (str): Path to the input SU2 file.
     output_filepath (str): Path to the output text file (default: Nfix1.nam).
     """
+
+    print("Extracting traction nodes ...", end = ' ')
     with open(su2_filepath, "r") as file:
         lines = file.readlines()
 
@@ -202,6 +240,7 @@ def get_traction_nodes(su2_filepath, output_filepath="NSurface.nam"):
         for node in new_skin_nodes:
             output_file.write(f"{node},\n")
 
+    print("done!")
     #return f"Successfully extracted {len(skin_nodes)} skin nodes with offset, written one per line with comma (original order preserved), saved to {output_filepath}"
 
 
@@ -218,6 +257,8 @@ def get_fixed_nodes(su2_filepath, output_filepath="Nfix1.nam"):
     su2_filepath (str): Path to the input SU2 file.
     output_filepath (str): Path to the output text file (default: Nfix1.nam).
     """
+
+    print("Extracting fixed nodes ...", end = '')
     with open(su2_filepath, "r") as file:
         lines = file.readlines()
 
@@ -255,6 +296,7 @@ def get_fixed_nodes(su2_filepath, output_filepath="Nfix1.nam"):
         for node in new_root_nodes:
             output_file.write(f"{node},\n")
 
+    print("done!")
     #return f"Successfully extracted {len(root_nodes)} ROOT nodes with offset, written one per line with comma (original order preserved), saved to {output_filepath}"
 
 def extract_skin_node_triplets(su2_filepath):
@@ -326,19 +368,48 @@ def find_all_tetrahedral_elements_for_skin_optimized(su2_filepath, skin_triplets
     
     return skin_to_tetra_mapping
 
-su2path = "../TestCases/Short_Cantelever_Beam/SCB.su2"
+
+def main():
+    parser = argparse.ArgumentParser(description="Convert SU2 mesh to CalculiX NAM format and extract boundary nodes.")
+    parser.add_argument("su2_file", type=str, help="Path to the input SU2 mesh file")
+    parser.add_argument("--mesh_out", type=str, default="mesh.nam", help="Output file for CalculiX mesh (default: mesh.nam)")
+    parser.add_argument("--fixed_out", type=str, default="Nfix1.nam", help="Output file for fixed node set (default: Nfix1.nam)")
+    parser.add_argument("--surface_out", type=str, default="NSurface.nam", help="Output file for surface node set (default: NSurface.nam)")
+
+    args = parser.parse_args()
+
+    print_banner()
+
+    # Extract all "fixed" nodes and write to Nfix1.nam
+    get_fixed_nodes(args.su2_file, args.fixed_out)
+
+    # Extract all "surface" nodes and write to Nsurface.nam
+    get_traction_nodes(args.su2_file, args.surface_out)
+
+    # Extract all coordinates and connectivity matrix and write to mesh.nam
+    nDV = extract_su2_mesh_data_with_element_index(args.su2_file, args.mesh_out)
+
+    print("Number of design variables: ", nDV)
+if __name__ == "__main__":
+    main()
+
+
+
+#su2path = "SCB_EL_12MM.su2"
 #su2path = "TestCube/TestCube.su2"
+
+
 # Extract all "fixed" nodes and write to Nfix1.nam
-get_fixed_nodes(su2path)
+#get_fixed_nodes(su2path)
 
 #get_skin_nodes("SU2_MESH/CRMWS_WINGBOX.su2")
 
 # Extract all "surface" nodes and write to Nsurface.nam
-get_traction_nodes(su2path)
+#get_traction_nodes(su2path)
 
 
 # Read all coordinates and connectivity matrix and write to mesh.nam
-extract_su2_mesh_data_with_element_index(su2path)
+#extract_su2_mesh_data_with_element_index(su2path)
 
 
 
