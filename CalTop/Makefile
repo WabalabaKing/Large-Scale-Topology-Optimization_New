@@ -16,12 +16,12 @@ PREFIX ?= $(shell pwd)
 BINDIR = $(PREFIX)/bin
 
 # Compiler and flags
-CFLAGS = -Wall $(OPT) -fopenmp -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I$(MKL_INCLUDE) -I$(INCLUDE_DIR)
+CFLAGS = -Wall $(OPT) -fopenmp -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I$(MKL_INCLUDE) -I$(INCLUDE_DIR) -g
 
 FFLAGS = -Wall -O3 -fallow-argument-mismatch
 
-CC = cc
-FC = gfortran
+CC = tau_cc.sh -dynamic
+FC = tau_f90.sh -dynamic
 
 #INTEL MKL
 MKL_LIB= /opt/intel/oneapi/mkl/2025.1/lib/intel64
