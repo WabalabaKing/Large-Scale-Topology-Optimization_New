@@ -207,6 +207,22 @@ export OMP_NUM_THREADS =<num_procs>
 To use CalTop with FADO interface for optimization, obtain FADO from github. https://github.com/WabalabaKing/FADO_pyoptsparse (This is not the official repo but have ipopt driver and pyoptsparse interface builtin)
 FADO already comes with multiple optimization algorithms. To use IPOPT and pyoptSparse, obtain ipyopt package from https://pypi.org/project/ipyopt/ (or just do pip install ipyopt)
 
+## Profiling
+The underlying density-based CalculiX codebase can be profiled using TAU. A comprehensive discusion on calTop's performance is forthcoming. To profile calTop, the source code transformation-based approach in recommended as it allows for fine-grain profiling. TAU must be built with PDT using the following configuration:
+
+``` sh
+./configure -cc=cc -fortran=gfortran -pthread -openmp -bfd=download -unwind=download -pdt=<pdt_root_dir> -prefix=<tau_install_dir>
+```
+
+Once TAU is in path, the `TAU_MAKEFILE`  and `TAU execuatble` shoudl be added to the environment:
+
+``` sh
+export PATH="<install_dir>/x86_64/bin:$PATH"
+export TAU_MAKEFILE=<install_dir>/x86_64/lib/Makefile.tau-pthread-pdt-openmp
+```
+
+To compile calTop with TAU, we recommend using the Makefile in `TAU_MAKE`.
+
 
 ## License
 This project is licensed under [MIT License](LICENSE).
