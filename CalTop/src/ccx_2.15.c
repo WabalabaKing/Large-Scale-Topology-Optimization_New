@@ -470,7 +470,7 @@ else
 
 //printf("\n */*/*/* rmin= %f\n",rmin);
 
-/* Assign default values */
+/* Assign default value for penalty parameter */
 if (pSupplied==0.0) 
   {
     pstiff=1.0;
@@ -508,6 +508,8 @@ printf("\n");
 printf("* Contributors:\n");
 printf("* Prateek Ranjan, Dept. of Aerospace Engineering,\n");
 printf("* Massachusetts Institute of Technology \n");
+printf("* Wanzheng Zheng, Dept. of Aerospace Engineering,\n");
+printf("* University of Illinois at Urbana Champaign \n");
 printf("* Ghanendra Kumar Das, Dept. of Aerospace Engineering,\n");
 printf("* Georgia Institute of Technology\n");
 printf("* Kai A. James, Dept. of Aerospace Engineering,\n");
