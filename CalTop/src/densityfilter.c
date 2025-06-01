@@ -60,7 +60,7 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 
     /* Calculate density filter */
-    prinff("Computing distance matrix...");
+    printf("Computing distance matrix...");
     mafillsmmain_filter2(ipkon,rmin,filternnz,ne,ttime,&time,&ne0,elCentroid,
                                     FilterMatrixs,rowFilters,colFilters,filternnzElems,fnnzassumed);
     printf("Done \n");
@@ -238,7 +238,7 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     SFREE(drow);
     SFREE(dval);
   }
-  
+
   (*ttime)+=(*tper);
   return;
 }
