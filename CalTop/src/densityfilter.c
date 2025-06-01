@@ -19,6 +19,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "CalculiX.h"
+#include <unistd.h>
 
 void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	                ITG *ne,
@@ -44,12 +45,24 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   dtime=*tper;
 
   ne0=*ne;
+  
+  /* Define counter for filter matrix eval */
+  int build_filter = 0;
+
+  /* Check if filter files exist */
+  if (access("drow.dat", F_OK) != 0 || access("dcol.dat", F_OK) != 0 || access("dval.dat", F_OK) != 0) 
+  {
+    build_filter = 1;
+  }
+
 
   
-  /* If this is the first iteration, build the density filter */
-  if(itertop==1)
+  /* Filter files not found, build the density filter */
+  if(build_filter==1)
   {
-    
+   
+    printf("Filter files not found...building filter matrix");
+
     double *elCentroid=NULL; //pointer to store Centroid of elements
     NNEW(elCentroid,double,3*ne0);  //allocate memory to element CG, initialize to 0 
 
@@ -128,11 +141,10 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       }
     }
     fclose(dnnz);
-
   }
   else
   {
-    printf("Reading density filter matrix from file");
+    printf("Filter files found...assembling filter matrix");
 
     /* Read non zeros in each row from dnnz.dat and calculate total nnzs */
     *filternnz=0; //initialize
