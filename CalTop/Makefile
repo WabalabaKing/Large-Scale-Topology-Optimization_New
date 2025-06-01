@@ -7,7 +7,7 @@ ARPACK_PATH = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/
 
 #Directories
 SRC_DIR = src
-OBJ_DIR = //media/prateekr/MDO/buffer/
+OBJ_DIR = obj
 INCLUDE_DIR = include
 BIN_DIR = bin
 
@@ -16,12 +16,12 @@ PREFIX ?= $(shell pwd)
 BINDIR = $(PREFIX)/bin
 
 # Compiler and flags
-CFLAGS = -Wall $(OPT) -fopenmp -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I$(MKL_INCLUDE) -I$(INCLUDE_DIR) -g
+CFLAGS = -Wall $(OPT) -fopenmp -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I$(MKL_INCLUDE) -I$(INCLUDE_DIR)
 
 FFLAGS = -Wall -O3 -fallow-argument-mismatch
 
-CC = tau_cc.sh -dynamic
-FC = tau_f90.sh -dynamic
+CC = cc
+FC = gfortran
 
 #INTEL MKL
 MKL_LIB= /opt/intel/oneapi/mkl/2025.1/lib/intel64
@@ -30,7 +30,7 @@ MKL_INCLUDE=/opt/intel/oneapi/mkl/2025.1/include
 CMPLR_PATH=/opt/intel/oneapi/compiler/2025.1/bin
 
 # Defauilt target
-all: $(BIN_DIR)/calTop_INST.exe
+all: $(BIN_DIR)/calTop.exe
 
 # Ensure object directory exists
 $(OBJ_DIR) $(BIN_DIR):
@@ -62,7 +62,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f | $(OBJ_DIR)
 	$(FC) $(FFLAGS) -c $< -o $@
 
 # Build executable in bin/
-$(BIN_DIR)/calTop_INST.exe: $(OCCXMAIN) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
+$(BIN_DIR)/calTop.exe: $(OCCXMAIN) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
 	./date.pl
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ccx_2.15.c -o $(OBJ_DIR)/ccx_2.15.o
 	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
@@ -73,16 +73,16 @@ ccx_2.15.a: $(OCCXF) $(OCCXC) | $(OBJ_DIR)
 	ar vr $@ $^
 
 # Install target (default: install in current directory)
-install: $(BIN_DIR)/calTop_INST.exe
-	@echo "Installing calTop_INST.exe to $(BINDIR)"
+install: $(BIN_DIR)/calTop.exe
+	@echo "Installing calTop.exe to $(BINDIR)"
 	mkdir -p $(BINDIR)
-	cp $(BIN_DIR)/calTop_INST.exe $(BINDIR)/
-	chmod +x $(BINDIR)/calTop_INST.exe
+	cp $(BIN_DIR)/calTop.exe $(BINDIR)/
+	chmod +x $(BINDIR)/calTop.exe
 
 # Uninstall target
 uninstall:
-	@echo "Removing calTop_INST.exe from $(BINDIR)"
-	rm -f $(BINDIR)/calTop_INST.exe
+	@echo "Removing calTop.exe from $(BINDIR)"
+	rm -f $(BINDIR)/calTop.exe
 
 clean:
-	rm -f $(OBJ_DIR)/*.* $(BIN_DIR)/*.* ccx_2.15.a
+	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*.* ccx_2.15.a

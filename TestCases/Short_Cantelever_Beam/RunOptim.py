@@ -24,6 +24,7 @@ rmin = 1
 volfrac=0.3
 InputFileName="SCB"
 nDV = 14189
+nnz = 700
 
 
 
@@ -38,7 +39,7 @@ with open("Constants.txt", mode="w+") as file:
     file.write(str(NCPU)+"\n")
     
     
-var = InputVariable(x0, ArrayLabelReplacer("__X__"), 0, np.ones(nDV,dtype=float), lb=0.0, ub=1.0)
+var = InputVariable(x0, ArrayLabelReplacer("__X__"), 0, np.ones(nDV,dtype=float), lb=0.001, ub=1.0)
 parData1 = Parameter(["Constants.txt"],LabelReplacer("__DATA_FILE__"))
 
 evalFun1 = ExternalRun("Direct","python3 ../../direct.py config_temp.txt")
@@ -57,7 +58,7 @@ driver = IpoptDriver()
 driver.addObjective("min", fun1, 1)
 driver.addUpperBound(con,volfrac)
 
-optIter = 1000
+optIter = 500
 
 driver.setEvaluationMode(False,2.0)
 driver.setStorageMode(True, "DSN_")

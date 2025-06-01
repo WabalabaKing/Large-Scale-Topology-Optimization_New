@@ -15,9 +15,9 @@ def runcalTop(x,File, penalty, rmin,NCPU):
         for xi in x:
             file.write(str(xi)+"\n")
     File=File
-    if NCPU>1:
-        cpucmd = "export OMP_NUM_THREADS="+str(int(NCPU))
-        os.system(cpucmd)
+    #if NCPU>1:
+    #    cpucmd = "export OMP_NUM_THREADS="+str(int(NCPU))
+    #    os.system(cpucmd)
     cmd = ["calTop.exe", File, "-p", str(penalty), "-r", str(rmin)]
     result = subprocess.run(cmd)
     
