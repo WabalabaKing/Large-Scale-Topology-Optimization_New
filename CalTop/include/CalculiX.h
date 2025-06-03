@@ -124,6 +124,9 @@ void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
                 int *filternnzElems, int *drow, int *dcol, double *dval,
                 int ne, int ne0, int *filternnz, int *fnnzassumed);
 
+void assembleFilter_beta(double *FilterMatrixs, int *rowFilters, int *colFilters,
+                int *filternnzElems, int ne, int ne0, int *filternnz, int *fnnzassumed);
+
 
 
 void FORTRAN(actideacti,(char *set,ITG *nset,ITG *istartset,ITG *iendset,

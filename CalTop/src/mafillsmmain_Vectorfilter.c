@@ -129,7 +129,7 @@ void mafillsmmain_Vectorfilter(ITG *ipkon,double *Vector,double *VectorFiltered,
 
     /* FilterVector */
 
-    printf(" Using up to %" ITGFORMAT " cpu(s) to filter vector.\n\n", num_cpus);
+    printf("Using up to %" ITGFORMAT " cpu(s) to filter vector.\n", num_cpus);
 
     /* create threads and wait */
     NNEW(ithread,ITG,num_cpus);

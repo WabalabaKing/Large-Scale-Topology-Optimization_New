@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 /**
  * @brief Populate the flattened filter matrix and associated row/column index arrays
@@ -34,7 +35,8 @@ void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
 
     int index = 1;      // Shared counter for writing into flattened arrays
                         // (shared across all rows — may cause overwrite)
-
+    
+    printf("Starting loop \n");
     for (i = 0; i < *filternnz; i++) 
     {
         rowval = drow[i];    // Target row (0-based index)
@@ -65,3 +67,61 @@ void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
 
     return;
 }
+
+
+
+void assembleFilter_beta(double *FilterMatrixs, int *rowFilters, int *colFilters,
+                    int *filternnzElems,
+                    int ne, int ne0,
+                    int *filternnz, int *fnnzassumed)
+{
+    FILE *frow = NULL, *fcol = NULL, *fval = NULL;
+    int i, rowval, colval, index = 1;
+    double value;
+
+    // Open the input files
+    frow = fopen("drow.dat", "r");
+    fcol = fopen("dcol.dat", "r");
+    fval = fopen("dval.dat", "r");
+
+    if (!frow || !fcol || !fval) {
+        perror("Error opening one or more input files");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Streaming filter data from disk...\n");
+
+    for ( i = 0; i < *filternnz; ++i)
+    {
+        if (fscanf(frow, "%d", &rowval) != 1 ||
+            fscanf(fcol, "%d", &colval) != 1 ||
+            fscanf(fval, "%lf", &value) != 1)
+            {
+                fprintf(stderr, "Error reading line %d in filter data\n", i);
+                exit(EXIT_FAILURE);
+            }
+    
+        // Compute flattened index (column-major: index + fnnzassumed * row)
+        int offset = (index - 1) + (*fnnzassumed) * (rowval - 1);
+
+        rowFilters[offset]    = rowval;
+        colFilters[offset]    = colval;
+        FilterMatrixs[offset] = value;
+
+        // Update index (shared for all rows — may lead to memory overwrites)
+        if (index < filternnzElems[rowval])
+        {
+            index++;
+        }
+        else
+        {
+            index = 1;
+        }
+    }
+
+    /* Free memeory */
+    fclose(frow);
+    fclose(fcol);
+    fclose(fval);
+}
+

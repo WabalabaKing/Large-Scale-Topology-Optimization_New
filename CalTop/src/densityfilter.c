@@ -180,6 +180,7 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       exit(1);
     }
 
+    
     printf("Allocating memory for filter files...");
     double *dval=NULL; //pointer to store density filter values
     NNEW(dval,double,*filternnz);  //allocate memory to dval 
@@ -193,6 +194,7 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     printf("Done \n");
     FILE *dcolw;
 
+    /*
     dcolw=fopen("dcol.dat","r"); //open in read mode
 
     if (dcolw!=NULL)
@@ -245,11 +247,13 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     {
       perror("Error reading dval.dat");
     }
-
+    */
     printf("Assembling density filter \n");
     //FORTRAN(readfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,filternnz,drow,dcol,dval,fnnzassumed));
     
-    assembleFilter(FilterMatrixs, rowFilters, colFilters,filternnzElems, drow, dcol, dval, ne, ne0, filternnz,fnnzassumed); 
+    //assembleFilter(FilterMatrixs, rowFilters, colFilters,filternnzElems, drow, dcol, dval, ne, ne0, filternnz,fnnzassumed);
+
+    assembleFilter_beta(FilterMatrixs, rowFilters, colFilters,filternnzElems, ne, ne0, filternnz,fnnzassumed); 
 
     double val_0 = FilterMatrixs[0];
     double val_1 = FilterMatrixs[1];
