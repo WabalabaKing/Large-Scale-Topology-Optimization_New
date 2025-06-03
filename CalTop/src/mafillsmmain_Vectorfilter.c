@@ -157,76 +157,62 @@ void mafillsmmain_Vectorfilter(ITG *ipkon,double *Vector,double *VectorFiltered,
 }
 
 /* subroutine for multithreading of mafillsm */
-//void *mafillsmVectorfiltermt(ITG *i)
 void *mafillsmVectorfiltermt(void *thread_id_ptr) 
 {
-    int i = *((int *)thread_id_ptr);
+    ITG i = *((ITG *)thread_id_ptr);
+    ITG nea = neapar[i] + 1;
+    ITG neb = nebpar[i] + 1;
 
+    printf("[Thread %d] Filtering elements %d to %d\n", i, nea, neb);
 
-    int nea,neb;
+    /* Legacy method */
+    //FORTRAN(mafillsmvectorfilter,(ne1,ttime1,time1,ne01,&nea,&neb,
+    //                          FilterMatrix1,Vector1,VectorFiltered1,
+    //                          filternnzElem1,rowFilter1,colFilter1,fnnzassumed1,q1));
 
-    //nea=neapar[*i]+1;
-    //neb=nebpar[*i]+1;
+    /*mafillsmvectorfilter_io(*ne1, *ttime1, *time1, *ne01, nea, neb,
+                            FilterMatrix1, Vector1, VectorFiltered1,
+                            filternnzElem1, rowFilter1, colFilter1,
+                            *fnnzassumed1, *q1); */
 
-    nea=neapar[i]+1;
-    neb=nebpar[i]+1;
-
-/*FILE *rhoFile;
-
-    rhoFile=fopen("densityout_mafillsmmain.dat","w"); //open in write mode
-
-
-    int i;  //counter
-        for (i=0;i<ne;i++)
-            {
-                fprintf(rhoFile,"%f \n",design1[i]);
-            }
-        fclose(rhoFile);*/
-
-
-    /* Legacy approach */
-    
-    FORTRAN(mafillsmvectorfilter,(ne1,ttime1,time1,ne01,&nea,&neb,
-                              FilterMatrix1,Vector1,VectorFiltered1,
-                              filternnzElem1,rowFilter1,colFilter1,fnnzassumed1,q1));
-    
-    /*
-        mafillsmvectorfilter_io(*ne1, *ttime1, *time1, *ne01, nea, neb,
-                        FilterMatrix1, Vector1, VectorFiltered1,
-                        filternnzElem1, rowFilter1, colFilter1, *fnnzassumed1, *q1);
-    */
     return NULL;
 }
 
 
 void mafillsmvectorfilter_io(int ne_, double ttime, double time,
-                          int ne0, int nea, int neb,
-                          double *FilterMatrixs, double *Vector, double *VectorFiltered,
-                          int *filternnzElems, int *rowFilters, int *colFilters,
-                          int fnnzassumed, double q)
-{
-    for (int i = nea; i <= neb; ++i) 
+                             int ne0, int nea, int neb,
+                             double *FilterMatrixs, double *Vector, double *VectorFiltered,
+                             int *filternnzElems, int *rowFilters, int *colFilters,
+                             int fnnzassumed, double q) 
     {
-        double sum = 0.0;
-        VectorFiltered[i] = 0.0;
-
-        for (int j = 0; j < filternnzElems[i]; ++j) 
+        for (int i = nea; i <= neb; ++i) 
         {
-            int offset = j + fnnzassumed * i;
-            int col = colFilters[offset];  // 0-based index
+            double sum = 0.0;
+            VectorFiltered[i] = 0.0;
 
-            double weight = pow(FilterMatrixs[offset], q);
-            VectorFiltered[i] += weight * Vector[col];
-            sum += weight;
-        }
+            for (int j = 0; j < filternnzElems[i]; ++j) 
+            {
+                int offset = j + fnnzassumed * i;
 
-        if (sum > 0.0) 
-        {
-            VectorFiltered[i] /= sum;
-        } 
-        else 
-        {
-            VectorFiltered[i] = 0.0;  // fallback
+                if (offset >= fnnzassumed * ne_) 
+                {
+                    fprintf(stderr, "[ERROR] offset out of bounds: %d >= %d (i=%d, j=%d)\n", offset, fnnzassumed * ne_, i, j);
+                    exit(EXIT_FAILURE);
+                }
+
+                int col = colFilters[offset];
+
+                if (col < 0 || col >= ne_) 
+                {
+                    fprintf(stderr, "[ERROR] col index out of bounds: col=%d (i=%d)\n", col, i);
+                   // exit(EXIT_FAILURE);
+                }
+
+                double weight = pow(FilterMatrixs[offset], q);
+                VectorFiltered[i] += weight * Vector[col];
+                sum += weight;
+            }
+
+            VectorFiltered[i] = (sum > 0.0) ? VectorFiltered[i] / sum : 0.0;
         }
     }
-}
