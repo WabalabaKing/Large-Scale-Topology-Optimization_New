@@ -251,6 +251,14 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     
     assembleFilter(FilterMatrixs, rowFilters, colFilters,filternnzElems, drow, dcol, dval, ne, ne0, filternnz,fnnzassumed); 
 
+    double val_0 = FilterMatrixs[0];
+    double val_1 = FilterMatrixs[1];
+    double val_2 = FilterMatrixs[2];
+
+    printf("\nFirst value: %f", val_0);
+    printf("\nSecond value: %f", val_1);
+    printf("\nThird value: %f", val_2);
+
     /* Density filter build, free up memory */
     SFREE(dcol);
     SFREE(drow);

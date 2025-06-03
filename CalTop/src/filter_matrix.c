@@ -42,7 +42,10 @@ void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
         value  = dval[i];    // Corresponding value
 
         // Compute flattened array offset for (index, rowval)
-        int offset = index + (*fnnzassumed) * rowval;
+        //int offset = index + (*fnnzassumed) * rowval;
+
+        int offset = (index - 1) + (*fnnzassumed) * (rowval - 1);
+        //FilterMatrixs[offset] = value;
 
         // Store data in the filter structure
         rowFilters[offset]    = rowval;
