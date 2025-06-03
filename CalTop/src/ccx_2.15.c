@@ -588,7 +588,7 @@ nlabel=48;
 /* While the status variable istat is non-negative */
 while(istat>=0)
 {
-  printf("iStep at begining of outer loop: %d ", istat);
+  //printf("iStep at begining of outer loop: %d ", istat);
   fflush(stdout);
 
   /* in order to reduce the number of variables to be transferred to
@@ -1071,27 +1071,29 @@ while(istat>=0)
 
     if (stat("skinElementList.nam", &buffer) != 0) 
     {
-        printf("File 'skinElementList.nam' not found.\n");
+      printf("File 'skinElementList.nam' not found.\n");
     } 
     else
     /* Read the element indies from skinElementList.nam */ 
     {
       passiveIDs = passiveElements("skinElementList.nam", &numPassive);
-      
+      printf("File 'skinElementList.nam' found. \n");
       printf("Read %d passive elements.\n", numPassive);
 
+      printf("First five skin element IDs => \n");
       for (int i = 0; i < 5; i++) 
       {
-          printf("Passive Element ID: %d\n", passiveIDs[i]);
+        printf("Passive Element ID: %d\n", passiveIDs[i]);
       }
 
       printf(".\n");
       printf(".\n");
       printf(".\n");
 
+      printf("Last five skin element IDs => \n");
       for (int i = numPassive - 5; i < numPassive; i++) 
       {
-          printf("Passive Element ID: %d\n", passiveIDs[i]);
+        printf("Passive Element ID: %d\n", passiveIDs[i]);
       }
 
     }
@@ -1789,7 +1791,7 @@ while(istat>=0)
 
       if(pSupplied!=0)
       {
-        printf("Building filter matix for topology optimization...");
+        printf("Checking if filter matrix needs to be built \n");
         NNEW(FilterMatrixs,double,fnnzassumed*ne_); //Sparse filter matrix stored as row,colum,value with fassumed nnzs per element assumed
     
         NNEW(rowFilters,ITG,fnnzassumed*ne_);
