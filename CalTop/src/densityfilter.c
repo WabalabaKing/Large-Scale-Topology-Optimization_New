@@ -249,11 +249,18 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     }
     */
     printf("Assembling density filter \n");
+    /* Legacy method  */
     //FORTRAN(readfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,filternnz,drow,dcol,dval,fnnzassumed));
     
+    /* c-based method with in-memory drow, dcol and dval handling */
     //assembleFilter(FilterMatrixs, rowFilters, colFilters,filternnzElems, drow, dcol, dval, ne, ne0, filternnz,fnnzassumed);
 
+    /* c-based method with I/O-based drow, dcol and dval handling */
     assembleFilter_beta(FilterMatrixs, rowFilters, colFilters,filternnzElems, ne, ne0, filternnz,fnnzassumed); 
+
+    /* c-based method with buffered I/O-based drow, dcol and dval handling */
+    assembleFilter_beta_buffer(FilterMatrixs, rowFilters, colFilters,filternnzElems, ne, ne0, filternnz,fnnzassumed); 
+
 
     double val_0 = FilterMatrixs[0];
     double val_1 = FilterMatrixs[1];

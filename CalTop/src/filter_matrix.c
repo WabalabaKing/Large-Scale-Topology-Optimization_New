@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define BLOCK_SIZE 1000  // Tune this for performance vs memory
+
 /**
  * @brief Populate the flattened filter matrix and associated row/column index arrays
  *        from sparse data given in coordinate format (drow, dcol, dval).
@@ -125,3 +127,80 @@ void assembleFilter_beta(double *FilterMatrixs, int *rowFilters, int *colFilters
     fclose(fval);
 }
 
+void assembleFilter_beta_buffer(double *FilterMatrixs, int *rowFilters, int *colFilters,
+                    int *filternnzElems,
+                    int ne, int ne0,
+                    int *filternnz, int *fnnzassumed)
+{
+    FILE *frow = NULL, *fcol = NULL, *fval = NULL;
+    int i, block_read, index = 1;
+    int *drow_block = NULL, *dcol_block = NULL;
+    double *dval_block = NULL;
+
+    frow = fopen("drow.dat", "r");
+    fcol = fopen("dcol.dat", "r");
+    fval = fopen("dval.dat", "r");
+
+    if (!frow || !fcol || !fval) {
+        perror("Error opening filter input files");
+        exit(EXIT_FAILURE);
+    }
+
+    // Allocate buffer for block reads
+    drow_block = (int *)malloc(BLOCK_SIZE * sizeof(int));
+    dcol_block = (int *)malloc(BLOCK_SIZE * sizeof(int));
+    dval_block = (double *)malloc(BLOCK_SIZE * sizeof(double));
+
+    if (!drow_block || !dcol_block || !dval_block) {
+        fprintf(stderr, "Memory allocation failed for block buffers.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Reading filter triplets in blocks of %d...\n", BLOCK_SIZE);
+
+    int total_read = 0;
+    while (total_read < *filternnz) {
+        int remaining = *filternnz - total_read;
+        block_read = (remaining < BLOCK_SIZE) ? remaining : BLOCK_SIZE;
+
+        // Read one block into buffers
+        for (i = 0; i < block_read; ++i) {
+            if (fscanf(frow, "%d", &drow_block[i]) != 1 ||
+                fscanf(fcol, "%d", &dcol_block[i]) != 1 ||
+                fscanf(fval, "%lf", &dval_block[i]) != 1)
+            {
+                fprintf(stderr, "Error reading triplet at %d\n", total_read + i);
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        // Process the block
+        for (i = 0; i < block_read; ++i) {
+            int rowval = drow_block[i];
+            int colval = dcol_block[i];
+            double value = dval_block[i];
+
+            int offset = (index - 1) + (*fnnzassumed) * (rowval - 1);
+
+            rowFilters[offset]    = rowval;
+            colFilters[offset]    = colval;
+            FilterMatrixs[offset] = value;
+
+            if (index < filternnzElems[rowval]) {
+                index++;
+            } else {
+                index = 1;
+            }
+        }
+
+        total_read += block_read;
+    }
+
+    // Cleanup
+    fclose(frow);
+    fclose(fcol);
+    fclose(fval);
+    free(drow_block);
+    free(dcol_block);
+    free(dval_block);
+}
