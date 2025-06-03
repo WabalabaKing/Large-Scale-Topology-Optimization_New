@@ -120,6 +120,10 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
 
 void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum);
 
+void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
+                int *filternnzElems, int *drow, int *dcol, double *dval,
+                int ne, int ne0, int *filternnz, int *fnnzassumed);
+
 
 
 void FORTRAN(actideacti,(char *set,ITG *nset,ITG *istartset,ITG *iendset,

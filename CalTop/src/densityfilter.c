@@ -247,8 +247,9 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     }
 
     printf("Assembling density filter \n");
-    FORTRAN(readfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,filternnz,drow,dcol,dval,fnnzassumed));
+    //FORTRAN(readfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,filternnz,drow,dcol,dval,fnnzassumed));
     
+    assembleFilter(FilterMatrixs, rowFilters, colFilters,filternnzElems, drow, dcol, dval, ne, ne0, filternnz,fnnzassumed); 
 
     /* Density filter build, free up memory */
     SFREE(dcol);
