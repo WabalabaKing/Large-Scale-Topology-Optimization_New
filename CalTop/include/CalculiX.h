@@ -127,7 +127,11 @@ void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
 void assembleFilter_beta(double *FilterMatrixs, int *rowFilters, int *colFilters,
                 int *filternnzElems, int ne, int ne0, int *filternnz, int *fnnzassumed);
 
-
+void mafillsmvectorfilter_io(int ne_, double ttime, double time,
+                          int ne0, int nea, int neb,
+                          double *FilterMatrixs, double *Vector, double *VectorFiltered,
+                          int *filternnzElems, int *rowFilters, int *colFilters,
+                          int fnnzassumed, double q);
 
 void FORTRAN(actideacti,(char *set,ITG *nset,ITG *istartset,ITG *iendset,
 			 ITG *ialset,char *objectset,ITG *ipkon,ITG *ibject,
@@ -2766,7 +2770,10 @@ void *mafillsmsemt(ITG *i);
 
 void *mafillsmfiltermt(ITG *i);
 void *mafillsmfilter2mt(ITG *i);
-void *mafillsmVectorfiltermt(ITG *i);
+//void *mafillsmVectorfiltermt(ITG *i);
+
+void *mafillsmVectorfiltermt(void *thread_id_ptr);
+
 
 
 void mafillsmmain(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,

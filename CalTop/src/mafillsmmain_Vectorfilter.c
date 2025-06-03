@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "CalculiX.h"
+#include <stddef.h>  // for NULL
 
 
 static ITG *ne1,*ne01,num_cpus,*neapar=NULL,*nebpar=NULL,
@@ -156,13 +157,19 @@ void mafillsmmain_Vectorfilter(ITG *ipkon,double *Vector,double *VectorFiltered,
 }
 
 /* subroutine for multithreading of mafillsm */
-void *mafillsmVectorfiltermt(ITG *i)
+//void *mafillsmVectorfiltermt(ITG *i)
+void *mafillsmVectorfiltermt(void *thread_id_ptr) 
 {
+    int i = *((int *)thread_id_ptr);
 
-    ITG nea,neb;
 
-    nea=neapar[*i]+1;
-    neb=nebpar[*i]+1;
+    int nea,neb;
+
+    //nea=neapar[*i]+1;
+    //neb=nebpar[*i]+1;
+
+    nea=neapar[i]+1;
+    neb=nebpar[i]+1;
 
 /*FILE *rhoFile;
 
@@ -177,9 +184,49 @@ void *mafillsmVectorfiltermt(ITG *i)
         fclose(rhoFile);*/
 
 
+    /* Legacy approach */
+    
     FORTRAN(mafillsmvectorfilter,(ne1,ttime1,time1,ne01,&nea,&neb,
                               FilterMatrix1,Vector1,VectorFiltered1,
                               filternnzElem1,rowFilter1,colFilter1,fnnzassumed1,q1));
-
+    
+    /*
+        mafillsmvectorfilter_io(*ne1, *ttime1, *time1, *ne01, nea, neb,
+                        FilterMatrix1, Vector1, VectorFiltered1,
+                        filternnzElem1, rowFilter1, colFilter1, *fnnzassumed1, *q1);
+    */
     return NULL;
+}
+
+
+void mafillsmvectorfilter_io(int ne_, double ttime, double time,
+                          int ne0, int nea, int neb,
+                          double *FilterMatrixs, double *Vector, double *VectorFiltered,
+                          int *filternnzElems, int *rowFilters, int *colFilters,
+                          int fnnzassumed, double q)
+{
+    for (int i = nea; i <= neb; ++i) 
+    {
+        double sum = 0.0;
+        VectorFiltered[i] = 0.0;
+
+        for (int j = 0; j < filternnzElems[i]; ++j) 
+        {
+            int offset = j + fnnzassumed * i;
+            int col = colFilters[offset];  // 0-based index
+
+            double weight = pow(FilterMatrixs[offset], q);
+            VectorFiltered[i] += weight * Vector[col];
+            sum += weight;
+        }
+
+        if (sum > 0.0) 
+        {
+            VectorFiltered[i] /= sum;
+        } 
+        else 
+        {
+            VectorFiltered[i] = 0.0;  // fallback
+        }
+    }
 }

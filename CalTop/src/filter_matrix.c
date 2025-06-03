@@ -141,7 +141,8 @@ void assembleFilter_beta_buffer(double *FilterMatrixs, int *rowFilters, int *col
     fcol = fopen("dcol.dat", "r");
     fval = fopen("dval.dat", "r");
 
-    if (!frow || !fcol || !fval) {
+    if (!frow || !fcol || !fval) 
+    {
         perror("Error opening filter input files");
         exit(EXIT_FAILURE);
     }
@@ -151,7 +152,8 @@ void assembleFilter_beta_buffer(double *FilterMatrixs, int *rowFilters, int *col
     dcol_block = (int *)malloc(BLOCK_SIZE * sizeof(int));
     dval_block = (double *)malloc(BLOCK_SIZE * sizeof(double));
 
-    if (!drow_block || !dcol_block || !dval_block) {
+    if (!drow_block || !dcol_block || !dval_block) 
+    {
         fprintf(stderr, "Memory allocation failed for block buffers.\n");
         exit(EXIT_FAILURE);
     }
@@ -159,12 +161,14 @@ void assembleFilter_beta_buffer(double *FilterMatrixs, int *rowFilters, int *col
     printf("Reading filter triplets in blocks of %d...\n", BLOCK_SIZE);
 
     int total_read = 0;
-    while (total_read < *filternnz) {
+    while (total_read < *filternnz) 
+    {
         int remaining = *filternnz - total_read;
         block_read = (remaining < BLOCK_SIZE) ? remaining : BLOCK_SIZE;
 
         // Read one block into buffers
-        for (i = 0; i < block_read; ++i) {
+        for (i = 0; i < block_read; ++i) 
+        {
             if (fscanf(frow, "%d", &drow_block[i]) != 1 ||
                 fscanf(fcol, "%d", &dcol_block[i]) != 1 ||
                 fscanf(fval, "%lf", &dval_block[i]) != 1)
@@ -175,7 +179,8 @@ void assembleFilter_beta_buffer(double *FilterMatrixs, int *rowFilters, int *col
         }
 
         // Process the block
-        for (i = 0; i < block_read; ++i) {
+        for (i = 0; i < block_read; ++i) 
+        {
             int rowval = drow_block[i];
             int colval = dcol_block[i];
             double value = dval_block[i];
@@ -186,9 +191,12 @@ void assembleFilter_beta_buffer(double *FilterMatrixs, int *rowFilters, int *col
             colFilters[offset]    = colval;
             FilterMatrixs[offset] = value;
 
-            if (index < filternnzElems[rowval]) {
+            if (index < filternnzElems[rowval]) 
+            {
                 index++;
-            } else {
+            } 
+            else 
+            {
                 index = 1;
             }
         }

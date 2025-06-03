@@ -1792,6 +1792,8 @@ while(istat>=0)
       if(pSupplied!=0)
       {
         printf("Checking if filter matrix needs to be built \n");
+
+        
         NNEW(FilterMatrixs,double,fnnzassumed*ne_); //Sparse filter matrix stored as row,colum,value with fassumed nnzs per element assumed
     
         NNEW(rowFilters,ITG,fnnzassumed*ne_);
