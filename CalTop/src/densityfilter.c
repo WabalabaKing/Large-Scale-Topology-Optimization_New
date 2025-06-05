@@ -85,16 +85,22 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
     /* Go through each nnz and copy to respective other half, must be in serial */ 
     printf("Mirroring the filter matrix...");
-    FORTRAN(mafillsm_expandfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,fnnzassumed));
+    // LEGACY METHOD
+    //FORTRAN(mafillsm_expandfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,fnnzassumed));
+
+   mafillsm_expandfilter(FilterMatrixs, filternnzElems,rowFilters, colFilters,ne,&ne0, fnnzassumed);
+
+
     printf("done! \n");
     
+
 
     printf("Writing row indices to file...");
     /* FileterMatrixs is built. Write row, col and element values to disk */
 
     /* Write non zero row values for density filter */
     drow=fopen("drow.dat","w"); //open in write mode
-    printf("done!\n");
+    
 
     for(int iii=0; iii < (*fnnzassumed)*(ne0); iii++)
     {
@@ -104,11 +110,12 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       }
     }
     fclose(drow);
+    printf("done!\n");
 
     printf("Writing column indices to file...");
     /* Write non zero col values for density filter */
     dcol=fopen("dcol.dat","w"); //open in write mode
-    printf("done!\n");
+  
 
     for(int iii=0;iii<(*fnnzassumed)*ne0;iii++)
     {
@@ -118,11 +125,12 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       }
     }
     fclose(dcol);
+    printf("done! \n");
 
     printf("Writing element values to file...");
     /* Write non zero filter values for density filter */
     dval=fopen("dval.dat","w"); //open in write mode
-
+    
 
     double sum = 0.0;
 
@@ -131,12 +139,15 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       if(FilterMatrixs[iii]>0)
       {
         fprintf(dval,"%.6f\n",FilterMatrixs[iii]);
+        sum = sum + FilterMatrixs[iii];
       }
     }
     fclose(dval);
 
+
     printf("done!\n");
 
+    printf("DVAL SUM FOR FULL MATRIX : %f \n", sum);
 
     printf("Writing non-zero values to file...");
     /* Write number of non zero filter values for each element */
