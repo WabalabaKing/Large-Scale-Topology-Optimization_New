@@ -174,12 +174,12 @@ void *mafillsmfilter2mt(ITG *i)
 
     ITG thread_id = *i;
     // FORTRAN call
-  //  nea=neapar[*i]+1;
-  //  neb=nebpar[*i]+1;
+    nea=neapar[*i]+1;
+    neb=nebpar[*i]+1;
 
     /* C call */
-    nea=neapar[*i];
-    neb=nebpar[*i];
+  //  nea=neapar[*i];
+ //   neb=nebpar[*i];
 
 
 /*FILE *rhoFile;
