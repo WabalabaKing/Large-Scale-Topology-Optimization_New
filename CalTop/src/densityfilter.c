@@ -83,11 +83,11 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     /* Pointers for filter matrix  */
     FILE *drow; FILE *dcol; FILE *dnnz; FILE *dval;			
 
-    /* Go through each nnz and copy to respective other half, must be in serial */
-    printf("Constructing filter matrix...");
+    /* Go through each nnz and copy to respective other half, must be in serial */ 
+    printf("Mirroring the filter matrix...");
     FORTRAN(mafillsm_expandfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,fnnzassumed));
     printf("done! \n");
-
+    
 
     printf("Writing row indices to file...");
     /* FileterMatrixs is built. Write row, col and element values to disk */
