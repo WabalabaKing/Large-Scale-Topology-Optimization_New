@@ -144,6 +144,13 @@ void mafillsm_filter2(int ne, double ttime, double time,
                       double *FilterMatrixs, int *rowFilters, int *colFilters,
                       int *filternnzElems, int *elarr, int fnnzassumed);
 
+void FORTRAN(mafillsm_filter2_full,(ITG *ne, double *ttime, double *time,
+                      ITG *ne0, ITG *nea, ITG *neb,
+                      double *elCentroid, double *rmin, ITG *filternnz,
+                      double *FilterMatrixs, ITG *rowFilters, ITG *colFilters,
+                      ITG *filternnzElems, ITG *elarr, ITG *fnnzassumed));	
+					  
+
 void FORTRAN(actideacti,(char *set,ITG *nset,ITG *istartset,ITG *iendset,
 			 ITG *ialset,char *objectset,ITG *ipkon,ITG *ibject,
                          ITG *ne));

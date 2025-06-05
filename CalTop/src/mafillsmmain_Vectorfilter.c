@@ -200,8 +200,6 @@ void mafillsmvectorfilter_io(int ne_, double ttime, double time,
                              int fnnzassumed, double q) 
     {
 
-        printf("Number of elements inside function: %d\n", ne_);
-
         for (int i = nea; i <= neb; ++i) 
         {
             double sum = 0.0;
@@ -211,19 +209,7 @@ void mafillsmvectorfilter_io(int ne_, double ttime, double time,
             {
                 int offset = j + fnnzassumed * i;
 
-            //    if (offset >= fnnzassumed * ne_) 
-            //    {
-            //        fprintf(stderr, "[ERROR] offset out of bounds: %d >= %d (i=%d, j=%d)\n", offset, fnnzassumed * ne_, i, j);
-            //        exit(EXIT_FAILURE);
-            //    }
-
                 int col = colFilters[offset] - 1;
-
-            //    if (col < 0 || col >= ne_) 
-            //    {
-            //        fprintf(stderr, "[ERROR] col index out of bounds: col=%d (i=%d)\n", col, i);
-                   // exit(EXIT_FAILURE);
-            //    }
 
                 double weight = pow(FilterMatrixs[offset], q);
                 VectorFiltered[i] += weight * Vector[col];
