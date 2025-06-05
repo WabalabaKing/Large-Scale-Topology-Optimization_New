@@ -197,29 +197,30 @@ void *mafillsmfilter2mt(ITG *i)
 
 
     // Legacy function
- /*  FORTRAN(mafillsm_filter2,(ne1,ttime1,time1,ne01,&nea,&neb,
+   FORTRAN(mafillsm_filter2,(ne1,ttime1,time1,ne01,&nea,&neb,
                               elCentroid1,rmin1,&thread_id,
                               filternnz1,
                               FilterMatrixs1,rowFilters1,colFilters1,filternnzElems1,elarr,fnnzassumed1));
-  */  
+    
    
     // Builds the full filter matrix //
   
- /*   FORTRAN(mafillsm_filter2_full,(ne1, ttime1, time1,
+    /*FORTRAN(mafillsm_filter2_full,(ne1, ttime1, time1,
        ne01, &nea, &neb, elCentroid1, rmin1, filternnz1,
        FilterMatrixs1, rowFilters1, colFilters1,
        filternnzElems1, elarr, fnnzassumed1));
-  */
+    
+       */
    
-    // THis is broken, come back to it later =>
+    /* This is works but only for the upper triangular part. Broken for lower triangular part */
     // c-based function to build the distance matrix 
-    mafillsm_filter2(*ne1, *ttime1, *time1,
+    /*mafillsm_filter2(*ne1, *ttime1, *time1,
                      *ne01, nea, neb,
                      elCentroid1, *rmin1, filternnz1,
                      FilterMatrixs1, rowFilters1, colFilters1,
                      filternnzElems1, elarr, *fnnzassumed1); 
     
-    
+    */
 
 
                     

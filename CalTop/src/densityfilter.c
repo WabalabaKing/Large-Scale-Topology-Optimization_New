@@ -84,11 +84,11 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     FILE *drow; FILE *dcol; FILE *dnnz; FILE *dval;			
 
     /* Go through each nnz and copy to respective other half, must be in serial */ 
-    printf("Mirroring the filter matrix...");
+    printf("Mirroring the filter matrix using legacy method...");
     // LEGACY METHOD
-    //FORTRAN(mafillsm_expandfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,fnnzassumed));
+    FORTRAN(mafillsm_expandfilter,(FilterMatrixs,filternnzElems,rowFilters,colFilters,ne,ttime,&time,&ne0,fnnzassumed));
 
-    mafillsm_expandfilter(FilterMatrixs, filternnzElems,rowFilters, colFilters,ne,&ne0, fnnzassumed);
+    //mafillsm_expandfilter(FilterMatrixs, filternnzElems,rowFilters, colFilters,ne,&ne0, fnnzassumed);
 
 
     printf("done! \n");
@@ -100,8 +100,6 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
     /* Write non zero row values for density filter */
     drow=fopen("drow.dat","w"); //open in write mode
-    
-
     for(int iii=0; iii < (*fnnzassumed)*(ne0); iii++)
     {
       if(FilterMatrixs[iii]>0)
@@ -152,7 +150,7 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     printf("Writing non-zero values to file...");
     /* Write number of non zero filter values for each element */
     dnnz=fopen("dnnz.dat","w"); //open in write mode
-    printf("done!\n");
+   
 
     for(int iii=0;iii<ne0;iii++)
     {
@@ -166,7 +164,11 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       }
     }
     fclose(dnnz);
+
+    printf("done!\n");
   }
+
+
 
   /* Filter matrix files were found on disk, build the filter matrix using dcol, drow and dval */
   else
