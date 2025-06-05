@@ -162,8 +162,18 @@ void mafillsmmain_filter2(ITG *ipkon,double *rmin,ITG *filternnz,
       }*/
 
 
+    // Debug =?
+    double sum = 0.0;
 
+    for(int iii=0;iii< (*fnnzassumed) * (*ne0);iii++)
+    {
+      if(FilterMatrixs[iii]>0)
+      {
+        sum = sum + FilterMatrixs[iii];
+      }
+    }
 
+    printf("FORTRAN DVAL SUM: %f \n", sum);
 
 
   return;
@@ -179,12 +189,12 @@ void *mafillsmfilter2mt(ITG *i)
 
     ITG thread_id = *i;
     // FORTRAN call
-  //  nea=neapar[*i]+1;
-  //  neb=nebpar[*i]+1;
+    nea=neapar[*i]+1;
+    neb=nebpar[*i]+1;
 
     /* C call */
-    nea=neapar[*i];
-    neb=nebpar[*i];
+  //  nea=neapar[*i];
+  //  neb=nebpar[*i];
 
 
 /*FILE *rhoFile;
@@ -202,11 +212,11 @@ void *mafillsmfilter2mt(ITG *i)
 
 
     // Legacy function
-   /*FORTRAN(mafillsm_filter2,(ne1,ttime1,time1,ne01,&nea,&neb,
+   FORTRAN(mafillsm_filter2,(ne1,ttime1,time1,ne01,&nea,&neb,
                               elCentroid1,rmin1,&thread_id,
                               filternnz1,
                               FilterMatrixs1,rowFilters1,colFilters1,filternnzElems1,elarr,fnnzassumed1));
-    */
+    
    
     // Builds the full filter matrix //
   
@@ -218,19 +228,20 @@ void *mafillsmfilter2mt(ITG *i)
    
     // THis is broken, come back to it later =>
     // c-based function to build the distance matrix 
-    mafillsm_filter2(*ne1, *ttime1, *time1,
+  /*  mafillsm_filter2(*ne1, *ttime1, *time1,
                      *ne01, nea, neb,
                      elCentroid1, *rmin1, filternnz1,
                      FilterMatrixs1, rowFilters1, colFilters1,
                      filternnzElems1, elarr, *fnnzassumed1); 
-
+    */
+    
 
 
                     
     
-    printf("First element value: %f \n ", FilterMatrixs1[0]);
-    printf("Second element value: %f \n ", FilterMatrixs1[1]);
-    printf("Third element value: %f \n ", FilterMatrixs1[2]);
+    //printf("First element value: %f \n ", FilterMatrixs1[0]);
+   // printf("Second element value: %f \n ", FilterMatrixs1[1]);
+   // printf("Third element value: %f \n ", FilterMatrixs1[2]);
 
     return NULL;
 }

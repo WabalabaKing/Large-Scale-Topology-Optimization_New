@@ -122,7 +122,9 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     printf("Writing element values to file...");
     /* Write non zero filter values for density filter */
     dval=fopen("dval.dat","w"); //open in write mode
-    printf("done!\n");
+
+
+    double sum = 0.0;
 
     for(int iii=0;iii<*fnnzassumed * ne0;iii++)
     {
@@ -132,6 +134,9 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       }
     }
     fclose(dval);
+
+    printf("done!\n");
+
 
     printf("Writing non-zero values to file...");
     /* Write number of non zero filter values for each element */
