@@ -20,32 +20,25 @@ import os
 # this defines initial value and how they are written to an arbitrary file
 NCPU = 8
 penalty = 5
-rmin = 3
+rmin = 1
 volfrac=0.4
 InputFileName="UCRMWS"
+nnz=700
 nDV = 708869
 
-
+cpucmd = "export OMP_NUM_THREADS="+str(int(NCPU))
+os.system(cpucmd)
 
 
 x0=volfrac * np.ones(nDV,dtype=float)
-with open("Constants.txt", mode="w+") as file:
-    file.write(str(nDV)+"\n")
-    file.write(str(volfrac)+"\n")
-    file.write(str(rmin)+"\n")
-    file.write(str(penalty)+"\n")
-    file.write(InputFileName+"\n")
-    file.write(str(NCPU)+"\n")
-    
-    
-var = InputVariable(x0, ArrayLabelReplacer("__X__"), 0, np.ones(nDV,dtype=float), lb=0.0, ub=1.0)
-parData1 = Parameter(["Constants.txt"],LabelReplacer("__DATA_FILE__"))
+var = InputVariable(x0, ArrayLabelReplacer("__X__", "\n"), 0, np.ones(nDV,dtype=float), lb=0.001, ub=1.0)
 
-evalFun1 = ExternalRun("Direct","python3 ../../direct.py config_temp.txt")
-evalFun1.addConfig("config_temp.txt")
-evalFun1.addData("Constants.txt")
+
+evalFun1 = ExternalRun("Direct",f"calTop.exe {InputFileName} -p {penalty} -r {rmin} -f {nnz}")
+evalFun1.addConfig("density.dat")
 evalFun1.addData(InputFileName+".inp")
-evalFun1.addParameter(parData1)
+
+
 
 fun1 = Function("Topop","Direct/objectives.csv",TableReader(0,0,(1,0),(None,None),","))
 fun1.addInputVariable(var,"Direct/compliance_sens.csv",TableReader(None,1,(1,0),(None,None),","))
