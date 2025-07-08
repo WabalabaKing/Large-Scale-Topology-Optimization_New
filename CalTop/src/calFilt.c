@@ -1344,72 +1344,66 @@ while(istat>=0)
 
     /* temperature loading */
 
-  if(ithermal[0] != 0)
-  {
-      RENEW(t0,double,nk);
-      RENEW(t1,double,nk);
-
-      if((ne1d!=0)||(ne2d!=0))
-      {
-	      RENEW(t0g,double,2*nk);
-	      RENEW(t1g,double,2*nk);
-      }
-
-      if(nam > 0)
-      {
-        RENEW(iamt1,ITG,nk);
-      }
-  }
-
-  RENEW(nelemload,ITG,2*nload);
-  RENEW(sideload,char,20*nload);
-  RENEW(xload,double,2*nload);
-
-  RENEW(cbody,char,81*nbody);
-  RENEW(ibody,ITG,3*nbody);
-  RENEW(xbody,double,7*nbody);
-  RENEW(xbodyold,double,7*nbody);
-
-  RENEW(ipompc,ITG,nmpc);
-  RENEW(labmpc,char,20*nmpc+1);
-  RENEW(ikmpc,ITG,nmpc);
-  RENEW(ilmpc,ITG,nmpc);
-  RENEW(fmpc,double,nmpc);
-
-  /* energy */
-
-  if((nener==1)&&(nenerold==0))
-  {
-    NNEW(ener,double,mi[0]*ne*2);
-
-    if((istep>1)&&(iperturb[0]>1))
+    if(ithermal[0] != 0)
     {
-      printf(" *ERROR in CalculiX: in nonlinear calculations\n");
-      printf("        energy output must be selected in the first step\n\n");
-      FORTRAN(stop,());
-    }
-  }
+        RENEW(t0,double,nk);
+        RENEW(t1,double,nk);
 
-  /* following segment executed if solving:
+        if((ne1d!=0)||(ne2d!=0))
+        {
+	        RENEW(t0g,double,2*nk);
+	        RENEW(t1g,double,2*nk);
+        }
+
+        if(nam > 0)
+        {
+            RENEW(iamt1,ITG,nk);
+        }
+    }
+
+    RENEW(nelemload,ITG,2*nload);
+    RENEW(sideload,char,20*nload);
+    RENEW(xload,double,2*nload);
+
+    RENEW(cbody,char,81*nbody);
+    RENEW(ibody,ITG,3*nbody);
+    RENEW(xbody,double,7*nbody);
+    RENEW(xbodyold,double,7*nbody);
+
+    RENEW(ipompc,ITG,nmpc);
+    RENEW(labmpc,char,20*nmpc+1);
+    RENEW(ikmpc,ITG,nmpc);
+    RENEW(ilmpc,ITG,nmpc);
+    RENEW(fmpc,double,nmpc);
+
+    /* energy */
+
+    if((nener==1)&&(nenerold==0))
+    {
+        NNEW(ener,double,mi[0]*ne*2);
+
+        if((istep>1)&&(iperturb[0]>1))
+        {
+            printf(" *ERROR in CalculiX: in nonlinear calculations\n");
+            printf("        energy output must be selected in the first step\n\n");
+            FORTRAN(stop,());
+        }
+    }
+
+    /* following segment executed if solving:
 
       Linear dynamic analysis
       Steady state dynamics
       Magnetostatics
       Static analysis with material and geometric non-linearities
-  */
+    */
 
-  /* initial velocities and accelerations */
-  if((nmethod==4)||(nmethod==5)||(nmethod==8)||(nmethod==9)||
+    /* initial velocities and accelerations */
+    if((nmethod==4)||(nmethod==5)||(nmethod==8)||(nmethod==9)||
      ((abs(nmethod)==1)&&(iperturb[0]>=2)))
-     {
+    {
         RENEW(veold,double,mt*nk);
-     }
-
-  /* not being used so free memory */
-  //else 
-  //{
-  //  SFREE(veold);
- // }
+    }
 
   /* if solving linear dynamic system with geometric non-linearities */
 
@@ -1622,22 +1616,15 @@ while(istat>=0)
 	      FORTRAN(stop,());
 	    }
 
-      printf("\n#------------------------------TOPOLOGY OPTIMIZATION PARAMTERS----------------------------#\n");
-      printf("Penalty parameter                 %.2f\n", pstiff);
-      printf("Density filter radius             %.2f\n", rmin);
-      printf("Filter Order                      %.2f\n", qfilter);
-      printf("Volume fraction                   %.2f\n", volfrac);
+      printf("\n#------------------------------FILTER MATRIX PARAMTERS----------------------------#\n");
+      printf("Length scale                      %.2f\n", rmin);
       printf("Non zeros in Filtermatrix         %d\n", fnnzassumed);
-      printf("#-----------------------------------------------------------------------------------------#\n");
+      printf("#------------------------------------------------------------------------------------#\n");
      
       fflush(stdout);
 
       printf("\n");
-      if(pSupplied!=0)
-      {
-        printf("Penalization parameter found!\n");
-        printf("Will perform adjoint sensitivity analysis.\n");
-      }
+
 
       if(pSupplied!=0)
       {
@@ -1679,34 +1666,6 @@ while(istat>=0)
       }
 
       
-      //printf("\n For stiffness, penalty considered= %f \n",pstiff);
-
-      time_t startl, endl; 
-	    startl = time(NULL);
-      
-	    linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
-	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
-             &nforc, nelemload,sideload,xload,&nload,
-	     nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
-	     ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr, vold,iperturb,sti,nzs,
-	     &kode,filab,eme,&iexpl,plicon,
-             nplicon,plkcon,nplkcon,&xstate,&npmat_,matname,
-	     &isolver,mi,&ncmat_,&nstate_,cs,&mcs,&nkon,&ener,
-             xbounold,xforcold,xloadold,amname,amta,namta,
-             &nam,iamforc,iamload,iamt1,iamboun,&ttime,
-             output,set,&nset,istartset,iendset,ialset,&nprint,prlab,
-             prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
-	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
-	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff, stx);
-
-      endl = time(NULL);
-
-	    printf("\n Time taken for linstatic.c is %.8f seconds \n", 
-		  difftime(endl, startl)); 
-
 
 	    for(i=0;i<3;i++)
       {
@@ -1720,48 +1679,6 @@ while(istat>=0)
 
     } // end if(iperturb[0]<2)
 
-    else /* non-linear analysis from here */
-    {
-	    mpcinfo[0]=memmpc_;
-      mpcinfo[1]=mpcfree;
-      mpcinfo[2]=icascade;
-	    mpcinfo[3]=maxlenmpc;
-
-	    nonlingeo(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
-	     &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
-             &nforc,&nelemload,&sideload,xload,&nload,
-	     nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,&ikmpc,
-	     &ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr,
-	     &vold,iperturb,sti,nzs,&kode,filab,&idrct,jmax,
-	     jout,timepar,eme,xbounold,xforcold,xloadold,
-	     veold,accold,amname,amta,namta,
-	     &nam,iamforc,&iamload,iamt1,&alpha,
-             &iexpl,iamboun,plicon,nplicon,plkcon,nplkcon,
-	     &xstate,&npmat_,&istep,&ttime,matname,qaold,mi,
-	     &isolver,&ncmat_,&nstate_,&iumat,cs,&mcs,&nkon,&ener,
-	     mpcinfo,output,
-             shcon,nshcon,cocon,ncocon,physcon,&nflow,ctrl,
-             set,&nset,istartset,iendset,ialset,&nprint,prlab,
-             prset,&nener,ikforc,ilforc,trab,inotr,&ntrans,&fmpc,
-             cbody,ibody,xbody,&nbody,xbodyold,ielprop,prop,
-	     &ntie,tieset,&itpamp,&iviewfile,jobnamec,tietol,&nslavs,thicke,
-	     ics,&nintpoint,&mortar,
-	     &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
-	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
-	     velo,veloo, rhoPhys,&pstiff);
-
-	      memmpc_=mpcinfo[0];
-        mpcfree=mpcinfo[1];
-        icascade=mpcinfo[2];
-        maxlenmpc=mpcinfo[3];
-
-	    for(i=0;i<3;i++)
-      {
-        nzsprevstep[i]=nzs[i];
-      }
-    } // end else
   } //end if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
   
   
@@ -1851,317 +1768,6 @@ while(istat>=0)
       #endif
     }
   } // end if nmethod ==2
-  /*
-  else if(nmethod==3)
-  {
-
-    #ifdef ARPACK
-	  arpackbu(co,&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
-	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
-             &nforc,
-	     nelemload,sideload,xload,&nload,
-	     nactdof,icol,jq,irow,neq,&nzl,&nmethod,ikmpc,
-	     ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-             alcon,nalcon,alzero,ielmat,ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr,
-	     vold,iperturb,sti,nzs,&kode,mei,fei,filab,
-	     eme,&iexpl,plicon,nplicon,plkcon,nplkcon,
-	     xstate,&npmat_,matname,mi,&ncmat_,&nstate_,ener,output,
-             set,&nset,istartset,iendset,ialset,&nprint,prlab,
-             prset,&nener,&isolver,trab,inotr,&ntrans,&ttime,fmpc,cbody,
-	     ibody,xbody,&nbody,thicke,jobnamec,&nmat,ielprop,prop,
-	     orname,typeboun,rhoPhys,&pstiff);
-    #else
-      printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
-      FORTRAN(stop,());
-    #endif
-  } */
-  /*
-  else if(nmethod==4)
-  {
-	  if((ne1d!=0)||(ne2d!=0))
-    {
-	    printf(" *WARNING: 1-D or 2-D elements may cause problems in modal dynamic calculations\n");
-	    printf("           ensure that point loads defined in a *MODAL DYNAMIC step\n");
-	    printf("           and applied to nodes belonging to 1-D or 2-D elements have been\n");
-	    printf("           applied to the same nodes in the preceding FREQUENCY step with\n");
-	    printf("           magnitude zero; look at example shellf.inp for a guideline.\n\n");}
-
-      printf(" Composing the dynamic response from the eigenmodes\n\n");
-
-      dyna(&co,&nk,&kon,&ipkon,&lakon,&ne,&nodeboun,&ndirboun,&xboun,&nboun,
-	    &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,&nforc,
-	    nelemload,sideload,xload,&nload,
-	    &nactdof,neq,&nzl,icol,irow,&nmethod,&ikmpc,&ilmpc,&ikboun,&ilboun,
-            elcon,nelcon,rhcon,nrhcon,cocon,ncocon,
-            alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,&t0,
-	    &t1,ithermal,prestr,&iprestr,&vold,iperturb,&sti,nzs,
-	    timepar,xmodal,&veold,amname,amta,
-	    namta,&nam,iamforc,iamload,&iamt1,
-	    jout,&kode,filab,&eme,xforcold,xloadold,
-            &t1old,&iamboun,&xbounold,&iexpl,plicon,
-            nplicon,plkcon,nplkcon,&xstate,&npmat_,matname,
-            mi,&ncmat_,&nstate_,&ener,jobnamec,&ttime,set,&nset,
-            istartset,iendset,&ialset,&nprint,prlab,
-            prset,&nener,trab,&inotr,&ntrans,&fmpc,cbody,ibody,xbody,&nbody,
-            xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,&mpcend,ics,cs,
-	    &ntie,tieset,&idrct,jmax,ctrl,&itpamp,tietol,&nalset,
-	    ikforc,ilforc,thicke,&nslavs,&nmat,typeboun,ielprop,prop,orname);
-    } */
-    /*
-    else if(nmethod==5)
-    {
-	    if((ne1d!=0)||(ne2d!=0))
-      {
-	      printf(" *WARNING: 1-D or 2-D elements may cause problems in steady state calculations\n");
-	      printf("           ensure that point loads defined in a *STEADY STATE DYNAMICS step\n");
-	      printf("           and applied to nodes belonging to 1-D or 2-D elements have been\n");
-	      printf("           applied to the same nodes in the preceding FREQUENCY step with\n");
-	      printf("           magnitude zero; look at example shellf.inp for a guideline.\n\n");
-      }
-
-      printf(" Composing the steady state response from the eigenmodes\n\n");
-
-      steadystate(&co,&nk,&kon,&ipkon,&lakon,&ne,&nodeboun,&ndirboun,&xboun,&nboun,
-	      &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,&nforc,
-	      nelemload,sideload,xload,&nload,
-	      &nactdof,neq,&nzl,icol,irow,&nmethod,&ikmpc,&ilmpc,&ikboun,&ilboun,
-            elcon,nelcon,rhcon,nrhcon,cocon,ncocon,
-            alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,&t0,
-	      &t1,ithermal,prestr,&iprestr,&vold,iperturb,sti,nzs,
-	      timepar,xmodal,&veold,amname,amta,
-	      namta,&nam,iamforc,iamload,&iamt1,
-	      jout,&kode,filab,&eme,xforcold,xloadold,
-            &t1old,&iamboun,&xbounold,&iexpl,plicon,
-            nplicon,plkcon,nplkcon,xstate,&npmat_,matname,
-            mi,&ncmat_,&nstate_,&ener,jobnamec,&ttime,set,&nset,
-            istartset,iendset,ialset,&nprint,prlab,
-            prset,&nener,trab,&inotr,&ntrans,&fmpc,cbody,ibody,xbody,&nbody,
-	      xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,ics,cs,&mpcend,
-	      ctrl,ikforc,ilforc,thicke,&nmat,typeboun,ielprop,prop,orname,
-	      &ndamp,dacon);
-    } */
-    /*
-    else if((nmethod==6)||(nmethod==7))
-    {
-
-      printf(" Composing the complex eigenmodes from the real eigenmodes\n\n");
-
-      complexfreq(&co,&nk,&kon,&ipkon,&lakon,&ne,&nodeboun,&ndirboun,&xboun,&nboun,
-	    &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,&nforc,
-	    nelemload,sideload,xload,&nload,
-	    &nactdof,neq,&nzl,icol,irow,&nmethod,&ikmpc,&ilmpc,&ikboun,&ilboun,
-            elcon,nelcon,rhcon,nrhcon,cocon,ncocon,
-            alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,&t0,
-	    &t1,ithermal,prestr,&iprestr,&vold,iperturb,&sti,nzs,
-	    timepar,xmodal,&veold,amname,amta,
-	    namta,&nam,iamforc,iamload,&iamt1,
-	    jout,&kode,filab,&eme,xforcold,xloadold,
-            &t1old,&iamboun,&xbounold,&iexpl,plicon,
-            nplicon,plkcon,nplkcon,xstate,&npmat_,matname,
-            mi,&ncmat_,&nstate_,&ener,jobnamec,&ttime,set,&nset,
-            istartset,iendset,&ialset,&nprint,prlab,
-            prset,&nener,trab,&inotr,&ntrans,&fmpc,cbody,ibody,xbody,&nbody,
-            xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,&mpcend,ics,cs,
-	    &ntie,tieset,&idrct,jmax,ctrl,&itpamp,tietol,&nalset,
-	    ikforc,ilforc,thicke,jobnamef,mei,&nmat,ielprop,prop,orname,
-            typeboun);
-    } */
-    /*
-    else if((nmethod>7)&&(nmethod<12))
-    {
-	    mpcinfo[0]=memmpc_;
-      mpcinfo[1]=mpcfree;
-      mpcinfo[2]=icascade;
-	    mpcinfo[3]=maxlenmpc;
-
-	    electromagnetics(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,
-             ndirboun,xboun,&nboun,
-	     &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
-             &nforc,&nelemload,&sideload,xload,&nload,
-	     nactdof,&icol,&jq,&irow,neq,&nzl,&nmethod,&ikmpc,
-	     &ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr,
-	     &vold,iperturb,sti,nzs,&kode,filab,&idrct,jmax,
-	     jout,timepar,eme,xbounold,xforcold,xloadold,
-	     veold,accold,amname,amta,namta,
-	     &nam,iamforc,&iamload,iamt1,&alpha,
-             &iexpl,iamboun,plicon,nplicon,plkcon,nplkcon,
-	     &xstate,&npmat_,&istep,&ttime,matname,qaold,mi,
-	     &isolver,&ncmat_,&nstate_,&iumat,cs,&mcs,&nkon,&ener,
-	     mpcinfo,output,
-             shcon,nshcon,cocon,ncocon,physcon,&nflow,ctrl,
-             &set,&nset,&istartset,&iendset,&ialset,&nprint,prlab,
-             prset,&nener,ikforc,ilforc,trab,inotr,&ntrans,&fmpc,
-             cbody,ibody,xbody,&nbody,xbodyold,ielprop,prop,
-	     &ntie,&tieset,&itpamp,&iviewfile,jobnamec,&tietol,&nslavs,thicke,
-	     ics,&nalset,&nmpc_,&nmat,typeboun,&iaxial,&nload_,&nprop,
-	     &network,orname,rhoPhys,&pstiff);
-
-	    memmpc_=mpcinfo[0];
-      mpcfree=mpcinfo[1];
-      icascade=mpcinfo[2];
-      maxlenmpc=mpcinfo[3];
-    } */
-
-    /* Write elastic fields to a vtu file */
-    printf("Skipping:Post-processing results...");
-    tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
-    printf("done!");
-
-    printf("Non-zero penalization parameter issued, computing sensitivities...");
-    /* adjoint sensitivity calculation */
-    if(pSupplied!=0)
-    {
-      printf("Starting adjoint sensitivty calculations");
-    
-
-      /* allocate memory for compliance gradient and initialize to zero */
-      NNEW(gradCompl,double,ne_);
-
-      /* allocate memory for element complaince and initialize to zero */
-      NNEW(elCompl,double,ne_);
-
-      /* allocate memory for element C.G and initialize to zero */
-      NNEW(elCG,double,3*ne_);
-
-      /* allocate memory for element volume and initialize to zero */
-      NNEW(eleVol,double,ne_); 
-
-      /* allocate memory for filtered compliance gradient and initialize to zero */
-      NNEW(gradComplFiltered,double,ne_);  //allocate memory to gradcompliance, initialize to 0
-
-      /* allocate memory for filtered volume gradient and initialize to zero */
-      NNEW(eleVolFiltered,double,ne_);
-
-      time_t starts, ends; 
-	    starts = time(NULL);
-
-
-      /* Evaluate sensitivities */
-      printf("Performing adjoint sensitivity analysis...");
-	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
-	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
-             ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
-	     nactdof,icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
-	     ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr, vold,iperturb,sti,nzs,
-	     &kode,filab,eme,&iexpl,plicon,
-             nplicon,plkcon,nplkcon,&xstate,&npmat_,matname,
-	     &isolver,mi,&ncmat_,&nstate_,cs,&mcs,&nkon,&ener,
-             xbounold,xforcold,xloadold,amname,amta,namta,
-             &nam,iamforc,iamload,iamt1,iamboun,&ttime,
-             output,set,&nset,istartset,iendset,ialset,&nprint,prlab,
-             prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
-	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
-	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
-             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
-      printf("done! \n");
-
-      printf("Filter compliance gradient...");
-      /* Filter compliance gradient */
-      //filterVector(&ipkon,gradCompl,gradComplFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter, filternnz); //Filter Compliance sensitivity
-      filterVector_buffered_mt(gradCompl, gradComplFiltered,filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
-      printf("done! \n");
-
-      printf("Filter element volume gradient...");
-      /* Filter element volume gradient */
-      //filterVector(&ipkon,eleVol,eleVolFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter, filternnz); //Filter volume sensitivity
-      filterVector_buffered_mt(eleVol, eleVolFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
-      ends = time(NULL);
-      printf("done!\n");
-	    //printf("Time taken for sensitivity calculation: %.2f seconds \n", 
-		  //difftime(ends, starts)); 
-
-      /* write compliance gradient to file */
-      FILE *gradC;
-      //FILE *elC_file;
-      FILE *elV_file;
-
-
-      /* write compliance value */
-      //elC_file=fopen("objectives.dat","w");
-
-      /* set the filtered element densities of passive elements to 0 */
-      filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
-
-      /* set the filtered compliance sens of passive elements to 0 */
-      filterOutPassiveElems_sens(gradComplFiltered, ne, passiveIDs, numPassive);
-
-      /* initialize for compliance */
-      double compliance_sum=0;
-      
-      printf("Writing compliance sensitivities...");
-      write_compliance_sensitivities(ne,gradCompl,gradComplFiltered,elCompl,&compliance_sum);
-      printf("Done!\n");
-
-      /* set the filtered volume sens of passive elements to 0 */
-      filterOutPassiveElems_sens(eleVolFiltered, ne, passiveIDs, numPassive);
-
-      printf("Writing volume sensitivities...");
-      write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
-      printf("Done!\n");
-      
-      printf("Writing objectives...");
-      write_objectives(ne, eleVol, rhoPhys, &compliance_sum);
-      printf("Done!\n");
-
-
-      /* initialize for total materal volume with rho = 1 */
-      //double initialVol_sum=0;
-
-      /* initialize for total material volume with optimized rho */
-      //double designVol_sum=0;
-
-      /* loop over all elements to compute summed values */
-      //for (int iii=0;iii<ne;iii++)
-      //{
-        /* compute initial volume */
-      //  initialVol_sum+=eleVol[iii];
-
-        /* compute current design volume */
-      //  designVol_sum+=(eleVol[iii]*rhoPhys[iii]);
-                
-      //}
-
-      /* write summed compliance and volume fraction values to file */
-      //fprintf(elC_file,"%.15f , %.15f , %.15f , %.15f \n",compliance_sum,designVol_sum-volfrac*initialVol_sum, initialVol_sum,designVol_sum);
-
-      /* ensure any buffered data is written to file */
-      //fflush(elC_file); 
-
-      /* close all files */
-      //fclose(elC_file);
-   
-      /* evaluate discreteness of the structure*/
-      /* discreteness is a metric often used in topology optimization problems to assess hpw close the design
-       is to a "0-1" or binary solution. */
-
-      double mnd = 0.0;
-        
-
-
-      /* loop over all element density values */
-      for (int iii=0;iii<ne;iii++)
-      {
-        mnd+=(rhoPhys[iii]*(1-rhoPhys[iii]));               
-      }
-
-      /* Normalize and average */
-      mnd=(4*mnd*100/ne);
-  
-     /* print output */
-      
-      printf("\nTotal Compliance:          %.12f \n",compliance_sum);
-      //printf("Total domain volume:         %.6f \n",initialVol_sum);
-      //printf("Current domain volume:       %.6f \n",designVol_sum);
-      //printf("Volume constraint violation:: %.6f \n",designVol_sum-volfrac*initialVol_sum);
-      printf("Discreteness, mnd, percent:               %.6f \n",mnd);
-
-    } // end adjoint calculation
 
     printf("\nWriting rhos.dat...");
     fflush(stdout);

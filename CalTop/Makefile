@@ -30,7 +30,8 @@ MKL_INCLUDE=/opt/intel/oneapi/mkl/2025.1/include
 CMPLR_PATH=/opt/intel/oneapi/compiler/2025.1/bin
 
 # Defauilt target
-all: $(BIN_DIR)/calTop.exe
+all: $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe
+
 
 # Ensure object directory exists
 $(OBJ_DIR) $(BIN_DIR):
@@ -41,10 +42,18 @@ include Makefile.inc
 
 # Source files and objects
 SCCXMAIN = $(SRC_DIR)/ccx_2.15.c
+SCCXCMAINFILT = $(SRC_DIR)/calFilt.c
+
+
+SCCXC_EXTRA = $(SCCXMAINFILT)
+OCCXC_EXTRA = $(SCCXC_EXTRA:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
 
 OCCXF = $(SCCXF:$(SRC_DIR)/%.f=$(OBJ_DIR)/%.o)
 OCCXC = $(SCCXC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
 OCCXMAIN = $(OBJ_DIR)/ccx_2.15.o
+OCCXMAINFILT = $(OBJ_DIR)/calFilt.o
 
 # Libraries
 LIBS = \
@@ -61,28 +70,39 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f | $(OBJ_DIR)
 	$(FC) $(FFLAGS) -c $< -o $@
 
-# Build executable in bin/
+# Build calTop executable
 $(BIN_DIR)/calTop.exe: $(OCCXMAIN) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
 	./date.pl
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ccx_2.15.c -o $(OBJ_DIR)/ccx_2.15.o
 	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
-	@echo "Build successful!"
+	@echo "Build calTop.exe successfully!"
+
+#Build calFilt executable
+$(BIN_DIR)/calFilt.exe: $(OCCXMAINFILT) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/calFilt.c -o $(OBJ_DIR)/calFilt.o
+	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAINFILT) ccx_2.15.a $(LIBS)
+	@echo "Build calFilt.exe successfully!"
 
 # Build static library
 ccx_2.15.a: $(OCCXF) $(OCCXC) | $(OBJ_DIR)
 	ar vr $@ $^
 
 # Install target (default: install in current directory)
-install: $(BIN_DIR)/calTop.exe
-	@echo "Installing calTop.exe to $(BINDIR)"
+install: $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe
+	@echo "Installing executables to $(BINDIR)"
 	mkdir -p $(BINDIR)
-	cp $(BIN_DIR)/calTop.exe $(BINDIR)/
+	cp $(BIN_DIR)/calTop.exe $(BINIR)/
+	cp $(BIN_DIR)/calFilt.exe $(BINDIR)/
 	chmod +x $(BINDIR)/calTop.exe
+	chmod +x $(BINDIR)/calFilt.exe
+
 
 # Uninstall target
 uninstall:
-	@echo "Removing calTop.exe from $(BINDIR)"
+	@echo "Removing executables from $(BINDIR)"
 	rm -f $(BINDIR)/calTop.exe
+	rm -f $(BINDIR)/calFilt.exe
+
 
 clean:
-	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/*.* ccx_2.15.a
+	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe ccx_2.15.a
