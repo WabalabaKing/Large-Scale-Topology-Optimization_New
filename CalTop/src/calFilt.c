@@ -370,29 +370,59 @@ int main(int argc,char *argv[])
             break;
         }
 
-        if(jin==0)
+        if(strcmp1(argv[i],"-v")==0)
         {
-            strcpy(jobnamec,argv[1]);strcpy1(jobnamef,argv[1],132);
+            /* Print version */
+	        printf("\nThis is calFilt v1.0: A CalculiX-based filter matrix assembly module \n");
+            printf(" Authors: Prateek Ranjan, Massachusetts Institute of Technology \n");
+            printf(" Authors: Ghanendra Das, Georgia Institute of Technology \n");
+            printf(" Authors: Wanzheng Zheng, University of Illinois at Urbana-Champaign \n");
+            printf(" Kai. A James, Georgia Institute of Technology \n");
+	        FORTRAN(stop,());
         }
+    }
 
-        /* Read length scale */
-        for(i=1; i<argc; i++)
+    if(jin==0)
+    {
+        strcpy(jobnamec,argv[1]);strcpy1(jobnamef,argv[1],132);
+    }
+
+    for(i=1; i<argc; i++)
+    {
+        if(strcmp1(argv[i],"-o")==0)
         {
-            if(strcmp1(argv[i],"-r")==0)
-            {
-                rmin=atof(argv[i+1]);
-                break;
-            }
+            strcpy(output,argv[i+1]);
+            break;
         }
+    }
 
-        /* Read expected non-zeros in filter matrix */
-        for(i=1; i<argc; i++)
+    /* Read penalty parameter */
+    for(i=1; i<argc; i++)
+    {
+        if(strcmp1(argv[i],"-p")==0) 
         {
-            if(strcmp1(argv[i],"-f")==0)
-            {
-               fnnzassumed=atoi(argv[i+1]);
-               break; 
-            }
+            pSupplied=atof(argv[i+1]);
+            break;
+        }
+    }
+
+    /* Read length scale */
+    for(i=1; i<argc; i++)
+    {
+        if(strcmp1(argv[i],"-r")==0)
+        {
+            rmin=atof(argv[i+1]);
+            break;
+        }
+    }
+
+    /* Read expected non-zeros in filter matrix */
+    for(i=1; i<argc; i++)
+    {
+        if(strcmp1(argv[i],"-f")==0)
+        {
+            fnnzassumed=atoi(argv[i+1]);
+            break; 
         }
     }
   } // Done reading all input flags
@@ -1625,11 +1655,7 @@ while(istat>=0)
 
       printf("\n");
 
-
-      if(pSupplied!=0)
-      {
         printf("Checking if filter matrix needs to be built \n");
-
 
         NNEW(FilterMatrixs,double,fnnzassumed*ne_); //Sparse filter matrix stored as row,colum,value with fassumed nnzs per element assumed
     
@@ -1645,27 +1671,7 @@ while(istat>=0)
                   &rmin,&filternnz,
                   FilterMatrixs,rowFilters,colFilters,filternnzElems,itertop,&fnnzassumed);
 
-        printf("Read within densityfilter:%d \n", filternnz);
-
-        
-        /* apply the filter matrix on rho to get rhoPhys */ 
-        //filterVector(&ipkon,design,designFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter, filternnz);
-
-        /* Try the multi-threaded */
-        printf("Filtering element densities...\n");
-        filterVector_buffered_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
-        printf("Done!");
-
-        rhoPhys=designFiltered;
-      }
-      else
-      {
-        printf("No penalization parameter found, initializing all densities to one \n");
-        /* design was initialized to 1.0 in rho.c */
-        rhoPhys=design;
-      }
-
-      
+       
 
 	    for(i=0;i<3;i++)
       {
@@ -1768,26 +1774,6 @@ while(istat>=0)
       #endif
     }
   } // end if nmethod ==2
-
-    printf("\nWriting rhos.dat...");
-    fflush(stdout);
-
-    FILE *rho_file;
-    rho_file=fopen("rhos.dat","w"); //open in write mode
-    
-    /* loop over all elements and write element densities to file */
-    for (int iii=0;iii<ne;iii++)
-    {
-      fprintf(rho_file,"%.15f  ,  %.15f \n",design[iii],rhoPhys[iii]);            
-    }
-
-    /* ensure any buffered data is written to file */
-    fflush(rho_file); 
-
-    /* all operations done, close file */
-    fclose(rho_file);
-
-    printf("done!\n");
 
 
     SFREE(nactdof);
