@@ -2156,15 +2156,15 @@ while(istat>=0)
     } */
 
     /* Write elastic fields to a vtu file */
-    printf("Skipping:Post-processing results...");
+    printf("Writing output fields...");
     tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
-    printf("done!");
+    printf("done!")
 
-    printf("Non-zero penalization parameter issued, computing sensitivities...");
+  
     /* adjoint sensitivity calculation */
     if(pSupplied!=0)
     {
-      printf("Starting adjoint sensitivty calculations");
+      printf("Performing adjoint sensitivty calculations");
     
 
       /* allocate memory for compliance gradient and initialize to zero */
@@ -2190,7 +2190,7 @@ while(istat>=0)
 
 
       /* Evaluate sensitivities */
-      printf("Performing adjoint sensitivity analysis...");
+  
 	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
