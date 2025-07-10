@@ -376,7 +376,6 @@ int main(int argc,char *argv[])
 	        printf("\nThis is calFilt v1.0: A CalculiX-based filter matrix assembly module \n");
             printf(" Authors: Prateek Ranjan, Massachusetts Institute of Technology \n");
             printf(" Authors: Ghanendra Das, Georgia Institute of Technology \n");
-            printf(" Authors: Wanzheng Zheng, University of Illinois at Urbana-Champaign \n");
             printf(" Kai. A James, Georgia Institute of Technology \n");
 	        FORTRAN(stop,());
         }
@@ -447,11 +446,11 @@ int main(int argc,char *argv[])
 
     printf("\n");
 
-    printf("  #####    #####   ##        #######  #####   ######  \n");
-    printf(" ##       ##   ##  ##           ##   ##   ##  ##   ## \n");
-    printf(" ##       #######  ##           ##   ##   ##  ######  \n");
-    printf(" ##       ##   ##  ##           ##   ##   ##  ##      \n");
-    printf("  #####   ##   ##  #######      ##    #####   ##      \n");
+    printf("  #####    #####   ##        #######  ####   ##       ######   \n");
+    printf(" ##       ##   ##  ##        ##        ##    ##         ##     \n");
+    printf(" ##       #######  ##        ######    ##    ##         ##     \n");
+    printf(" ##       ##   ##  ##        ##        ##    ##         ##     \n");
+    printf("  #####   ##   ##  #######   ##       ####   ######     ##     \n");
     
     printf("\n");
 
