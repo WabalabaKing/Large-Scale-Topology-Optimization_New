@@ -119,12 +119,15 @@ void filterVector_buffered_mt(double *Vector, double *VectorFiltered,
     // Zero-initialize VectorFiltered (caller owns allocation)
     for (int i = 0; i < ne; ++i) VectorFiltered[i] = 0.0;
 
-    //pthread_t threads[num_threads];
-    //ThreadArgs thread_args[num_threads];
+    
 
     // Allocate arrays for pthread management
     pthread_t *threads = malloc(num_threads * sizeof(pthread_t));
     ThreadArgs *thread_args = malloc(num_threads * sizeof(ThreadArgs));
+
+    row_locks = malloc(ne * sizeof(pthread_mutex_t));
+    for (int i = 0; i < ne; ++i) pthread_mutex_init(&row_locks[i], NULL);
+
 
     int total_read = 0;
     while (total_read < filternnz_total) 
@@ -163,11 +166,14 @@ void filterVector_buffered_mt(double *Vector, double *VectorFiltered,
             }
             */
 
+            
             if (pthread_create(&threads[t], NULL, thread_filter_worker_mutex, &thread_args[t]) != 0) 
             {
                 perror("Failed to create thread");
                 exit(EXIT_FAILURE);
             }
+
+            
 
 
         }
