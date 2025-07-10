@@ -27,6 +27,38 @@ void *thread_filter_worker_atomic(void *args_ptr) {
     return NULL;
 }
 
+pthread_mutex_t *row_locks;
+
+
+void *thread_filter_worker_mutex(void *args_ptr) {
+    ThreadArgs *args = (ThreadArgs *)args_ptr;
+
+    int start = (args->block_read * args->thread_id) / args->num_threads;
+    int end   = (args->block_read * (args->thread_id + 1)) / args->num_threads;
+
+    for (int i = start; i < end; ++i) {
+        int row = args->drow[i] - 1;
+        int col = args->dcol[i] - 1;
+
+        if (row < 0 || row >= args->ne || col < 0 || col >= args->ne) {
+            fprintf(stderr, "Invalid row/col index: row=%d, col=%d\n", row, col);
+            continue;
+        }
+
+        double w = pow(args->dval[i], args->q);
+        double contrib = w * args->Vector[col];
+
+        pthread_mutex_lock(&row_locks[row]);
+        args->VectorFiltered[row] += contrib;
+        args->weight_sum[row] += w;
+        pthread_mutex_unlock(&row_locks[row]);
+    }
+
+    return NULL;
+}
+
+
+
 void filterVector_buffered_mt(double *Vector, double *VectorFiltered,
                               int *filternnzElems,
                               int *ne_ptr, int *fnnzassumed_ptr,
@@ -69,10 +101,12 @@ void filterVector_buffered_mt(double *Vector, double *VectorFiltered,
     double *dval_block = malloc(BLOCK_SIZE * sizeof(double));
     
 
-    if (!drow_block || !dcol_block || !dval_block) {
+    if (!drow_block || !dcol_block || !dval_block) 
+    {
         fprintf(stderr, "Memory allocation failed.\n");
         exit(EXIT_FAILURE);
     }
+
     printf("Allocating memory for weights...");
     double *weight_sum = calloc(ne, sizeof(double));
     if (!weight_sum) 
@@ -121,10 +155,21 @@ void filterVector_buffered_mt(double *Vector, double *VectorFiltered,
                 .ne = ne,
                 .block_read = block_read
             };
+
+            /*
             if (pthread_create(&threads[t], NULL, thread_filter_worker_atomic, &thread_args[t]) != 0) {
                 perror("Failed to create thread");
                 exit(EXIT_FAILURE);
             }
+            */
+
+            if (pthread_create(&threads[t], NULL, thread_filter_worker_mutex, &thread_args[t]) != 0) 
+            {
+                perror("Failed to create thread");
+                exit(EXIT_FAILURE);
+            }
+
+
         }
 
         printf("Waiting on all threads to finish...\n");
