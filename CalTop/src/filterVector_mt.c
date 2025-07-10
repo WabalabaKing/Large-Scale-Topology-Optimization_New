@@ -73,7 +73,7 @@ void filterVector_buffered_mt(double *Vector, double *VectorFiltered,
         fprintf(stderr, "Memory allocation failed.\n");
         exit(EXIT_FAILURE);
     }
-    printf("Allocating memeory for weights...");
+    printf("Allocating memory for weights...");
     double *weight_sum = calloc(ne, sizeof(double));
     if (!weight_sum) 
     {
@@ -128,8 +128,11 @@ void filterVector_buffered_mt(double *Vector, double *VectorFiltered,
         }
 
         printf("Waiting on all threads to finish...\n");
-        for (int t = 0; t < num_threads; ++t) {
-            if (pthread_join(threads[t], NULL) != 0) {
+
+        for (int t = 0; t < num_threads; ++t) 
+        {
+            if (pthread_join(threads[t], NULL) != 0) 
+            {
                 perror("Failed to join thread");
                 exit(EXIT_FAILURE);
             }

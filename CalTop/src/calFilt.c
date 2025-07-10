@@ -352,7 +352,7 @@ int main(int argc,char *argv[])
   {
     /* Inadequate input arguments */
 
-    printf("Usage: Flags: -i jobname -r LENGTH SCALE -f FILTERNNZ \n");
+    printf("Usage: Flags: -i jobname -r FILTER RADIUS -f FILTERNNZ \n");
     FORTRAN(stop,());
   }
 
