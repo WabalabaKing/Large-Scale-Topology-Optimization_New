@@ -123,11 +123,10 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     fclose(dcol);
     printf("done! \n");
 
-    printf("Writing element values to file...");
-    /* Write non zero filter values for density filter */
+    printf("Writing weights to file...");
+    /* Write non zero weights for density filter */
     dval=fopen("dval.dat","w"); //open in write mode
     
-
     double sum = 0.0;
 
     for(int iii=0;iii<*fnnzassumed * ne0;iii++)
