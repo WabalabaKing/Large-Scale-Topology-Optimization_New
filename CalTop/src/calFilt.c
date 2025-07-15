@@ -451,6 +451,8 @@ int main(int argc,char *argv[])
     printf(" ##       #######  ##        ######    ##    ##         ##     \n");
     printf(" ##       ##   ##  ##        ##        ##    ##         ##     \n");
     printf("  #####   ##   ##  #######   ##       ####   ######     ##     \n");
+
+    printf("A density filter matrix assembly routine \n");
     
     printf("\n");
 
@@ -463,9 +465,7 @@ int main(int argc,char *argv[])
     printf("* Georgia Institute of Technology\n");
     printf("* Kai A. James, Dept. of Aerospace Engineering,\n");
     printf("* Georgia Institute of Technology\n");
-    printf("************************************************************\n\n");
-    printf("Original FEA source code: CalculiX by Guido Dhondt\n");
-    printf("************************************************************\n\n");
+
 
 
     
