@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <math.h>
-#include "Calculix.h"
+#include <stdlib.h>
+#include "CalculiX.h"
 #include <unistd.h>
-
 
 
 void densityfilterFast(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                    ITG *ne, double *ttime, double *timepar,
                    ITG *mortar, double *rmin, ITG *filternnz,
-                   double *FilterMatrixs, ITG *rowFilters, ITG *colFilters,
                    ITG *filternnzElems, ITG itertop, ITG *fnnzassumed)
 
     {
@@ -38,7 +37,7 @@ void densityfilterFast(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lak
             printf("Filter files not found => building filter matrix\n");
 
             // Allocate memory for element centroids
-            double *eleCentroid = NULL;
+            double *elCentroid = NULL;
             NNEW(elCentroid, double, 3 * ne0);
 
             printf("Computing element centroids...");
@@ -77,9 +76,9 @@ void densityfilterFast(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lak
                 {
                     if (i == j) continue;
 
-                    double xj = eleCentroid[3 * j + 0];
-                    double yj = eleCentroid[3 * j + 1];
-                    double zj = eleCentroid[3 * j + 2];
+                    double xj = elCentroid[3 * j + 0];
+                    double yj = elCentroid[3 * j + 1];
+                    double zj = elCentroid[3 * j + 2];
 
                     double dx = xi - xj;
                     double dy = yi - yj;
