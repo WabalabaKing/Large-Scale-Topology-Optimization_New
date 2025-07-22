@@ -20,11 +20,11 @@ import subprocess
 # this defines initial value and how they are written to an arbitrary file
 NCPU = 8
 penalty = 3
-rmin = 1
+rmin = 0.1
 volfrac=0.12
 InputFileName="CB"
 nDV = 109945
-nnz = 2000
+nnz = 5000
 
 
 cpucmd = "export OMP_NUM_THREADS="+str(int(NCPU))

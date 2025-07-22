@@ -35,6 +35,8 @@ def parse_su2_and_record_nodes(filename_in, filename_out,ycoord,zcoord):
         for idx in nodes_of_interest:
             f.write(f"{idx+1}\n")
 
+    print(f"Number of loaded Point is {len(nodes_of_interest)}")
+
 # Usage:
 # Place your SU2 snippet in "example.su2"
 # Adjust the Z target as needed
