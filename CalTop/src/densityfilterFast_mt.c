@@ -66,9 +66,9 @@ void *filter_thread_streamed(void *args_ptr)
             if (dist <= args->rmin_local) 
             {
                 double w = args->rmin_local - dist;
-                fprintf(frow, "%d\n%d\n ", i + 1, j + 1);
-                fprintf(fcol, "%d\n%d\n ", j + 1, i + 1);
-                fprintf(fval, "%.6f\n%.6f\n ", w, w);
+                fprintf(frow, "%d\n%d\n", i + 1, j + 1);
+                fprintf(fcol, "%d\n%d\n", j + 1, i + 1);
+                fprintf(fval, "%.6f\n%.6f\n", w, w);
                 count++;
             }
         }
