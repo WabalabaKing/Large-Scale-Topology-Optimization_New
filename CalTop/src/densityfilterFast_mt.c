@@ -95,7 +95,7 @@ void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **
     if (env) num_threads = atoi(env);
     if (num_threads <= 0) num_threads = 1;
 
-    print("Using %d threads to build filter matrix.", num_threads);
+    printf("Using %d threads to build filter matrix.", num_threads);
     ITG ne0 = *ne;
     double time = timepar[1];
 
