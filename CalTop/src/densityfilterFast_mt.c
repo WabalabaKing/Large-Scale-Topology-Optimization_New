@@ -152,6 +152,7 @@ void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **
     SFREE(elCentroid);
     free(threads); free(args);
 
+    printf("\nThread-local filter triplet files written to disk.\n");
     printf("Merging filter triplet files from all threads...\n");
     int status = 0;
 
