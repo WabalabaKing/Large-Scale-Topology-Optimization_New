@@ -375,7 +375,6 @@ int main(int argc,char *argv[])
             /* Print version */
 	        printf("\nThis is calFilt v1.0: A CalculiX-based filter matrix assembly module \n");
             printf(" Authors: Prateek Ranjan, Massachusetts Institute of Technology \n");
-            printf(" Authors: Ghanendra Das, Georgia Institute of Technology \n");
             printf(" Kai. A James, Georgia Institute of Technology \n");
 	        FORTRAN(stop,());
         }
@@ -459,8 +458,6 @@ int main(int argc,char *argv[])
     printf("* Contributors:\n");
     printf("* Prateek Ranjan, Dept. of Aerospace Engineering,\n");
     printf("* Massachusetts Institute of Technology \n");
-    printf("* Wanzheng Zheng, Dept. of Aerospace Engineering,\n");
-    printf("* University of Illinois at Urbana Champaign \n");
     printf("* Ghanendra Kumar Das, Dept. of Aerospace Engineering,\n");
     printf("* Georgia Institute of Technology\n");
     printf("* Kai A. James, Dept. of Aerospace Engineering,\n");
@@ -1646,7 +1643,7 @@ while(istat>=0)
 	    }
 
       printf("\n#------------------------------FILTER MATRIX PARAMTERS----------------------------#\n");
-      printf("Length scale                      %.2f\n", rmin);
+      printf("Filter radius                      %.2f\n", rmin);
       printf("Non zeros in Filtermatrix         %d\n", fnnzassumed);
       printf("#------------------------------------------------------------------------------------#\n");
      
@@ -1656,6 +1653,7 @@ while(istat>=0)
 
         printf("Checking if filter matrix needs to be built \n");
 
+        /*
         NNEW(FilterMatrixs,double,fnnzassumed*ne_); //Sparse filter matrix stored as row,colum,value with fassumed nnzs per element assumed
     
         NNEW(rowFilters,ITG,fnnzassumed*ne_);
@@ -1665,12 +1663,21 @@ while(istat>=0)
         NNEW(filternnzElems,ITG,ne_);
         NNEW(designFiltered,double,ne_);
 
-        /* Create or assemble the density filter */
+        // Create or assemble the density filter //
         densityfilter(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
                   &rmin,&filternnz,
                   FilterMatrixs,rowFilters,colFilters,filternnzElems,itertop,&fnnzassumed);
 
-       
+        */
+
+        NNEW(filternnzElems, ITG, ne_);
+
+      
+       // densityfilterFast(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
+       //           &rmin,&filternnz,filternnzElems,itertop,&fnnzassumed);
+
+      densityfilterFast_mt(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
+                  &rmin,&filternnz,filternnzElems,itertop,&fnnzassumed);
 
 	    for(i=0;i<3;i++)
       {
@@ -1939,7 +1946,7 @@ while(istat>=0)
   }
   if(istep == 1)
   {
-    printf("Linear analysis complete!\n");
+    //printf("Linear analysis complete!\n");
     break;
   }
 

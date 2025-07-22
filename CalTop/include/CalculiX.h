@@ -114,6 +114,7 @@ void filterOutPassiveElems_density(double *design, int ne, int *passiveIDs, int 
 
 void filterOutPassiveElems_sens(double *sens, int ne, int *passiveIDs, int numPassive);
 
+
 void rho(double *design,int ne);
 
 void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy);
@@ -2277,7 +2278,16 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		 double *rmin,ITG *filternnz,
 		 double *FilterMatrixs,ITG *rowFilters,ITG *colFilters,ITG *filternnzElems, ITG itertop, ITG *fnnzassumed);
 
+void densityfilterFast(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
+                   ITG *ne, double *ttime, double *timepar,
+                   ITG *mortar, double *rmin, ITG *filternnz,
+                   ITG *filternnzElems, ITG itertop, ITG *fnnzassumed);
 
+
+void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
+                         ITG *ne, double *ttime, double *timepar,
+                         ITG *mortar, double *rmin, ITG *filternnz,
+                         ITG *filternnzElems, ITG itertop, ITG *fnnzassumed);
 
 void filterVector(ITG **ipkonp,double *Vector, double *VectorFiltered,double *FilterMatrix,ITG *filternnzElem,ITG *rowFilter, ITG *colFilter,ITG *ne,double *ttime, double *timepar, ITG *fnnzassumed, double *q, ITG filternnz);
 
