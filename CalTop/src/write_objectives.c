@@ -23,7 +23,7 @@ void write_objectives(int ne,
     double  designVol_sum = 0;
 
     /* design domain discreteness */
-    double discreteness = 0.0;
+    double discreteness_sum = 0.0;
 
     /* Check for old sensitivity file and delete it */
     if (access(filename, F_OK) == 0)
@@ -56,13 +56,16 @@ void write_objectives(int ne,
     {
         initialVol_sum+= eleVol[i];
         designVol_sum+= (eleVol[i]*rhoPhys[i]);
-        discreteness += rhoPhys[i] * (1.0 - rhoPhys[i]);
+        discreteness_sum += rhoPhys[i] * (1.0 - rhoPhys[i]);
 
         //fprintf(sens_file, "%.15f,%.15f,%.15f\n", eleVol[i], eleVol[i] * rhoPhys[i], eleVolFiltered[i]);
     }
 
      /* Compute volume fraction */
     double volume_fraction = designVol_sum / initialVol_sum;
+
+    /* Compute discreteness */
+    double discreteness = (4.0 /ne) * discreteness_sum;
 
     /* Write structure compliance and volume to file */
     fprintf(obj_file, "%.15f, %.15f, %.15f, %.15f, %.15f \n", *compliance_sum, initialVol_sum, designVol_sum, volume_fraction, discreteness);
