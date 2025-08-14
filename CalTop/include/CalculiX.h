@@ -2291,6 +2291,11 @@ void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **
 
 void filterVector(ITG **ipkonp,double *Vector, double *VectorFiltered,double *FilterMatrix,ITG *filternnzElem,ITG *rowFilter, ITG *colFilter,ITG *ne,double *ttime, double *timepar, ITG *fnnzassumed, double *q, ITG filternnz);
 
+void filter_sensitivities_buffered_mt(const double *df_dxtilde,
+                                     double *df_dx,
+                                     int ne,
+                                     long long nnz_total,
+                                     double q);
 
 /**
  * @brief Counts the number of lines in a given text file.
