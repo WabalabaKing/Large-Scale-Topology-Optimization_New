@@ -16,7 +16,7 @@
 #endif
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE (1<<20)   // ~1M triplets per block; tune for your I/O/cache
+#define BLOCK_SIZE 100000000   // ~1M triplets per block; tune for your I/O/cache
 #endif
 
 typedef struct {
@@ -40,13 +40,22 @@ static long long count_nnz_from_files(void){
     FILE *fr=fopen("drow.dat","r");
     FILE *fc=fopen("dcol.dat","r");
     FILE *fv=fopen("dval.dat","r");
-    if(!fr||!fc||!fv){
+
+    if(!fr||!fc||!fv)
+    {
         fprintf(stderr,"ERROR: cannot open drow.dat/dcol.dat/dval.dat: %s\n", strerror(errno));
         if(fr) fclose(fr); if(fc) fclose(fc); if(fv) fclose(fv);
         return -1;
     }
+
+    // Define buffer for speed I/O
+    setvbuf(fr,NULL,_IOFBF,8<<20);
+    setvbuf(fc,NULL,_IOFBF,8<<20);
+    setvbuf(fv,NULL,_IOFBF,8<<20);
+
     long long cnt=0; int r,c; double v;
-    for(;;){
+    for(;;)
+    {
         int okr=fscanf(fr,"%d",&r);
         int okc=fscanf(fc,"%d",&c);
         int okv=fscanf(fv,"%lf",&v);
@@ -128,15 +137,24 @@ void filterSensitivity_buffered_mt(const double *SensIn,  // df/dx_tilde[j]
         }
     }
 
+    printf("Opening triplets...");
     // open triplets
     FILE *frow = fopen("drow.dat", "r");
     FILE *fcol = fopen("dcol.dat", "r");
     FILE *fval = fopen("dval.dat", "r");
-    if (!frow || !fcol || !fval) {
+
+    if (!frow || !fcol || !fval) 
+    {
         fprintf(stderr,"ERROR: opening triplet files: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
+    printf("done! \n");
 
+    setvbuf(frow,NULL,_IOFBF,8<<20);
+    setvbuf(fcol,NULL,_IOFBF,8<<20);
+    setvbuf(fval,NULL,_IOFBF,8<<20);
+
+    printf("Allocating memory for blocks and thread structs...");
     // allocate buffers/accumulators
     int *drow_block = (int*)malloc(BLOCK_SIZE * sizeof(int));
     int *dcol_block = (int*)malloc(BLOCK_SIZE * sizeof(int));
@@ -152,6 +170,7 @@ void filterSensitivity_buffered_mt(const double *SensIn,  // df/dx_tilde[j]
     ThreadArgs *targs  = (ThreadArgs*)malloc(num_threads * sizeof(ThreadArgs));
     if (!threads || !targs) { fprintf(stderr,"alloc thread structs failed\n"); exit(EXIT_FAILURE); }
 
+    printf("done! \n");
     // ---------------- PASS 1: donor row sums ----------------
     {   
         printf("First pass for evaluating donor row sums...");
@@ -200,6 +219,11 @@ void filterSensitivity_buffered_mt(const double *SensIn,  // df/dx_tilde[j]
         fprintf(stderr,"ERROR: reopening triplet files (pass2): %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
+
+    // Set large buffers
+    setvbuf(frow,NULL,_IOFBF,8<<20);
+    setvbuf(fcol,NULL,_IOFBF,8<<20);
+    setvbuf(fval,NULL,_IOFBF,8<<20);
 
     {
         long long total_read = 0;
