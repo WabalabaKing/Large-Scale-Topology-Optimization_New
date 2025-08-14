@@ -1052,7 +1052,9 @@ $(SRC_DIR)/utils.c \
 $(SRC_DIR)/filterDensity_mt.c \
 $(SRC_DIR)/densityfilterFast.c \
 $(SRC_DIR)/densityfilterFast_mt.c \
-$(SRC_DIR)/filterSens_mt.c
+$(SRC_DIR)/filterSens_mt.c \
+$(SRC_DIR)/filterSens_mt_s.c
+
 
 
 
