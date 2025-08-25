@@ -20,6 +20,21 @@ typedef struct {
     int *filternnzElems;
 } ThreadArgs;
 
+// --- Small helper: copy a whole file (binary) into an already open out fp ---
+static void copy_file_into(FILE *out, const char *path, size_t buf_bytes) {
+    FILE *in = fopen(path, "rb");
+    if (!in) return;
+    if (buf_bytes < 1) buf_bytes = 1<<20; // 1 MB default
+    unsigned char *buf = (unsigned char*)malloc(buf_bytes);
+    if (!buf) { fclose(in); return; }
+    size_t nread;
+    while ((nread = fread(buf, 1, buf_bytes, in)) > 0) {
+        fwrite(buf, 1, nread, out);
+    }
+    free(buf);
+    fclose(in);
+}
+
 
 /**
  * Builds a symmetric density filter matrix (in triplet format) in parallel.
@@ -71,7 +86,9 @@ void *filter_thread(void *args_ptr)
 
     // Thread-local row-sum accumulator (full length ne0)
     double *row_sum_local = (double*)calloc((size_t)args->ne0, sizeof(double));
-    if (!row_sum_local) {
+
+    if (!row_sum_local) 
+    {
         pthread_mutex_lock(&print_mutex);
         fprintf(stderr, "Thread %d: Failed to allocate row_sum_local.\n", args->thread_id);
         pthread_mutex_unlock(&print_mutex);
@@ -97,8 +114,11 @@ void *filter_thread(void *args_ptr)
             double yj = args->elCentroid[3 * j + 1];
             double zj = args->elCentroid[3 * j + 2];
             double dx = xi - xj, dy = yi - yj, dz = zi - zj;
-            double dist = sqrt(dx * dx + dy * dy + dz * dz);
 
+            // Compute distance
+            double dist = sqrt(dx * dx + dy * dy + dz * dz);
+            
+            // If within filter radius, perform evals
             if (dist <= args->rmin_local) 
             {
                 double w = args->rmin_local - dist;
@@ -116,14 +136,14 @@ void *filter_thread(void *args_ptr)
                 int row1 = i + 1, col1 = j + 1;
                 int row2 = j + 1, col2 = i + 1;
                 
-                fwrite(&row1, sizeof(int),    1, frow);     // CHANGED
-                fwrite(&row2, sizeof(int),    1, frow);     // CHANGED
+                fwrite(&row1, sizeof(int),    1, frow);     
+                fwrite(&row2, sizeof(int),    1, frow);   
 
-                fwrite(&col1, sizeof(int),    1, fcol);     // CHANGED
-                fwrite(&col2, sizeof(int),    1, fcol);     // CHANGED
+                fwrite(&col1, sizeof(int),    1, fcol);     
+                fwrite(&col2, sizeof(int),    1, fcol);     
 
-                fwrite(&w,    sizeof(double), 1, fval);     // CHANGED
-                fwrite(&w,    sizeof(double), 1, fval);     // CHANGED
+                fwrite(&w,    sizeof(double), 1, fval);    
+                fwrite(&w,    sizeof(double), 1, fval);     
 
                // Accumulate row-wise sums for symmetric H:
                 // row i gains w for (i,j), row j gains w for (j,i)
@@ -135,7 +155,10 @@ void *filter_thread(void *args_ptr)
         }
 
         // Write number of neighbors for element i
-        fprintf(fdnnz, "%d\n", count);
+        //fprintf(fdnnz, "%d\n", count);
+
+        // Per-row neighbour count (for i-only -- excludes mirroring )
+        fwrite (&count, sizeof(int), 1, fdnnz);
 
         // Guard: check if fnnzassumed is too small
         if (count > *args->fnnzassumed) 
@@ -180,6 +203,8 @@ void *filter_thread(void *args_ptr)
     /* Uncomment for ASCII write 
     FILE *fdsum = fopen(fname_dsum, "w");
     */
+
+    // Write thread-local rown sums (length = ne0) to binary file
     FILE *fdsum = fopen(fname_dsum, "wb");
     if (!fdsum) 
     {
@@ -189,12 +214,14 @@ void *filter_thread(void *args_ptr)
         exit(EXIT_FAILURE);
     }
 
-    for (int r = 0; r < args->ne0; ++r)
-        fprintf(fdsum, "%.10f\n", row_sum_local[r]);
+    //for (int r = 0; r < args->ne0; ++r)
+    //    fprintf(fdsum, "%.10f\n", row_sum_local[r]);
+
+    fwrite(row_sum_local, sizeof(double), (size_t)args->ne0, fdsum);
     fclose(fdsum);
 
 
-    // Close all file handles
+    // Close this thread's files
     fclose(frow); 
     fclose(fcol); 
     fclose(fval); 
@@ -241,7 +268,7 @@ void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **
     fflush(stdout);
 
     printf("Number of elements per thread: %d\n", elems_per_thread);
-    printf("Creating threads and executing thread-local streaming...\n");
+    printf("Creating threads and streaming thread-local binary shards...\n");
 
     for (int t = 0; t < num_threads; ++t) 
     {
@@ -273,89 +300,86 @@ void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **
     fflush(stdout);
     printf("All threads completed.\n");
 
-    FILE *fdnnz = fopen("dnnz.dat", "w");
-    for (int t = 0; t < num_threads; ++t) {
-        char fname[64];
-        sprintf(fname, "dnnz_%d.dat", t);
-        FILE *in = fopen(fname, "r");
-        if (!in) continue;
-        char line[64];
-        while (fgets(line, sizeof(line), in)) fputs(line, fdnnz);
-        fclose(in);
-        remove(fname);
-    }
-    fclose(fdnnz);
+    // Compute filternnz (symmetric): 2 * sum of per-row neighbor counts
+    long long sum_dnnz = 0;
+    for (int i = 0; i < ne0; ++i) sum_dnnz += filternnzElems[i];
+    *filternnz = (ITG)(2LL * sum_dnnz);
 
-    *filternnz = 0;
-    for (int i = 0; i < ne0; ++i)
-        *filternnz += 2 * filternnzElems[i];
-
-    SFREE(elCentroid);
-    free(threads); free(args);
+    //SFREE(elCentroid);
+    //free(threads); free(args);
 
     printf("\n\033[36m==================== Filter Matrix Summary ====================\033[0m\n");
-    printf("Thread-local filter triplet files written to disk.\n");
-    printf("Merging filter triplet files from all threads...\n");
+    //printf("Thread-local filter triplet files written to disk.\n");
+    //printf("Merging filter triplet files from all threads...\n");
 
-    int status = 0;
-    status = system("cat drow_*.dat > drow.dat");
-    if (status != 0) fprintf(stderr, "Failed to merge drow files\n");
+    // Begin merging binary files
+    printf("Merging thread-local binaries...");
+    FILE *Fdrow = fopen("drow.bin","wb");
+    FILE *Fdcol = fopen("dcol.bin","wb");
+    FILE *Fdval = fopen("dval.bin","wb");
+    FILE *Fdnnz = fopen("dnnz.bin","wb");
 
-    status = system("cat dcol_*.dat > dcol.dat");
-    if (status != 0) fprintf(stderr, "Failed to merge dcol files\n");
-
-    status = system("cat dval_*.dat > dval.dat");
-    if (status != 0) fprintf(stderr, "Failed to merge dval files\n");
-
-    system("rm -f drow_*.dat dcol_*.dat dval_*.dat");
-
-    printf("Filter matrix written: %d total nonzeros (symmetric)\n", *filternnz);
-
-    
+    if (!Fdrow||!Fdcol||!Fdval||!Fdnnz) 
+    {
+        fprintf(stderr,"Failed to open final binary files.\n");
+        exit(EXIT_FAILURE);
+    }
 
 
-    // Reduce per-thread row-sum partials -> dsum.dat
-    printf("Merging row-wise sums from all threads into dsum.dat...\n");
+    // Merge drow/dcol/dval
+    for (int t = 0; t < num_threads; ++t) {
+        char fpath[64];
+        sprintf(fpath, "drow_%d.bin", t); copy_file_into(Fdrow, fpath, 8<<20); remove(fpath);
+        sprintf(fpath, "dcol_%d.bin", t); copy_file_into(Fdcol, fpath, 8<<20); remove(fpath);
+        sprintf(fpath, "dval_%d.bin", t); copy_file_into(Fdval, fpath, 8<<20); remove(fpath);
+    }
+    fclose(Fdrow); fclose(Fdcol); fclose(Fdval);
+
+    // Merge dnnz (already contiguous per thread)
+    for (int t = 0; t < num_threads; ++t) {
+        char fpath[64];
+        sprintf(fpath, "dnnz_%d.bin", t); copy_file_into(Fdnnz, fpath, 1<<20); remove(fpath);
+    }
+    fclose(Fdnnz);
+
+    // Reduce dsum_T.bin → dsum.bin (sum across threads)
+    printf("Reducing row-wise sums into dsum.bin...\n");
     double *dsum = (double*)calloc((size_t)ne0, sizeof(double));
-
     if (!dsum) { fprintf(stderr, "Failed to allocate dsum accumulator.\n"); exit(EXIT_FAILURE); }
 
-    for (int t = 0; t < num_threads; ++t)
-    {
-        char fname[64];
+    double *tmpbuf = (double*)malloc((size_t)ne0 * sizeof(double));
+    if (!tmpbuf) { fprintf(stderr,"Failed to allocate tmpbuf.\n"); free(dsum); exit(EXIT_FAILURE); }
 
-        sprintf(fname, "dsum_%d.dat", t);
-        FILE *in = fopen(fname, "r");
-        if (!in)
-        {
-            fprintf(stderr, "Warning: missing %s *t=%d); treating as zeros \n", fname, t);
-            continue;
-        }
-
-        for (int r = 0; r < ne0; ++r)
-        {
-            double v;
-            if (fscanf(in, "%lf", &v) == 1) dsum[r] += v;
-            else{
-                fprintf(stderr, "Error reading %s at line %d\n", fname, r+1);
-                fclose(in);
-                free(dsum);
-                exit(EXIT_FAILURE);
-            }
+    for (int t = 0; t < num_threads; ++t) {
+        char fpath[64];
+        sprintf(fpath, "dsum_%d.bin", t);
+        FILE *in = fopen(fpath, "rb");
+        if (!in) { fprintf(stderr,"Warning: missing %s; treating as zeros\n", fpath); continue; }
+        size_t got = fread(tmpbuf, sizeof(double), (size_t)ne0, in);
+        if (got != (size_t)ne0) {
+            fprintf(stderr,"Error: short read in %s (%zu of %d)\n", fpath, got, (int)ne0);
+            fclose(in); free(tmpbuf); free(dsum); exit(EXIT_FAILURE);
         }
         fclose(in);
-        remove(fname);
-    } // End loop over threads
+        remove(fpath);
+        for (int r = 0; r < ne0; ++r) dsum[r] += tmpbuf[r];
+    }
+    free(tmpbuf);
 
-    FILE *out_dsum = fopen("dsum.dat", "w");
-    if (!out_dsum) { fprintf(stderr, "Failed to open dsum.dat for write.\n"); free(dsum); exit(EXIT_FAILURE); }
-    for (int r = 0; r < ne0; ++r) fprintf(out_dsum, "%.10f\n", dsum[r]);
-    fclose(out_dsum);
+    FILE *Fdsum = fopen("dsum.bin","wb");
+    if (!Fdsum) { fprintf(stderr,"Failed to open dsum.bin for write.\n"); free(dsum); exit(EXIT_FAILURE); }
+    fwrite(dsum, sizeof(double), (size_t)ne0, Fdsum);
+    fclose(Fdsum);
     free(dsum);
 
-    printf("Row-wise sums written to dsum.dat (one value per row).\n");
+    // Cleanup
+    SFREE(elCentroid);
+    free(threads);
+    free(args);
 
+    printf("Done!\n");
+
+    printf("Final binaries: drow.bin, dcol.bin, dval.bin, dnnz.bin, dsum.bin\n");
+    printf("Filter matrix nnz (symmetric): %d\n", *filternnz);
     printf("===============================================================\n");
-
-
 }
