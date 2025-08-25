@@ -33,17 +33,33 @@ void *filter_thread(void *args_ptr)
 
     // Prepare thread-local filenames
     char fname_row[64], fname_col[64], fname_val[64], fname_dnnz[64], fname_dsum[64];
+    /* Uncomment for ASCII based write
     sprintf(fname_row,  "drow_%d.dat", args->thread_id);
     sprintf(fname_col,  "dcol_%d.dat", args->thread_id);
     sprintf(fname_val,  "dval_%d.dat", args->thread_id);
     sprintf(fname_dnnz, "dnnz_%d.dat", args->thread_id);
     sprintf(fname_dsum, "dsum_%d.dat", args->thread_id);
+    */
+
+    sprintf(fname_row,  "drow_%d.bin", args->thread_id);
+    sprintf(fname_col,  "dcol_%d.bin", args->thread_id);
+    sprintf(fname_val,  "dval_%d.bin", args->thread_id);
+    sprintf(fname_dnnz, "dnnz_%d.bin", args->thread_id);
+    sprintf(fname_dsum, "dsum_%d.bin", args->thread_id);
 
     // Open thread-local output files
+    /* Uncomment for ASCII based write 
     FILE *frow = fopen(fname_row, "w");
     FILE *fcol = fopen(fname_col, "w");
     FILE *fval = fopen(fname_val, "w");
     FILE *fdnnz = fopen(fname_dnnz, "w");
+    */
+
+    FILE *frow = fopen(fname_row, "wb");
+    FILE *fcol = fopen(fname_col, "wb");
+    FILE *fval = fopen(fname_val, "wb");
+    FILE *fdnnz = fopen(fname_dnnz, "wb");
+
 
     if (!frow || !fcol || !fval || !fdnnz) 
     {
@@ -89,10 +105,25 @@ void *filter_thread(void *args_ptr)
 
                 // Emit symmetric pair: (i,j) and (j,i) with same weight
                 // (1-based indices in files)
+
+                /* Uncomment for ASCII based write
                 fprintf(frow, "%d\n%d\n", i + 1, j + 1);
                 fprintf(fcol, "%d\n%d\n", j + 1, i + 1);
                 fprintf(fval, "%.6f\n%.6f\n", w, w);
+                */
 
+                // Write symmetric pair in binary (1-based ints)
+                int row1 = i + 1, col1 = j + 1;
+                int row2 = j + 1, col2 = i + 1;
+                
+                fwrite(&row1, sizeof(int),    1, frow);     // CHANGED
+                fwrite(&row2, sizeof(int),    1, frow);     // CHANGED
+
+                fwrite(&col1, sizeof(int),    1, fcol);     // CHANGED
+                fwrite(&col2, sizeof(int),    1, fcol);     // CHANGED
+
+                fwrite(&w,    sizeof(double), 1, fval);     // CHANGED
+                fwrite(&w,    sizeof(double), 1, fval);     // CHANGED
 
                // Accumulate row-wise sums for symmetric H:
                 // row i gains w for (i,j), row j gains w for (j,i)
@@ -146,8 +177,10 @@ void *filter_thread(void *args_ptr)
     pthread_mutex_unlock(&print_mutex);
 
     // NEW: write the per-thread row-sum partial to disk (length = ne0)
+    /* Uncomment for ASCII write 
     FILE *fdsum = fopen(fname_dsum, "w");
-
+    */
+    FILE *fdsum = fopen(fname_dsum, "wb");
     if (!fdsum) 
     {
         pthread_mutex_lock(&print_mutex);
