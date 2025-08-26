@@ -21,18 +21,6 @@
 #include "CalculiX.h"
 #include <unistd.h>
 
-#include <sys/stat.h>
-
-// Count number of nonzeros from a binary drow.bin (int32 per entry)
-static long long count_nnz_from_bin(const char *path) {
-    struct stat st;
-    if (stat(path, &st) != 0) {
-        perror("stat drow.bin");
-        return -1;
-    }
-    return st.st_size / sizeof(int);
-}
-
 void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	                ITG *ne,
                   double *ttime, double *timepar,
@@ -62,7 +50,7 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   int build_filter = 0;
 
   /* Check if filter files exist */
-  if (access("drow.bin", F_OK) != 0 || access("dcol.bin", F_OK) != 0 || access("dval.bin", F_OK) != 0) 
+  if (access("drow.dat", F_OK) != 0 || access("dcol.dat", F_OK) != 0 || access("dval.dat", F_OK) != 0) 
   {
     build_filter = 1;
   }
@@ -191,9 +179,6 @@ void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     *filternnz = 0;
 
     *filternnz = count_lines("drow.dat");
-
-    // New (binary):
-    //*filternnz = count_nnz_from_bin("drow.bin");
 
   
 
