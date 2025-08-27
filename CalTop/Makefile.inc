@@ -1049,9 +1049,10 @@ $(SRC_DIR)/filter_matrix.c \
 $(SRC_DIR)/makeDistanceMatrix.c \
 $(SRC_DIR)/expand_filter.c \
 $(SRC_DIR)/utils.c \
-$(SRC_DIR)/filterDensity_mt.c \
+$(SRC_DIR)/filterDensity_txt_mt.c \
 $(SRC_DIR)/densityfilterFast.c \
-$(SRC_DIR)/densityfilterFast_mt.c \
+$(SRC_DIR)/assembleDensityFilter_txt_mt.c \
+$(SRC_DIR)/assembleDensityFilter_bin_mt.c \
 $(SRC_DIR)/filterSens_mt.c \
 $(SRC_DIR)/filterSens_mt_s.c
 
