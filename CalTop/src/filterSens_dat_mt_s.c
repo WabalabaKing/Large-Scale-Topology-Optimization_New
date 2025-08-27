@@ -109,7 +109,7 @@ static void *worker_accumulate_onepass(void *args_ptr)
 //  ne       : number of elements
 //  nnz_total: total nnz in triplet files (<=0 → auto-count)
 //  q        : exponent used for weights; MUST MATCH the q used to make dsum.dat
-void filterSensitivity_buffered_mts(const double *SensIn,
+void filterSensitivity_dat_buffered_mts(const double *SensIn,
                                   double *SensOut,
                                   int ne,
                                   long long nnz_total)
