@@ -1675,7 +1675,7 @@ while(istat>=0)
        // densityfilterFast(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
        //           &rmin,&filternnz,filternnzElems,itertop,&fnnzassumed);
 
-      densityfilterFast_mt(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
+      densityfilterFast_dat_mt(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
                   &rmin,&filternnz,filternnzElems,itertop,&fnnzassumed);
 
 	    for(i=0;i<3;i++)

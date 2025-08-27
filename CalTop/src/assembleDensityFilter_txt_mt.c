@@ -224,7 +224,7 @@ void *filter_thread(void *args_ptr)
 /* Top-level driver: launches threads that stream/write triplets and per-row nnz,
    then merges thread-local files into drow.dat, dcol.dat, dval.dat, dnnz.dat,
    and reduces row sums into dsum.dat. */
-void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
+void densityfilterFast_dat_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                           ITG *ne, double *ttime, double *timepar,
                           ITG *mortar, double *rmin, ITG *filternnz,
                           ITG *filternnzElems, ITG itertop, ITG *fnnzassumed) 
