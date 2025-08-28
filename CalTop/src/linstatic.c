@@ -19,6 +19,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include "CalculiX.h"
+
+#include <math.h>
 #ifdef SPOOLES
    #include "spooles.h"
 #endif
@@ -528,11 +530,23 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	printf("Computing the Right Hand Side...");
   	NNEW(b,double,*neq);
 
+	double res_l2 = 0.0;   // ||b||_2
+
   	for(k=0;k<*neq;++k)
   	{
-      b[k]=fext[k]-f[k];
+	  double r = fext[k] - f[k];
+      b[k] = r;
+	 
+	  double ar = fabs(r);
+	  res_l2  += r * r;
   	}
+
+	res_l2 = sqrt(res_l2);
+
+	printf("L2-norm : %f \n", res_l2);
+
 	printf("done!\n");
+
 
   	SFREE(fext);
   	SFREE(f);

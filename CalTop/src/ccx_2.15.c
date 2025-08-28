@@ -1839,6 +1839,20 @@ while(istat>=0)
         printf("No penalization parameter found, initializing all densities to one \n");
         /* design was initialized to 1.0 in rho.c */
         rhoPhys=design;
+
+        printf("First five rhoPhys values:\n");
+
+        for (int i = 0; i < 5 && i < ne_; ++i) {
+            printf("  rhoPhys[%d] = %g\n", i, rhoPhys[i]);
+        }
+
+        printf("Last five rhoPhys values:\n");
+        for (int i = (ne_ > 5 ? ne_ - 5 : 0); i < ne_; ++i) 
+        {
+            printf(" rhoPhys[%d] = %g\n", i, rhoPhys[i]);
+        }
+
+
       }
 
       
