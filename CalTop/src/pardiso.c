@@ -83,6 +83,7 @@ void pardiso_factor(double *ad, double *au, double *adb, double *aub,
          pardiso needs the entries row per row */      
 
       mtype=-2;
+
       
       ndim=*neq+*nzs;
       
