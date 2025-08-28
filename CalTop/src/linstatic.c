@@ -537,8 +537,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  double r = fext[k] - f[k];
       b[k] = r;
 	 
-	  double ar = fabs(r);
-	  res_l2  += r * r;
+	  res_l2 += r * r;
   	}
 
 	res_l2 = sqrt(res_l2);
@@ -982,12 +981,27 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     				else if(*isolver==7)
 					{
 						#ifdef PARDISO
+						// Call PARDISO to solve linear system
+						printf("Calling PARSIDO from linstatic.c \n");
       					pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
 		   				&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 						#else
             			printf("*ERROR in linstatic: the PARDISO library is not linked\n\n");
             			FORTRAN(stop,());
 						#endif
+
+						// Debugging: print compute the l2 norm for x in Ax = B
+
+						double l2_norm_disp = 0.0;
+
+						for (int i = 0; i < *neq; i++)
+						{
+							l2_norm_disp += b[i] * b[i];
+						}
+
+						l2_norm_disp = sqrt(l2_norm_disp);
+
+						printf("L2 norm of displacements: %f \n", l2_norm_disp);
     				}
 
    	 				/* saving of ad and au for sensitivity analysis */
