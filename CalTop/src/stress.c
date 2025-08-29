@@ -13,6 +13,7 @@
 
 #include <math.h>
 #include <stddef.h>
+#include <float.h>
 
 /* Get C3D4 connectivity from CalculiX-style arrays.
    - i_elem_1b: element index i (1-based, as in Fortran)
