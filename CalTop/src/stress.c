@@ -14,6 +14,34 @@
 #include <math.h>
 #include <stddef.h>
 
+/* Get C3D4 connectivity from CalculiX-style arrays.
+   - i_elem_1b: element index i (1-based, as in Fortran)
+   - ipkon: length >= ne, each entry 1-based pointer into kon
+   - kon: global connectivity, node IDs are 1-based
+   - out conn[4]: 0-based node indices for use in C
+   Returns 0 on success, <0 on error.
+*/
+int ccx_get_conn_C3D4(const int *ipkon, const int *kon,
+                      int i_elem_1b, int conn[4])
+{
+    if (i_elem_1b <= 0) return -1;
+    /* Convert ipkon(i) from 1-based to 0-based index into kon[] */
+    int idx0 = ipkon[i_elem_1b - 1];            /* still 1-based */
+    if (idx0 <= 0) return -2;                   /* negative => inactive in CCX */
+    idx0 -= 1;                                  /* now 0-based */
+
+    /* kon holds 1-based node IDs. Make them 0-based for C. */
+    conn[0] = kon[idx0 + 0] - 1;
+    conn[1] = kon[idx0 + 1] - 1;
+    conn[2] = kon[idx0 + 2] - 1;
+    conn[3] = kon[idx0 + 3] - 1;
+
+    /* Optional sanity: ensure all >=0 */
+    for (int a=0; a<4; ++a) if (conn[a] < 0) return -3;
+    return 0;
+}
+
+
 typedef struct 
 {
     double dNdx[4][3];  /* gradients of N_a: [a=0..3][x,y,z] */
