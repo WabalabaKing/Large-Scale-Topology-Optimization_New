@@ -180,7 +180,7 @@ alias calGeo='python3 some_path/Large-Scale-Topology-Optimization/CalGeo/calGeo.
 Thereafter, source your `.bashrc`. Now calGeo.py is aliased as `calGeo` in your environemnt and can be run from any location as:
 
 ``` sh
-calGeo mesh_name.su2
+calGeo mesh_name.su2 SkinMarkerList 
 ```
 Additionally if you wish to detect skin element and mark them as passive, use argument "--SkinMarkerList" followed by a list of marker names identified as "skin<N>", where <N> is a positive integer that represents the layer of skins. An example case for a "mesh_name.su2" constaining markers named "skin1,skin3,skin10" is written as 
 
