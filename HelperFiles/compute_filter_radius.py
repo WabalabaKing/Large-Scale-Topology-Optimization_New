@@ -3,19 +3,20 @@
 Simplified script:
 - Reads a CSV with histogram bins (bin start, bin end, count).
 - Computes the plain mean of bin centers (unweighted).
-- Suggests filter radii as multiples of this mean.
-- Plots the histogram.
+- Plots the histogram with the mean marked.
 """
 
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import Sequence
+import matplotlib
+matplotlib.use("Agg")
+
+plt.style.use("seaborn-v0_8-deep")
 
 def compute_and_plot_filter_radius_from_csv(
     file_path: str,
-    multiplier_values: Sequence[float] = (1.5, 2.0, 2.5, 3.0),
     out_png: str = "EdgeLengthDist.png",
     dpi: int = 300,
 ) -> None:
@@ -42,44 +43,54 @@ def compute_and_plot_filter_radius_from_csv(
     # Plain (unweighted) mean
     mean_edge_length = bin_edges.mean()
 
-    # Filter radii suggestions
-    filter_radii = {f"{m}×": m * mean_edge_length for m in multiplier_values}
-
     # Plot
-    plt.figure(figsize=(8, 5))
+    fig1 = plt.figure()
+    ax1 = fig1.gca()
+
     plt.bar(bin_edges, counts, width=(bin_edges[1] - bin_edges[0] if len(bin_edges) > 1 else 0.01),
             edgecolor='k', align='center', alpha=0.8)
-    plt.axvline(mean_edge_length, color='red', linestyle='--',
+    plt.axvline(mean_edge_length, color='black', linestyle='--',
                 label=f'Mean = {mean_edge_length:.3f} m')
 
-    for label, value in filter_radii.items():
-        plt.axvline(value, linestyle=':', label=f'{label}Mean = {value:.3f} m')
+    plt.xlabel("Edge Length (m)", fontsize=22, fontname="Times New Roman")
+    plt.ylabel("Count", fontsize=22, fontname="Times New Roman")
+    plt.legend(frameon=False, loc ='upper right', prop={'size': 13, 'family': 'Times New Roman'}, ncol=2)
 
-    plt.xlabel("Edge Length (m)")
-    plt.ylabel("Count")
-    plt.title("Edge Length Distribution and Filter Radius Suggestions")
-    plt.legend()
-    plt.grid(True)
+    ax1.grid(which='major', color='black', linestyle=':', linewidth='0.01')
+    ax1.minorticks_on()
+    ax1.grid(which='minor', color='black', linestyle=':', linewidth='0.01')
+
+    ax1.tick_params(bottom=True, top=True, left=True, right=True)
+    ax1.tick_params(which='major', length=10, width=1.2, direction='in')
+    ax1.tick_params(which='minor', length=5, width=1.2, direction='in')
+
+    for axis in ['top', 'bottom', 'left', 'right']:
+        ax1.spines[axis].set_linewidth(1.5)
+
+    plt.xticks(fontname="Times New Roman", fontsize=20)
+    plt.yticks(fontname="Times New Roman", fontsize=20)
+    ax1.set_xlim(0.0, 0.5)
+
+
+    plt.tight_layout()
+    F = plt.gcf()
+    Size = F.get_size_inches()
+    F.set_size_inches(Size[0] * 1.5, Size[1] * 1.5, forward=True)
     plt.tight_layout()
     plt.savefig(out_png, dpi=dpi)
 
     # Print results
     print(f"Mean edge length: {mean_edge_length:.5f} m")
-    for label, value in filter_radii.items():
-        print(f"Filter radius ({label}): {value:.5f} m")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Compute filter radius from edge length histogram CSV")
+    parser = argparse.ArgumentParser(description="Compute mean edge length from histogram CSV and plot")
     parser.add_argument("csv_path", type=str, help="Path to the edge length histogram CSV file")
     parser.add_argument("--out", type=str, default="EdgeLengthDist.png", help="Output PNG path")
     parser.add_argument("--dpi", type=int, default=300, help="PNG DPI")
-    parser.add_argument("--multipliers", type=float, nargs="+", default=[1.5, 2.0, 2.5, 3.0],
-                        help="Multipliers applied to mean edge length")
     args = parser.parse_args()
 
     compute_and_plot_filter_radius_from_csv(
         args.csv_path,
-        multiplier_values=args.multipliers,
         out_png=args.out,
         dpi=args.dpi,
     )
