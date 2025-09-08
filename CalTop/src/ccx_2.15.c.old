@@ -2331,12 +2331,15 @@ while(istat>=0)
       //  mnd+=(rhoPhys[iii]*(1-rhoPhys[iii]));               
      // }
 
+     // Evaluate the discretness of the design
+
+
       /* Normalize and average */
       //mnd=(4*mnd*100/ne);
   
      /* print output */
       
-      printf("\nTotal Compliance:          %.12f \n",compliance_sum);
+      printf("\nStructural  Compliance:          %.12f \n",compliance_sum);
       //printf("Total domain volume:         %.6f \n",initialVol_sum);
       //printf("Current domain volume:       %.6f \n",designVol_sum);
       //printf("Volume constraint violation:: %.6f \n",designVol_sum-volfrac*initialVol_sum);
