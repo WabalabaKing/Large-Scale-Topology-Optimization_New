@@ -157,7 +157,7 @@ void mafillsmvectorfilter_buffered_filtering(double *Vector, double *VectorFilte
 
 
 
-											 int write_cg_sens(const char *path,
+int write_cg_sens(const char *path,
                       size_t ne,
                       const double *dCGx,
                       const double *dCGy,
