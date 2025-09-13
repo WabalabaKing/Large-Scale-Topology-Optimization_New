@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <math.h>
 #include <pthread.h>
+#include <inttypes.h>
 
 #include <sys/stat.h>
 #include <stdint.h>
@@ -156,7 +157,10 @@ void filterSensitivity_bin_buffered_mts(const double *SensIn,
     pthread_t  *threads=(pthread_t*)malloc((size_t)num_threads*sizeof(pthread_t));
     ThreadArgs *targs  =(ThreadArgs*)malloc((size_t)num_threads*sizeof(ThreadArgs));
 
-    long long total_read=0;
+    //long long total_read=0;
+
+    int64_t total_read = 0;
+
     while(1){
         size_t n1=fread(drow_block,sizeof(int64_t),   BLOCK_SIZE,frow);
         size_t n2=fread(dcol_block,sizeof(int64_t),   BLOCK_SIZE,fcol);
@@ -189,5 +193,7 @@ void filterSensitivity_bin_buffered_mts(const double *SensIn,
     free(drow_block); free(dcol_block); free(dval_block); free(w_block);
     free(row_sum); free(threads); free(targs);
 
-    printf("Processed %lld triplets (binary)\n", total_read);
+    //printf("Processed %lld triplets (binary)\n", total_read);
+
+    printf("Processed %" PRId64 " triplets (binary)\n", total_read); // new
 }

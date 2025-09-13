@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "CalculiX.h"
+#include <inttypes.h>
 
 #include <stdint.h> 
 
@@ -18,7 +19,7 @@ typedef struct {
     int ne_start, ne_end;
     double *elCentroid;
     double rmin_local;
-    int *fnnzassumed;
+    ITG *fnnzassumed;
     int *filternnzElems;
 } ThreadArgs;
 
@@ -137,7 +138,7 @@ void *filter_thread_bin(void *args_ptr)
         fwrite (&count, sizeof(int), 1, fdnnz);
 
         // Guard: check if fnnzassumed is too small
-        if (count > *args->fnnzassumed) 
+        if (count > (int)*args->fnnzassumed) 
         {
             pthread_mutex_lock(&print_mutex);
             printf("WARNING: Element %d has %d neighbors. Increase fnnzassumed.\n", i, count);
@@ -269,8 +270,11 @@ void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, cha
     printf("All threads completed.\n");
 
     // Compute filternnz (symmetric): 2 * sum of per-row neighbor counts
-    long long sum_dnnz = 0;
-    for (int i = 0; i < ne0; ++i) sum_dnnz += filternnzElems[i];
+    int64_t sum_dnnz = 0;
+    for (int i = 0; i < ne0; ++i) sum_dnnz += (int64_t)filternnzElems[i];
+
+    int64_t nnz_total_sym = 2 * sum_dnnz;
+
     *filternnz = (ITG)(2LL * sum_dnnz);
 
     //SFREE(elCentroid);
@@ -374,6 +378,6 @@ void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, cha
     printf("Done!\n");
 
     printf("Final binaries: drow.bin, dcol.bin, dval.bin, dnnz.bin, dsum.bin\n");
-    printf("Filter matrix nnz (symmetric): %d\n", *filternnz);
+    printf("Filter matrix nnz (symmetric): %d\n", nnz_total_sym);
     printf("===============================================================\n");
 }

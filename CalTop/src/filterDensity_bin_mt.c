@@ -5,12 +5,14 @@
 #include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>   
 
 pthread_mutex_t *row_locks;
 
 #include <sys/stat.h>
 #include <stdint.h> 
 
+/*
 static long long file_elems(const char *path, size_t item_size) {
     struct stat st;
     if (stat(path, &st) != 0) { perror(path); exit(EXIT_FAILURE); }
@@ -20,6 +22,21 @@ static long long file_elems(const char *path, size_t item_size) {
     }
     return (long long)(st.st_size / (long long)item_size);
 }
+
+*/
+
+static int64_t file_elems64(const char *path, size_t item_size) 
+{
+    struct stat st;
+    if (stat(path, &st) != 0) { perror(path); exit(EXIT_FAILURE); }
+    if ((size_t)st.st_size % item_size) 
+    {
+        fprintf(stderr, "Size mismatch in %s (not a multiple of item size)\n", path);
+        exit(EXIT_FAILURE);
+    }
+    return (int64_t)((size_t)st.st_size / item_size);
+}
+
 
 void *thread_filter_bin_worker_mutex(void *args_ptr)
 {
@@ -63,19 +80,22 @@ void filterDensity_buffered_bin_mt(double *Vector, double *VectorFiltered,
     const int ne = *ne_ptr;
     const double q = *q_ptr;
 
-    long long nrow = file_elems("drow.bin", sizeof(int64_t));
-    long long ncol = file_elems("dcol.bin", sizeof(int64_t));
-    long long nval = file_elems("dval.bin", sizeof(double));
+    int64_t nrow = file_elems64("drow.bin", sizeof(int64_t));
+    int64_t ncol = file_elems64("dcol.bin", sizeof(int64_t));
+    int64_t nval = file_elems64("dval.bin", sizeof(double));
 
-    filternnz_total = (int)nrow;   // use this instead of a passed-in value
+    //filternnz_total = (int)nrow;   // use this instead of a passed-in value
 
+    int64_t filternnz_total_64 = nrow;             // total triplets (symmetric already)
 
-    printf("Filternnz total: %d \n", filternnz_total);
+    printf("Filternnz total: %" PRId64 "\n", filternnz_total_64);
 
-    if (!(nrow == ncol && ncol == nval)) {
-    fprintf(stderr, "Triplet file length mismatch: drow=%lld dcol=%lld dval=%lld\n", nrow, ncol, nval);
-    exit(EXIT_FAILURE);
-}
+    if (!(nrow == ncol && ncol == nval)) 
+    {
+        fprintf(stderr, "Triplet file length mismatch: drow=%" PRId64 " dcol=%" PRId64 " dval=%" PRId64 "\n",
+            nrow, ncol, nval);
+        exit(EXIT_FAILURE);
+    }
 
     const char *env_threads = getenv("OMP_NUM_THREADS");
     int num_threads = (env_threads ? atoi(env_threads) : 4);
@@ -137,27 +157,38 @@ void filterDensity_buffered_bin_mt(double *Vector, double *VectorFiltered,
     // Threads & locks
     pthread_t *threads = (pthread_t*)malloc((size_t)num_threads * sizeof(pthread_t));
     ThreadArgs *thread_args = (ThreadArgs*)malloc((size_t)num_threads * sizeof(ThreadArgs));
-    if (!threads || !thread_args) {
+
+    if (!threads || !thread_args) 
+    {
         fprintf(stderr, "Thread arrays allocation failed\n");
         free(dsum); free(drow_block); free(dcol_block); free(dval_block); free(weight_sum);
         exit(EXIT_FAILURE);
     }
+
     row_locks = (pthread_mutex_t*)malloc((size_t)ne * sizeof(pthread_mutex_t));
     for (int i = 0; i < ne; ++i) pthread_mutex_init(&row_locks[i], NULL);
 
     // --- Stream blocks in binary ---
-    int total_read = 0;
-    while (total_read < filternnz_total) {
-        int block_read = filternnz_total - total_read;
-        if (block_read > BLOCK_SIZE) block_read = BLOCK_SIZE;
+    int64_t total_read = 0;
+    while (total_read < filternnz_total_64) 
+    {
+        int64_t remaining = filternnz_total_64 - total_read;
+        int block_read = (remaining > BLOCK_SIZE) ? BLOCK_SIZE : (int)remaining;
+
+        //if (block_read > BLOCK_SIZE) block_read = BLOCK_SIZE;
 
         size_t r1 = fread(drow_block, sizeof(int64_t),    (size_t)block_read, frow);
         size_t r2 = fread(dcol_block, sizeof(int64_t),    (size_t)block_read, fcol);
         size_t r3 = fread(dval_block, sizeof(double), (size_t)block_read, fval);
-        if (r1 != (size_t)block_read || r2 != (size_t)block_read || r3 != (size_t)block_read) {
-            fprintf(stderr, "Binary read error at triplet offset %d (got %zu/%zu/%zu)\n",
-                    total_read, r1, r2, r3);
-            fclose(frow); fclose(fcol); fclose(fval);
+
+        if (r1 != (size_t)block_read || r2 != (size_t)block_read || r3 != (size_t)block_read) 
+        {
+            fprintf(stderr, "Binary read error at triplet offset %" PRId64 " (got %zu/%zu/%zu)\n", total_read, r1, r2, r3);
+
+
+            fclose(frow);
+            fclose(fcol); 
+            fclose(fval);
             free(dsum); free(drow_block); free(dcol_block); free(dval_block);
             free(weight_sum);
             for (int i = 0; i < ne; ++i) pthread_mutex_destroy(&row_locks[i]);

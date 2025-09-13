@@ -33,6 +33,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <inttypes.h> 
 
 #ifdef _OPENMP
   #include <omp.h>
@@ -168,7 +169,9 @@ void filterSensitivity_bin_buffered_mts_multi(const double * const *SensInArr,
     ThreadArgs *targs   = (ThreadArgs*) malloc((size_t)num_threads * sizeof(ThreadArgs));
     if (!threads || !targs) { fprintf(stderr,"alloc thread objects failed\n"); exit(EXIT_FAILURE); }
 
-    long long total_read = 0;
+    //long long total_read = 0;
+
+    int64_t total_read = 0;
 
     while (1) {
         const size_t n1 = fread(drow_block, sizeof(int64_t), BLOCK_SIZE, frow);
@@ -219,7 +222,8 @@ void filterSensitivity_bin_buffered_mts_multi(const double * const *SensInArr,
     free(drow_block); free(dcol_block); free(dval_block); free(w_block);
     free(row_sum); free(threads); free(targs);
 
-    printf("Processed %lld triplets (binary)\n", total_read);
+    //printf("Processed %lld triplets (binary)\n", total_read);
+    printf("Processed %" PRId64 " triplets (binary)\n", total_read);
 }
 
 // Convenience wrapper for exactly 3 sensitivities (CGx, CGy, CGz)
