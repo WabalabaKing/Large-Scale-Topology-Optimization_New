@@ -26,7 +26,7 @@
      &  springarea,reltime,calcul_fn,calcul_qa,calcul_cauchy,nener,
      &  ikin,nal,ne0,thicke,emeini,pslavsurf,
      &  pmastsurf,mortar,clearini,nea,neb,ielprop,prop,kscale,
-     &  list,ilist)
+     &  list,ilist, design, penal)
 !
 !     calculates stresses and the material tangent at the integration
 !     points and the internal forces at the nodes
@@ -68,7 +68,9 @@
      &  gs(8,4),a,reltime,tlayer(4),dlayer(4),xlayer(mi(3),4),
      &  thicke(mi(3),*),emeini(6,mi(1),*),clearini(3,9,*),
      &  pslavsurf(3,*),pmastsurf(6,*)
-!
+!     
+!     Element density and penalization vector
+      real*8 design(*), penal
       intent(in) co,kon,ipkon,lakon,ne,v,
      &  elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
      &  ielorien,norien,orab,ntmat_,t0,t1,ithermal,
@@ -318,7 +320,7 @@ c     Bernhardi end
          elseif(lakonl(1:1).eq.'E') then
             mint3d=0
          endif
-!
+!        Gather nodal displacements
          do j=1,nope
             konl(j)=kon(indexe+j)
             do k=1,3
@@ -616,7 +618,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !           calculating the strain
 !
 !           attention! exy,exz and eyz are engineering strains!
-!
+!           Small-strain (engineering shears)
             exx=vkl(1,1)
             eyy=vkl(2,2)
             ezz=vkl(3,3)
@@ -661,7 +663,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             endif
 !
 !              storing the local strains
-!
+!              Store tenorial components
             if(iperturb(1).ne.-1) then
                eloc(1)=exx
                eloc(2)=eyy
@@ -915,7 +917,7 @@ c     Bernhardi end
             endif
 !
 !           calculating the local stiffness and stress
-!
+!           Constitutive law
             nlgeom_undo=0
             call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
      &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
@@ -1053,7 +1055,7 @@ c     Bernhardi end
                ener(jj,i+ne)=rho*(vel(1,1)*vel(1,1)+
      &              vel(2,1)*vel(2,1)+ vel(3,1)*vel(3,1))/2.d0
             endif
-!
+!           Write stress into stx (integration-point storage)
             skl(1,1)=stre(1)
             skl(2,2)=stre(2)
             skl(3,3)=stre(3)
