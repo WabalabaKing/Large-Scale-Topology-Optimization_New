@@ -4116,7 +4116,7 @@ void FORTRAN(resultsmech,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	  ITG *iener,ITG *ikin,ITG *nal,ITG *ne0,double *thicke,
 	  double *emeini,double *pslavsurf,double *pmastsurf,ITG *mortar,
 	  double *clearini,ITG *nea,ITG *neb,ITG *ielprop,double *prop,
-	  ITG *kscale,ITG *list,ITG *ilist));
+	  ITG *kscale,ITG *list,ITG *ilist, double* design, double* penal));
 
 void *resultsmechmt(ITG *i);
 

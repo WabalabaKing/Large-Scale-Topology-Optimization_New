@@ -40,6 +40,8 @@ static double *co1,*v1,*stx1,*elcon1,*rhcon1,*alcon1,*alzero1,*orab1,*t01,*t11,
     *cocon1,*qfx1,*thicke1,*emeini1,*shcon1,*xload1,*prop1,
     *xloadold1,*pslavsurf1,*pmastsurf1,*clearini1,*xbody1;
 
+static double *design1, *penal1; 
+
 void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        double *v,double *stn,ITG *inum,double *stx,double *elcon,ITG *nelcon,
        double *rhcon,ITG *nrhcon,double *alcon,ITG *nalcon,double *alzero,
@@ -219,6 +221,10 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         printf("Look at resultsmech.f to see how stresses are computed");
 		printf("Using up to %" ITGFORMAT " cpu(s) for the stress calculation.\n\n", num_cpus);
 	}
+
+
+    design1 = design;
+    penal1  = penal;
 
 	/* create threads and wait */
 	
@@ -468,7 +474,7 @@ void *resultsmechmt(ITG *i)
           springarea1,reltime1,&calcul_fn1,&calcul_qa1,&calcul_cauchy1,nener1,
 	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
 	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
-	  kscale1,&list1,ilist1));
+	  kscale1,&list1,ilist1, design1, penal1));
 
     // qa1[indexqa+2] now has this thread's ∑ w·vm^p
     // qa1[indexqa+3] now has this thread's ∑ w
