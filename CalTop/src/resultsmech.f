@@ -72,9 +72,11 @@
 !     Element density and penalization vector
       real*8 design(*), penal
 
-!     p-norm scratch
-      real*8 sx, sy, sz, txy, txz, tyz, vm, vm2, pexp, sump, vol, wgt  
-      integer ngp 
+!     p-norm variables scratch 
+      real*8 sx, sy, sz, txy, txz, tyz, vm, vm2, wgt
+      real*8 g_sump, g_vol, g_pexp
+
+
       intent(in) co,kon,ipkon,lakon,ne,v,
      &  elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
      &  ielorien,norien,orab,ntmat_,t0,t1,ithermal,
@@ -99,6 +101,11 @@
       nal=0
       qa(3)=-1.d0
       qa(4)=0.d0
+
+      ! --- INIT global p-norm accumulators ---
+      g_sump = 0.d0
+      g_vol  = 0.d0
+      g_pexp = 20.d0     ! choose your global p
 !
       do m=nea,neb
 !
@@ -414,11 +421,7 @@ c         write(*,*) 'resultsmech ',i,lakonl,mint3d
                enddo
             enddo            
          endif
-! ADD (init per element for p-norm)
-      sump = 0.d0
-      vol  = 0.d0
-      ngp  = 0
-      pexp = 20.d0        ! choose a
+!
          do jj=1,mint3d
             if(lakonl(4:5).eq.'8R') then
                xi=gauss3d1(1,jj)
@@ -1181,19 +1184,11 @@ c     Bernhardi end
 
 
             wgt  = xsj*weight
-            sump = sump + (vm**pexp)*wgt
-            vol  = vol  + wgt
-            ngp  = ngp  + 1
+            g_sump = g_sump + (vm**g_pexp)*wgt
+            g_vol  = g_vol  + wgt
 
 !
          enddo  ! <--- end of jj=1, mint3d
-
-         ! --- ADD: element p-norm reduction (volume-weighted) ----------------------
-         if (vol .gt. 0.d0) then
-            qa(4) = (sump / vol)**(1.d0/pexp)
-         else
-            qa(4) = 0.d0
-         endif
 !
 !        q contains the contributions to the nodal force in the nodes
 !        belonging to the element at stake from other elements (elements
@@ -1211,5 +1206,12 @@ c     Bernhardi end
          endif
       enddo
 !
+
+!
+
+      qa(3) = g_sump
+      qa(4) = g_vol
+
+! ------------------------
       return
       end

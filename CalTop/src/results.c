@@ -224,6 +224,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	
 	NNEW(ithread,ITG,num_cpus);
 
+    
+
 	for(i=0; i<num_cpus; i++)  
     {
 	    ithread[i]=i;
@@ -232,6 +234,24 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
 	for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 	
+    /* p-norm variables */
+    double sumP = 0.0;
+    double sumV = 0.0;
+
+    for (int t = 0; t < num_cpus; ++t)
+    {
+        size_t idx = (size_t)t *4;
+        sumP += qa1[idx + 2];   // thread's g_sump
+        sumV += qa1[idx + 3];   // thread's g_vol
+    }
+
+    // must match g_pexp used inside resultsmech
+    const double p = 20.0;
+    double pnorm = (sumV > 0.0) ? pow(sumP / sumV, 1.0 / p) : 0.0;
+    // Optional: keep raw sums around for debugging
+    printf("Global p-norm (p=%.0f): %.6e  [sumP=%.6e, sumV=%.6e]\n",
+       p, pnorm, sumP, sumV);
+
 	for(i=0;i<mt**nk;i++)
     {
 	    fn[i]=fn1[i];
@@ -415,18 +435,26 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
 /* subroutine for multithreading of resultsmech */
 
-void *resultsmechmt(ITG *i){
+void *resultsmechmt(ITG *i)
+
+{
 
     ITG indexfn,indexqa,indexnal,nea,neb,list1,*ilist1=NULL;
 
     indexfn=*i*mt1**nk1;
-    indexqa=*i*4;
+    indexqa=*i*4;  // this thread's 4-slot window in qa1
     indexnal=*i;
 
     nea=neapar[*i]+1;
     neb=nebpar[*i]+1;
 
     list1=0;
+
+    // --- IMPORTANT: clear this thread's qa window so we don't sum garbage
+    qa1[indexqa + 0] = 0.0;   // qa(1) not used for p-norm, but clear anyway
+    qa1[indexqa + 1] = 0.0;   // qa(2) not used here
+    qa1[indexqa + 2] = 0.0;   // will hold partial g_sump (∑ w·vm^p)
+    qa1[indexqa + 3] = 0.0;   // will hold partial g_vol  (∑ w)
 
     
     FORTRAN(resultsmech,(co1,kon1,ipkon1,lakon1,ne1,v1,
@@ -442,6 +470,8 @@ void *resultsmechmt(ITG *i){
 	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
 	  kscale1,&list1,ilist1));
 
+    // qa1[indexqa+2] now has this thread's ∑ w·vm^p
+    // qa1[indexqa+3] now has this thread's ∑ w
 
     
 
