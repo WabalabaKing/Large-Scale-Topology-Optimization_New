@@ -41,3 +41,10 @@ ReadIPOPT --log log.OPT --out <output file name>.csv
 ```
 
 Parses the log file from IPOPT (print level = 6) and writes a csv file with relevant convergence metrics
+
+To use this script as an executable, set the following alias in your bashrc:
+
+``` sh
+alias ReadIPOPT='python3 some_path/Large-Scale-Topology-Optimization/HelperFiles/ReadIPOPT.py'
+
+```
