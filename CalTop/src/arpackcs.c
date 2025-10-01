@@ -122,6 +122,8 @@ void arpackcs(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     *cdnt=NULL,*cdnr=NULL,*cdni=NULL,*eme=NULL,alea=0.1,
     *pslavsurfold=NULL,*energyini=NULL,*energy=NULL;
 
+	double *brhs =NULL;
+
   FILE *f1;
 
   /* dummy arguments for the results call */
@@ -390,7 +392,7 @@ void arpackcs(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	      sideload,xload,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
               mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	      islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-              inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal);
+              inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal, brhs);
   }else{
       results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
 	      elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
@@ -409,7 +411,7 @@ void arpackcs(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	      sideload,xload,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
               mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	      islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-              inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal);
+              inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal, brhs);
   }
   SFREE(f);SFREE(v);SFREE(fn);SFREE(stx);SFREE(eme);SFREE(inum);
   iout=1;
@@ -1246,7 +1248,7 @@ void arpackcs(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		    sideload,xload,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 		    mortar,islavact,&cdn[kk6],islavnode,nslavnode,ntie,clearini,
 		    islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-		    inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal);}
+		    inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal, brhs);}
 	      else{
 		  results(co,nk,kon,ipkon,lakon,ne,&v[kkv],&stn[kk6],inum,
 		    &stx[kkx],elcon,
@@ -1266,7 +1268,7 @@ void arpackcs(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		    sideload,xload,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 		    mortar,islavact,&cdn[kk6],islavnode,nslavnode,ntie,clearini,
 		    islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-		    inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal);
+		    inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal, brhs);
 	      }
 
 	  }

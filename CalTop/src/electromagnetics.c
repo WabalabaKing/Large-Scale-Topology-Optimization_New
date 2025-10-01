@@ -133,6 +133,8 @@ void electromagnetics(double **cop, ITG *nk, ITG **konp, ITG **ipkonp,
 	 *cdnr=NULL,*cdni=NULL,*energyini=NULL,*energy=NULL,*adfreq=NULL,
 	 *aufreq=NULL,*bfreq=NULL,om;
 
+	 double *brhs = NULL;
+
 #ifdef SGI
   ITG token;
 #endif
@@ -451,7 +453,7 @@ void electromagnetics(double **cop, ITG *nk, ITG **konp, ITG **ipkonp,
 	  sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
           &mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	  islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-          inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun, design, penal);
+          inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun, design, penal, brhs);
   
   SFREE(fn);SFREE(inum);SFREE(v);
   
@@ -565,7 +567,7 @@ void electromagnetics(double **cop, ITG *nk, ITG **konp, ITG **ipkonp,
 	  sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
           &mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	  islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-          inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun, design, penal);
+          inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun, design, penal, brhs);
   
 //  memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
   

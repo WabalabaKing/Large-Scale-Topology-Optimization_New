@@ -97,6 +97,7 @@ void expand(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
 
 	double *design;
 	double *penal;
+	double *brhs;
     
     /* dummy arguments for the results call */
     
@@ -529,7 +530,7 @@ void expand(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
               sideload,xload,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 	      &mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	      islavsurf,ielprop,prop,energyini,energy,&iit,iponoel,
-	      inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal);
+	      inoel,nener,orname,&network,ipobody,xbody,ibody,typeboun, design, penal, brhs);
 	    
 	}
 	SFREE(eei);

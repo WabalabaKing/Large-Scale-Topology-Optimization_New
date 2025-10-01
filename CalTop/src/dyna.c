@@ -101,6 +101,7 @@ void dyna(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp, ITG *n
 
     double *design;
     double *penal;
+    double *brhs;
 
   long long i2;
 
@@ -1894,7 +1895,7 @@ void dyna(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp, ITG *n
 		sideload,xload,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 		&mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
                 islavsurf,ielprop,prop,energyini,energy,&iit,iponoel,
-                inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal);
+                inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, brhs);
 
 	/* restoring */
 
