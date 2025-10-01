@@ -222,6 +222,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 		printf("Using up to %" ITGFORMAT " cpu(s) for the stress calculation.\n\n", num_cpus);
 	}
 
+    /************************************************** */
+    /*  STRESS CALCULATION */
 
     design1 = design;
     penal1  = penal;
@@ -240,9 +242,9 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
 	for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 	
-    /* p-norm variables */
-    double sumP = 0.0;
-    double sumV = 0.0;
+    /* p-norm variables reduced across threads */
+    double sumP = 0.0;  // Accumulated numerator
+    double sumV = 0.0;  // Accumulated denominator
 
     for (int t = 0; t < num_cpus; ++t)
     {
@@ -254,9 +256,31 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     // must match g_pexp used inside resultsmech
     const double p = 20.0;
     double pnorm = (sumV > 0.0) ? pow(sumP / sumV, 1.0 / p) : 0.0;
+
+    double J = 0.0;  // Volume-normalzied p-norm
+    double alpha = 0.0; // Scalar factor used in adjoint RHS
+
+    if (sumV > 0.0)
+    {
+        double ratio = sumP/sumV;     /* mean of vm^p */
+
+        if (ratio > 0.0)
+        {
+            /* compute J */
+
+            J = pow(ratio, 1.0/p);
+
+            /* alpha = J^(1-p)/sumV ; use log/exp for numerical robustness */
+            double logJ = log(J);
+            alpha = exp((1.0 - p) * logJ) / sumV;
+        }
+    }
+
     // Optional: keep raw sums around for debugging
     printf("Global p-norm (p=%.0f): %.6e  [sumP=%.6e, sumV=%.6e]\n",
        p, pnorm, sumP, sumV);
+
+
 
 	for(i=0;i<mt**nk;i++)
     {
@@ -274,6 +298,22 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     SFREE(ithread);
     SFREE(neapar);
     SFREE(nebpar);
+
+
+    /********************END STRESS CALCULATION *****************/
+    /************************************************************/
+
+        /************************************************** */
+    /*  STRESS-ADJOINT RHS CALCULATION */
+
+    // Define and allocate adjoint RHS vector
+    double *brhs;
+    NNEW(brhs,double,num_cpus*mt**nk);
+
+
+
+    // Deallocate RHS adjoint post sensitivity calculation
+
 	
     /* determine the internal force */
 

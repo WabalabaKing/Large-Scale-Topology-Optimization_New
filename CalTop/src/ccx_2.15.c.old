@@ -47,7 +47,7 @@ int main(int argc,char *argv[])
   char *orname=NULL;      /**< name of orientation of element */
   char *amname=NULL;      /**< amplitude name. */
   char *filab=NULL;       /**< field label (U, S,..) */
-  char *lakon=NULL;       /**< element label */
+  char *lakon=NULL;       /**< element type string */
   char *labmpc=NULL;      /**< MPC label. */
   char *prlab=NULL;       /**< output request */
   char *prset=NULL;       /**< node or element set assiciated with output request.*/
@@ -65,7 +65,7 @@ int main(int argc,char *argv[])
   char  *heading=NULL;    /**< decription. */
   char  *objectset=NULL;  /**< decription. */
 
-  ITG *kon=NULL;          /**< Element topology vector */
+  ITG *kon=NULL;          /**< element connectivity */
   ITG *nodeboun=NULL;     /**< boundary nodes (SPC) */
   ITG *ndirboun=NULL;     /**< directions of SPC at nodeboun */
   ITG *ipompc=NULL;       /**< index of node with MPCs */ 
@@ -106,7 +106,7 @@ int main(int argc,char *argv[])
   ITG *iamload=NULL;     /**< amplitude definition for distributed loads */
   ITG *iamt1=NULL;      /**< amplitude definition for temperature loads */
   ITG *namta=NULL;     /**< amplitude values for temperature definitions */
-  ITG *ipkon=NULL;    /** < element connectivity */
+  ITG *ipkon=NULL;    /** < element pointer to kon */
   ITG *iamboun=NULL; /**< ampplitude definitins associated with SPCs */
   ITG *nplicon=NULL; /**< number of plasticity constants for material */
   ITG *nplkcon=NULL; /**< number of plasticity constants associated with elements */
