@@ -40,7 +40,12 @@ static double *co1,*v1,*stx1,*elcon1,*rhcon1,*alcon1,*alzero1,*orab1,*t01,*t11,
     *cocon1,*qfx1,*thicke1,*emeini1,*shcon1,*xload1,*prop1,
     *xloadold1,*pslavsurf1,*pmastsurf1,*clearini1,*xbody1;
 
-static double *design1, *penal1; 
+
+
+static double *design1, *penal1; /* Element densities and penalization paramter*/
+static double *rhs1=NULL;  /* per-thread RHS blocks*/
+static double *brhs=NULL;  /* reduced adjoint RHS (global)*/
+static double p1 = 0.0;   /* p in p-norm */ 
 
 void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        double *v,double *stn,ITG *inum,double *stx,double *elcon,ITG *nelcon,
@@ -253,32 +258,27 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         sumV += qa1[idx + 3];   // thread's g_vol
     }
 
-    // must match g_pexp used inside resultsmech
-    const double p = 20.0;
-    double pnorm = (sumV > 0.0) ? pow(sumP / sumV, 1.0 / p) : 0.0;
+    /* must match the exponent used inside resultsmech() */
+    p1 = 20.0;
 
-    double J = 0.0;  // Volume-normalzied p-norm
-    double alpha = 0.0; // Scalar factor used in adjoint RHS
+    double J = 0.0;     /* volume-normalized p-norm */
+    alpha1 = 0.0;       /* scalar used in adjoint RHS */
 
-    if (sumV > 0.0)
+    if (sumV > 0.0) 
     {
-        double ratio = sumP/sumV;     /* mean of vm^p */
-
-        if (ratio > 0.0)
+        const double ratio = sumP / sumV;  /* mean of vm^p */
+        if (ratio > 0.0) 
         {
-            /* compute J */
-
-            J = pow(ratio, 1.0/p);
-
-            /* alpha = J^(1-p)/sumV ; use log/exp for numerical robustness */
-            double logJ = log(J);
-            alpha = exp((1.0 - p) * logJ) / sumV;
+            J = pow(ratio, 1.0 / p1);
+            /* alpha = J^(1-p)/sumV (log/exp for stability) */
+            const double logJ = log(J);
+            alpha1 = exp((1.0 - p1) * logJ) / sumV;
         }
     }
 
-    // Optional: keep raw sums around for debugging
     printf("Global p-norm (p=%.0f): %.6e  [sumP=%.6e, sumV=%.6e]\n",
-       p, pnorm, sumP, sumV);
+        p1, J, sumP, sumV);
+
 
 
 
@@ -296,27 +296,56 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	}
 	SFREE(fn1);
     SFREE(ithread);
-    SFREE(neapar);
-    SFREE(nebpar);
+    /*SFREE(neapar);
+    SFREE(nebpar); */ // Free after stress calculation
 
 
     /********************END STRESS CALCULATION *****************/
     /************************************************************/
 
-        /************************************************** */
+    /************************************************** */
     /*  STRESS-ADJOINT RHS CALCULATION */
 
-    // Define and allocate adjoint RHS vector
-    double *brhs;
-    NNEW(brhs,double,num_cpus*mt**nk);
+    /* Allocate per-thread RHS blocks and the reduced RHS */
+    NNEW(rhs1, double, (size_t)num_cpus * mt * *nk);
+    NNEW(brhs, double, (size_t)mt * *nk);
+
+    /* Zero them (CalculiX NNEW doesn't zero by default) */
+    for (size_t zz = 0; zz < (size_t)num_cpus * mt * *nk; ++zz) rhs1[zz] = 0.0;
+    for (size_t zz = 0; zz < (size_t)mt * *nk; ++zz)     brhs[zz] = 0.0;
+
+    /* Spawn RHS threads */
+    NNEW(ithread, ITG, num_cpus);
+
+    for (i = 0; i < num_cpus; ++i) 
+    {
+        ithread[i] = i;
+        pthread_create(&tid[i], NULL, (void *)pnormRHSmt, (void *)&ithread[i]);
+    }
+
+    for (i = 0; i < num_cpus; ++i) pthread_join(tid[i], NULL);
+    SFREE(ithread);
 
 
+    /* Reduce per-thread blocks into brhs */
+    for (i = 0; i < mt * *nk; ++i) 
+    {
+        double acc = rhs1[i];
+        for (j = 1; j < num_cpus; ++j) 
+        {
+            acc += rhs1[i + j * mt * *nk];
+        }
+        brhs[i] = acc;
+    }
 
-    // Deallocate RHS adjoint post sensitivity calculation
 
+    /* Done with per-thread storage*/
+	SFREE(rhs1);
+    SFREE(neapar);
+    SFREE(nebpar);
 	
+    
     /* determine the internal force */
-
 	qa[0]=qa1[0];
 	for(j=1;j<num_cpus;j++)
     {
@@ -520,6 +549,25 @@ void *resultsmechmt(ITG *i)
     // qa1[indexqa+3] now has this thread's ∑ w
 
     
+
+    return NULL;
+}
+
+/* thread entry for assembling the adjoint RHS of the p-norm functional */
+void *pnormRHSmt(ITG *i)
+{
+    ITG indexrhs, nea, neb, list1 = 0;
+    ITG *ilist1 = NULL;
+
+    /* each thread writes into its own block in rhs1 */
+    indexrhs = *i * mt1 * *nk1;
+
+    nea = neapar[*i] + 1;
+    neb = nebpar[*i] + 1;
+
+    FORTRAN(pnorm_rhs,(co1,kon1,ipkon1,lakon1,ne1,
+        stx1,xstiff1,mi1,&rhs1[indexrhs],&alpha1,&p1,design1,
+        &nea,&neb,&list1,ilist1));
 
     return NULL;
 }
