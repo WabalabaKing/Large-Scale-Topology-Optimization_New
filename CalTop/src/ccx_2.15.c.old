@@ -1860,6 +1860,8 @@ while(istat>=0)
 
       time_t startl, endl; 
 	    startl = time(NULL);
+
+      printf("Calling linstatic from main driver....\n");
       
 	    linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
 	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,

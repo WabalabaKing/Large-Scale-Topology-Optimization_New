@@ -228,6 +228,15 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 		printf("Using up to %" ITGFORMAT " cpu(s) for the stress calculation.\n\n", num_cpus);
 	}
 
+
+//    size_t total = (size_t)mt * (size_t)(*nk);
+//size_t to_show = (total < 24 ? total : 24); /* cap output */
+//for (size_t i = 0; i < to_show; ++i) {
+//    printf("v1[%zu] = % .6e\n", i, v1[i]);
+//}
+fflush(stdout);
+
+
     /************************************************** */
     /*  STRESS CALCULATION */
 
@@ -264,6 +273,9 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
     double J = 0.0;     /* volume-normalized p-norm */
     alpha1 = 0.0;       /* scalar used in adjoint RHS */
+
+    printf("Current sumP: %f \n", sumP);
+    printf("Current sumV: %f \n", sumV);
 
     if (sumV > 0.0) 
     {
@@ -307,6 +319,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     /************************************************** */
     /*  STRESS-ADJOINT RHS CALCULATION */
 
+    printf("Assembling RHS for stress adjoint...");
+
     /* Allocate per-thread RHS blocks and the reduced RHS */
     NNEW(rhs1, double, num_cpus * mt * *nk);
     //NNEW(brhs, double, mt * *nk);
@@ -346,6 +360,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	SFREE(rhs1);
     SFREE(neapar);
     SFREE(nebpar);
+
+    printf("Done!");
 	
     
     /* determine the internal force */
@@ -547,6 +563,8 @@ void *resultsmechmt(ITG *i)
 	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
 	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
 	  kscale1,&list1,ilist1, design1, penal1));
+
+    
 
     // qa1[indexqa+2] now has this thread's ∑ w·vm^p
     // qa1[indexqa+3] now has this thread's ∑ w

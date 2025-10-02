@@ -1184,6 +1184,9 @@ c     Bernhardi end
             txz = stx(5,jj,i)
             tyz = stx(6,jj,i)
 
+            !print *, 'sx = ', sx
+            !print *, 'sy = ', sy
+
             vm2 = (sx-sy)*(sx-sy) + (sy-sz)*(sy-sz) + (sz-sx)*(sz-sx)
             vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
             vm  = dsqrt(vm2)

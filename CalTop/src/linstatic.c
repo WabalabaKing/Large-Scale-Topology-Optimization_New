@@ -368,6 +368,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   	iout=-1;
   	NNEW(v,double,mt**nk);
   	NNEW(fn,double,mt**nk);
+	NNEW(brhs,double,mt**nk);
   	//NNEW(stx,double,6*mi[0]**ne); No passing stx as an input argument to linstatic
   	NNEW(inum,ITG,*nk);
 	
@@ -392,6 +393,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   	SFREE(v);
 	SFREE(fn);
+	SFREE(brhs);
 	//SFREE(stx); No free stx in main driver
 	SFREE(inum);
   	iout=1;
@@ -463,6 +465,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	{	
 		/*############################################################################################*/
 		/* linear static calculation */
+
+		printf("Starting linstatic calculation...\n");
       	NNEW(au,double,*nzs);
       	nmethodl=*nmethod;
 
@@ -625,6 +629,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	      			NNEW(fn,double,mt**nk);
 	      			NNEW(stn,double,6**nk);
 	      			NNEW(inum,ITG,*nk);
+					NNEW(brhs,double,mt**nk);
 	      			//NNEW(stx,double,6*mi[0]**ne);
 
 	      			if(strcmp1(&filab[261],"E   ")==0) NNEW(een,double,6**nk);
@@ -667,6 +672,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 	      				SFREE(v);
 						SFREE(stn);
+						SFREE(brhs);
 						SFREE(inum);
 						//SFREE(stx);
 
@@ -819,6 +825,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 	      				NNEW(v,double,mt**nk);
 	      				NNEW(fn,double,mt**nk);
+						NNEW(brhs,double,mt**nk);
 	      				NNEW(stn,double,6**nk);
 	      				NNEW(inum,ITG,*nk);
 	      				//NNEW(stx,double,6*mi[0]**ne);
@@ -905,6 +912,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     	 				SFREE(v);SFREE(stn);SFREE(inum);
 	      					//SFREE(stx);
 							SFREE(fn);
+							SFREE(brhs);
 
 	      					if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
 	      					if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
@@ -1002,7 +1010,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 						l2_norm_disp = sqrt(l2_norm_disp);
 
-						printf("L2 norm of displacements: %f \n", l2_norm_disp);
+						printf("L2 norm of RHS: %f \n", l2_norm_disp);
     				}
 
    	 				/* saving of ad and au for sensitivity analysis */
@@ -1111,35 +1119,10 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 					
 					printf("done calling results.c for static calculation: line: 1112 @ linstatic.c \n");
 
-					/* --- Build adjoint RHS in the solver DOF space: b = map(brhs) --- */
-					for(ITG ii=0; ii<*neq; ++ii) b[ii] = 0.0;
-
-					/* resultsforc maps nodal forces (fn-like) -> global DOF vector (f-like)
-   							We can reuse it by passing brhs as "fn" and b as "f". */
-					{
-    					ITG calcul_fn_adj = 1, calcul_f_adj = 1;
-    					FORTRAN(resultsforc,(nk, b, brhs, nactdof, ipompc, nodempc,
-                         coefmpc, labmpc, nmpc, mi, fmpc,
-                         &calcul_fn_adj, &calcul_f_adj));
-					}
-
-					/* --- Adjoint sign: K^T λ = - dJ/du ; K is symmetric, so K λ = - dJ/du --- */
-					for(ITG ii=0; ii<*neq; ++ii) b[ii] = -b[ii];
-
-
 					if(*isolver==7)
 					{
 						printf("Solving stress adjoint system....");
 
-						#ifdef PARDISO
-						// Call PARDISO to solve linear system
-						printf("Calling PARSIDO from linstatic.c \n");
-      					pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
-		   				&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
-						#else
-            			printf("*ERROR in linstatic: the PARDISO library is not linked\n\n");
-            			FORTRAN(stop,());
-						#endif
 					}
 
     				SFREE(eei);
@@ -1196,6 +1179,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     				SFREE(b);
 					//SFREE(stx);
 					SFREE(fn);
+					SFREE(brhs);
 
     				if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
     				if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
