@@ -72,13 +72,12 @@
 !     Element density and penalization vector
       real*8 design(*), penal
 
-!     p-norm variables scratch 
+!     p-norm variables 
       real*8 sx, sy, sz, txy, txz, tyz, vm, vm2, wgt
-      real*8 g_sump, g_vol, g_pexp
+      real*8 g_sump, g_vol, pexp
+      real*8 rho_e, rho_min, rho_eff, rho_p, eps_relax, sig0, phi
 
-!     SIMP weighting helpers
-      real*8 rho_min, dens, dens_eff, wexp
-
+! 
 
       intent(in) co,kon,ipkon,lakon,ne,v,
      &  elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -108,11 +107,15 @@
       ! --- INIT global p-norm accumulators ---
       g_sump = 0.d0
       g_vol  = 0.d0
-      g_pexp = 20.d0     ! choose your global p
+      pexp = 4.d0     ! choose your global p
+
+
+
 
       ! SIMP constants (tweak as needed)
-      rho_min = 1.d-3    ! small stiffness floor
-      wexp   = 1.d0     ! weight power on density (often 1)
+      rho_min = 1.d-3      ! small stiffness floor
+      eps_relax = 1.d-3    ! stress relaxation paramter to avoid singularity
+      sig0 = 1.d0          ! set to thr allowable stress
 !
       do m=nea,neb
 !
@@ -1187,24 +1190,28 @@ c     Bernhardi end
             !print *, 'sx = ', sx
             !print *, 'sy = ', sy
 
+!  --- von Mises 
             vm2 = (sx-sy)*(sx-sy) + (sy-sz)*(sy-sz) + (sz-sx)*(sz-sx)
             vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
             vm  = dsqrt(vm2)
 
-            ! --- filtered design alread in [0,1] (clamp defenseively)  ---
-            dens = design(i)
+!  --- filtered design alread in [0,1] (clamp defenseively)  ---
+            rho_e = design(i)
             ! (optional clamp, safe if design may drift)
-            if (dens .lt. 0.d0) dens = 0.d0
-            if (dens .gt. 1.d0) dens = 1.d0
+            if (rho_e .lt. 0.d0) rho_e = 0.d0
+            if (rho_e .gt. 1.d0) rho_e = 1.d0
 
-            dens_eff = rho_min + (1.d0 - rho_min) * dens
+            rho_eff = max(rho_e, rho_min)
+            rho_p = rho_eff**penal
 
-            ! density-weighted measure (wexp=1 is common)
-            wgt  = xsj*weight * dens_eff**wexp
+! --- Duysinx-Sigmund relaxed local measure
+            phi = vm/ (rho_p*sig0) + eps_relax - eps_relax/rho_eff
+            if (phi .lt. 0.d0) phi = 0.d0
 
-            g_sump = g_sump + (vm**g_pexp) * wgt
+! --- p-mean over the PHYSICAL volume (no desnity weighting)
+            wgt = xsj * weight
+            g_sump = g_sump + (phi**pexp) * wgt
             g_vol  = g_vol  + wgt
-
 !
          enddo  ! <--- end of jj=1, mint3d
 !
