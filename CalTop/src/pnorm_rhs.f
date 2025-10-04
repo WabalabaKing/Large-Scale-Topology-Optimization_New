@@ -207,7 +207,7 @@ c----------- ε-relaxed φ
             if (phi.le.0.d0) cycle
 
 c----------- dJ/dσ = α * φ^(p-1) * (1/(ρ^p σ0)) * dvm/dσ   (Voigt)
-            fac = alpha * (phi**(p-1)) / (rho_p*sig0)
+            fac = alpha * p * (phi**(p-1)) / (rho_p*sig0)
 
             g(1) =  fac*((2.d0*sx - sy - sz)/(2.d0*vm))
             g(2) =  fac*((2.d0*sy - sx - sz)/(2.d0*vm))
