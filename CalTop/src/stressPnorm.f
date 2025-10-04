@@ -16,7 +16,7 @@
 !     along with this program; if not, write to the Free Software
 !     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !
-      subroutine stressPnorm(co,kon,ipkon,lakon,ne,v,
+      subroutine stresspnorm(co,kon,ipkon,lakon,ne,v,
      &  stx,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
      &  ielmat,ielorien,norien,orab,ntmat_,t0,t1,ithermal,prestr,
      &  iprestr,eme,iperturb,fn,iout,qa,vold,nmethod,
@@ -1215,7 +1215,7 @@ c     Bernhardi end
 ! --- p-mean over the PHYSICAL volume (no desnity weighting)
             wgt = xsj * weight
             g_sump = g_sump + (phi**pexp) * wgt
-            g_vol  = g_vol  + wgt
+            !g_vol  = g_vol  + wgt  <-- valid only for p-mean
 !
          enddo  ! <--- end of jj=1, mint3d
 !
@@ -1239,7 +1239,7 @@ c     Bernhardi end
 !
 
       qa(3) = g_sump
-      qa(4) = g_vol
+      !qa(4) = g_vol
 
 ! ------------------------
       return

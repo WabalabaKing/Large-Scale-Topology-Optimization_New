@@ -258,13 +258,13 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	
     /* p-norm variables reduced across threads */
     double sumP = 0.0;  // Accumulated numerator
-    double sumV = 0.0;  // Accumulated denominator
+    //double sumV = 0.0;  // Accumulated denominator
 
     for (int t = 0; t < num_cpus; ++t)
     {
         size_t idx = (size_t)t *4;
         sumP += qa1[idx + 2];   // thread's g_sump
-        sumV += qa1[idx + 3];   // thread's g_vol -> needed for p-mean
+        //sumV += qa1[idx + 3];   // thread's g_vol -> needed for p-mean
 
         /* restore CCX defaults so downstream code doesnt misinterpret */
         qa1[idx + 2] = -1.0;   /* qa(3) */
@@ -277,24 +277,26 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     double J = 0.0;     /*  stress p-norm */
     alpha1 = 0.0;       /* scalar used in adjoint RHS */
 
-    printf("Current sumP: %f \n", sumP);
-    printf("Current sumV: %f \n", sumV);
+    //printf("Current sumP: %f \n", sumP);
+    //printf("Current sumV: %f \n", sumV);
 
-    if (sumV > 0.0) 
-    {
-        const double ratio = sumP / sumV;  /* mean of vm^p */
-        if (ratio > 0.0) 
-        {
-            J = pow(ratio, 1.0 / p1);
-            /* alpha = J^(1-p)/sumV (log/exp for stability) */
-            const double logJ = log(J);
-            //alpha1 = exp((1.0 - p1) * logJ) / sumV; // valid for p-mean
-            alpha1 = exp((1.0 - p1) * logJ) / sumV;
-        }
+
+    // Compute the aggregated P-norm
+    if (sumP > 0.0) 
+    {   
+        // Aggregation based on Duysinx and Sigmind
+        J = pow(sumP, 1.0 / p1);
+        alpha1 = pow(sumP, (1.0 / p1) - 1.0);
+    }
+    else{
+        J = 0.0;
+        alpha1 = 0.0;
     }
 
-    printf("Global p-norm (p=%.0f): %.6e  [sumP=%.6e, sumV=%.6e]\n",
-        p1, J, sumP, sumV);
+    printf("sumP (unnormalized): %.12e\n", sumP);
+    printf("J (p-norm)        : %.12e\n", J);
+    printf("alpha1 = J^(1-p)  : %.12e\n", alpha1);
+    printf("\n");
 
 
 	for(i=0;i<mt**nk;i++)
