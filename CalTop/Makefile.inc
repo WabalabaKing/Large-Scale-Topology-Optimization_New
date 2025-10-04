@@ -877,6 +877,7 @@ $(SRC_DIR)/zienzhu.f  \
 $(SRC_DIR)/tecplot.f \
 $(SRC_DIR)/tecplot_vtu.f \
 $(SRC_DIR)/build_filter.f \
+$(SRC_DIR)/stressPnorm.f \
 $(SRC_DIR)/pnorm_rhs.f 
 
 

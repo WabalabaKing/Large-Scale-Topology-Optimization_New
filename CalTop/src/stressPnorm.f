@@ -16,7 +16,7 @@
 !     along with this program; if not, write to the Free Software
 !     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !
-      subroutine resultsmech(co,kon,ipkon,lakon,ne,v,
+      subroutine stressPnorm(co,kon,ipkon,lakon,ne,v,
      &  stx,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
      &  ielmat,ielorien,norien,orab,ntmat_,t0,t1,ithermal,prestr,
      &  iprestr,eme,iperturb,fn,iout,qa,vold,nmethod,
@@ -26,11 +26,15 @@
      &  springarea,reltime,calcul_fn,calcul_qa,calcul_cauchy,nener,
      &  ikin,nal,ne0,thicke,emeini,pslavsurf,
      &  pmastsurf,mortar,clearini,nea,neb,ielprop,prop,kscale,
-     &  list,ilist)
+     &  list,ilist, design, penal)
 !
-!     calculates stresses and the material tangent at the integration
-!     points and the internal forces at the nodes
 !
+
+!     calculates the relaxed P-norm-aggregated stress based on 
+!     Duysinx, P and Sigmund O, New developments in handling stress
+!     constraints in optimal material distribution
+!     7th AIAA symposium on multidisciplinary analysis and optimization
+
       implicit none
 !
       integer cauchy
@@ -69,6 +73,14 @@
      &  thicke(mi(3),*),emeini(6,mi(1),*),clearini(3,9,*),
      &  pslavsurf(3,*),pmastsurf(6,*)
 !     
+!     Element density and penalization vector
+      real*8 design(*), penal
+
+!     p-norm variables 
+      real*8 sx, sy, sz, txy, txz, tyz, vm, vm2, wgt
+      real*8 g_sump, g_vol, pexp
+      real*8 rho_e, rho_min, rho_eff, rho_p, eps_relax, sig0, phi
+
 ! 
 
       intent(in) co,kon,ipkon,lakon,ne,v,
@@ -96,8 +108,19 @@
       qa(3)=-1.d0
       qa(4)=0.d0
 
+      ! --- INIT global p-norm accumulators ---
+      g_sump = 0.d0
+      g_vol  = 0.d0
+      pexp = 4.d0     ! choose your global p
 
 
+
+
+      ! SIMP constants (tweak as needed)
+      rho_min = 1.d-3      ! small stiffness floor
+      eps_relax = 1.d-3    ! stress relaxation paramter to avoid singularity
+      sig0 = 1.d0          ! set to thr allowable stress
+!
       do m=nea,neb
 !
          if(list.eq.1) then
@@ -1160,6 +1183,40 @@ c     Bernhardi end
                stx(5,jj,i)=ckl(3,1)
                stx(6,jj,i)=ckl(3,2)
             endif
+! --- p-norm accumulation (AFTER the Cauchy block) ------
+            sx  = stx(1,jj,i)
+            sy  = stx(2,jj,i)
+            sz  = stx(3,jj,i)
+            txy = stx(4,jj,i)
+            txz = stx(5,jj,i)
+            tyz = stx(6,jj,i)
+
+            !print *, 'sx = ', sx
+            !print *, 'sy = ', sy
+
+!  --- von Mises 
+            vm2 = (sx-sy)*(sx-sy) + (sy-sz)*(sy-sz) + (sz-sx)*(sz-sx)
+            vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
+            vm  = dsqrt(vm2)
+
+!  --- filtered design alread in [0,1] (clamp defenseively)  ---
+            rho_e = design(i)
+            ! (optional clamp, safe if design may drift)
+            if (rho_e .lt. 0.d0) rho_e = 0.d0
+            if (rho_e .gt. 1.d0) rho_e = 1.d0
+
+            rho_eff = max(rho_e, rho_min)
+            rho_p = rho_eff**penal
+
+! --- Duysinx-Sigmund relaxed local measure
+            phi = vm/ (rho_p*sig0) + eps_relax - eps_relax/rho_eff
+            if (phi .lt. 0.d0) phi = 0.d0
+
+! --- p-mean over the PHYSICAL volume (no desnity weighting)
+            wgt = xsj * weight
+            g_sump = g_sump + (phi**pexp) * wgt
+            g_vol  = g_vol  + wgt
+!
          enddo  ! <--- end of jj=1, mint3d
 !
 !        q contains the contributions to the nodal force in the nodes
@@ -1177,6 +1234,13 @@ c     Bernhardi end
             nal=nal+3*nope
          endif
       enddo
+!
+
+!
+
+      qa(3) = g_sump
+      qa(4) = g_vol
+
 ! ------------------------
       return
       end

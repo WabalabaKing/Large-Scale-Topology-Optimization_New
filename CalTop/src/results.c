@@ -233,16 +233,11 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	}
 
 
-//    size_t total = (size_t)mt * (size_t)(*nk);
-//size_t to_show = (total < 24 ? total : 24); /* cap output */
-//for (size_t i = 0; i < to_show; ++i) {
-//    printf("v1[%zu] = % .6e\n", i, v1[i]);
-//}
-fflush(stdout);
+    fflush(stdout);
 
 
     /************************************************** */
-    /*  STRESS CALCULATION */
+    /*  STRESS CALCULATION (P-NORM AGGREGATION) */
 
     design1 = design;
     penal1  = penal;
@@ -256,7 +251,7 @@ fflush(stdout);
 	for(i=0; i<num_cpus; i++)  
     {
 	    ithread[i]=i;
-	    pthread_create(&tid[i], NULL, (void *)resultsmechmt, (void *)&ithread[i]);
+	    pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
 	}
 
 	for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
@@ -569,7 +564,7 @@ void *resultsmechmt(ITG *i)
           springarea1,reltime1,&calcul_fn1,&calcul_qa1,&calcul_cauchy1,nener1,
 	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
 	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
-	  kscale1,&list1,ilist1, design1, penal1));
+	  kscale1,&list1,ilist1));
 
     
 
@@ -578,6 +573,43 @@ void *resultsmechmt(ITG *i)
 
     
 
+    return NULL;
+}
+
+void *stresspnormmt(ITG *i)
+
+{
+
+    ITG indexfn,indexqa,indexnal,nea,neb,list1,*ilist1=NULL;
+
+    indexfn=*i*mt1**nk1;
+    indexqa=*i*4;  // this thread's 4-slot window in qa1
+    indexnal=*i;
+
+    nea=neapar[*i]+1;
+    neb=nebpar[*i]+1;
+
+    list1=0;
+
+    // --- IMPORTANT: clear this thread's qa window so we don't sum garbage
+    qa1[indexqa + 0] = 0.0;   // qa(1) not used for p-norm, but clear anyway
+    qa1[indexqa + 1] = 0.0;   // qa(2) not used here
+    qa1[indexqa + 2] = 0.0;   // will hold partial g_sump (∑ w·vm^p)
+    qa1[indexqa + 3] = 0.0;   // will hold partial g_vol  (∑ w)
+
+    
+    FORTRAN(stresspnorm,(co1,kon1,ipkon1,lakon1,ne1,v1,
+          stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
+          ielmat1,ielorien1,norien1,orab1,ntmat1_,t01,t11,ithermal1,prestr1,
+          iprestr1,eme1,iperturb1,&fn1[indexfn],iout1,&qa1[indexqa],vold1,
+          nmethod1,
+          veold1,dtime1,time1,ttime1,plicon1,nplicon1,plkcon1,nplkcon1,
+          xstateini1,xstiff1,xstate1,npmat1_,matname1,mi1,ielas1,icmd1,
+          ncmat1_,nstate1_,stiini1,vini1,ener1,eei1,enerini1,istep1,iinc1,
+          springarea1,reltime1,&calcul_fn1,&calcul_qa1,&calcul_cauchy1,nener1,
+	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
+	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
+	  kscale1,&list1,ilist1, design1, penal1));
     return NULL;
 }
 
