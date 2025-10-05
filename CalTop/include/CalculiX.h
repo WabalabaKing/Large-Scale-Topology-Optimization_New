@@ -4136,11 +4136,17 @@ void FORTRAN(stresspnorm,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	  double *clearini,ITG *nea,ITG *neb,ITG *ielprop,double *prop,
 	  ITG *kscale,ITG *list,ITG *ilist, double* design, double* penal));
 
+void FORTRAN(pnorm_explicit,(double *co,ITG *kon,ITG *ipkon,char *lakon,
+		ITG *ne, double *stx, ITG mi, double *design, ITG penal, double *sigma01, double* eps1, double *rhomin1,
+        double *alpha1, double *pexp, ITG *nea,ITG *neb, ITG list, ITG ilist, double *djdrho));
+
 void *resultsmechmt(ITG *i);
 
 void *stresspnormmt(ITG *i);
 
 void *pnormRHSmt(ITG *i);
+
+void *pnorm_explicitmt(ITG *i);
 
 void *resultsmechmtstr(ITG *i);
 

@@ -40,10 +40,10 @@ static double *co1,*v1,*stx1,*elcon1,*rhcon1,*alcon1,*alzero1,*orab1,*t01,*t11,
     *cocon1,*qfx1,*thicke1,*emeini1,*shcon1,*xload1,*prop1,
     *xloadold1,*pslavsurf1,*pmastsurf1,*clearini1,*xbody1;
 
-    static double sigma01 = 1.0;     /* your allowable stress */
+static double sigma01 = 1.0;     /* your allowable stress */
 static double eps1    = 1e-3;    /* same eps_relax used in resultsmech */
 static double rhomin1 = 1e-3;    /* same rho_min        */
-
+static double *djdrho1 = NULL;   /* per element sensiticvity dJ/drho_e (size = *ne) */
 
 
 static double *design1, *penal1; /* Element densities and penalization paramter*/
@@ -366,6 +366,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     SFREE(nebpar);
 
     printf("Done!\n");
+
+    
 	
     
     /* determine the internal force */
@@ -633,6 +635,27 @@ void *pnormRHSmt(ITG *i)
     &nea,&neb,&list1,ilist1));
     return NULL;
 }
+
+/* thread entry for the explicit (density) part of dJ/drho */
+void *pnormexplicitmt(ITG *i)
+{
+    ITG nea, neb, list1 = 0;
+    ITG *ilist1 = NULL;
+
+    nea = neapar[*i] + 1;
+    neb = nebpar[*i] + 1;
+
+    /* Each thread writes only its own [nea..neb] element range,
+       so djdrho1 can be shared safely with no reduction step. */
+    FORTRAN(pnorm_explicit,(co1,kon1,ipkon1,lakon1,ne1,
+        stx1,mi1,design1,penal1, &sigma01,&eps1,&rhomin1,
+        &alpha1,&p1, &nea,&neb, &list1, ilist1, djdrho1));
+    return NULL;
+}
+
+
+
+
 
 /* subroutine for multithreading of resultsmech */
 
