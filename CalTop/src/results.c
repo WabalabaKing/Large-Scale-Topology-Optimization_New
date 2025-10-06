@@ -167,6 +167,18 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	}
     }
 
+    /* Force iout = 0 for adjoint expand-only mode */
+    ITG iout_local = *iout;
+    ITG *iout_ptr = iout;
+
+    if (get_adjoint == 2)
+    {
+        iout_local = 0;
+        iout_ptr = &iout_local;
+    }
+
+
+
 // next line is to be inserted in a similar way for all other paralell parts
 
     if(*ne<num_cpus) num_cpus=*ne;
@@ -177,11 +189,17 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        2. determination which derived variables have to be calculated */
 
     FORTRAN(resultsini,(nk,v,ithermal,filab,iperturb,f,fn,
-       nactdof,iout,qa,vold,b,nodeboun,ndirboun,
+       nactdof,iout_ptr,qa,vold,b,nodeboun,ndirboun,
        xboun,nboun,ipompc,nodempc,coefmpc,labmpc,nmpc,nmethod,cam,neq,
        veold,accold,bet,gam,dtime,mi,vini,nprint,prlab,
        &intpointvarm,&calcul_fn,&calcul_f,&calcul_qa,&calcul_cauchy,
        &ikin,&intpointvart,typeboun));
+
+    if (get_adjoint == 2)
+    {
+        printf("Adjoint variable expansion in nodal space \n");
+        return;
+    }
 
    /* next statement allows for storing the displacements in each
       iteration: for debugging purposes */

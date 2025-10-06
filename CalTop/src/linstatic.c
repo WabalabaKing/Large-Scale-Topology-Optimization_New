@@ -583,7 +583,38 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 				printf("Calling PARSIDO from linstatic.c to solve the stress adjoint system \n");
       			pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
-			
+	
+				// At this point we have the explicit and adjoint variables.
+
+				double *lam = NULL, *stn=NULL, *inum=NULL;
+				/* allocate minimal outputs and reuse existing arrays and args*/
+				NNEW(lam, double, mt**nk);
+				NNEW(stn, double, 6**nk);
+				NNEW(inum, ITG, *nk);
+				int iout = -1;
+
+				results(co,nk,kon,ipkon,lakon,ne,
+        		lam,
+        		stn,inum,stx,
+        		elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
+        		ielorien,norien,orab,ntmat_,
+        		t0,t1act,ithermal,prestr,iprestr,filab,eme,emn,een,iperturb, NULL,NULL,nactdof,&iout,qa,vold, b_adj,    /* <= active-DOF adjoint solution */
+        		nodeboun,ndirboun,xbounact,nboun,ipompc,nodempc,coefmpc,labmpc,
+        		nmpc,nmethod,cam,neq,veold,accold,&bet,&gam,&dtime,&time,ttime,
+        		plicon,nplicon,plkcon,nplkcon,xstateini,xstiff,xstate,npmat_,
+        		epn,matname,mi,&ielas,&icmd,ncmat_,nstate_,stiini,vini,ikboun,
+        		ilboun,ener,enern,emeini,xstaten,eei,enerini,cocon,ncocon,set,
+        		nset,istartset,iendset,ialset,nprint,prlab,prset,qfx,qfn,trab,
+        		inotr,ntrans,fmpc,nelemload,nload,ikmpc,ilmpc,istep,&iinc,
+        		springarea,&reltime,&ne0,thicke,shcon,nshcon,sideload,xloadact,
+        		xloadold,&icfd,inomat,pslavsurf,pmastsurf,mortar,islavact,cdn,
+        		islavnode,nslavnode,ntie,clearini,islavsurf,ielprop,prop,
+        		energyini,energy,&kscale,iponoel,inoel,nener,orname,&network,
+        		ipobody,xbodyact,ibody,typeboun,design,penal, NULL,NULL, 2);
+
+
+				// All linear system calculations are complete, free terms
+				SFREE(lam);
     			SFREE(ad);
 				SFREE(au);
     			if(iglob<0)
