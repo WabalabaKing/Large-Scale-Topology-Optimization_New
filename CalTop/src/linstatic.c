@@ -125,7 +125,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	
 		
 
-		//for (ITG e=0; e<ne; ++e) djdrho[e]=0.0;
+		/* temp adjoint flag*/
+		int get_adjoint = 0;
 
 
 
@@ -260,7 +261,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 	  	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	  	islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, brhs, djdrho);
+    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, brhs, djdrho, 0);
 
 
   		SFREE(v);
@@ -561,7 +562,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
             	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	    		islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-            	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, brhs, djdrho);
+            	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, brhs, djdrho, 1);
 					
 				printf("done calling results.c for static calculation: line: 1112 @ linstatic.c \n");
 

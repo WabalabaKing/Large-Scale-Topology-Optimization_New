@@ -88,7 +88,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        ITG *islavsurf,ITG *ielprop,double *prop,double *energyini,
        double *energy,ITG *kscale,ITG *iponoel,ITG *inoel,ITG *nener,
        char *orname,ITG *network,ITG *ipobody,double *xbody,ITG *ibody,
-       char *typeboun, double *design, double *penal, double *brhs, double *djdrho)
+       char *typeboun, double *design, double *penal, double *brhs, double *djdrho, int get_adjoint)
        
        {
 
@@ -248,53 +248,69 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	
 	NNEW(ithread,ITG,num_cpus);
 
-    
-
-	for(i=0; i<num_cpus; i++)  
+    if (get_adjoint == 0)
     {
-	    ithread[i]=i;
-	    pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
-	}
+        printf("Will compute stress components only\n");
+        for(i=0; i<num_cpus; i++)  
+        {
+	        ithread[i]=i;
+	        //pthread_create(&tid[i], NULL, (void *)resultsmechmt, (void *)&ithread[i]);
+            pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
+    	}
+        for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+    }
 
-	for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+    if (get_adjoint == 1)
+    {   
+        printf("Evaluating stress adjoint terms \n");
+	    for(i=0; i<num_cpus; i++)  
+        {
+	        ithread[i]=i;
+	        pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
+	    }
+
+	    for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 	
-    /* p-norm variables reduced across threads */
-    double sumP = 0.0;  // Accumulated numerator
-    double sumV = 0.0;  // Accumulated denominator
+        /* p-norm variables reduced across threads */
+        double sumP = 0.0;  // Accumulated numerator
+        double sumV = 0.0;  // Accumulated denominator
 
-    for (int t = 0; t < num_cpus; ++t)
-    {
-        size_t idx = (size_t)t *4;
-        sumP += qa1[idx + 2];   // thread's g_sump
-        sumV += qa1[idx + 3];   // thread's g_vol -> needed for p-mean
+        for (int t = 0; t < num_cpus; ++t)
+        {
+            size_t idx = (size_t)t *4;
+            sumP += qa1[idx + 2];   // thread's g_sump
+            sumV += qa1[idx + 3];   // thread's g_vol -> needed for p-mean
 
-        /* restore CCX defaults so downstream code doesnt misinterpret */
-        qa1[idx + 2] = -1.0;   /* qa(3) */
-        qa1[idx + 3] =  0.0;   /* qa(4) */     
-    }
+            /* restore CCX defaults so downstream code doesnt misinterpret */
+            qa1[idx + 2] = -1.0;   /* qa(3) */
+            qa1[idx + 3] =  0.0;   /* qa(4) */     
+        }
 
-    /* must match the exponent used inside resultsmech() */
-    p1 = 4.0;
+        /* must match the exponent used inside resultsmech() */
+        p1 = 4.0;
 
-    double J = 0.0;     /*  stress p-norm */
-    alpha1 = 0.0;       /* scalar used in adjoint RHS */
+        double J = 0.0;     /*  stress p-norm */
+        alpha1 = 0.0;       /* scalar used in adjoint RHS */
 
-    // Compute aggregated P-norm
-    if (sumP > 0.0)
-    {
-        // Compute P-norm based on Duysinx and Sigmund 2012
-        J = pow(sumP, 1.0 / p1);
-        alpha1 = pow(J, (1.0 - p1));
-    }
-    else
-    {
-        J = 0.0;
-        alpha1 = 0.0;
-    }
+        // Compute aggregated P-norm
+        if (sumP > 0.0)
+        {
+            // Compute P-norm based on Duysinx and Sigmund 2012
+            J = pow(sumP, 1.0 / p1);
+            alpha1 = pow(J, (1.0 - p1));
+        }
+        else
+        {
+            J = 0.0;
+            alpha1 = 0.0;
+        }
 
-    printf("sumP (unnormalized): %.12e\n", sumP);
-    printf("J (p-norm)        : %.12e\n", J);
-    printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
+        printf("sumP (unnormalized): %.12e\n", sumP);
+        printf("J (p-norm)        : %.12e\n", J);
+        printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
+    }  // end adjoint condition
+
+
 
 	for(i=0;i<mt**nk;i++)
     {
@@ -308,93 +324,81 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 		    fn[i]+=fn1[i+j*mt**nk];
 	    }
 	}
+
 	SFREE(fn1);
     SFREE(ithread);
-    /*SFREE(neapar);
-    SFREE(nebpar); */ // Free after stress calculation
-
-
 
 
     /******************************P-NORM ADJOINT RHS CALCULATION***************************************/
 
-
-    printf("Assembling RHS for stress adjoint...");
-
-    /* Allocate per-thread RHS blocks and the reduced RHS */
-    NNEW(rhs1, double, num_cpus * mt * *nk);
-
-    /* Zero them (CalculiX NNEW doesn't zero by default) */
-    for (size_t zz = 0; zz < (size_t)num_cpus * mt * *nk; ++zz) rhs1[zz] = 0.0;
-
-
-    /* Spawn RHS threads */
-    NNEW(ithread, ITG, num_cpus);
-
-    for (i = 0; i < num_cpus; ++i) 
+    if (get_adjoint == 1)
     {
-        ithread[i] = i;
-        pthread_create(&tid[i], NULL, (void *)pnormRHSmt, (void *)&ithread[i]);
-    }
 
-    for (i = 0; i < num_cpus; ++i) pthread_join(tid[i], NULL);
-    SFREE(ithread);
+        printf("Assembling RHS for stress adjoint...");
+
+        /* Allocate per-thread RHS blocks and the reduced RHS */
+        NNEW(rhs1, double, num_cpus * mt * *nk);
+
+        /* Zero them (CalculiX NNEW doesn't zero by default) */
+        for (size_t zz = 0; zz < (size_t)num_cpus * mt * *nk; ++zz) rhs1[zz] = 0.0;
 
 
-    /* Reduce per-thread blocks into brhs */
-    for (i = 0; i < mt * *nk; ++i) 
-    {
-        double acc = rhs1[i];
-        for (j = 1; j < num_cpus; ++j) 
+        /* Spawn RHS threads */
+        NNEW(ithread, ITG, num_cpus);
+
+        for (i = 0; i < num_cpus; ++i) 
         {
-            acc += rhs1[i + j * mt * *nk];
+            ithread[i] = i;
+            pthread_create(&tid[i], NULL, (void *)pnormRHSmt, (void *)&ithread[i]);
         }
-        brhs[i] = acc;
-    }
 
+        for (i = 0; i < num_cpus; ++i) pthread_join(tid[i], NULL);
+        SFREE(ithread);
 
-    /* Done with per-thread storage*/
-	SFREE(rhs1);
+        /* Reduce per-thread blocks into brhs */
+        for (i = 0; i < mt * *nk; ++i) 
+        {
+            double acc = rhs1[i];
+            for (j = 1; j < num_cpus; ++j) 
+            {
+                acc += rhs1[i + j * mt * *nk];
+            }
+            brhs[i] = acc;
+        }
 
-    /*************************************P-NORM EXPLICIT TERM CALCULATION******************************/
+        /* Done with per-thread storage*/
+	    SFREE(rhs1);
 
-    /* allocate once per call to results(); zero it */
-    //NNEW(djdrho1, double, *ne);
-    //for (ITG e = 0; e < *ne; ++e) djdrho1[e] = 0.0;
+        /*************************************P-NORM EXPLICIT TERM CALCULATION******************************/
 
-    djdrho1 = djdrho;
+        djdrho1 = djdrho;
 
-    /* allocate per-thread indices */
-    NNEW(ithread, ITG, num_cpus);
+        /* allocate per-thread indices */
+        NNEW(ithread, ITG, num_cpus);
 
-   for (i = 0; i < num_cpus; ++i) 
-    {
-        ithread[i] = i;
-
-        //pthread_create(&tid[i], NULL, (void *)pnorm_explicitmt, (void *)&ithread[i]);
-
-        pthread_create(&tid[i], NULL,
+        for (i = 0; i < num_cpus; ++i) 
+        {
+            ithread[i] = i;
+            pthread_create(&tid[i], NULL,
             (void *(*)(void *))pnorm_explicitmt, (void *)&ithread[i]);
+        }
+
+        for (i = 0; i < num_cpus; ++i) 
+        {
+            pthread_join(tid[i], NULL);
+        }
+
+        SFREE(ithread);  
+
+
+        printf("Explicit dJ/drho assembled.\n");
+
+
+        printf("Done!\n");
+        SFREE(neapar);
+        SFREE(nebpar);
+
     }
-
-    for (i = 0; i < num_cpus; ++i) 
-    {
-        pthread_join(tid[i], NULL);
-    }
-
-    
-
-    SFREE(ithread);  
-
-
-    printf("Explicit dJ/drho assembled.\n");
-
-
-    printf("Done!\n");
-    SFREE(neapar);
-    SFREE(nebpar);
-
-
     /*********************************************P-NORM CALCULATION ENDS*******************************/
 	
     
