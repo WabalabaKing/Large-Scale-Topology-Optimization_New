@@ -12,6 +12,7 @@
  * @param cgx               C.G x coordinate
  * @param cgy               C.G y coordinate
  * @param cgz               C.G z coordinate
+ * @param Pnorm             Pnorm stress
  */
 void write_objectives(int ne,
                                 const double *eleVol,
@@ -20,7 +21,8 @@ void write_objectives(int ne,
                                 const double *Mass, 
                                 const double *cgx, 
                                 const double *cgy, 
-                                const double *cgz)
+                                const double *cgz,
+                                const double *pnorm)
 {
     const char *filename = "objectives.csv";
 
@@ -57,7 +59,7 @@ void write_objectives(int ne,
 
 
     /* Write file header */
-    fprintf(obj_file, "COMPLIANCE, ORIGINAL VOLUME, DESIGN VOLUME, VOLUME_FRACTION, DISCRETENESS, MASS, CGx, CGy, CGz\n");
+    fprintf(obj_file, "COMPLIANCE, ORIGINAL VOLUME, DESIGN VOLUME, VOLUME_FRACTION, DISCRETENESS, MASS, CGx, CGy, CGz, PNORM\n");
 
     /* Loop over all elements and compute the initial and current volume*/
     for (int i = 0; i < ne; i++)
@@ -76,7 +78,7 @@ void write_objectives(int ne,
     double discreteness = (4.0 /ne) * discreteness_sum;
 
     /* Write structure compliance and volume to file */
-    fprintf(obj_file, "%.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f \n", *compliance_sum, initialVol_sum, designVol_sum, volume_fraction, discreteness, *Mass, *cgx, *cgy, *cgz);
+    fprintf(obj_file, "%.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f \n", *compliance_sum, initialVol_sum, designVol_sum, volume_fraction, discreteness, *Mass, *cgx, *cgy, *cgz, *pnorm);
     
     fclose(obj_file);
 }

@@ -2342,7 +2342,7 @@ while(istat>=0)
       printf("done!\n");
       
       printf(" Writing objectives...");
-      write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz);
+      write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, &Pnorm);
       printf("done!\n");
 
       free(dCGx);
