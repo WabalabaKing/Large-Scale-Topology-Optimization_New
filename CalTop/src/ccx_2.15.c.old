@@ -2285,15 +2285,15 @@ while(istat>=0)
 
       
 
-      printf("  Filter compliance gradient...");
+      printf(" Filter compliance gradient ");
       filterSensitivity_bin_buffered_mts(gradCompl, gradComplFiltered, ne, filternnz);
       printf("done! \n");
 
-      printf("  Filter element volume gradient...");
+      printf(" Filter element volume gradient ");
       filterSensitivity_bin_buffered_mts(eleVol, eleVolFiltered, ne, filternnz);
       printf("done! \n");
 
-      printf("  Filter CG gradient...");
+      printf(" Filter CG gradient ");
       filterSensitivity_bin_buffered_mts3(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
       
       ends = time(NULL);
@@ -2407,8 +2407,9 @@ while(istat>=0)
   
      /* print output */
       
-      printf("\n Compliance:          %.3f \n",compliance_sum);
-      printf(" Mass:                %.3f \n", M);
+      printf("\n Compliance:                 %.3f \n",compliance_sum);
+      printf(" Mass:                       %.3f \n", M);
+      printf(" Aggregated stress (P-norm): %.3f \n", Pnorm);
       //printf("Total domain volume:         %.6f \n",initialVol_sum);
       //printf("Current domain volume:       %.6f \n",designVol_sum);
       //printf("Volume constraint violation:: %.6f \n",designVol_sum-volfrac*initialVol_sum);

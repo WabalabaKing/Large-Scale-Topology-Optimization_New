@@ -346,10 +346,10 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         }
         // Debug only
 
-        /*
-        printf("sumP (unnormalized): %.12e\n", sumP);
-        printf("J (p-norm)        : %.12e\n", *Pnorm);
-        printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1); */
+        
+        //printf("sumP (unnormalized): %.12e\n", sumP);
+        //printf("J (p-norm)        : %.12e\n", *Pnorm);
+        //printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
     }  // end adjoint condition
 
 
