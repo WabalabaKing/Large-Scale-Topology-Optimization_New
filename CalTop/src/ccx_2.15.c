@@ -340,11 +340,12 @@ int main(int argc,char *argv[])
   double  rmin=0.000000000001; /**< minimum radius */
   double  volfrac=1.00; /**< volume fraction */
   double  qfilter = 3; /**< q-filter value */
+  double Pnorm = 0;
 
   double sigma0 = 1.0;
-  double eps_relax = 1e-03;
-  double rhomin = 1e-03;
-  double pexp = 8;
+  double eps_relax = 0.001;
+  double rhomin = 0.001;
+  double pexp = 1.0;
 
   ITG itertop= 1; /**<iteration counter in topology optimization */
   ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
@@ -367,7 +368,7 @@ int main(int argc,char *argv[])
   if(argc==1)
   { 
     /* Inadequate input arguments */
-    printf("Usage: Flags: -i jobname -p PENALTY -q HIGHERORDERFILTER -r RADIUS -v VOLUMEFRACTION -s ITERATION -f FILTERNNZ\n");
+    printf("Usage: Flags: -i jobname -p PENALTY-r RADIUS -f FILTERNNZ -pexp PNORM EXPONENT -sigmal SIGMA MINIMUM -eps STRESS RELAXATION\n");
     FORTRAN(stop,());
   }
 
@@ -431,22 +432,31 @@ else
     }
   }
 
-  /* Read filter order */
+  /* Read P-norm exponent */
   for(i=1; i<argc; i++)
   {
-    if(strcmp1(argv[i],"-q")==0) 
+    if(strcmp1(argv[i],"-e")==0) 
     {
-      qfilter=atof(argv[i+1]);
+      pexp=atof(argv[i+1]);
       break;
     }
   }  
 
-  /* Read volume fraction */
+  /* Read Sigmal */
   for(i=1; i<argc; i++)
   {
-    if(strcmp1(argv[i],"-v")==0) 
+    if(strcmp1(argv[i],"-s")==0) 
     {
-      volfrac=atof(argv[i+1]);
+      sigma0=atof(argv[i+1]);
+      break;
+    }
+  }
+
+  for(i=1; i<argc; i++)
+  {
+    if(strcmp1(argv[i],"-l")==0) 
+    {
+      eps_relax=atof(argv[i+1]);
       break;
     }
   }
@@ -457,16 +467,6 @@ else
     if(strcmp1(argv[i],"-f")==0) 
     {
       fnnzassumed=atoi(argv[i+1]);
-      break;
-    }
-  }
-
-  /* Read iteration number */
-  for(i=1; i<argc; i++)
-  {
-    if(strcmp1(argv[i],"-s")==0) 
-    {
-      itertop=atoi(argv[i+1]);
       break;
     }
   }
@@ -487,6 +487,7 @@ else
 
 //printf("\n*/*/*/*pstiff= %f\n",pstiff);
 
+printf("Current exponsnet in ccx: %f\n", pexp);
 
 
 //setenv("CCX_JOBNAME_GETJOBNAME",jobnamec,1);
@@ -1884,7 +1885,7 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp);
+	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm);
 
       endl = time(NULL);
 

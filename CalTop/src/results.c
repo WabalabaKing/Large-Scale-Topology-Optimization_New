@@ -93,7 +93,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        double *energy,ITG *kscale,ITG *iponoel,ITG *inoel,ITG *nener,
        char *orname,ITG *network,ITG *ipobody,double *xbody,ITG *ibody,
        char *typeboun, double *design, double *penal, double *sigma0, double *eps, double *rhomin,
-       double *pexp, double *brhs, double *djdrho_explicit, int get_adjoint)
+       double *pexp, double *brhs, double *djdrho_explicit, double *Pnorm, int get_adjoint)
        
        {
 
@@ -263,6 +263,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
     fflush(stdout);
 
+    printf("Current exponent in results(): %f", *pexp1);
+
 
     /************************************************P-NORM AGGREGATION****************************************/
 
@@ -292,6 +294,13 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     if (get_adjoint == 1)
     {   
         printf("Evaluating stress adjoint terms \n");
+
+        printf(" Results.c Pexp: %f, \n", *pexp1);
+        printf(" Results.c Sigma0: %f, \n", sigma01);
+        printf(" Results.c rhomin: %f, \n", *rhomin1);
+        printf(" Results.c Eps-relax: %f, \n", *eps1);
+        printf("Curent Pnorm value: %f, \n", *Pnorm);
+
 	    for(i=0; i<num_cpus; i++)  
         {
 	        ithread[i]=i;
@@ -318,24 +327,24 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         /* must match the exponent used inside resultsmech() */
         const double p = *pexp1; 
 
-        double J = 0.0;     /*  stress p-norm */
+        //double J = 0.0;     /*  stress p-norm */
         alpha1 = 0.0;       /* scalar used in adjoint RHS */
 
         // Compute aggregated P-norm
         if (sumP > 0.0)
         {
             // Compute P-norm based on Duysinx and Sigmund 2012
-            J = pow(sumP, 1.0 / p);
-            alpha1 = pow(J, (1.0 - p));
+            *Pnorm = pow(sumP, 1.0 / p);
+            alpha1 = pow(*Pnorm, (1.0 - p));
         }
         else
         {
-            J = 0.0;
+            *Pnorm = 0.0;
             alpha1 = 0.0;
         }
 
         printf("sumP (unnormalized): %.12e\n", sumP);
-        printf("J (p-norm)        : %.12e\n", J);
+        printf("J (p-norm)        : %.12e\n", *Pnorm);
         printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
     }  // end adjoint condition
 

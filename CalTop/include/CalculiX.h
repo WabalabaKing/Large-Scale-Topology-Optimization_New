@@ -2276,7 +2276,7 @@ void linstatic(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     double *thicke,char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp);
+             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm);
 
 
 void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
@@ -4056,7 +4056,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
              double *energy,ITG *kscale,ITG *iponoel,ITG *inoel,ITG *nener,
              char *orname,ITG *network,ITG *ipobody,double *xbodyact,
              ITG *ibody,char *typeboun, double *design, double *penal,  double * sigma0, double *eps, double *rhomin,
-			 double *pexp, double *brhs, double *djdrho, int get_adjoint);
+			 double *pexp, double *brhs, double *djdrho, double *Pnorm, int get_adjoint);
 
 void FORTRAN(resultsem,(double *co,ITG *kon,ITG *ipkon,char *lakon,
              double *v,double *elcon,ITG *nelcon,ITG *ielmat,ITG *ntmat_,
