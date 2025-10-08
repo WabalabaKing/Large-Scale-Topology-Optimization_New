@@ -342,10 +342,10 @@ int main(int argc,char *argv[])
   double  qfilter = 3; /**< q-filter value */
   double Pnorm = 0;
 
-  double sigma0 = 0.0;
+  double sigma0 = 1.0;
   double eps_relax = 1e-03;
   double rhomin = 1e-04;
-  double pexp = 0.0;
+  double pexp = 1.0;
 
   ITG itertop= 1; /**<iteration counter in topology optimization */
   ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
