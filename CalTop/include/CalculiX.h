@@ -162,6 +162,14 @@ int write_cg_sens(const char *path,
                       const double *dCGx,
                       const double *dCGy,
                       const double *dCGz);
+
+
+int write_Stress_sens(const char *path,
+                      size_t ne,
+                      const double *dPnorm_drho);
+
+
+
 void FORTRAN(mafillsm_filter2_full,(ITG *ne, double *ttime, double *time,
                       ITG *ne0, ITG *nea, ITG *neb,
                       double *elCentroid, double *rmin, ITG *filternnz,
@@ -2276,7 +2284,7 @@ void linstatic(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     double *thicke,char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm);
+             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho);
 
 
 void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,

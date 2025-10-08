@@ -1115,6 +1115,11 @@ while(istat>=0)
   /* Define stress array here, pass to linstatic and then plot in write_vtu.c */
   NNEW(stx,double,6*mi[0]*ne);
 
+  /* Define sensitivity vector for Pnorm and pass to linstatic()*/
+  double *dPnorm_drho = NULL;
+  double *dPnorm_drhoFiltered = NULL;
+  NNEW(dPnorm_drho, double, ne);
+
 
   #ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
   for(i=0;i!=nmat;++i)
@@ -1899,7 +1904,7 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm);
+	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho);
 
       endl = time(NULL);
 
@@ -2244,6 +2249,11 @@ while(istat>=0)
       double *dCGxFiltered = (double*)calloc(ne, sizeof(double));
       double *dCGyFiltered = (double*)calloc(ne, sizeof(double));
       double *dCGzFiltered = (double*)calloc(ne, sizeof(double));
+
+      /* Allocate memory for P-norm stress sensitivities */
+      // NOTE: P-norm sensitivity initialized and passed to linstatic() earlier
+      NNEW(dPnorm_drhoFiltered, double, ne_);
+
       printf("done! \n");
 
       time_t starts, ends; 
@@ -2295,9 +2305,25 @@ while(istat>=0)
 
       printf(" Filter CG gradient ");
       filterSensitivity_bin_buffered_mts3(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
+      printf("done \n");
+      
+
+      /*--------------------------------------STRESS SENSITIVITY FILTERING AND I/O -----------------------------------*/
+      printf("Filter element stress (P-norm) gradient ");
+      filterSensitivity_bin_buffered_mts(dPnorm_drho, dPnorm_drhoFiltered, ne, filternnz);
+
+      int rs = write_Stress_sens("stress_sens.csv", ne, dPnorm_drhoFiltered);
+      if (rs != 0) 
+      {
+        printf("Unable to write P-norm sensitivities to disk!\n");
+      }
+      SFREE(dPnorm_drho);
+      SFREE(dPnorm_drhoFiltered);
+      printf("done \n");
+      /*---------------------------------------------------------------------------------------------------------------*/
+      
       
       ends = time(NULL);
-      printf("done!\n");
 	    //printf("Time taken for sensitivity calculation: %.2f seconds \n", 
 		  //difftime(ends, starts)); 
 
@@ -2351,6 +2377,7 @@ while(istat>=0)
       free(dCGxFiltered);
       free(dCGyFiltered);
       free(dCGzFiltered);
+      
       dCGx = NULL;
       dCGy = NULL; 
       dCGz = NULL; 
@@ -2652,6 +2679,7 @@ while(istat>=0)
   SFREE(gradComplFiltered);
   SFREE(eleVolFiltered);
   SFREE(designFiltered);
+
   rhoPhys = NULL;
   free(passiveIDs);
 

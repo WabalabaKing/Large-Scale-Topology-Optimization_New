@@ -73,7 +73,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
              char *orname,double *design, double *penal, double *stx, double *sigma0, double *eps,
-			double *rhomin, double *pexp, double *Pnorm)
+			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho)
 	{
 
   		char description[13]="            ",*lakon=NULL,stiffmatrix[132]="",
@@ -636,6 +636,14 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				FORTRAN(pnorm_implicit_c3d4,(co,kon,ipkon,lakon,ne,mi,
         		xstiff, vold, lam, design, penal,
         		&nea_loc, &neb_loc, &list_loc, ilist_loc, djdrho_impl));
+
+
+				/* Assemble the global P-norm sensitivity */
+
+				for (int i = 0; i < *ne; ++i)
+				{
+					dPnorm_drho[i] = djdrho_expl[i] + djdrho_impl[i];
+				}
 
 
 				// All linear system calculations are complete, free terms
