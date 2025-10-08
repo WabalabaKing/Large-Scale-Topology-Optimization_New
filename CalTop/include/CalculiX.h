@@ -2276,7 +2276,7 @@ void linstatic(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     double *thicke,char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design,double *penal, double *stx);
+             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp);
 
 
 void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,

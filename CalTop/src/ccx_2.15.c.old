@@ -341,6 +341,11 @@ int main(int argc,char *argv[])
   double  volfrac=1.00; /**< volume fraction */
   double  qfilter = 3; /**< q-filter value */
 
+  double sigma0 = 1.0;
+  double eps_relax = 1e-03;
+  double rhomin = 1e-03;
+  double pexp = 8;
+
   ITG itertop= 1; /**<iteration counter in topology optimization */
   ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
   //filternnz=total number of nonzeros in filtermatrix,filternnzElem=no of nonzeros in each row of filtermatrix
@@ -506,7 +511,7 @@ printf("  #####   ##   ##  #######      ##    #####   ##      \n");
 printf("\n");
 
 printf("* Contributors:\n");
-printf("* Prateek Ranjan, Dept. of Aerospace Engineering,\n");
+printf("* Prateek Ranjan, Dept. of Aeronautics & Astronautics,\n");
 printf("* Massachusetts Institute of Technology \n");
 printf("* Wanzheng Zheng, Dept. of Aerospace Engineering,\n");
 printf("* University of Illinois at Urbana Champaign \n");
@@ -1879,7 +1884,7 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff, stx);
+	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp);
 
       endl = time(NULL);
 
