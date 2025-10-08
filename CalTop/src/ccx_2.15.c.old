@@ -2285,78 +2285,18 @@ while(istat>=0)
       // Mass and C.G properties
       double M, cgx, cgy, cgz;
       
+      /*---------------------------------C.G SENSITIVITY FILTERING AND I/O ----------------------------------------*/
 
-      printf(" Evaluating Center of Gravity sensitivities...");
+
+      printf(" Evaluate and filter CG sensitivities...");
       compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
                             dCGx, dCGy, dCGz);
 
-      printf("done! \n");
-
-      
-
-      printf(" Filter compliance gradient ");
-      filterSensitivity_bin_buffered_mts(gradCompl, gradComplFiltered, ne, filternnz);
-      printf("done! \n");
-
-      printf(" Filter element volume gradient ");
-      filterSensitivity_bin_buffered_mts(eleVol, eleVolFiltered, ne, filternnz);
-      printf("done! \n");
-
-      printf(" Filter CG gradient ");
       filterSensitivity_bin_buffered_mts3(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
       printf("done \n");
-      
 
-      /*--------------------------------------STRESS SENSITIVITY FILTERING AND I/O -----------------------------------*/
-      printf("Filter element stress (P-norm) gradient ");
-      filterSensitivity_bin_buffered_mts(dPnorm_drho, dPnorm_drhoFiltered, ne, filternnz);
-
-      int rs = write_Stress_sens("stress_sens.csv", ne, dPnorm_drhoFiltered);
-      if (rs != 0) 
-      {
-        printf("Unable to write P-norm sensitivities to disk!\n");
-      }
-      SFREE(dPnorm_drho);
-      SFREE(dPnorm_drhoFiltered);
-      printf("done \n");
-      /*---------------------------------------------------------------------------------------------------------------*/
-      
-      
-      ends = time(NULL);
-	    //printf("Time taken for sensitivity calculation: %.2f seconds \n", 
-		  //difftime(ends, starts)); 
-
-      /* write compliance gradient to file */
-      FILE *gradC;
-      //FILE *elC_file;
-      FILE *elV_file;
-
-
-      /* write compliance value */
-      //elC_file=fopen("objectives.dat","w");
-
-      /* set the filtered element densities of passive elements to 0 */
-      filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
-
-      /* set the filtered compliance sens of passive elements to 0 */
-      filterOutPassiveElems_sens(gradComplFiltered, ne, passiveIDs, numPassive);
-
-      /* initialize for compliance */
-      double compliance_sum=0;
-      printf("\n\nOUTPUT FILEDS--------------------------------------------------------------|\n\n");
-      printf(" Writing compliance sensitivities...");
-      write_compliance_sensitivities(ne,gradCompl,gradComplFiltered,elCompl,&compliance_sum);
-      printf("done!\n");
-
-      /* set the filtered volume sens of passive elements to 0 */
-      filterOutPassiveElems_sens(eleVolFiltered, ne, passiveIDs, numPassive);
-
-      printf(" Writing volume sensitivities...");
-      write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
-      printf("done!\n");
-
-      printf(" Writing CG sensitivities...");
+      printf(" Writing CG sensitivities to disk...");
       /* ... after you fill dCGx, dCGy, dCGz ... */
       int rc = write_cg_sens("cg_sens.csv", ne, dCGxFiltered, dCGyFiltered, dCGzFiltered);
       if (rc != 0) 
@@ -2364,11 +2304,6 @@ while(istat>=0)
         printf("Unable to write CG sensitivities to disk!\n");
       }
 
-
-      printf("done!\n");
-      
-      printf(" Writing objectives...");
-      write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, &Pnorm);
       printf("done!\n");
 
       free(dCGx);
@@ -2385,6 +2320,84 @@ while(istat>=0)
       dCGyFiltered = NULL;
       dCGzFiltered = NULL;
 
+      /*---------------------------------------------------------------------------------------------------------------*/      
+
+      /*--------------------------------------STRESS SENSITIVITY FILTERING AND I/O -----------------------------------*/
+      printf(" Filter element stress (P-norm) gradient ");
+      filterSensitivity_bin_buffered_mts(dPnorm_drho, dPnorm_drhoFiltered, ne, filternnz);
+
+      int rs = write_Stress_sens("stress_sens.csv", ne, dPnorm_drhoFiltered);
+      if (rs != 0) 
+      {
+        printf("Unable to write P-norm sensitivities to disk!\n");
+      }
+      SFREE(dPnorm_drho);
+      SFREE(dPnorm_drhoFiltered);
+      printf("done \n");
+      /*---------------------------------------------------------------------------------------------------------------*/
+
+
+      /*-------------------------------------COMPLIANCE SENSITIVITY FILTERING AND I/O----------------------------------*/
+      double compliance_sum=0;
+
+      printf(" Filter compliance gradient ");
+      filterSensitivity_bin_buffered_mts(gradCompl, gradComplFiltered, ne, filternnz);
+      printf("done! \n");
+
+      FILE *gradC;
+      printf(" Writing compliance sensitivities...");
+      write_compliance_sensitivities(ne,gradCompl,gradComplFiltered,elCompl,&compliance_sum);
+      printf("done!\n");
+
+      SFREE(gradCompl);
+      SFREE(gradComplFiltered);
+      
+      /*---------------------------------------------------------------------------------------------------------------*/
+
+      /*-------------------------------------VOLUME SENSITIVITY FILTERING AND I/O----------------------------------*/
+
+      FILE *elV_file;
+      printf(" Filter element volume gradient ");
+      filterSensitivity_bin_buffered_mts(eleVol, eleVolFiltered, ne, filternnz);
+      printf("done! \n");
+      
+      printf(" Writing volume sensitivities...");
+      write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
+      printf("done!\n");
+
+      SFREE(eleVol);
+      SFREE(eleVolFiltered);
+
+      ends = time(NULL);
+	    //printf("Time taken for sensitivity calculation: %.2f seconds \n", 
+		  //difftime(ends, starts)); 
+
+      /* write compliance gradient to file */
+     
+      //FILE *elC_file;
+      
+
+
+      /* write compliance value */
+      //elC_file=fopen("objectives.dat","w");
+
+      /* set the filtered element densities of passive elements to 0 */
+      //filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
+
+      /* set the filtered compliance sens of passive elements to 0 */
+      //filterOutPassiveElems_sens(gradComplFiltered, ne, passiveIDs, numPassive);
+
+      /* initialize for compliance */
+      
+      printf("\n\nOUTPUT FILEDS--------------------------------------------------------------|\n\n");
+     
+      /* set the filtered volume sens of passive elements to 0 */
+      //filterOutPassiveElems_sens(eleVolFiltered, ne, passiveIDs, numPassive);
+
+      
+      printf(" Writing objectives...");
+      write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, &Pnorm);
+      printf("done!\n");
 
       /* initialize for total materal volume with rho = 1 */
       //double initialVol_sum=0;
@@ -2672,12 +2685,12 @@ while(istat>=0)
   SFREE(FilterMatrixs);
   SFREE(rowFilters);
   SFREE(colFilters);
-  SFREE(gradCompl);
-  SFREE(elCompl);
-  SFREE(eleVol);
+ 
+  
+  
   SFREE(elCG);
-  SFREE(gradComplFiltered);
-  SFREE(eleVolFiltered);
+  //SFREE(gradComplFiltered);
+  //SFREE(eleVolFiltered);
   SFREE(designFiltered);
 
   rhoPhys = NULL;
