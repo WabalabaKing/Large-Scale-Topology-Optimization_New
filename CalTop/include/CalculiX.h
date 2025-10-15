@@ -4150,6 +4150,15 @@ void FORTRAN(pnorm_explicit,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 		ITG *ne, double *stx, ITG *mi, double *design, double *penal, double *sigma01, double* eps1, double *rhomin1,
         double *alpha1, double *pexp, ITG *nea,ITG *neb, ITG *list, ITG *ilist, double *djdrho));
 
+
+
+void FORTRAN(pnorm_value_from_stx,(double *co, ITG *kon, ITG *ipkon, char *lakon, ITG *ne,
+                                   double *stx, ITG *mi, double *design, double *penal,
+                                   double *sig0, double *eps_relax, double *rho_min,
+                                   double *pexp, ITG *nea, ITG *neb, ITG *list,
+                                   ITG *ilist, double *psum));
+
+
 void FORTRAN(pnorm_implicit_c3d4,
 ( double *co,        /* 3*nk */
   ITG    *kon,       /* connectivity */
@@ -4168,6 +4177,8 @@ void FORTRAN(pnorm_implicit_c3d4,
   ITG    *ilist,     /* optional selection list */
   double *djdrho     /* output sensitivity per element */
 ));
+
+
 
 void *resultsmechmt(ITG *i);
 

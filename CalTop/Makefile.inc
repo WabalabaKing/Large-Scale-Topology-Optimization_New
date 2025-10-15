@@ -880,7 +880,8 @@ $(SRC_DIR)/build_filter.f \
 $(SRC_DIR)/stressPnorm.f \
 $(SRC_DIR)/pnorm_rhs.f \
 $(SRC_DIR)/pnorm_explicit.f \
-$(SRC_DIR)/pnorm_implicit.f
+$(SRC_DIR)/pnorm_implicit.f \
+$(SRC_DIR)/pnorm_value_from_stx.f
 
 
 

@@ -347,7 +347,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         // Debug only
 
         
-        //printf("sumP (unnormalized): %.12e\n", sumP);
+         printf("sumP (unnormalized): %.12e\n", sumP);
         //printf("J (p-norm)        : %.12e\n", *Pnorm);
         //printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
     }  // end adjoint condition
@@ -445,6 +445,125 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
     }
     /*********************************************P-NORM CALCULATION ENDS*******************************/
+
+    /************ Finite-difference (FD) validation of EXPLICIT part (all elems) ************/
+if (get_adjoint == 1)
+{
+    const double h = 1.0e-6;        /* absolute bump in rho_e */
+    ITG   nea_loc = 1, neb_loc = *ne, list_loc = 0;
+    ITG  *ilist_loc = NULL;
+
+    /* working copy of design */
+    double *design_fd = NULL;
+    NNEW(design_fd,double,*ne);
+    memcpy(design_fd, design1, sizeof(double)*(*ne));
+
+    /* storage for FD */
+    double *dJ_fd_exp = NULL;
+    NNEW(dJ_fd_exp,double,*ne);
+
+    const double p = *pexp1;
+
+    printf("\nElement  rho        dJ_exp(adj)        dJ_exp(FDc)         FD/adj\n");
+    printf("---------------------------------------------------------------------\n");
+
+    for (ITG e = 1; e <= *ne; ++e)
+    {
+        const ITG ei = e - 1;
+        const double rho0 = design_fd[ei];
+
+        /* central bumps (clamped into [0,1]) */
+        double rho_p = rho0 + h;
+        if (rho_p > 1.0) rho_p = 1.0;
+
+        double rho_m = rho0 - h;
+        if (rho_m < 0.0) rho_m = 0.0;
+
+        double dJfd = 0.0;
+
+        if ((rho_p == rho0) && (rho_m == rho0)) {
+            /* both sides clamped: derivative effectively zero */
+            dJfd = 0.0;
+        } else if (rho_m == rho0) {
+            /* fallback: forward (one-sided) */
+            double saved = rho0;
+            design_fd[ei] = rho_p;
+
+            double psum_p = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_p));
+            const double Jp = (psum_p>0.0) ? pow(psum_p, 1.0/p) : 0.0;
+
+            /* reuse base at rho0 for one-sided: compute once here */
+            design_fd[ei] = saved;
+            double psum_0 = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_0));
+            const double J0 = (psum_0>0.0) ? pow(psum_0, 1.0/p) : 0.0;
+
+            dJfd = (Jp - J0) / (rho_p - rho0);
+        } else if (rho_p == rho0) {
+            /* fallback: backward (one-sided) */
+            double saved = rho0;
+            design_fd[ei] = rho_m;
+
+            double psum_m = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_m));
+            const double Jm = (psum_m>0.0) ? pow(psum_m, 1.0/p) : 0.0;
+
+            /* base at rho0 */
+            design_fd[ei] = saved;
+            double psum_0 = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_0));
+            const double J0 = (psum_0>0.0) ? pow(psum_0, 1.0/p) : 0.0;
+
+            dJfd = (J0 - Jm) / (rho0 - rho_m);
+        } else {
+            /* true central difference */
+            double saved = rho0;
+
+            /* J(rho + h) */
+            design_fd[ei] = rho_p;
+            double psum_p = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_p));
+            const double Jp = (psum_p>0.0) ? pow(psum_p, 1.0/p) : 0.0;
+
+            /* J(rho - h) */
+            design_fd[ei] = rho_m;
+            double psum_m = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_m));
+            const double Jm = (psum_m>0.0) ? pow(psum_m, 1.0/p) : 0.0;
+
+            /* restore */
+            design_fd[ei] = saved;
+
+            dJfd = (Jp - Jm) / (rho_p - rho_m);
+        }
+
+        const double dJadj = djdrho_explicit1[ei];
+        dJ_fd_exp[ei] = dJfd;
+
+        const double ratio = (fabs(dJadj)>0.0) ? (dJfd/dJadj) : 0.0;
+
+        printf("%-7ld  %-8.4f  %-18.9e %-18.9e %-10.6f\n",
+               (long)e, rho0, dJadj, dJfd, ratio);
+    }
+
+    SFREE(dJ_fd_exp);
+    SFREE(design_fd);
+}
+
+    /************************************************************************************************* */
 	
     
     /* determine the internal force */
