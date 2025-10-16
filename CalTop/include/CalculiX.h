@@ -4192,12 +4192,31 @@ void *resultsmechmtstr(ITG *i);
 
 void *resultsmechmt_se(ITG *i);
 
+void FORTRAN(pnorm_rhs,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
+          double *v,double *stx,double *elcon,ITG *nelcon,double *rhcon,
+          ITG *nrhcon,double *alcon,ITG *nalcon,double *alzero,ITG *ielmat,
+          ITG *ielorien,ITG *norien,double *orab,ITG *ntmat_,double *t0,
+          double *t1,ITG *ithermal,double *prestr,ITG *iprestr,double *eme,
+          ITG *iperturb,double *fn,ITG *iout,double *qa,double *vold,
+          ITG *nmethod,double *veold,double *dtime,double *time,
+          double *ttime,double *plicon,ITG *nplicon,double *plkcon,
+          ITG *nplkcon,double *xstateini,double *xstiff,double *xstate,
+          ITG *npmat_,char *matname,ITG *mi,ITG *ielas,ITG *icmd,ITG *ncmat_,
+          ITG *nstate_,double *stiini,double *vini,double *ener,double *eei,
+          double *enerini,ITG *istep,ITG *iinc,double *springarea,
+          double *reltime,ITG *calcul_fn,ITG *calcul_qa,ITG *calcul_cauchy,
+	  ITG *iener,ITG *ikin,ITG *nal,ITG *ne0,double *thicke,
+	  double *emeini,double *pslavsurf,double *pmastsurf,ITG *mortar,
+	  double *clearini,ITG *nea,ITG *neb,ITG *ielprop,double *prop,
+	  ITG *kscale,ITG *list,ITG *ilist, double *rhs, double* design, double* penal, double *sigma0, double *eps,
+	  double * rhomin, double *pexp, double *alpha));
+/*
 void FORTRAN(pnorm_rhs,(double *co, ITG *kon, ITG *ipkon, char *lakon, ITG *ne,
   double *stx, double *xstiff, ITG *mi,
   double *rhs, double *alpha, double *pexp,
   double *design, double *penal, double *sigma0, double *epsilon, double *rhomin,
   ITG *nea, ITG *neb, ITG *list, ITG *ilist));
-
+*/
 void FORTRAN(resultsmech_se,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
           double *v,double *stx,double *elcon,ITG *nelcon,double *rhcon,
           ITG *nrhcon,double *alcon,ITG *nalcon,double *alzero,ITG *ielmat,

@@ -34,7 +34,7 @@
 !     Duysinx, P and Sigmund O, New developments in handling stress
 !     constraints in optimal material distribution
 !     7th AIAA symposium on multidisciplinary analysis and optimization
-
+      
       implicit none
 !
       integer cauchy
@@ -42,6 +42,7 @@
       character*8 lakon(*),lakonl
       character*80 amat,matname(*)
 !
+      
       integer kon(*),konl(26),nea,neb,mi(*),mint2d,nopes,
      &  nelcon(2,*),nrhcon(*),nalcon(2,*),ielmat(mi(3),*),
      &  ielorien(mi(3),*),ntmat_,ipkon(*),ne0,iflag,null,kscale,
@@ -80,7 +81,6 @@
       real*8 sx, sy, sz, txy, txz, tyz, vm, vm2, wgt
       real*8 g_sump, g_vol, pexp
       real*8 rho_e, rho_min, rho_eff, rho_p, eps_relax, sig0, phi
-
 ! 
 
       intent(in) co,kon,ipkon,lakon,ne,v,
@@ -1217,6 +1217,7 @@ c     Bernhardi end
             wgt = xsj * weight
             g_sump = g_sump + (phi**pexp) * wgt
             !g_vol  = g_vol  + wgt  <-- valid only for p-mean
+
 !
          enddo  ! <--- end of jj=1, mint3d
 !
