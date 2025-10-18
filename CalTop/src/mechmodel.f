@@ -57,7 +57,6 @@
      &  dtime,didc(27),d2idc2(243),dibdc(27),d2ibdc2(243),
      &  dudc(9),d2udc2(81),dldc(27),d2ldc2(243),dlbdc(27),d2lbdc2(243),
      &  pgauss(3),orab(7,*),time,ttime,eloc(6),pnewdt
-!
       real*8 xstate(nstate_,mi(1),*),xstateini(nstate_,mi(1),*)
 !
       if(kode.gt.0) then

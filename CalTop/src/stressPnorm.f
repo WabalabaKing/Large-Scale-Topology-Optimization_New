@@ -941,16 +941,30 @@ c     Bernhardi end
                   enddo
                endif
             endif
+
+! --- SIMP penalization for linear isotropic (mattyp == 1) ---
+            if (mattyp .eq. 1) then
+              write(*,*) 'Scaling the C matrix!'
+              rho_e   = design(i)
+              if (rho_e .lt. 0.d0) rho_e = 0.d0
+              if (rho_e .gt. 1.d0) rho_e = 1.d0
+              rho_eff = max(rho_e, rho_min)
+              rho_p   = rho_eff**penal
+              ! Pass rho_p to linel.f through mechmodel.f
+
+              
+              write(*,*) 'Done!'
+            endif
 !
 !           calculating the local stiffness and stress
 !           Constitutive law
             nlgeom_undo=0
-            call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
+            call mechmodel_simp(elconloc,elas,emec,kode,emec0,ithermal,
      &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
      &           plconloc,xstate,xstateini,ielas,
      &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
      &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
-     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
+     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo, rho_p)
 !
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
@@ -969,6 +983,7 @@ c     Bernhardi end
 !                    to allow the displacements to redistribute
 !                    in a quasi-static way (only applies to
 !                    quasi-static analyses (*STATIC))
+               write(*,*) 'In manual Hooks law loop'
 !
                eloc(1)=exx-vokl(1,1)
                eloc(2)=eyy-vokl(2,2)
@@ -1090,7 +1105,7 @@ c     Bernhardi end
             skl(3,2)=stre(6)
 !
             stx(1,jj,i)=skl(1,1)
-            stx(2,jj,i)=skl(2,2)
+            stx(2,jj,i)=skl(2,2) 
             stx(3,jj,i)=skl(3,3)
             stx(4,jj,i)=skl(2,1)
             stx(5,jj,i)=skl(3,1)
@@ -1177,15 +1192,15 @@ c     Bernhardi end
                   enddo
                enddo
 !
-               stx(1,jj,i)=ckl(1,1)
-               stx(2,jj,i)=ckl(2,2)
+               stx(1,jj,i)=ckl(1,1) 
+               stx(2,jj,i)=ckl(2,2) 
                stx(3,jj,i)=ckl(3,3)
                stx(4,jj,i)=ckl(2,1)
                stx(5,jj,i)=ckl(3,1)
                stx(6,jj,i)=ckl(3,2)
             endif
 ! --- p-norm accumulation (AFTER the Cauchy block) ------
-            sx  = stx(1,jj,i)
+            sx  = stx(1,jj,i) 
             sy  = stx(2,jj,i)
             sz  = stx(3,jj,i)
             txy = stx(4,jj,i)
@@ -1216,6 +1231,7 @@ c     Bernhardi end
 ! --- p-mean over the PHYSICAL volume (no desnity weighting)
             wgt = xsj * weight
             g_sump = g_sump + (phi**pexp) * wgt
+            write(*,*), "Current gsump:", g_sump 
             !g_vol  = g_vol  + wgt  <-- valid only for p-mean
 
 !

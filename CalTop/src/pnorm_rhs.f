@@ -957,9 +957,9 @@ c     Bernhardi end
               rho_eff = max(rho_e, rho_min)
               rho_p   = rho_eff**penal
               ! Scale the entire Constitutive matrix with element densities
-              do m1 = 1, 21
-              elas(m1) = rho_p * elas(m1)
-              enddo
+              !do m1 = 1, 21
+              !elas(m1) = rho_p * elas(m1)
+              !enddo
             endif
 !           calculating the local stiffness and stress
 !           Constitutive law
@@ -971,7 +971,7 @@ c     Bernhardi end
      &           plconloc,xstate,xstateini,ielas,
      &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
      &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
-     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
+     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo, rho_p)
 !
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then

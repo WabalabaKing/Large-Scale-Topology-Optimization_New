@@ -51,20 +51,20 @@
          do i=1,2
             elas(i)=elconloc(i)
          enddo
-!
+
          e=elas(1)
          un=elas(2)
          um2=e/(1.d0+un)
          al=un*um2/(1.d0-2.d0*un)
          um=um2/2.d0
          am1=al+um2
-!
-         stre(1)=am1*fxx+al*(fyy+fzz)-beta(1)
-         stre(2)=am1*fyy+al*(fxx+fzz)-beta(2)
-         stre(3)=am1*fzz+al*(fxx+fyy)-beta(3)
-         stre(4)=um*fxy-beta(4)
-         stre(5)=um*fxz-beta(5)
-         stre(6)=um*fyz-beta(6)
+!        
+         stre(1)=(am1*fxx+al*(fyy+fzz)-beta(1)) 
+         stre(2)=(am1*fyy+al*(fxx+fzz)-beta(2)) 
+         stre(3)=(am1*fzz+al*(fxx+fyy)-beta(3))
+         stre(4)=(um*fxy-beta(4)) 
+         stre(5)=(um*fxz-beta(5)) 
+         stre(6)=(um*fyz-beta(6))
 !
          mattyp=1
 !
