@@ -966,7 +966,7 @@ c     Bernhardi end
             nlgeom_undo=0
 
 
-            call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
+            call mechmodel_simp(elconloc,elas,emec,kode,emec0,ithermal,
      &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
      &           plconloc,xstate,xstateini,ielas,
      &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
