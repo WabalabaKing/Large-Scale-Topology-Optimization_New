@@ -852,8 +852,7 @@ void *pnormRHSmt(ITG *i)
           springarea1,reltime1,&calcul_fn1,&calcul_qa1,&calcul_cauchy1,nener1,
 	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
 	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
-	  kscale1,&list1,ilist1, rhs1, design1, penal1, sigma01, eps1, rhomin1, pexp1, &alpha1));
-    return NULL;
+	  kscale1,&list1,ilist1, &rhs1[indexrhs], design1, penal1, sigma01, eps1, rhomin1, pexp1, &alpha1));
     return NULL;
 }
 

@@ -949,9 +949,23 @@ c     Bernhardi end
                endif
             endif
 !
+! --- SIMP penalization for linear isotropic (mattyp == 1) ---
+            if (mattyp .eq. 1) then
+              rho_e   = design(i)
+              if (rho_e .lt. 0.d0) rho_e = 0.d0
+              if (rho_e .gt. 1.d0) rho_e = 1.d0
+              rho_eff = max(rho_e, rho_min)
+              rho_p   = rho_eff**penal
+              ! Scale the entire Constitutive matrix with element densities
+              do m1 = 1, 21
+              elas(m1) = rho_p * elas(m1)
+              enddo
+            endif
 !           calculating the local stiffness and stress
 !           Constitutive law
             nlgeom_undo=0
+
+
             call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
      &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
      &           plconloc,xstate,xstateini,ielas,
@@ -976,6 +990,8 @@ c     Bernhardi end
 !                    to allow the displacements to redistribute
 !                    in a quasi-static way (only applies to
 !                    quasi-static analyses (*STATIC))
+
+!              NOTE: This is not called in linear static analysis for CalTop             
 !
                eloc(1)=exx-vokl(1,1)
                eloc(2)=eyy-vokl(2,2)
@@ -985,18 +1001,22 @@ c     Bernhardi end
                eloc(6)=eyz-(vokl(2,3)+vokl(3,2))
 !
                if(mattyp.eq.1) then
-                  e=elas(1)
-                  un=elas(2)
-                  um=e/(1.d0+un)
-                  al=un*um/(1.d0-2.d0*un)
-                  um=um/2.d0
-                  am1=al*(eloc(1)+eloc(2)+eloc(3))
-                  stre(1)=am1+2.d0*um*eloc(1)
-                  stre(2)=am1+2.d0*um*eloc(2)
-                  stre(3)=am1+2.d0*um*eloc(3)
-                  stre(4)=um*eloc(4)
-                  stre(5)=um*eloc(5)
-                  stre(6)=um*eloc(6)
+
+!                 isotropic: build Lame params from elas(1:2)
+                  e=elas(1)                           ! Elastic modulus
+                  un=elas(2)                          ! Poisson's ratio
+!                 Penalized Lame moduli
+                  um=(e)/(1.d0+un)                      ! mu
+                  al=un*um/(1.d0-2.d0*un)             ! lambda
+                  um=um/2.d0                          ! Shear modulus
+                  am1=al*(eloc(1)+eloc(2)+eloc(3))    ! lambda tr(eps)
+                  stre(1)=am1+2.d0*um*eloc(1)         ! Sigma_11
+                  stre(2)=am1+2.d0*um*eloc(2)         ! Sigma_22
+                  stre(3)=am1+2.d0*um*eloc(3)         ! Sigma_33
+                  stre(4)=um*eloc(4)                  ! Tau_12
+                  stre(5)=um*eloc(5)                  ! Tau 13
+                  stre(6)=um*eloc(6)                  ! Tau 23
+!                 material type is orthotropic (not relevant for CalTop for now)
                elseif(mattyp.eq.2) then
                   stre(1)=eloc(1)*elas(1)+eloc(2)*elas(2)
      &                 +eloc(3)*elas(4)
