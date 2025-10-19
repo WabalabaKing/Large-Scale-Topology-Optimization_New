@@ -1070,12 +1070,12 @@ c     Bernhardi end
             skl(3,1)=stre(5)
             skl(3,2)=stre(6)
 !
-            stx(1,jj,i)=skl(1,1)
-            stx(2,jj,i)=skl(2,2)
-            stx(3,jj,i)=skl(3,3)
-            stx(4,jj,i)=skl(2,1)
-            stx(5,jj,i)=skl(3,1)
-            stx(6,jj,i)=skl(3,2)
+            !stx(1,jj,i)=skl(1,1)
+            !stx(2,jj,i)=skl(2,2)
+            !stx(3,jj,i)=skl(3,3)
+            !stx(4,jj,i)=skl(2,1)
+            !stx(5,jj,i)=skl(3,1)
+            !stx(6,jj,i)=skl(3,2)
 !
             skl(1,2)=skl(2,1)
             skl(1,3)=skl(3,1)
