@@ -655,7 +655,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 				
 				double *b_adj = NULL;
-				NNEW(b_adj,double,*neq);
+				NNEW(b_adj,double,*neq); // Adjoint variabels in equation space
 				DMEMSET(b_adj,0,*neq,0.0);
 
 
@@ -674,18 +674,18 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 				double *lam = NULL, *stn=NULL, *inum=NULL;
 				/* allocate minimal outputs and reuse existing arrays and args*/
-				NNEW(lam, double, mt**nk);
+				NNEW(lam, double, mt**nk); // Adjoint variables in nodal space
 				NNEW(stn, double, 6**nk);
 				NNEW(inum, ITG, *nk);
 				int iout = -1;
-				
+				// NOTE: B_adj is the adjoint solution in equation space
 				/* Call results with adjoint flag = 2 to expand active DOF vector to nodal field*/
-				results(co,nk,kon,ipkon,lakon,ne,
+				/*results(co,nk,kon,ipkon,lakon,ne,
         		lam,
         		stn,inum,stx,
         		elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
         		ielorien,norien,orab,ntmat_,
-        		t0,t1act,ithermal,prestr,iprestr,filab,eme,emn,een,iperturb, NULL,NULL,nactdof,&iout,qa,vold, b_adj,    /* <= active-DOF adjoint solution */
+        		t0,t1act,ithermal,prestr,iprestr,filab,eme,emn,een,iperturb, NULL,NULL,nactdof,&iout,qa,vold, b_adj, 
         		nodeboun,ndirboun,xbounact,nboun,ipompc,nodempc,coefmpc,labmpc,
         		nmpc,nmethod,cam,neq,veold,accold,&bet,&gam,&dtime,&time,ttime,
         		plicon,nplicon,plkcon,nplkcon,xstateini,xstiff,xstate,npmat_,
@@ -698,8 +698,9 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         		islavnode,nslavnode,ntie,clearini,islavsurf,ielprop,prop,
         		energyini,energy,&kscale,iponoel,inoel,nener,orname,&network,
         		ipobody,xbodyact,ibody,typeboun,design,penal, sigma0, eps, rhomin, pexp, NULL,NULL,Pnorm, 2);
-				
+				*/
 
+				adjoint_eq_2_node(nk, nactdof, nboun, nodeboun,ndirboun,mi,lam, b_adj);
 				/* Allocate memory for implicit derivative*/
 				NNEW(djdrho_impl, double, *ne);
 				

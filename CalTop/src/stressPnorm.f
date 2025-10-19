@@ -951,7 +951,7 @@ c     Bernhardi end
               rho_eff = max(rho_e, rho_min)
               rho_p   = rho_eff**penal
               ! Pass rho_p to linel.f through mechmodel.f
-
+!              Note; No penalization of xstiff here
               
 !              write(*,*) 'Done!'
             endif

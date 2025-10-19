@@ -236,7 +236,7 @@ c      if((iperturb(1).ge.2).or.((iperturb(1).le.1).and.(iout.lt.0)))
                   accold(ndir,node)=accold(ndir,node)+bnac
                endif
             endif
-            v(ndirboun(i),nodeboun(i))=fixed_disp
+            v(ndirboun(i),nodeboun(i))=fixed_disp  ! --- ENFORCE SPC
          enddo
 !     
 !     inserting the mpc information

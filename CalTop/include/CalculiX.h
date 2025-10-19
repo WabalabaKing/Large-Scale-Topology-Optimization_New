@@ -170,6 +170,7 @@ int write_Stress_sens(const char *path,
 
 
 
+
 void FORTRAN(mafillsm_filter2_full,(ITG *ne, double *ttime, double *time,
                       ITG *ne0, ITG *nea, ITG *neb,
                       double *elCentroid, double *rmin, ITG *filternnz,
@@ -4065,6 +4066,18 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
              char *orname,ITG *network,ITG *ipobody,double *xbodyact,
              ITG *ibody,char *typeboun, double *design, double *penal,  double * sigma0, double *eps, double *rhomin,
 			 double *pexp, double *brhs, double *djdrho, double *Pnorm, int get_adjoint);
+
+
+void adjoint_eq_2_node(
+    ITG *nk,
+    ITG *nactdof,     /* (mi[2]+1) * (*nk) */
+    ITG *nboun,
+    ITG *nodeboun,    /* length *nboun, 1-based nodes */
+    ITG *ndirboun,    /* length *nboun, values 1..mi[2] */
+    ITG *mi,          /* mi[2] = #mech DOFs per node */
+    double *lambda,   /* ladj, size (mi[2]+1)*(*nk) in Fortran layout */
+    double *B_adj     /* adjoint solution vector (length = neq) */
+);
 
 void FORTRAN(resultsem,(double *co,ITG *kon,ITG *ipkon,char *lakon,
              double *v,double *elcon,ITG *nelcon,ITG *ielmat,ITG *ntmat_,

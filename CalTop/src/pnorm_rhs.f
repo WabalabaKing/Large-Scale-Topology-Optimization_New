@@ -974,7 +974,7 @@ c     Bernhardi end
 !
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
-
+!              Scale xstiff here
                rho_e   = design(i)
                if (rho_e .lt. 0.d0) rho_e = 0.d0
                if (rho_e .gt. 1.d0) rho_e = 1.d0

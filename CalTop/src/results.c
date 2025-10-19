@@ -198,18 +198,14 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     
     /* 1. nodewise storage of the primary variables
        2. determination which derived variables have to be calculated */
-
-    FORTRAN(resultsini,(nk,v,ithermal,filab,iperturb,f,fn,
-       nactdof,iout_ptr,qa,vold,b,nodeboun,ndirboun,
-       xboun,nboun,ipompc,nodempc,coefmpc,labmpc,nmpc,nmethod,cam,neq,
-       veold,accold,bet,gam,dtime,mi,vini,nprint,prlab,
-       &intpointvarm,&calcul_fn,&calcul_f,&calcul_qa,&calcul_cauchy,
-       &ikin,&intpointvart,typeboun));
-
-    if (get_adjoint == 2)
+    if (get_adjoint!=2)
     {
-        printf("Adjoint variable expansion in nodal space \n");
-        return;
+        FORTRAN(resultsini,(nk,v,ithermal,filab,iperturb,f,fn,
+        nactdof,iout_ptr,qa,vold,b,nodeboun,ndirboun,
+        xboun,nboun,ipompc,nodempc,coefmpc,labmpc,nmpc,nmethod,cam,neq,
+        veold,accold,bet,gam,dtime,mi,vini,nprint,prlab,
+        &intpointvarm,&calcul_fn,&calcul_f,&calcul_qa,&calcul_cauchy,
+        &ikin,&intpointvart,typeboun));
     }
 
    /* next statement allows for storing the displacements in each
