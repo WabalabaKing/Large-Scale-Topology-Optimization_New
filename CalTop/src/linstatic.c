@@ -130,7 +130,10 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   		irow=*irowp;ener=*enerp;xstate=*xstatep;ipkon=*ipkonp;lakon=*lakonp;
   		kon=*konp;ielmat=*ielmatp;ielorien=*ielorienp;icol=*icolp;
 
-	
+		
+		long long blk = 27LL * mi[0];    /* number of doubles per element */
+		int max_elems_to_show = 3;       /* print only first 3 elements */
+		int max_vals_to_show  = 10;      /* print up to 10 nonzero values per element */
 		
 
 		/* temp adjoint flag*/
@@ -251,6 +254,32 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		NNEW(brhs,double,mt**nk);
   		//NNEW(stx,double,6*mi[0]**ne); No passing stx as an input argument to linstatic
   		NNEW(inum,ITG,*nk);
+
+
+		printf("\nInspecting nonzero entries in xstiff:\n");
+
+		for (int ielem = 0; ielem < *ne && ielem < max_elems_to_show; ielem++) 
+		{
+    		double *xe = xstiff + (long long)ielem * blk;
+    		int printed = 0;
+
+    		printf("\nElement %d:\n", ielem + 1);
+
+    		for (int k = 0; k < blk; k++) 
+			{
+        		if (fabs(xe[k]) > 1e-12) 
+				{   /* threshold for "nonzero" */
+            		printf("  xstiff[%d][%d] = % .6e\n", ielem + 1, k, xe[k]);
+            		printed++;
+            		if (printed >= max_vals_to_show) break;  /* limit output per element */
+        		}
+    		}
+
+    		if (printed == 0) 
+			{
+        		printf("  All entries are zero (within tolerance).\n\n");
+    		}
+		}
 	
   		results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
 	  	elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
@@ -271,6 +300,32 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  	islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
     	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, &Pnorm, 0);
 
+		// NOTE: At this point xstiff is not penalized
+		
+		printf("\nInspecting nonzero entries in xstiff @ first reslts() call:\n");
+
+		for (int ielem = 0; ielem < *ne && ielem < max_elems_to_show; ielem++) 
+		{
+    		double *xe = xstiff + (long long)ielem * blk;
+    		int printed = 0;
+
+    		printf("\nElement %d:\n", ielem + 1);
+
+    		for (int k = 0; k < blk; k++) 
+			{
+        		if (fabs(xe[k]) > 1e-12) 
+				{   /* threshold for "nonzero" */
+            		printf("  xstiff[%d][%d] = % .6e\n", ielem + 1, k, xe[k]);
+            		printed++;
+            		if (printed >= max_vals_to_show) break;  /* limit output per element */
+        		}
+    		}
+
+    		if (printed == 0) 
+			{
+        		printf("  All entries are zero (within tolerance).\n\n");
+    		}
+		}
 
   		SFREE(v);
 		SFREE(fn);
@@ -411,6 +466,31 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		  	ialset,ntie,&nasym,pslavsurf,pmastsurf,mortar,clearini,
 		  	ielprop,prop,&ne0,&kscale,iponoel,inoel,&network));
   		}
+
+		printf("\nInspecting nonzero entries in xstiff after mafillsmain call:\n");
+
+		for (int ielem = 0; ielem < *ne && ielem < max_elems_to_show; ielem++) 
+		{
+    		double *xe = xstiff + (long long)ielem * blk;
+    		int printed = 0;
+
+    		printf("\nElement %d:\n", ielem + 1);
+
+    		for (int k = 0; k < blk; k++) 
+			{
+        		if (fabs(xe[k]) > 1e-12) 
+				{   /* threshold for "nonzero" */
+            		printf("  xstiff[%d][%d] = % .6e\n", ielem + 1, k, xe[k]);
+            		printed++;
+            		if (printed >= max_vals_to_show) break;  /* limit output per element */
+        		}
+    		}
+
+    		if (printed == 0) 
+			{
+        		printf("  All entries are zero (within tolerance).\n\n");
+    		}
+		}
 
   		/* determining the right hand side */
 

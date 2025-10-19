@@ -285,12 +285,13 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
     if (get_adjoint == 0)
     {
+        // NOTE: No penalization of xstiff here
         printf(" Initializing fields...");
         for(i=0; i<num_cpus; i++)  
         {
 	        ithread[i]=i;
-	        //pthread_create(&tid[i], NULL, (void *)resultsmechmt, (void *)&ithread[i]);
-            pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
+	        pthread_create(&tid[i], NULL, (void *)resultsmechmt, (void *)&ithread[i]);
+            //pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
     	}
         for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 
