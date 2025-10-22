@@ -41,7 +41,7 @@ static double *co1,*v1,*stx1,*elcon1,*rhcon1,*alcon1,*alzero1,*orab1,*t01,*t11,
     *ttime1,*plicon1,*plkcon1,*xstateini1,*xstiff1,*xstate1,*stiini1,
     *vini1,*ener1,*eei1,*enerini1,*springarea1,*reltime1,*coefmpc1,
     *cocon1,*qfx1,*thicke1,*emeini1,*shcon1,*xload1,*prop1,
-    *xloadold1,*pslavsurf1,*pmastsurf1,*clearini1,*xbody1;
+    *xloadold1,*pslavsurf1,*pmastsurf1,*clearini1,*xbody1, *vsan1;
 
 /* Stress aggregation terms */
 static double *sigma01, *eps1, *rhomin1, *pexp1;
@@ -196,6 +196,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        2. determination which derived variables have to be calculated */
     if (get_adjoint!=2)
     {
+        printf("    Displacement state eq. space -> nodal space\n");
         FORTRAN(resultsini,(nk,v,ithermal,filab,iperturb,f,fn,
         nactdof,iout_ptr,qa,vold,b,nodeboun,ndirboun,
         xboun,nboun,ipompc,nodempc,coefmpc,labmpc,nmpc,nmethod,cam,neq,
@@ -204,13 +205,6 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         &ikin,&intpointvart,typeboun));
     }
 
-   /* next statement allows for storing the displacements in each
-      iteration: for debugging purposes */
-
-    if((strcmp1(&filab[3],"I")==0)&&(*iout==0)){
-	FORTRAN(frditeration,(co,nk,kon,ipkon,lakon,ne,v,
-		ttime,ielmat,matname,mi,istep,iinc,ithermal));
-    }
 
     /* calculating the stresses and material tangent at the 
        integration points; calculating the internal forces */
@@ -246,6 +240,41 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         emeini1=emeini;pslavsurf1=pslavsurf;clearini1=clearini;
         pmastsurf1=pmastsurf;mortar1=mortar;ielprop1=ielprop;prop1=prop;
         kscale1=kscale; sigma01 = sigma0; eps1 = eps; rhomin1 = rhomin; pexp1 = pexp;
+
+/* ---- Print displacement field (u,v,w) for Element 1 (C3D4) ---- */
+{
+    ITG e = 0;                       /* first element (0-based index) */
+    ITG start = ipkon[e];            /* start index in kon for element 1 */
+
+    if (start < 0) {
+        printf("Element 1 is inactive (ipkon[0] < 0)\n");
+    } else {
+        ITG mt = mi[1] + 1;          /* stride per node in v/v1 */
+        printf("\nElement 1 (C3D4) node displacements:\n");
+        for (int a = 0; a < 4; ++a) {               /* C3D4 always has 4 nodes */
+            ITG node = kon[start + a];              /* 1-based node number */
+            ITG base = mt * (node - 1);             /* displacement offset */
+
+            double ux = v[base + 1];
+            double uy = v[base + 2];
+            double uz = v[base + 3];
+
+            printf("  local node %d (global %lld):  [% .6e  % .6e  % .6e]\n",
+                   a + 1, (long long)node, ux, uy, uz);
+        }
+        printf("-------------------------------------------------------\n");
+    }
+}
+/* ---- end print block ---- */
+
+// Pass an empty displacement field to stressPnorm() for sanity check
+double*vsan;
+NNEW(vsan, double, mt**nk);
+
+vsan1 = vsan;
+
+
+
 
         //static double *sigma01, *eps1, *rhomin1, *pexp1, *djdrho1_explicit = NULL;
 
@@ -295,7 +324,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
     if (get_adjoint == 1)
     {   
-        printf(" Evaluating stress adjoint terms \n");
+        printf("    Aggregating stress norm\n");
 
         //printf(" Results.c Pexp: %f, \n", *pexp1);
        // printf(" Results.c Sigma0: %f, \n", *sigma0);
@@ -344,7 +373,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
             alpha1 = 0.0;
         }
         
-         printf("sumP (unnormalized): %.12e\n", sumP);
+         //printf("sumP (unnormalized): %.12e\n", sumP);
         //printf("J (p-norm)        : %.12e\n", *Pnorm);
         //printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
 
@@ -375,7 +404,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     if (get_adjoint == 1)
     {
 
-        printf(" Assembling RHS for stress adjoint...");
+        printf("    Assembling RHS for stress adjoint...");
 
         /* Allocate per-thread RHS blocks and the reduced RHS */
         NNEW(rhs1, double, num_cpus * mt * *nk);
@@ -411,13 +440,98 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
         /* Done with per-thread storage*/
 	    SFREE(rhs1);
-        printf("done!");
+        printf("done!\n");
+
+        /**************************************P-NORM RHS FD VERIFICATION***************************************/
+        /* First DOF = node 1, ux (dof=1). Change node/dof if needed. */
+        ITG mtloc = mi[1] + 1;
+        ITG node  = 1;                 /* 1-based */
+        ITG dof   = 1;                 /* 1=uX, 2=uY, 3=uZ */
+        ITG idx   = mtloc * (node - 1) + dof;
+
+        /* Step size: relative to magnitude, fallback to absolute */
+        double u0 = vsan1[idx];
+        double h  = 1e-06;
+
+        /* We need a temporary fn1 & ithread for calling stresspnormmt twice (baseline and perturbed) */
+        NNEW(fn1, double, num_cpus * mt * *nk);
+        NNEW(ithread, ITG, num_cpus);
+
+        /* Helper: compute J (aggregated Pnorm) using current vsan1=v
+       (clears qa1 per-thread, launches stresspnormmt, reduces sumP -> J) */
+        double J0, Jp;
+        {
+            /* baseline J0 */
+            /* clear per-thread accumulators */
+            int t;
+            for (t = 0; t < num_cpus; ++t) 
+            {
+                size_t base = (size_t)t * 4;
+                qa1[base + 0] = 0.0;
+                qa1[base + 1] = 0.0;
+                qa1[base + 2] = 0.0;
+                qa1[base + 3] = 0.0;
+            }
+            /* run threads */
+            for (i = 0; i < num_cpus; ++i) { ithread[i] = i; pthread_create(&tid[i], NULL, (void*)stresspnormmt, (void*)&ithread[i]); }
+            for (i = 0; i < num_cpus; ++i) { pthread_join(tid[i], NULL); }
+            /* reduce */
+            double sumP0 = 0.0;
+            for (t = 0; t < num_cpus; ++t) sumP0 += qa1[(size_t)t * 4 + 2];
+            J0 = (sumP0 > 0.0) ? pow(sumP0, 1.0 / *pexp1) : 0.0;
+        }
+
+        /* Forward perturb */
+        vsan1[idx] = u0 + h;
+        {
+            /* J(u + h e_k) */
+            int t;
+            for (t = 0; t < num_cpus; ++t) {
+                size_t base = (size_t)t * 4;
+                qa1[base + 0] = 0.0;
+                qa1[base + 1] = 0.0;
+                qa1[base + 2] = 0.0;
+                qa1[base + 3] = 0.0;
+            }
+            for (i = 0; i < num_cpus; ++i) { ithread[i] = i; pthread_create(&tid[i], NULL, (void*)stresspnormmt, (void*)&ithread[i]); }
+            for (i = 0; i < num_cpus; ++i) { pthread_join(tid[i], NULL); }
+            double sumPp = 0.0;
+            for (t = 0; t < num_cpus; ++t) sumPp += qa1[(size_t)t * 4 + 2];
+            Jp = (sumPp > 0.0) ? pow(sumPp, 1.0 / *pexp1) : 0.0;
+        }
+
+
+        /* Restore */
+        vsan1[idx] = u0;
+
+        /* First-order forward finite difference */
+        double dJdu_fd = (Jp - J0) / h;
+
+        /* Adjoint “RHS” value for the same DOF (already scaled by alpha1 above) */
+        double dJdu_adj = brhs[idx];
+
+
+        /* Relative error (guard for zero) */
+        double denom = fabs(dJdu_adj);
+        if (denom < 1.0e-30) denom = 1.0e-30;
+        double relerr = fabs(dJdu_fd - dJdu_adj) / denom;
+
+        printf("\n[FD vs Adjoint] dJ/du at node=%lld, dof=%lld  (h=%.3e)\n",
+           (long long)node, (long long)dof, h);
+        printf("  J0=%.12e  J+=%.12e\n", J0, Jp);
+        printf("  dJ/du (FD forward) = %.12e\n", dJdu_fd);
+        printf("  dJ/du (adjoint)    = %.12e\n", dJdu_adj);
+        printf("  relative error     = %.6e\n", relerr);
+
+        SFREE(ithread);
+        SFREE(fn1);
+
 
         /*************************************P-NORM EXPLICIT TERM CALCULATION******************************/
 
         djdrho_explicit1 = djdrho_explicit;
 
-        printf(" Assembling explicit term...");
+        printf("    Assembling explicit term...");
 
         /* allocate per-thread indices */
         NNEW(ithread, ITG, num_cpus);
@@ -565,7 +679,6 @@ if (get_adjoint == 4)
     SFREE(design_fd);
 }
 
-    /************************************************************************************************* */
 	
     
     /* determine the internal force */
@@ -800,7 +913,7 @@ void *stresspnormmt(ITG *i)
     qa1[indexqa + 3] = 0.0;   // will hold partial g_vol  (∑ w)
 
     
-    FORTRAN(stresspnorm,(co1,kon1,ipkon1,lakon1,ne1,v1,
+    FORTRAN(stresspnorm,(co1,kon1,ipkon1,lakon1,ne1,vsan1,
           stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
           ielmat1,ielorien1,norien1,orab1,ntmat1_,t01,t11,ithermal1,prestr1,
           iprestr1,eme1,iperturb1,&fn1[indexfn],iout1,&qa1[indexqa],vold1,

@@ -423,30 +423,6 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		  	ielprop,prop,&ne0,&kscale,iponoel,inoel,&network));
   		}
 
-		printf("\nInspecting nonzero entries in xstiff after mafillsmain call:\n");
-
-		for (int ielem = 0; ielem < *ne && ielem < max_elems_to_show; ielem++) 
-		{
-    		double *xe = xstiff + (long long)ielem * blk;
-    		int printed = 0;
-
-    		printf("\nElement %d:\n", ielem + 1);
-
-    		for (int k = 0; k < blk; k++) 
-			{
-        		if (fabs(xe[k]) > 1e-12) 
-				{   /* threshold for "nonzero" */
-            		printf("  xstiff[%d][%d] = % .6e\n", ielem + 1, k, xe[k]);
-            		printed++;
-            		if (printed >= max_vals_to_show) break;  /* limit output per element */
-        		}
-    		}
-
-    		if (printed == 0) 
-			{
-        		printf("  All entries are zero (within tolerance).\n\n");
-    		}
-		}
 
   		/* determining the right hand side */
 
@@ -549,7 +525,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 				/* NOTE: 	At this point "b" holds the displacement in equation space. 
 							Allocate memory for full nodal displacement vector "v"
-							Pass both v and b to results()->resultsini.f to get full representation
+							Pass both v and b to results()->resultsini.f to get full nodal representation
 							
 				*/
 
@@ -576,8 +552,11 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 					NNEW(enerini,double,mi[0]**ne);
 				}
 
+				printf("\n========================================\n");
+				printf("STRESS CALCULATION\n");
+				printf("========================================\n");
 
-				//printf("Calling results.c in linstatic.c...");
+				// Pass displacements (b) to results, compute stress, rhs adjoint and explicit terms. 
     			results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
 	    		elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
 	    		ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
@@ -596,8 +575,6 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	    		islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
             	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl,Pnorm, 1);
 				
-
-				printf("Displacement tranformed to full nodal space!\n");
 					
 				//printf("done calling results.c for static calculation: line: 1112 @ linstatic.c \n");
 
