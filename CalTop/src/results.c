@@ -268,10 +268,10 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 /* ---- end print block ---- */
 
 // Pass an empty displacement field to stressPnorm() for sanity check
-double*vsan;
-NNEW(vsan, double, mt**nk);
+//double*vsan;
+//NNEW(vsan, double, mt**nk);
 
-vsan1 = vsan;
+//vsan1 = vsan;
 
 
 
@@ -373,7 +373,7 @@ vsan1 = vsan;
             alpha1 = 0.0;
         }
         
-         //printf("sumP (unnormalized): %.12e\n", sumP);
+        printf("sumP (unnormalized): %.12e\n", sumP);
         //printf("J (p-norm)        : %.12e\n", *Pnorm);
         //printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
 
@@ -443,19 +443,28 @@ vsan1 = vsan;
         printf("done!\n");
 
         /**************************************P-NORM RHS FD VERIFICATION***************************************/
-        /* First DOF = node 1, ux (dof=1). Change node/dof if needed. */
+        /* First DOF = global node 3837, uX (1=uX,2=uY,3=uZ) */
         ITG mtloc = mi[1] + 1;
-        ITG node  = 1;                 /* 1-based */
-        ITG dof   = 1;                 /* 1=uX, 2=uY, 3=uZ */
-        ITG idx   = mtloc * (node - 1) + dof;
+        ITG node  = 3905;                  /* global node id (1-based) */
+        ITG dof   = 2;                     /* 1=uX, 2=uY, 3=uZ */
+        ITG idx   = mtloc * (node - 1) + dof; /* this is the 0-based slot for u(node,dof) */
+
+        if (nactdof && nactdof[idx] == 0) 
+        {
+            printf("  [warn] node %" ITGFORMAT " dof %d is constrained (nactdof=0)\n", node, dof);  
+        }
 
         /* Step size: relative to magnitude, fallback to absolute */
-        double u0 = vsan1[idx];
-        double h  = 1e-06;
-
+        double u0 = v1[idx];
+        double h  = 1e-6;
+    
         /* We need a temporary fn1 & ithread for calling stresspnormmt twice (baseline and perturbed) */
         NNEW(fn1, double, num_cpus * mt * *nk);
         NNEW(ithread, ITG, num_cpus);
+
+        /* We will not use fn1 in stresspnorm, but zero it defensively */
+        for (size_t zz = 0; zz < (size_t)num_cpus * mt * *nk; ++zz) fn1[zz] = 0.0;
+
 
         /* Helper: compute J (aggregated Pnorm) using current vsan1=v
        (clears qa1 per-thread, launches stresspnormmt, reduces sumP -> J) */
@@ -482,7 +491,7 @@ vsan1 = vsan;
         }
 
         /* Forward perturb */
-        vsan1[idx] = u0 + h;
+        v1[idx] = u0 + h;
         {
             /* J(u + h e_k) */
             int t;
@@ -502,7 +511,7 @@ vsan1 = vsan;
 
 
         /* Restore */
-        vsan1[idx] = u0;
+        v1[idx] = u0;
 
         /* First-order forward finite difference */
         double dJdu_fd = (Jp - J0) / h;
@@ -512,9 +521,8 @@ vsan1 = vsan;
 
 
         /* Relative error (guard for zero) */
-        double denom = fabs(dJdu_adj);
-        if (denom < 1.0e-30) denom = 1.0e-30;
-        double relerr = fabs(dJdu_fd - dJdu_adj) / denom;
+        double denom = fmax(fabs(dJdu_fd), fabs(dJdu_adj));
+        double relerr = (denom > 1.0e-30) ? fabs(dJdu_fd - dJdu_adj) / denom : 0.0;
 
         printf("\n[FD vs Adjoint] dJ/du at node=%lld, dof=%lld  (h=%.3e)\n",
            (long long)node, (long long)dof, h);
@@ -913,7 +921,7 @@ void *stresspnormmt(ITG *i)
     qa1[indexqa + 3] = 0.0;   // will hold partial g_vol  (∑ w)
 
     
-    FORTRAN(stresspnorm,(co1,kon1,ipkon1,lakon1,ne1,vsan1,
+    FORTRAN(stresspnorm,(co1,kon1,ipkon1,lakon1,ne1,v1,
           stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
           ielmat1,ielorien1,norien1,orab1,ntmat1_,t01,t11,ithermal1,prestr1,
           iprestr1,eme1,iperturb1,&fn1[indexfn],iout1,&qa1[indexqa],vold1,
