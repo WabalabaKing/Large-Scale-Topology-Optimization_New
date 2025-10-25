@@ -596,8 +596,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				FORTRAN(adjrhs_scatter_linstatic_nompc,(nk, neq, mi, nactdof,brhs,b_adj,nboun, nodeboun, ndirboun));
 					
 
-				printf(" PARSIDO: adjoint solve \n");
-      			pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
+				printf(" SKIPPING PARSIDO: adjoint solve \n");
+      			//pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
 	
 				// At this point we have the explicit and adjoint variables.
 

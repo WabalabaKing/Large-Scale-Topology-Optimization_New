@@ -94,6 +94,7 @@ static double eval_pnorm_J_fd(void)
     for (ITG t = 0; t < num_cpus; ++t)
         sump += qa1[(size_t)t * 4 + 2];
 
+      //  printf("Current sump: %f \n", sump);
     const double p = *pexp1;
     return (sump > 0.0) ? pow(sump, 1.0 / p) : 0.0;
 }
@@ -243,7 +244,9 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         veold,accold,bet,gam,dtime,mi,vini,nprint,prlab,
         &intpointvarm,&calcul_fn,&calcul_f,&calcul_qa,&calcul_cauchy,
         &ikin,&intpointvart,typeboun));
+        printf("done!\n");
     }
+
 
 
     /* calculating the stresses and material tangent at the 
@@ -281,19 +284,50 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         pmastsurf1=pmastsurf;mortar1=mortar;ielprop1=ielprop;prop1=prop;
         kscale1=kscale; sigma01 = sigma0; eps1 = eps; rhomin1 = rhomin; pexp1 = pexp;
 
-/* ---- Print displacement field (u,v,w) for Element 1 (C3D4) ---- */
+
+
+
+
+/*
 {
-    ITG e = 0;                       /* first element (0-based index) */
-    ITG start = ipkon[e];            /* start index in kon for element 1 */
+    ITG mtloc = mi[1] + 1;                  // stride per node 
+    ITG ndof  = mtloc * (*nk);              // total length of v1 
+    for (ITG k = 0; k < ndof; ++k) v1[k] = 1.0;
+}
+
+*/
+
+/*
+// ---- Quick peek: first 12 raw entries of v1 ---- 
+{
+    ITG mtloc = mi[1] + 1;                    //stride per node 
+    ITG ndof  = mtloc * (*nk);
+    ITG nshow = (ndof < 12 ? ndof : 12);
+
+    printf("\nFirst %lld entries of v1 (mt=%lld, ndof=%lld):\n",
+           (long long)nshow, (long long)mtloc, (long long)ndof);
+    for (ITG k = 0; k < nshow; ++k) {
+        printf("  v1[%3lld] = %+ .15e\n", (long long)k, v1[k]);
+    }
+    printf("-------------------------------------------------------\n");
+    fflush(stdout);
+}
+ */
+
+/* 
+//---- Print displacement field (u,v,w) for Element 1 (C3D4) ---- 
+{
+    ITG e = 0;                       // first element (0-based index) 
+    ITG start = ipkon[e];            // start index in kon for element 1
 
     if (start < 0) {
         printf("Element 1 is inactive (ipkon[0] < 0)\n");
     } else {
-        ITG mt = mi[1] + 1;          /* stride per node in v/v1 */
+        ITG mt = mi[1] + 1;          // stride per node in v/v1 
         printf("\nElement 1 (C3D4) node displacements:\n");
-        for (int a = 0; a < 4; ++a) {               /* C3D4 always has 4 nodes */
-            ITG node = kon[start + a];              /* 1-based node number */
-            ITG base = mt * (node - 1);             /* displacement offset */
+        for (int a = 0; a < 4; ++a) {               // C3D4 always has 4 nodes 
+            ITG node = kon[start + a];              // 1-based node number 
+            ITG base = mt * (node - 1);             // displacement offset 
 
             double ux = v[base + 1];
             double uy = v[base + 2];
@@ -305,7 +339,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         printf("-------------------------------------------------------\n");
     }
 }
-/* ---- end print block ---- */
+*/
 
 // Pass an empty displacement field to stressPnorm() for sanity check
 //double*vsan;
@@ -469,7 +503,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
             {
                 acc += rhs1[i + j * mt * *nk];
             }
-            brhs[i] = acc * alpha1;
+            brhs[i] = acc;
         }
 
 
@@ -478,10 +512,59 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	    SFREE(rhs1);
         printf("done!\n");
 
-        
+
+        /***************************************P-NORM RHS FD VERIFICATION***********************************/
+        /*
+        // ---------- FD check of dJ/du on first 12 displacement DOFs ---------- 
+        {
+            const ITG mtloc   = mi[1] + 1;   //stride per node 
+            const ITG ndof    = mtloc * (*nk);
+            const ITG ncheck  = 24;          // how many displacement DOFs to check 
+            const double J0   = eval_pnorm_J_fd();
+
+            printf("Current J0 %f", J0);
+
+            ITG tested = 0;
+            printf("    FD check on first %lld displacement DOFs (out of %lld total entries)\n",
+            (long long)ncheck, (long long)ndof);
+            printf("      %6s  %-22s  %-22s  %-12s\n",
+            "k", "dJ/du (FD)", "dJ/du (adjoint)", "rel.err");
+
+            for (ITG node = 1; node <= *nk && tested < ncheck; ++node) 
+            {
+                ITG base = mtloc * (node - 1);
+
+                // Skip temperature (base + 0); perturb only Ux, Uy, Uz 
+                for (ITG comp = 1; comp <= 3 && tested < ncheck; ++comp) 
+                {
+                    ITG k = base + comp;  // displacement component index 
+
+                    const double u0 = v1[k];
+                
+                    const double h  = 1e-06;
+
+                    v1[k] = u0 + h;
+                    const double Jp = eval_pnorm_J_fd();
+                   // printf("Current v1[k]: %f \n", v1[k]);
+                    v1[k] = u0;  // restore 
+                    //printf("Curent Jp: %f \n", Jp);
+
+                    const double dJdu_fd  = (Jp - J0) / h;
+                    const double dJdu_adj = brhs[k];  // analytical //
+                    const double rel_err = 
+                    (fabs(dJdu_adj) > 0.0) ? fabs(dJdu_fd - dJdu_adj) / fabs(dJdu_adj) : 0.0;
+
+                    printf("      %6lld  %+ .15e  %+ .15e  % .3e\n",
+                    (long long)k, dJdu_fd, dJdu_adj, rel_err);
+                    ++tested;
+                }
+            }
+        }
+        // ---------- end FD check ---------- //
+
+        */
 
         
-
         /**************************************P-NORM RHS FD EVALUATION***************************************/
         /*
         printf("    Assembling RHS via forward finite differences (ALL DOFs)...\n");
@@ -907,7 +990,6 @@ void *stresspnormmt(ITG *i)
     qa1[indexqa + 1] = 0.0;   // qa(2) not used here
     qa1[indexqa + 2] = 0.0;   // will hold partial g_sump (∑ w·vm^p)
     qa1[indexqa + 3] = 0.0;   // will hold partial g_vol  (∑ w)
-
     
     FORTRAN(stresspnorm,(co1,kon1,ipkon1,lakon1,ne1,v1,
           stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,

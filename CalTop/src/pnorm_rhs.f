@@ -1307,7 +1307,7 @@ c           skip if vm or phi yields zero gradient
 
 !  ---        evaluate 
                 invvm = 1.d0/(sig0 * vm)
-                fac   = (phi**(pexp-1)) * invvm
+                coeff   = (phi**(pexp-1)) * invvm
 
 ! ---- unpack xstiff(:,jj,i) -> full symmetric C(6,6) in tensorial Voigt ----
                
@@ -1436,9 +1436,10 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   enddo
                enddo
 
-! ---          Multiply with scalar factor
+! ---          Multiply with scalar coefficient
                do m1=1,12
-                  rhs_loc(m1) = fac * rhs_loc(m1)
+                  rhs_loc(m1) = coeff * rhs_loc(m1)
+!                  rhs_loc(m1) = coeff 
                enddo
 
 ! ---          Scatter to global rhs(1..3, node)
