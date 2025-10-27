@@ -953,7 +953,7 @@ c     Bernhardi end
 !              stress in Duysinx and Sigmnd, the penalized
 !              rho cancels out in the stress term with
 !              relaxation. Pass rho_p = 1 below
-!              rho_p   = rho_eff**penal
+!             rho_p   = rho_eff**penal
                rho_p = 1.d0
 !              Note: Since we are not penalizing the stress here
 !              von Misses must be penalized in ccx_2.15.c 

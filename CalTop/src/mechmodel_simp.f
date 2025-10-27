@@ -60,6 +60,7 @@
       real*8 xstate(nstate_,mi(1),*),xstateini(nstate_,mi(1),*), rho_p
 !
       if(kode.gt.0) then
+         write(*,*), 'Current rhoe:', rho_p     
          call linel_simp(kode,mattyp,beta,emec,stre,elas,elconloc,
      &  iorien,orab,pgauss, rho_p)
       elseif(kode.gt.-50) then

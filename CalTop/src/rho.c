@@ -46,7 +46,7 @@ void rho(double *design,int ne)
     /* Initialize design array with ones */
     for(i=0; i<ne; i++)
     {
-        design[i]=0.50;
+        design[i]=1.00;
     }
 
     /* If the density file does not exist, create one */

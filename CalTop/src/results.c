@@ -398,7 +398,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
     if (get_adjoint == 1)
     {
-        // Compute effective von Mises stress, aggregate, compute adjoint RHS   
+        // STEP 1: Compute VM stress and aggregate (P-NORM) for Rho = 1 
         printf("    Evaluating effective von Misses stress for the structure\n");
 
 	    for(i=0; i<num_cpus; i++)  
@@ -473,7 +473,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
     if (get_adjoint == 1)
     {
-        
+        // STEP 2: ASSEMBLE RHS FOR P-NORM ADJOINT (TODO: ZHENG TO CORRECT)
         printf("    Assembling RHS for stress adjoint using analytical solution");
 
         //Allocate per-thread RHS blocks and the reduced RHS
@@ -607,7 +607,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         */
 
         /*************************************P-NORM EXPLICIT TERM CALCULATION******************************/
-
+        
+        // STEP 3: COMPUTE EXPLICIT TERM FOR P-NORM ADJOINT (PRATEEK TO FIX)
         djdrho_explicit1 = djdrho_explicit;
 
         printf("    Assembling explicit term...");
@@ -642,44 +643,44 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     /*********************************************P-NORM CALCULATION ENDS*******************************/
 
     /************ Finite-difference (FD) validation of EXPLICIT part (all elems) ************/
-if (get_adjoint == 4)
-{
-    const double h = 1.0e-6;        /* absolute bump in rho_e */
-    ITG   nea_loc = 1, neb_loc = *ne, list_loc = 0;
-    ITG  *ilist_loc = NULL;
-
-    /* working copy of design */
-    double *design_fd = NULL;
-    NNEW(design_fd,double,*ne);
-    memcpy(design_fd, design1, sizeof(double)*(*ne));
-
-    /* storage for FD */
-    double *dJ_fd_exp = NULL;
-    NNEW(dJ_fd_exp,double,*ne);
-
-    const double p = *pexp1;
-
-    printf("\nElement  rho        dJ_exp(adj)        dJ_exp(FDc)         FD/adj\n");
-    printf("---------------------------------------------------------------------\n");
-
-    for (ITG e = 1; e <= *ne; ++e)
+    if (get_adjoint == 4)
     {
-        const ITG ei = e - 1;
-        const double rho0 = design_fd[ei];
+        const double h = 1.0e-6;        /* absolute bump in rho_e */
+        ITG   nea_loc = 1, neb_loc = *ne, list_loc = 0;
+        ITG  *ilist_loc = NULL;
 
-        /* central bumps (clamped into [0,1]) */
-        double rho_p = rho0 + h;
-        if (rho_p > 1.0) rho_p = 1.0;
+        /* working copy of design */
+        double *design_fd = NULL;
+        NNEW(design_fd,double,*ne);
+        memcpy(design_fd, design1, sizeof(double)*(*ne));
 
-        double rho_m = rho0 - h;
-        if (rho_m < 0.0) rho_m = 0.0;
+        /* storage for FD */
+        double *dJ_fd_exp = NULL;
+        NNEW(dJ_fd_exp,double,*ne);
 
-        double dJfd = 0.0;
+        const double p = *pexp1;
 
-        if ((rho_p == rho0) && (rho_m == rho0)) {
-            /* both sides clamped: derivative effectively zero */
-            dJfd = 0.0;
-        } else if (rho_m == rho0) {
+        printf("\nElement  rho        dJ_exp(adj)        dJ_exp(FDc)         FD/adj\n");
+        printf("---------------------------------------------------------------------\n");
+
+        for (ITG e = 1; e <= *ne; ++e)
+        {
+            const ITG ei = e - 1;
+            const double rho0 = design_fd[ei];
+
+            /* central bumps (clamped into [0,1]) */
+            double rho_p = rho0 + h;
+            if (rho_p > 1.0) rho_p = 1.0;
+
+            double rho_m = rho0 - h;
+            if (rho_m < 0.0) rho_m = 0.0;
+
+            double dJfd = 0.0;
+
+            if ((rho_p == rho0) && (rho_m == rho0)) {
+                /* both sides clamped: derivative effectively zero */
+                dJfd = 0.0;
+            } else if (rho_m == rho0) {
             /* fallback: forward (one-sided) */
             double saved = rho0;
             design_fd[ei] = rho_p;
@@ -696,10 +697,12 @@ if (get_adjoint == 4)
             FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
                 stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
                 &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_0));
-            const double J0 = (psum_0>0.0) ? pow(psum_0, 1.0/p) : 0.0;
+                const double J0 = (psum_0>0.0) ? pow(psum_0, 1.0/p) : 0.0;
 
             dJfd = (Jp - J0) / (rho_p - rho0);
-        } else if (rho_p == rho0) {
+        } 
+        else if (rho_p == rho0) 
+        {
             /* fallback: backward (one-sided) */
             double saved = rho0;
             design_fd[ei] = rho_m;
@@ -719,7 +722,8 @@ if (get_adjoint == 4)
             const double J0 = (psum_0>0.0) ? pow(psum_0, 1.0/p) : 0.0;
 
             dJfd = (J0 - Jm) / (rho0 - rho_m);
-        } else {
+        } 
+        else {
             /* true central difference */
             double saved = rho0;
 
