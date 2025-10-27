@@ -878,6 +878,7 @@ $(SRC_DIR)/tecplot.f \
 $(SRC_DIR)/tecplot_vtu.f \
 $(SRC_DIR)/build_filter.f \
 $(SRC_DIR)/stressPnorm.f \
+$(SRC_DIR)/stress_SIMP.f \
 $(SRC_DIR)/pnorm_rhs.f \
 $(SRC_DIR)/pnorm_explicit.f \
 $(SRC_DIR)/pnorm_implicit.f \
@@ -1072,7 +1073,8 @@ $(SRC_DIR)/massCG.c \
 $(SRC_DIR)/write_CGSens.c \
 $(SRC_DIR)/filterSens_bin_mt_s_group.c \
 $(SRC_DIR)/write_StressSens.c \
-$(SRC_DIR)/adjoint_eq_2_node.c 
+$(SRC_DIR)/adjoint_eq_2_node.c \
+
 
 
 

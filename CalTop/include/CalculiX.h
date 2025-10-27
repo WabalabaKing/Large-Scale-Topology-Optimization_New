@@ -4159,6 +4159,25 @@ void FORTRAN(stresspnorm,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	  ITG *kscale,ITG *list,ITG *ilist, double* design, double* penal, double *sigma0, double *eps,
 	  double * rhomin, double *pexp));
 
+void FORTRAN(stress_simp,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
+          double *v,double *stx,double *elcon,ITG *nelcon,double *rhcon,
+          ITG *nrhcon,double *alcon,ITG *nalcon,double *alzero,ITG *ielmat,
+          ITG *ielorien,ITG *norien,double *orab,ITG *ntmat_,double *t0,
+          double *t1,ITG *ithermal,double *prestr,ITG *iprestr,double *eme,
+          ITG *iperturb,double *fn,ITG *iout,double *qa,double *vold,
+          ITG *nmethod,double *veold,double *dtime,double *time,
+          double *ttime,double *plicon,ITG *nplicon,double *plkcon,
+          ITG *nplkcon,double *xstateini,double *xstiff,double *xstate,
+          ITG *npmat_,char *matname,ITG *mi,ITG *ielas,ITG *icmd,ITG *ncmat_,
+          ITG *nstate_,double *stiini,double *vini,double *ener,double *eei,
+          double *enerini,ITG *istep,ITG *iinc,double *springarea,
+          double *reltime,ITG *calcul_fn,ITG *calcul_qa,ITG *calcul_cauchy,
+	  ITG *iener,ITG *ikin,ITG *nal,ITG *ne0,double *thicke,
+	  double *emeini,double *pslavsurf,double *pmastsurf,ITG *mortar,
+	  double *clearini,ITG *nea,ITG *neb,ITG *ielprop,double *prop,
+	  ITG *kscale,ITG *list,ITG *ilist, double* design, double* penal, double *sigma0, double *eps,
+	  double * rhomin, double *pexp));
+
 void FORTRAN(pnorm_explicit,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 		ITG *ne, double *stx, ITG *mi, double *design, double *penal, double *sigma01, double* eps1, double *rhomin1,
         double *alpha1, double *pexp, ITG *nea,ITG *neb, ITG *list, ITG *ilist, double *djdrho));
@@ -4196,6 +4215,8 @@ void FORTRAN(pnorm_implicit_c3d4,
 void *resultsmechmt(ITG *i);
 
 void *stresspnormmt(ITG *i);
+
+void *stresssimpmt(ITG *i);
 
 void *pnormRHSmt(ITG *i);
 

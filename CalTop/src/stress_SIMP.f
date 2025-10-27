@@ -16,7 +16,7 @@
 !     along with this program; if not, write to the Free Software
 !     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !
-      subroutine stresspnorm(co,kon,ipkon,lakon,ne,v,
+      subroutine stresssimp(co,kon,ipkon,lakon,ne,v,
      &  stx,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
      &  ielmat,ielorien,norien,orab,ntmat_,t0,t1,ithermal,prestr,
      &  iprestr,eme,iperturb,fn,iout,qa,vold,nmethod,
@@ -30,10 +30,8 @@
 !
 !
 
-!     calculates the relaxed P-norm-aggregated stress based on 
-!     Duysinx, P and Sigmund O, New developments in handling stress
-!     constraints in optimal material distribution
-!     7th AIAA symposium on multidisciplinary analysis and optimization
+!     calculates the element-density-scaled stress for each
+!     element and wrtites to stx
       
       implicit none
 !
@@ -95,7 +93,7 @@
      &  pmastsurf,mortar,clearini,nea,neb,ielprop,prop,kscale,
      &  list,ilist,design, penal, sig0, eps_relax, rho_min, pexp
 !
-      intent(inout) nal,qa,fn,xstiff,ener,eme,eei,stx,ielmat,prestr,
+      intent(inout) nal,fn,xstiff,ener,eme,eei,stx,ielmat,prestr,
      &  emeini
 !
       include "gauss.f"
@@ -953,8 +951,8 @@ c     Bernhardi end
 !              stress in Duysinx and Sigmnd, the penalized
 !              rho cancels out in the stress term with
 !              relaxation. Pass rho_p = 1 below
-!             rho_p   = rho_eff**penal
-               rho_p = 1.d0
+             rho_p   = rho_eff**penal
+!               rho_p = 1.d0
 !              Note: Since we are not penalizing the stress here
 !              von Misses must be penalized in ccx_2.15.c 
 !              when writing to .vtu file
@@ -965,12 +963,12 @@ c     Bernhardi end
 !           calculating the local stiffness and stress
 !           Constitutive law
             nlgeom_undo=0
-            call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
+            call mechmodel_simp(elconloc,elas,emec,kode,emec0,ithermal,
      &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
      &           plconloc,xstate,xstateini,ielas,
      &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
      &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
-     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
+     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo, rho_p)
 !
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
@@ -1207,52 +1205,13 @@ c     Bernhardi end
                stx(5,jj,i)=ckl(3,1)
                stx(6,jj,i)=ckl(3,2)
             endif
-! --- p-norm accumulation (AFTER the Cauchy block) ------
-            sx  = stx(1,jj,i) 
-            sy  = stx(2,jj,i)
-            sz  = stx(3,jj,i)
-            txy = stx(4,jj,i)
-            txz = stx(5,jj,i)
-            tyz = stx(6,jj,i)
+
 
             !print *, 'sx = ', sx
             !print *, 'sy = ', sy
-
-!  --- von Mises (without penalization)
-            vm2 = (sx-sy)*(sx-sy) + (sy-sz)*(sy-sz) + (sz-sx)*(sz-sx)
-            vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
-            vm  = dsqrt(vm2)
-
-!            write(*,*), 'Currrent vm:', vm
-
-!  --- filtered design alread in [0,1] (clamp defenseively)  ---
-            rho_e = design(i)
-            ! (optional clamp, safe if design may drift)
-            if (rho_e .lt. 0.d0) rho_e = 0.d0
-            if (rho_e .gt. 1.d0) rho_e = 1.d0
-
-            rho_eff = max(rho_e, rho_min)
-            rho_p = rho_eff**penal
-
-! --- Duysinx-Sigmund effective von Misses stress measure for an element
-            phi = (vm/ (sig0)) + eps_relax - (eps_relax/rho_eff)
-! --- Consider effective von Misses stress (phi) > 0 only
-            if (phi .lt. 0.d0) phi = 0.d0
-
-!           write(*,*), 'Phi: ', phi
-
-! --- With effective von Misses stress calculated, raise to pexp
-! --- and sum over all elements
-! --- P-norm aggregation for this element
-            g_sump = g_sump + (phi**pexp)
 !
          enddo  ! <--- end of jj=1, mint3d
-!
-!        q contains the contributions to the nodal force in the nodes
-!        belonging to the element at stake from other elements (elements
-!        already treated). These contributions have to be
-!        subtracted to get the contributions attributable to the element
-!        at stake only
+
 !
          if(calcul_qa.eq.1) then
             do m1=1,nope
@@ -1267,9 +1226,9 @@ c     Bernhardi end
 
 !
 
-      qa(3) = g_sump
+      !qa(3) = g_sump
       !qa(4) = g_vol
 
 ! ------------------------
-      return
+!      return
       end

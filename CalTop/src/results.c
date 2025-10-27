@@ -636,10 +636,35 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
 
         printf("done!\n");
+        //SFREE(neapar);
+       // SFREE(nebpar);
+
+    }
+
+    if (get_adjoint == 1)
+    {
+        // STEP 1: Compute VM stress and aggregate (P-NORM) for Rho = 1 
+        printf("    Evaluating density-scaled element stress\n");
+
+         NNEW(ithread, ITG, num_cpus);
+         
+
+	    for(i=0; i<num_cpus; i++)  
+        {
+	        ithread[i]=i;
+	        pthread_create(&tid[i], NULL, (void *)stresssimpmt, (void *)&ithread[i]);
+	    }
+
+	    for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+
         SFREE(neapar);
         SFREE(nebpar);
 
+        
     }
+
+
+
     /*********************************************P-NORM CALCULATION ENDS*******************************/
 
     /************ Finite-difference (FD) validation of EXPLICIT part (all elems) ************/
@@ -996,6 +1021,36 @@ void *stresspnormmt(ITG *i)
     qa1[indexqa + 3] = 0.0;   // will hold partial g_vol  (∑ w)
     
     FORTRAN(stresspnorm,(co1,kon1,ipkon1,lakon1,ne1,v1,
+          stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
+          ielmat1,ielorien1,norien1,orab1,ntmat1_,t01,t11,ithermal1,prestr1,
+          iprestr1,eme1,iperturb1,&fn1[indexfn],iout1,&qa1[indexqa],vold1,
+          nmethod1,
+          veold1,dtime1,time1,ttime1,plicon1,nplicon1,plkcon1,nplkcon1,
+          xstateini1,xstiff1,xstate1,npmat1_,matname1,mi1,ielas1,icmd1,
+          ncmat1_,nstate1_,stiini1,vini1,ener1,eei1,enerini1,istep1,iinc1,
+          springarea1,reltime1,&calcul_fn1,&calcul_qa1,&calcul_cauchy1,nener1,
+	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
+	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
+	  kscale1,&list1,ilist1, design1, penal1, sigma01, eps1, rhomin1, pexp1));
+    return NULL;
+}
+
+void *stresssimpmt(ITG *i)
+{
+
+    ITG indexfn,indexqa,indexnal,nea,neb,list1,*ilist1=NULL;
+
+    indexfn=*i*mt1**nk1;
+    indexqa=*i*4;  // this thread's 4-slot window in qa1
+    indexnal=*i;
+
+    nea=neapar[*i]+1;
+    neb=nebpar[*i]+1;
+
+    list1=0;
+
+    
+    FORTRAN(stresssimp,(co1,kon1,ipkon1,lakon1,ne1,v1,
           stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
           ielmat1,ielorien1,norien1,orab1,ntmat1_,t01,t11,ithermal1,prestr1,
           iprestr1,eme1,iperturb1,&fn1[indexfn],iout1,&qa1[indexqa],vold1,
