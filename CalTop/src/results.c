@@ -636,7 +636,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
 
         printf("done!\n");
-        //SFREE(neapar);
+       // SFREE(neapar);
        // SFREE(nebpar);
 
     }
@@ -647,7 +647,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         printf("    Evaluating density-scaled element stress\n");
 
          NNEW(ithread, ITG, num_cpus);
-         
+
 
 	    for(i=0; i<num_cpus; i++)  
         {
