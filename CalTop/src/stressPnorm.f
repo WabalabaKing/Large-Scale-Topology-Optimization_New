@@ -1164,12 +1164,15 @@ c     Bernhardi end
 !           calculation of the Cauchy stresses
 !
             if((calcul_cauchy.eq.1).and.(nlgeom_undo.eq.0)) then
+
+               write(*,*), "Checking for Bernhardi start..."
 !
 !              changing the displacement gradients into
 !              deformation gradients
 !
 c               if(kode.ne.-50) then
                if((kode.ne.-50).and.(kode.gt.-100)) then
+                  write(*,*), "I am in kode.neq -50"
 c     Bernhardi start
                   xkl(1,1)=vkl(1,1)+1.0d0
                   xkl(2,2)=vkl(2,2)+1.0d0
