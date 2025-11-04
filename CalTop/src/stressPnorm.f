@@ -130,7 +130,7 @@
 !
 !
 
-!
+!        Set orientation flags
          if(lakonl(7:8).ne.'LC') then
 
             imat=ielmat(1,i)
@@ -173,6 +173,7 @@
 
 !     Begin loop over all integrations points per element
          do jj=1,mint3d
+
             ! Get integration weight for this element
             if(lakonl(4:4).eq.'4') then
                xi=gauss3d4(1,jj)
@@ -180,22 +181,25 @@
                ze=gauss3d4(3,jj)
                weight=weight3d4(jj)
             endif
+
             ! Compute shape func values
             if(nope.eq.4) then
                call shape4tet(xi,et,ze,xl,xsj,shp,iflag)
             endif
 
 !
-!                 vkl(m2,m3) contains the derivative of the m2-
-!                 component of the displacement with respect to
-!                 direction m3
-!
+!            vkl(m2,m3) contains the derivative of the m2-
+!            component of the displacement with respect to
+!            direction m3
+
+!           Initialize vkl to zero             
             do m2=1,3
                do m3=1,3
                   vkl(m2,m3)=0.d0
                enddo
             enddo
-!
+
+!           Compute vkl
             do m1=1,nope
                do m2=1,3
                   do m3=1,3
@@ -209,7 +213,6 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             kode=nelcon(1,imat)
 !
 !           calculating the strain
-!
 !           attention! exy,exz and eyz are engineering strains!
 !           Small-strain (engineering shears)
             exx=vkl(1,1)
@@ -220,8 +223,8 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             eyz=vkl(2,3)+vkl(3,2)
 !
 !
-!              storing the local strains
-!              Store tenorial components
+!           storing the local strains
+!           Store tenorial components
             if(iperturb(1).ne.-1) then
                eloc(1)=exx
                eloc(2)=eyy
@@ -260,23 +263,6 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                do m1=1,6
                   emec0(m1)=emeini(m1,jj,i)
                enddo
-            endif
-!
-!           subtracting the initial strains
-!
-            if(iprestr.eq.2) then
-               if(istrainfree==0) then
-                  do m1=1,6
-                     emec(m1)=emec(m1)-prestr(m1,jj,i)
-                  enddo
-               else
-                  do m1=1,6
-                     prestr(m1,jj,i)=emec(m1)
-                     emeini(m1,jj,i)=emec(m1)
-                     eme(m1,jj,i)=emec(m1)
-                     emec(m1)=0.d0
-                  enddo
-               endif
             endif
 
 ! --- SIMP penalization for linear isotropic (mattyp == 1) ---
