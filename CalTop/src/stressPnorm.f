@@ -241,27 +241,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
      &              vkl(3,1)*vkl(3,3)
                eyz=eyz+vkl(1,2)*vkl(1,3)+vkl(2,2)*vkl(2,3)+
      &              vkl(3,2)*vkl(3,3)
-!
-!           for frequency analysis or buckling with preload the
-!           strains are calculated with respect to the deformed
-!           configuration
-!
-            elseif(iperturb(1).eq.1) then
-               exx=exx+vokl(1,1)*vkl(1,1)+vokl(2,1)*vkl(2,1)+
-     &              vokl(3,1)*vkl(3,1)
-               eyy=eyy+vokl(1,2)*vkl(1,2)+vokl(2,2)*vkl(2,2)+
-     &              vokl(3,2)*vkl(3,2)
-               ezz=ezz+vokl(1,3)*vkl(1,3)+vokl(2,3)*vkl(2,3)+
-     &              vokl(3,3)*vkl(3,3)
-               exy=exy+vokl(1,1)*vkl(1,2)+vokl(1,2)*vkl(1,1)+
-     &              vokl(2,1)*vkl(2,2)+vokl(2,2)*vkl(2,1)+
-     &              vokl(3,1)*vkl(3,2)+vokl(3,2)*vkl(3,1)
-               exz=exz+vokl(1,1)*vkl(1,3)+vokl(1,3)*vkl(1,1)+
-     &              vokl(2,1)*vkl(2,3)+vokl(2,3)*vkl(2,1)+
-     &              vokl(3,1)*vkl(3,3)+vokl(3,3)*vkl(3,1)
-               eyz=eyz+vokl(1,2)*vkl(1,3)+vokl(1,3)*vkl(1,2)+
-     &              vokl(2,2)*vkl(2,3)+vokl(2,3)*vkl(2,2)+
-     &              vokl(3,2)*vkl(3,3)+vokl(3,3)*vkl(3,2)
+
             endif
 !
 !              storing the local strains
