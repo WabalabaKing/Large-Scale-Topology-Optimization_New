@@ -303,17 +303,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                   xstiff(m1,jj,i)=elas(m1)
                enddo
             endif
-!
-!
-            if((iout.gt.0).or.(iout.eq.-2).or.(kode.le.-100)) then
-               eei(1,jj,i)=eloc(1)
-               eei(2,jj,i)=eloc(2)
-               eei(3,jj,i)=eloc(3)
-               eei(4,jj,i)=eloc(4)
-               eei(5,jj,i)=eloc(5)
-               eei(6,jj,i)=eloc(6)
-            endif
-
+            
 !           Write stress into stx (integration-point storage)
             skl(1,1)=stre(1)
             skl(2,2)=stre(2)
