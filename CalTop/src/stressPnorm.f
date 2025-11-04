@@ -357,23 +357,15 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             skl(2,3)=skl(3,2)
 !
 !
-!           calculation of the Cauchy stresses
-!            write(*,*), 'CHECKING FOR CAUCHY EVAL'
+!           calculation of the Cauchy stresses (skip for liner CalTop)
             if((calcul_cauchy.eq.1).and.(nlgeom_undo.eq.0)) then
 
-               write(*,*), "Checking for Bernhardi start..."
-!
-!              changing the displacement gradients into
-!              deformation gradients
-!
-c               if(kode.ne.-50) then
-!               if((kode.ne.-50).and.(kode.gt.-100)) then
-!                  write(*,*), "I am in kode.neq -50"
-
-!               endif
+               write(*,*), "Skipping Cauchy stress eval"
            endif
-
-! --- p-norm accumulation (AFTER the Cauchy block) ------
+!--------------------------------------------------------------!
+!                       BEGIN P-NORM EVAL                          
+!--------------------------------------------------------------!
+! --- Read element stress values
             sx  = stx(1,jj,i) 
             sy  = stx(2,jj,i)
             sz  = stx(3,jj,i)
@@ -412,29 +404,15 @@ c               if(kode.ne.-50) then
 ! --- P-norm aggregation for this element
             g_sump = g_sump + (phi**pexp)
 !
-         enddo  ! <--- end of jj=1, mint3d
-!
-!        q contains the contributions to the nodal force in the nodes
-!        belonging to the element at stake from other elements (elements
-!        already treated). These contributions have to be
-!        subtracted to get the contributions attributable to the element
-!        at stake only
-!
-         if(calcul_qa.eq.1) then
-            do m1=1,nope
-               do m2=1,3
-                  qa(1)=qa(1)+dabs(fn(m2,konl(m1))-q(m2,m1))
-               enddo
-            enddo
-            nal=nal+3*nope
-         endif
-      enddo
+         enddo  ! <--- end of integration over element Gauss points
+
+      enddo   ! <--- end of loop over all elements
 !
 
 !
 
       qa(3) = g_sump
-      !qa(4) = g_vol
+
 
 ! ------------------------
       return
