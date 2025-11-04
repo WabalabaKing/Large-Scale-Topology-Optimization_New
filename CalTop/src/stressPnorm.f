@@ -327,106 +327,8 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                enddo
             endif
 !
-!            if((iperturb(1).eq.-1).and.(nlgeom_undo.eq.0)) then
-!
-!                    if the forced displacements were changed at
-!                    the start of a nonlinear step, the nodal
-!                    forces due do this displacements are 
-!                    calculated in a purely linear way, and
-!                    the first iteration is purely linear in order
-!                    to allow the displacements to redistribute
-!                    in a quasi-static way (only applies to
-!                    quasi-static analyses (*STATIC))
-!               write(*,*) 'In manual Hooks law loop'
-!
-!               eloc(1)=exx-vokl(1,1)
-!               eloc(2)=eyy-vokl(2,2)
-!               eloc(3)=ezz-vokl(3,3)
-!               eloc(4)=exy-(vokl(1,2)+vokl(2,1))
-!               eloc(5)=exz-(vokl(1,3)+vokl(3,1))
-!               eloc(6)=eyz-(vokl(2,3)+vokl(3,2))
-!
-!               if(mattyp.eq.1) then
-!                  e=elas(1)
-!                  un=elas(2)
-!                  um=e/(1.d0+un)
-!                  al=un*um/(1.d0-2.d0*un)
-!                  um=um/2.d0
-!                  am1=al*(eloc(1)+eloc(2)+eloc(3))
-!                  stre(1)=am1+2.d0*um*eloc(1)
-!                  stre(2)=am1+2.d0*um*eloc(2)
-!                  stre(3)=am1+2.d0*um*eloc(3)
-!                  stre(4)=um*eloc(4)
-!                  stre(5)=um*eloc(5)
-!                  stre(6)=um*eloc(6)
-!               elseif(mattyp.eq.2) then
-!                  stre(1)=eloc(1)*elas(1)+eloc(2)*elas(2)
-!     &                 +eloc(3)*elas(4)
-!                  stre(2)=eloc(1)*elas(2)+eloc(2)*elas(3)
-!     &                 +eloc(3)*elas(5)
-!                  stre(3)=eloc(1)*elas(4)+eloc(2)*elas(5)
-!     &                 +eloc(3)*elas(6)
-!                  stre(4)=eloc(4)*elas(7)
-!                  stre(5)=eloc(5)*elas(8)
-!                  stre(6)=eloc(6)*elas(9)
-!               elseif(mattyp.eq.3) then
-!                  stre(1)=eloc(1)*elas(1)+eloc(2)*elas(2)+
-!     &                 eloc(3)*elas(4)+eloc(4)*elas(7)+
-!     &                 eloc(5)*elas(11)+eloc(6)*elas(16)
-!                  stre(2)=eloc(1)*elas(2)+eloc(2)*elas(3)+
-!     &                 eloc(3)*elas(5)+eloc(4)*elas(8)+
-!     &                 eloc(5)*elas(12)+eloc(6)*elas(17)
-!                  stre(3)=eloc(1)*elas(4)+eloc(2)*elas(5)+
-!     &                 eloc(3)*elas(6)+eloc(4)*elas(9)+
-!     &                 eloc(5)*elas(13)+eloc(6)*elas(18)
-!                  stre(4)=eloc(1)*elas(7)+eloc(2)*elas(8)+
-!     &                 eloc(3)*elas(9)+eloc(4)*elas(10)+
-!     &                 eloc(5)*elas(14)+eloc(6)*elas(19)
-!                  stre(5)=eloc(1)*elas(11)+eloc(2)*elas(12)+
-!     &                 eloc(3)*elas(13)+eloc(4)*elas(14)+
-!     &                 eloc(5)*elas(15)+eloc(6)*elas(20)
-!                  stre(6)=eloc(1)*elas(16)+eloc(2)*elas(17)+
-!     &                 eloc(3)*elas(18)+eloc(4)*elas(19)+
-!     &                 eloc(5)*elas(20)+eloc(6)*elas(21)
-!               endif
-!            endif
-! 
-!           updating the internal energy and mechanical strain
-!           for user materials (kode<=-100) the mechanical strain has to
-!           be updated at the end of each increment (also if no output
-!           is requested), since it is input to the umat routine
-!
-            if((iout.gt.0).or.(iout.eq.-2).or.(kode.le.-100).or.
-     &         ((nmethod.eq.4).and.
-     &          ((iperturb(1).gt.1).and.(nlgeom_undo.eq.0)).and.
-     &          (ithermal(1).le.1))) then
-               if(ithermal(1).eq.0) then
-                  do m1=1,6
-                     eth(m1)=0.d0
-                  enddo
-               endif
-               if(nener.eq.1) then
-                  ener(jj,i)=enerini(jj,i)+
-     &                 ((eloc(1)-eth(1)-emeini(1,jj,i))*
-     &                  (stre(1)+stiini(1,jj,i))+
-     &                  (eloc(2)-eth(2)-emeini(2,jj,i))*
-     &                  (stre(2)+stiini(2,jj,i))+
-     &                  (eloc(3)-eth(3)-emeini(3,jj,i))*
-     &                  (stre(3)+stiini(3,jj,i)))/2.d0+
-     &         (eloc(4)-eth(4)-emeini(4,jj,i))*(stre(4)+stiini(4,jj,i))+
-     &         (eloc(5)-eth(5)-emeini(5,jj,i))*(stre(5)+stiini(5,jj,i))+
-     &         (eloc(6)-eth(6)-emeini(6,jj,i))*(stre(6)+stiini(6,jj,i))
-               endif
-               eme(1,jj,i)=eloc(1)-eth(1)
-               eme(2,jj,i)=eloc(2)-eth(2)
-               eme(3,jj,i)=eloc(3)-eth(3)
-               eme(4,jj,i)=eloc(4)-eth(4)
-               eme(5,jj,i)=eloc(5)-eth(5)
-               eme(6,jj,i)=eloc(6)-eth(6)
-            endif
 !
             if((iout.gt.0).or.(iout.eq.-2).or.(kode.le.-100)) then
-!
                eei(1,jj,i)=eloc(1)
                eei(2,jj,i)=eloc(2)
                eei(3,jj,i)=eloc(3)
@@ -454,43 +356,6 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             skl(1,3)=skl(3,1)
             skl(2,3)=skl(3,2)
 !
-!                 calculation of the nodal forces
-!
-            if(calcul_fn.eq.1)then
-!
-!                    calculating fn using skl
-!
-               do m1=1,nope
-                  do m2=1,3
-!
-!                          linear elastic part
-!                           
-                     do m3=1,3
-                        fn(m2,konl(m1))=fn(m2,konl(m1))+
-     &                       xsj*skl(m2,m3)*shp(m3,m1)*weight
-                     enddo
-!
-!                          nonlinear geometric part
-!
-                     if((iperturb(2).eq.1).and.(nlgeom_undo.eq.0)) then
-                        do m3=1,3
-                           do m4=1,3
-                              fn(m2,konl(m1))=fn(m2,konl(m1))+
-     &                             xsj*skl(m4,m3)*weight*
-     &                             (vkl(m2,m4)*shp(m3,m1)+
-     &                             vkl(m2,m3)*shp(m4,m1))/2.d0
-                           enddo
-                        enddo
-                     endif
-!
-                  enddo
-               enddo
-c     Bernhardi start
-               if(lakonl(1:5).eq.'C3D8R') then
-                  call hgforce (fn,elas,a,gs,vl,mi,konl)
-               endif
-c     Bernhardi end
-            endif
 !
 !           calculation of the Cauchy stresses
 !
