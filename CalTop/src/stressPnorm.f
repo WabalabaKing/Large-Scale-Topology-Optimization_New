@@ -214,29 +214,6 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                enddo
             enddo
 !
-!           for frequency analysis or buckling with preload the
-!           strains are calculated with respect to the deformed
-!           configuration
-!           for a linear iteration within a nonlinear increment:
-!           the tangent matrix is calculated at strain at the end
-!           of the previous increment
-!
-            if((iperturb(1).eq.1).or.(iperturb(1).eq.-1))then
-               do m2=1,3
-                  do m3=1,3
-                     vokl(m2,m3)=0.d0
-                  enddo
-               enddo
-!
-               do m1=1,nope
-                  do m2=1,3
-                     do m3=1,3
-                        vokl(m2,m3)=vokl(m2,m3)+
-     &                       shp(m3,m1)*voldl(m2,m1)
-                     enddo
-                  enddo
-               enddo
-            endif
 !
             kode=nelcon(1,imat)
 !
