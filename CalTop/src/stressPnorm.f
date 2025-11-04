@@ -241,139 +241,9 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             endif
 !
 !
-!
-!                 calculating fields for incremental plasticity
-!
-            if(kode.le.-100) then
-!
-!              calculating the deformation gradient at the
-!              start of the increment
-!
-!              calculating the displacement gradient at the
-!              start of the increment
-!
-               do m2=1,3
-                  do m3=1,3
-                     vikl(m2,m3)=0.d0
-                  enddo
-               enddo
-!
-               do m1=1,nope
-                  do m2=1,3
-                     do m3=1,3
-                        vikl(m2,m3)=vikl(m2,m3)
-     &                       +shp(m3,m1)*vini(m2,konl(m1))
-                     enddo
-                  enddo
-               enddo
-!
-!              calculating the deformation gradient of the old
-!              fields
-!
-               xikl(1,1)=vikl(1,1)+1.d0
-               xikl(2,2)=vikl(2,2)+1.d0
-               xikl(3,3)=vikl(3,3)+1.d0
-               xikl(1,2)=vikl(1,2)
-               xikl(1,3)=vikl(1,3)
-               xikl(2,3)=vikl(2,3)
-               xikl(2,1)=vikl(2,1)
-               xikl(3,1)=vikl(3,1)
-               xikl(3,2)=vikl(3,2)
-!
-!              calculating the Jacobian
-!
-               vij=xikl(1,1)*(xikl(2,2)*xikl(3,3)
-     &              -xikl(2,3)*xikl(3,2))
-     &              -xikl(1,2)*(xikl(2,1)*xikl(3,3)
-     &              -xikl(2,3)*xikl(3,1))
-     &              +xikl(1,3)*(xikl(2,1)*xikl(3,2)
-     &              -xikl(2,2)*xikl(3,1))
-!
-!              stresses at the start of the increment
-!
-               do m1=1,6
-                  stre(m1)=stiini(m1,jj,i)
-               enddo
-!
-            endif
-!
-!                 prestress values
-!
-            if(iprestr.eq.1) then
-               do kk=1,6
-                  beta(kk)=-prestr(kk,jj,i)
-               enddo
-            else
-               do kk=1,6
-                  beta(kk)=0.d0
-               enddo
-            endif
-!
-            if(ithermal(1).ge.1) then
-!
-!              calculating the temperature difference in
-!              the integration point
-!
-               t0l=0.d0
-               t1l=0.d0
-               if(ithermal(1).eq.1) then
-                  if((lakonl(4:5).eq.'8 ').or.
-     &               (lakonl(4:5).eq.'8I')) then
-                     do i1=1,8
-                        t0l=t0l+t0(konl(i1))/8.d0
-                        t1l=t1l+t1(konl(i1))/8.d0
-                     enddo
-                  elseif(lakonl(4:6).eq.'20 ') then
-                     nopered=20
-                     call lintemp(t0,t1,konl,nopered,jj,t0l,t1l)
-                  elseif(lakonl(4:6).eq.'10T') then
-                     call linscal10(t0,konl,t0l,null,shp)
-                     call linscal10(t1,konl,t1l,null,shp)
-                  else
-                     do i1=1,nope
-                        t0l=t0l+shp(4,i1)*t0(konl(i1))
-                        t1l=t1l+shp(4,i1)*t1(konl(i1))
-                     enddo
-                  endif
-               elseif(ithermal(1).ge.2) then
-                  if((lakonl(4:5).eq.'8 ').or.
-     &               (lakonl(4:5).eq.'8I')) then
-                     do i1=1,8
-                        t0l=t0l+t0(konl(i1))/8.d0
-                        t1l=t1l+vold(0,konl(i1))/8.d0
-                     enddo
-                  elseif(lakonl(4:6).eq.'20 ') then
-                     nopered=20
-                     call lintemp_th(t0,vold,konl,nopered,jj,t0l,t1l,mi)
-                  elseif(lakonl(4:6).eq.'10T') then
-                     call linscal10(t0,konl,t0l,null,shp)
-                     call linscal10(vold,konl,t1l,mi(2),shp)
-                  else
-                     do i1=1,nope
-                        t0l=t0l+shp(4,i1)*t0(konl(i1))
-                        t1l=t1l+shp(4,i1)*vold(0,konl(i1))
-                     enddo
-                  endif
-               endif
-               tt=t1l-t0l
-            endif
-!
-!                 calculating the coordinates of the integration point
-!                 for material orientation purposes (for cylindrical
-!                 coordinate systems)
-!
-            if((iorien.gt.0).or.(kode.le.-100)) then
-               do j=1,3
-                  pgauss(j)=0.d0
-                  do i1=1,nope
-                     pgauss(j)=pgauss(j)+shp(4,i1)*co(j,konl(i1))
-                  enddo
-               enddo
-            endif
-!
-!                 material data; for linear elastic materials
-!                 this includes the calculation of the stiffness
-!                 matrix
+!           material data; for linear elastic materials
+!           this includes the calculation of the stiffness
+!           matrix
 !
             istiff=0
 !     
@@ -457,7 +327,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                enddo
             endif
 !
-            if((iperturb(1).eq.-1).and.(nlgeom_undo.eq.0)) then
+!            if((iperturb(1).eq.-1).and.(nlgeom_undo.eq.0)) then
 !
 !                    if the forced displacements were changed at
 !                    the start of a nonlinear step, the nodal
@@ -467,59 +337,59 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !                    to allow the displacements to redistribute
 !                    in a quasi-static way (only applies to
 !                    quasi-static analyses (*STATIC))
-               write(*,*) 'In manual Hooks law loop'
+!               write(*,*) 'In manual Hooks law loop'
 !
-               eloc(1)=exx-vokl(1,1)
-               eloc(2)=eyy-vokl(2,2)
-               eloc(3)=ezz-vokl(3,3)
-               eloc(4)=exy-(vokl(1,2)+vokl(2,1))
-               eloc(5)=exz-(vokl(1,3)+vokl(3,1))
-               eloc(6)=eyz-(vokl(2,3)+vokl(3,2))
+!               eloc(1)=exx-vokl(1,1)
+!               eloc(2)=eyy-vokl(2,2)
+!               eloc(3)=ezz-vokl(3,3)
+!               eloc(4)=exy-(vokl(1,2)+vokl(2,1))
+!               eloc(5)=exz-(vokl(1,3)+vokl(3,1))
+!               eloc(6)=eyz-(vokl(2,3)+vokl(3,2))
 !
-               if(mattyp.eq.1) then
-                  e=elas(1)
-                  un=elas(2)
-                  um=e/(1.d0+un)
-                  al=un*um/(1.d0-2.d0*un)
-                  um=um/2.d0
-                  am1=al*(eloc(1)+eloc(2)+eloc(3))
-                  stre(1)=am1+2.d0*um*eloc(1)
-                  stre(2)=am1+2.d0*um*eloc(2)
-                  stre(3)=am1+2.d0*um*eloc(3)
-                  stre(4)=um*eloc(4)
-                  stre(5)=um*eloc(5)
-                  stre(6)=um*eloc(6)
-               elseif(mattyp.eq.2) then
-                  stre(1)=eloc(1)*elas(1)+eloc(2)*elas(2)
-     &                 +eloc(3)*elas(4)
-                  stre(2)=eloc(1)*elas(2)+eloc(2)*elas(3)
-     &                 +eloc(3)*elas(5)
-                  stre(3)=eloc(1)*elas(4)+eloc(2)*elas(5)
-     &                 +eloc(3)*elas(6)
-                  stre(4)=eloc(4)*elas(7)
-                  stre(5)=eloc(5)*elas(8)
-                  stre(6)=eloc(6)*elas(9)
-               elseif(mattyp.eq.3) then
-                  stre(1)=eloc(1)*elas(1)+eloc(2)*elas(2)+
-     &                 eloc(3)*elas(4)+eloc(4)*elas(7)+
-     &                 eloc(5)*elas(11)+eloc(6)*elas(16)
-                  stre(2)=eloc(1)*elas(2)+eloc(2)*elas(3)+
-     &                 eloc(3)*elas(5)+eloc(4)*elas(8)+
-     &                 eloc(5)*elas(12)+eloc(6)*elas(17)
-                  stre(3)=eloc(1)*elas(4)+eloc(2)*elas(5)+
-     &                 eloc(3)*elas(6)+eloc(4)*elas(9)+
-     &                 eloc(5)*elas(13)+eloc(6)*elas(18)
-                  stre(4)=eloc(1)*elas(7)+eloc(2)*elas(8)+
-     &                 eloc(3)*elas(9)+eloc(4)*elas(10)+
-     &                 eloc(5)*elas(14)+eloc(6)*elas(19)
-                  stre(5)=eloc(1)*elas(11)+eloc(2)*elas(12)+
-     &                 eloc(3)*elas(13)+eloc(4)*elas(14)+
-     &                 eloc(5)*elas(15)+eloc(6)*elas(20)
-                  stre(6)=eloc(1)*elas(16)+eloc(2)*elas(17)+
-     &                 eloc(3)*elas(18)+eloc(4)*elas(19)+
-     &                 eloc(5)*elas(20)+eloc(6)*elas(21)
-               endif
-            endif
+!               if(mattyp.eq.1) then
+!                  e=elas(1)
+!                  un=elas(2)
+!                  um=e/(1.d0+un)
+!                  al=un*um/(1.d0-2.d0*un)
+!                  um=um/2.d0
+!                  am1=al*(eloc(1)+eloc(2)+eloc(3))
+!                  stre(1)=am1+2.d0*um*eloc(1)
+!                  stre(2)=am1+2.d0*um*eloc(2)
+!                  stre(3)=am1+2.d0*um*eloc(3)
+!                  stre(4)=um*eloc(4)
+!                  stre(5)=um*eloc(5)
+!                  stre(6)=um*eloc(6)
+!               elseif(mattyp.eq.2) then
+!                  stre(1)=eloc(1)*elas(1)+eloc(2)*elas(2)
+!     &                 +eloc(3)*elas(4)
+!                  stre(2)=eloc(1)*elas(2)+eloc(2)*elas(3)
+!     &                 +eloc(3)*elas(5)
+!                  stre(3)=eloc(1)*elas(4)+eloc(2)*elas(5)
+!     &                 +eloc(3)*elas(6)
+!                  stre(4)=eloc(4)*elas(7)
+!                  stre(5)=eloc(5)*elas(8)
+!                  stre(6)=eloc(6)*elas(9)
+!               elseif(mattyp.eq.3) then
+!                  stre(1)=eloc(1)*elas(1)+eloc(2)*elas(2)+
+!     &                 eloc(3)*elas(4)+eloc(4)*elas(7)+
+!     &                 eloc(5)*elas(11)+eloc(6)*elas(16)
+!                  stre(2)=eloc(1)*elas(2)+eloc(2)*elas(3)+
+!     &                 eloc(3)*elas(5)+eloc(4)*elas(8)+
+!     &                 eloc(5)*elas(12)+eloc(6)*elas(17)
+!                  stre(3)=eloc(1)*elas(4)+eloc(2)*elas(5)+
+!     &                 eloc(3)*elas(6)+eloc(4)*elas(9)+
+!     &                 eloc(5)*elas(13)+eloc(6)*elas(18)
+!                  stre(4)=eloc(1)*elas(7)+eloc(2)*elas(8)+
+!     &                 eloc(3)*elas(9)+eloc(4)*elas(10)+
+!     &                 eloc(5)*elas(14)+eloc(6)*elas(19)
+!                  stre(5)=eloc(1)*elas(11)+eloc(2)*elas(12)+
+!     &                 eloc(3)*elas(13)+eloc(4)*elas(14)+
+!     &                 eloc(5)*elas(15)+eloc(6)*elas(20)
+!                  stre(6)=eloc(1)*elas(16)+eloc(2)*elas(17)+
+!     &                 eloc(3)*elas(18)+eloc(4)*elas(19)+
+!     &                 eloc(5)*elas(20)+eloc(6)*elas(21)
+!               endif
+!            endif
 ! 
 !           updating the internal energy and mechanical strain
 !           for user materials (kode<=-100) the mechanical strain has to
@@ -564,22 +434,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                eei(5,jj,i)=eloc(5)
                eei(6,jj,i)=eloc(6)
             endif
-!
-!     updating the kinetic energy
-!
-            if(ikin.eq.1) then
-!               
-               call materialdata_rho(rhcon,nrhcon,imat,rho,t1l,
-     &              ntmat_,ithermal)
-               do m1=1,3
-                  vel(m1,1)=0.d0
-                  do i1= 1,nope
-                     vel(m1,1)=vel(m1,1)+shp(4,i1)*veoldl(m1,i1)
-                  enddo
-               enddo
-               ener(jj,i+ne)=rho*(vel(1,1)*vel(1,1)+
-     &              vel(2,1)*vel(2,1)+ vel(3,1)*vel(3,1))/2.d0
-            endif
+
 !           Write stress into stx (integration-point storage)
             skl(1,1)=stre(1)
             skl(2,2)=stre(2)
