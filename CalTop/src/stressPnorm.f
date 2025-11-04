@@ -179,140 +179,16 @@
                enddo
             enddo
          endif
-!
 
+!     Begin loop over all integrations points per element
          do jj=1,mint3d
-            if(lakonl(4:5).eq.'8R') then
-               xi=gauss3d1(1,jj)
-               et=gauss3d1(2,jj)
-               ze=gauss3d1(3,jj)
-               weight=weight3d1(jj)
-            elseif(lakonl(4:7).eq.'20RB') then
-               if((lakonl(8:8).eq.'R').or.(lakonl(8:8).eq.'C')) then
-                  xi=gauss3d13(1,jj)
-                  et=gauss3d13(2,jj)
-                  ze=gauss3d13(3,jj)
-                  weight=weight3d13(jj)
-               else
-                  call beamintscheme(lakonl,mint3d,ielprop(i),prop,
-     &                 jj,xi,et,ze,weight)
-               endif
-            elseif((lakonl(4:4).eq.'8').or.
-     &             (lakonl(4:6).eq.'20R'))
-     &        then
-               if(lakonl(7:8).ne.'LC') then
-                  xi=gauss3d2(1,jj)
-                  et=gauss3d2(2,jj)
-                  ze=gauss3d2(3,jj)
-                  weight=weight3d2(jj)
-               else
-                  kl=mod(jj,8)
-                  if(kl.eq.0) kl=8
-!
-                  xi=gauss3d2(1,kl)
-                  et=gauss3d2(2,kl)
-                  ze=gauss3d2(3,kl)
-                  weight=weight3d2(kl)
-!
-                  ki=mod(jj,4)
-                  if(ki.eq.0) ki=4
-!
-                  if(kl.eq.1) then
-                     ilayer=ilayer+1
-                     if(ilayer.gt.1) then
-                        do k=1,4
-                           dlayer(k)=dlayer(k)+xlayer(ilayer-1,k)
-                        enddo
-                     endif
-                  endif
-                  ze=2.d0*(dlayer(ki)+(ze+1.d0)/2.d0*xlayer(ilayer,ki))/
-     &                 tlayer(ki)-1.d0
-                  weight=weight*xlayer(ilayer,ki)/tlayer(ki)
-!
-!                 material and orientation
-!
-                  imat=ielmat(ilayer,i)
-                  amat=matname(imat)
-                  if(norien.gt.0) then
-                     iorien=ielorien(ilayer,i)
-                  else
-                     iorien=0
-                  endif
-!     
-                  if(nelcon(1,imat).lt.0) then
-                     ihyper=1
-                  else
-                     ihyper=0
-                  endif
-               endif
-!            elseif(lakonl(4:4).eq.'2') then
-!               xi=gauss3d3(1,jj)
-!               et=gauss3d3(2,jj)
-!               ze=gauss3d3(3,jj)
-!               weight=weight3d3(jj)
-!            elseif(lakonl(4:5).eq.'10') then
-!               xi=gauss3d5(1,jj)
-!               et=gauss3d5(2,jj)
-!               ze=gauss3d5(3,jj)
-!               weight=weight3d5(jj)
-            elseif(lakonl(4:4).eq.'4') then
+            if(lakonl(4:4).eq.'4') then
                xi=gauss3d4(1,jj)
                et=gauss3d4(2,jj)
                ze=gauss3d4(3,jj)
                weight=weight3d4(jj)
-            elseif(lakonl(4:5).eq.'15') then
-               if(lakonl(7:8).ne.'LC') then
-                  xi=gauss3d8(1,jj)
-                  et=gauss3d8(2,jj)
-                  ze=gauss3d8(3,jj)
-                  weight=weight3d8(jj)
-               else
-                  kl=mod(jj,6)
-                  if(kl.eq.0) kl=6
-!
-                  xi=gauss3d10(1,kl)
-                  et=gauss3d10(2,kl)
-                  ze=gauss3d10(3,kl)
-                  weight=weight3d10(kl)
-!
-                  ki=mod(jj,3)
-                  if(ki.eq.0) ki=3
-!
-                  if(kl.eq.1) then
-                     ilayer=ilayer+1
-                     if(ilayer.gt.1) then
-                        do k=1,3
-                           dlayer(k)=dlayer(k)+xlayer(ilayer-1,k)
-                        enddo
-                     endif
-                  endif
-                  ze=2.d0*(dlayer(ki)+(ze+1.d0)/2.d0*xlayer(ilayer,ki))/
-     &                 tlayer(ki)-1.d0
-                  weight=weight*xlayer(ilayer,ki)/tlayer(ki)
-!
-!                 material and orientation
-!
-                  imat=ielmat(ilayer,i)
-                  amat=matname(imat)
-                  if(norien.gt.0) then
-                     iorien=ielorien(ilayer,i)
-                  else
-                     iorien=0
-                  endif
-!     
-                  if(nelcon(1,imat).lt.0) then
-                     ihyper=1
-                  else
-                     ihyper=0
-                  endif
-               endif
-            elseif(lakonl(4:4).eq.'6') then
-               xi=gauss3d7(1,jj)
-               et=gauss3d7(2,jj)
-               ze=gauss3d7(3,jj)
-               weight=weight3d7(jj)
             endif
-!
+
 c     Bernhardi start
             if(lakonl(1:5).eq.'C3D8R') then
                call shape8hr(xl,xsj,shp,gs,a)
