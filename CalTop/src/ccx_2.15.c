@@ -1075,6 +1075,8 @@ while(istat>=0)
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
 
+    /* Define a system-defined structure to get information about a file
+       Returns 0 if file is found */
     struct stat buffer;
 
     if (stat("skinElementList.nam", &buffer) != 0) 
@@ -1082,10 +1084,10 @@ while(istat>=0)
       printf("File 'skinElementList.nam' not found.\n");
     } 
     else
-    /* Read the element indies from skinElementList.nam */ 
+    /* Read the element indicies from skinElementList.nam */ 
     {
+      printf("File skinElementList.nam found. \n");
       passiveIDs = passiveElements("skinElementList.nam", &numPassive);
-      printf("File 'skinElementList.nam' found. \n");
       printf("Read %d passive elements.\n", numPassive);
 
       printf("First five skin element IDs => \n");
@@ -2076,164 +2078,8 @@ while(istat>=0)
       #endif
     }
   } // end if nmethod ==2
-  /*
-  else if(nmethod==3)
-  {
 
-    #ifdef ARPACK
-	  arpackbu(co,&nk,kon,ipkon,lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
-	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
-             &nforc,
-	     nelemload,sideload,xload,&nload,
-	     nactdof,icol,jq,irow,neq,&nzl,&nmethod,ikmpc,
-	     ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-             alcon,nalcon,alzero,ielmat,ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr,
-	     vold,iperturb,sti,nzs,&kode,mei,fei,filab,
-	     eme,&iexpl,plicon,nplicon,plkcon,nplkcon,
-	     xstate,&npmat_,matname,mi,&ncmat_,&nstate_,ener,output,
-             set,&nset,istartset,iendset,ialset,&nprint,prlab,
-             prset,&nener,&isolver,trab,inotr,&ntrans,&ttime,fmpc,cbody,
-	     ibody,xbody,&nbody,thicke,jobnamec,&nmat,ielprop,prop,
-	     orname,typeboun,rhoPhys,&pstiff);
-    #else
-      printf("*ERROR in CalculiX: the ARPACK library is not linked\n\n");
-      FORTRAN(stop,());
-    #endif
-  } */
-  /*
-  else if(nmethod==4)
-  {
-	  if((ne1d!=0)||(ne2d!=0))
-    {
-	    printf(" *WARNING: 1-D or 2-D elements may cause problems in modal dynamic calculations\n");
-	    printf("           ensure that point loads defined in a *MODAL DYNAMIC step\n");
-	    printf("           and applied to nodes belonging to 1-D or 2-D elements have been\n");
-	    printf("           applied to the same nodes in the preceding FREQUENCY step with\n");
-	    printf("           magnitude zero; look at example shellf.inp for a guideline.\n\n");}
 
-      printf(" Composing the dynamic response from the eigenmodes\n\n");
-
-      dyna(&co,&nk,&kon,&ipkon,&lakon,&ne,&nodeboun,&ndirboun,&xboun,&nboun,
-	    &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,&nforc,
-	    nelemload,sideload,xload,&nload,
-	    &nactdof,neq,&nzl,icol,irow,&nmethod,&ikmpc,&ilmpc,&ikboun,&ilboun,
-            elcon,nelcon,rhcon,nrhcon,cocon,ncocon,
-            alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,&t0,
-	    &t1,ithermal,prestr,&iprestr,&vold,iperturb,&sti,nzs,
-	    timepar,xmodal,&veold,amname,amta,
-	    namta,&nam,iamforc,iamload,&iamt1,
-	    jout,&kode,filab,&eme,xforcold,xloadold,
-            &t1old,&iamboun,&xbounold,&iexpl,plicon,
-            nplicon,plkcon,nplkcon,&xstate,&npmat_,matname,
-            mi,&ncmat_,&nstate_,&ener,jobnamec,&ttime,set,&nset,
-            istartset,iendset,&ialset,&nprint,prlab,
-            prset,&nener,trab,&inotr,&ntrans,&fmpc,cbody,ibody,xbody,&nbody,
-            xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,&mpcend,ics,cs,
-	    &ntie,tieset,&idrct,jmax,ctrl,&itpamp,tietol,&nalset,
-	    ikforc,ilforc,thicke,&nslavs,&nmat,typeboun,ielprop,prop,orname);
-    } */
-    /*
-    else if(nmethod==5)
-    {
-	    if((ne1d!=0)||(ne2d!=0))
-      {
-	      printf(" *WARNING: 1-D or 2-D elements may cause problems in steady state calculations\n");
-	      printf("           ensure that point loads defined in a *STEADY STATE DYNAMICS step\n");
-	      printf("           and applied to nodes belonging to 1-D or 2-D elements have been\n");
-	      printf("           applied to the same nodes in the preceding FREQUENCY step with\n");
-	      printf("           magnitude zero; look at example shellf.inp for a guideline.\n\n");
-      }
-
-      printf(" Composing the steady state response from the eigenmodes\n\n");
-
-      steadystate(&co,&nk,&kon,&ipkon,&lakon,&ne,&nodeboun,&ndirboun,&xboun,&nboun,
-	      &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,&nforc,
-	      nelemload,sideload,xload,&nload,
-	      &nactdof,neq,&nzl,icol,irow,&nmethod,&ikmpc,&ilmpc,&ikboun,&ilboun,
-            elcon,nelcon,rhcon,nrhcon,cocon,ncocon,
-            alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,&t0,
-	      &t1,ithermal,prestr,&iprestr,&vold,iperturb,sti,nzs,
-	      timepar,xmodal,&veold,amname,amta,
-	      namta,&nam,iamforc,iamload,&iamt1,
-	      jout,&kode,filab,&eme,xforcold,xloadold,
-            &t1old,&iamboun,&xbounold,&iexpl,plicon,
-            nplicon,plkcon,nplkcon,xstate,&npmat_,matname,
-            mi,&ncmat_,&nstate_,&ener,jobnamec,&ttime,set,&nset,
-            istartset,iendset,ialset,&nprint,prlab,
-            prset,&nener,trab,&inotr,&ntrans,&fmpc,cbody,ibody,xbody,&nbody,
-	      xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,ics,cs,&mpcend,
-	      ctrl,ikforc,ilforc,thicke,&nmat,typeboun,ielprop,prop,orname,
-	      &ndamp,dacon);
-    } */
-    /*
-    else if((nmethod==6)||(nmethod==7))
-    {
-
-      printf(" Composing the complex eigenmodes from the real eigenmodes\n\n");
-
-      complexfreq(&co,&nk,&kon,&ipkon,&lakon,&ne,&nodeboun,&ndirboun,&xboun,&nboun,
-	    &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,&nforc,
-	    nelemload,sideload,xload,&nload,
-	    &nactdof,neq,&nzl,icol,irow,&nmethod,&ikmpc,&ilmpc,&ikboun,&ilboun,
-            elcon,nelcon,rhcon,nrhcon,cocon,ncocon,
-            alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,&t0,
-	    &t1,ithermal,prestr,&iprestr,&vold,iperturb,&sti,nzs,
-	    timepar,xmodal,&veold,amname,amta,
-	    namta,&nam,iamforc,iamload,&iamt1,
-	    jout,&kode,filab,&eme,xforcold,xloadold,
-            &t1old,&iamboun,&xbounold,&iexpl,plicon,
-            nplicon,plkcon,nplkcon,xstate,&npmat_,matname,
-            mi,&ncmat_,&nstate_,&ener,jobnamec,&ttime,set,&nset,
-            istartset,iendset,&ialset,&nprint,prlab,
-            prset,&nener,trab,&inotr,&ntrans,&fmpc,cbody,ibody,xbody,&nbody,
-            xbodyold,&istep,&isolver,jq,output,&mcs,&nkon,&mpcend,ics,cs,
-	    &ntie,tieset,&idrct,jmax,ctrl,&itpamp,tietol,&nalset,
-	    ikforc,ilforc,thicke,jobnamef,mei,&nmat,ielprop,prop,orname,
-            typeboun);
-    } */
-    /*
-    else if((nmethod>7)&&(nmethod<12))
-    {
-	    mpcinfo[0]=memmpc_;
-      mpcinfo[1]=mpcfree;
-      mpcinfo[2]=icascade;
-	    mpcinfo[3]=maxlenmpc;
-
-	    electromagnetics(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,
-             ndirboun,xboun,&nboun,
-	     &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
-             &nforc,&nelemload,&sideload,xload,&nload,
-	     nactdof,&icol,&jq,&irow,neq,&nzl,&nmethod,&ikmpc,
-	     &ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr,
-	     &vold,iperturb,sti,nzs,&kode,filab,&idrct,jmax,
-	     jout,timepar,eme,xbounold,xforcold,xloadold,
-	     veold,accold,amname,amta,namta,
-	     &nam,iamforc,&iamload,iamt1,&alpha,
-             &iexpl,iamboun,plicon,nplicon,plkcon,nplkcon,
-	     &xstate,&npmat_,&istep,&ttime,matname,qaold,mi,
-	     &isolver,&ncmat_,&nstate_,&iumat,cs,&mcs,&nkon,&ener,
-	     mpcinfo,output,
-             shcon,nshcon,cocon,ncocon,physcon,&nflow,ctrl,
-             &set,&nset,&istartset,&iendset,&ialset,&nprint,prlab,
-             prset,&nener,ikforc,ilforc,trab,inotr,&ntrans,&fmpc,
-             cbody,ibody,xbody,&nbody,xbodyold,ielprop,prop,
-	     &ntie,&tieset,&itpamp,&iviewfile,jobnamec,&tietol,&nslavs,thicke,
-	     ics,&nalset,&nmpc_,&nmat,typeboun,&iaxial,&nload_,&nprop,
-	     &network,orname,rhoPhys,&pstiff);
-
-	    memmpc_=mpcinfo[0];
-      mpcfree=mpcinfo[1];
-      icascade=mpcinfo[2];
-      maxlenmpc=mpcinfo[3];
-    } */
-
-    /* Write elastic fields to a vtu file */
-    printf("\nWriting output fields...");
-    tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
-    printf("done!\n\n");
 
   
     /* adjoint sensitivity calculation */
@@ -2313,6 +2159,18 @@ while(istat>=0)
 
       filterSensitivity_bin_buffered_mts3(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
       printf("done \n");
+      
+      printf(" Filter passive elements for CG");
+      /* set the filtered CGx sens of passive elements to 0 */
+      filterOutPassiveElems_sens(dCGxFiltered, ne, passiveIDs, numPassive);
+
+      /* set the filtered CGy sens of passive elements to 0 */
+      filterOutPassiveElems_sens(dCGyFiltered, ne, passiveIDs, numPassive);
+
+      /* set the filtered CGz sens of passive elements to 0 */
+      filterOutPassiveElems_sens(dCGzFiltered, ne, passiveIDs, numPassive);
+
+      printf("done\n");
 
       printf(" Writing CG sensitivities to disk...");
       /* ... after you fill dCGx, dCGy, dCGz ... */
@@ -2351,6 +2209,15 @@ while(istat>=0)
       filterSensitivity_bin_buffered_mts(gradCompl, gradComplFiltered, ne, filternnz);
       printf("done! \n");
 
+      printf("  Filter passive elements...");
+
+      /* set the filtered element densities of passive elements to 1 */
+      //filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
+
+      /* set the filtered compliance sens of passive elements to 0 */
+      filterOutPassiveElems_sens(gradComplFiltered, ne, passiveIDs, numPassive);
+      printf("done\n");
+
       FILE *gradC;
       printf(" Writing compliance sensitivities...");
       write_compliance_sensitivities(ne,gradCompl,gradComplFiltered,elCompl,&compliance_sum);
@@ -2367,6 +2234,9 @@ while(istat>=0)
       printf(" Filter element volume gradient ");
       filterSensitivity_bin_buffered_mts(eleVol, eleVolFiltered, ne, filternnz);
       printf("done! \n");
+
+      /* set the filtered volumefraction sens of passive elements to 0 */
+      filterOutPassiveElems_sens(eleVolFiltered, ne, passiveIDs, numPassive);
       
       printf(" Writing volume sensitivities...");
       write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
@@ -2401,6 +2271,8 @@ while(istat>=0)
       /* set the filtered volume sens of passive elements to 0 */
       //filterOutPassiveElems_sens(eleVolFiltered, ne, passiveIDs, numPassive);
 
+
+ 
       
       printf(" Writing objectives...");
       write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, &Pnorm);
@@ -2475,6 +2347,14 @@ while(istat>=0)
     {
       fprintf(rho_file,"%.15f  ,  %.15f \n",design[iii],rhoPhys[iii]);            
     }
+
+    /* set the filtered element densities of passive elements to 0 */
+    filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
+
+    /* Write elastic fields to a vtu file */
+    printf("\nWriting output fields...");
+    tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
+    printf("done!\n\n");
 
     /* ensure any buffered data is written to file */
     fflush(rho_file); 
