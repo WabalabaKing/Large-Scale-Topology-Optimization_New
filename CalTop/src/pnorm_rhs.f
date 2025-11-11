@@ -303,13 +303,16 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !     &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
 !     &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
 !     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
-!
+            mattyp=1
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
 
 !               Build full 6X6 C (voigt, tensoral shear)
                 if (mattyp.eq.1) then
 !               Isotropic
+                  do i=1,2
+                     elas(i)=elconloc(i)
+                  enddo
                   e  = elas(1)
                   un = elas(2)
 
@@ -414,7 +417,7 @@ c----- RHS accumulation (minimal: C3D4 only) --------------------------
             if (nope.eq.4) then
 
 c           skip if vm or phi yields zero gradient
-              if (vm.gt.0.d0) then
+!              if (vm.gt.0.d0) then
 
 !  ---        evaluate 
 !                invvm = 1.d0/(sig0 * vm)
@@ -565,11 +568,12 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   enddo
                enddo
                sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
+               write(*,*),"sigma_e",sige
 ! ---          Construct the coeff
                coeff = (sige**(pexp-1))/(sig0*dsqrt(sigeT))
                
                do m1=1,12
-                  rhs_loc(m1) = coeff * rhs_loc(m1)
+!                  rhs_loc(m1) = coeff * rhs_loc(m1)
 !                  rhs_loc(m1) = coeff 
                enddo
 
@@ -582,7 +586,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   rhs(3,konl(m1)) = rhs(3,konl(m1)) 
      &                             + rhs_loc(3*(m1-1)+3)
                 enddo
-              endif
+              !endif
             endif ! End if nope .eq. 4 condition
 c----------------------------------------------------------------------
 
