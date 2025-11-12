@@ -383,7 +383,6 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 
       qa(3) = g_sump
 
-      write(*,*), "Sig_VM", qa(3)
 ! ------------------------
       return
       end

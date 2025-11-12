@@ -484,7 +484,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   B(5,m2+2) = shp(3,m1)   ! eyz engineering
                   B(5,m2+3) = shp(2,m1)
                enddo
-
+               write(*,*), "Bmat", B(1,1)
 ! ---          Convert to tensorial shear: Bten = R * Beng, R=diag(1,1,1,1/2,1/2,1/2)
                do m1=1,12
                   Bten(1,m1)=B(1,m1)
@@ -573,7 +573,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                coeff = (sige**(pexp-1))/(sig0*dsqrt(sigeT))
                
                do m1=1,12
-!                  rhs_loc(m1) = coeff * rhs_loc(m1)
+                  rhs_loc(m1) = coeff * rhs_loc(m1)
 !                  rhs_loc(m1) = coeff 
                enddo
 

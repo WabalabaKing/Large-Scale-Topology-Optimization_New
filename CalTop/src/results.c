@@ -550,8 +550,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
                 // Compute P-norm based on Duysinx and Sigmund 2012
                 *Pnorm = pow(sumP, 1.0 / p);
             }
-            SFREE(neapar);
-            SFREE(nebpar);
+            //SFREE(neapar);
+            //SFREE(nebpar);
 
             const double J0 =*Pnorm;
 
@@ -574,12 +574,35 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
                     const double u0 = v1[k];
                 
-                    const double h  = 1e-4;  
+                    const double h  = 1e-6;  
                     // Place holder for StressPnorm_Eval
 
                     v1[k] = u0 + h;
                             // 
-                            const double Jp =1;
+                        for(i=0; i<num_cpus; i++)  
+                        {
+	                        ithread[i]=i;
+	                        pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
+	                    }
+
+	                    for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+	
+                         /* p-norm variables reduced across threads */
+                        double sumP = 0.0;  // Accumulated numerator
+
+                        for (int t = 0; t < num_cpus; ++t)
+                        {
+                            size_t idx = (size_t)t *4;
+                            sumP += qa1[idx + 2];   // thread's g_sump
+                            /* restore CCX defaults so downstream code doesnt misinterpret */
+                            qa1[idx + 2] = -1.0;   /* qa(3) */
+                        }
+                        const double p = *pexp1; 
+                        if (sumP > 0.0)
+                        {
+                            *Pnorm = pow(sumP, 1.0 / p);
+                        }
+                    const double Jp =*Pnorm;
                     v1[k] = u0;  // restore 
 
                     const double dJdu_fd  = (Jp - J0) / h;
