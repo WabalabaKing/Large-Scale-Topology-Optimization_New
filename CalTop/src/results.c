@@ -442,7 +442,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
             *Pnorm = 0.0;
             alpha1 = 0.0;
         }
-        
+        //SFREE(neapar);
+        //SFREE(nebpar);
         printf("    Aggregated stress P-norm: %.12e\n", *Pnorm);
         //printf("J (p-norm)        : %.12e\n", *Pnorm);
         //printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
@@ -510,17 +511,56 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
          //Done with per-thread storage
 	    SFREE(rhs1);
+        SFREE(neapar);
+        SFREE(nebpar);
         printf("done!\n");
 
 
         /***************************************P-NORM RHS FD VERIFICATION***********************************/
-        /*
+        int eval_fd=1;
+        if (eval_fd==1) 
         // ---------- FD check of dJ/du on first 12 displacement DOFs ---------- 
         {
+            NNEW(neapar,ITG,num_cpus);
+	        NNEW(nebpar,ITG,num_cpus);
             const ITG mtloc   = mi[1] + 1;   //stride per node 
             const ITG ndof    = mtloc * (*nk);
-            const ITG ncheck  = 24;          // how many displacement DOFs to check 
-            const double J0   = eval_pnorm_J_fd();
+            const ITG ncheck  = 4;          // how many displacement DOFs to check 
+            for(i=0; i<num_cpus; i++)  
+            {
+	            ithread[i]=i;
+	            pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
+	        }
+
+	        for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+	
+            /* p-norm variables reduced across threads */
+            double sumP = 0.0;  // Accumulated numerator
+            double sumV = 0.0;  // Accumulated denominator
+
+            for (int t = 0; t < num_cpus; ++t)
+            {
+                size_t idx = (size_t)t *4;
+                sumP += qa1[idx + 2];   // thread's g_sump
+                sumV += qa1[idx + 3];   // thread's g_vol -> needed for p-mean
+
+                /* restore CCX defaults so downstream code doesnt misinterpret */
+                qa1[idx + 2] = -1.0;   /* qa(3) */
+                qa1[idx + 3] =  0.0;   /* qa(4) */     
+            }
+
+            /* must match the exponent used inside resultsmech() */
+            const double p = *pexp1; 
+            // Compute aggregated P-norm
+            if (sumP > 0.0)
+            {
+                // Compute P-norm based on Duysinx and Sigmund 2012
+                *Pnorm = pow(sumP, 1.0 / p);
+            }
+            SFREE(neapar);
+            SFREE(nebpar);
+
+            const double J0 =*Pnorm;
 
             printf("Current J0 %f", J0);
 
@@ -541,13 +581,13 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
                     const double u0 = v1[k];
                 
-                    const double h  = 1e-06;
+                    const double h  = 1e-4;  
+                    // Place holder for StressPnorm_Eval
 
                     v1[k] = u0 + h;
-                    const double Jp = eval_pnorm_J_fd();
-                   // printf("Current v1[k]: %f \n", v1[k]);
+                            // 
+                            const double Jp =1;
                     v1[k] = u0;  // restore 
-                    //printf("Curent Jp: %f \n", Jp);
 
                     const double dJdu_fd  = (Jp - J0) / h;
                     const double dJdu_adj = brhs[k];  // analytical //
@@ -562,7 +602,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         }
         // ---------- end FD check ---------- //
 
-        */
+        
 
         
         /**************************************P-NORM RHS FD EVALUATION***************************************/
