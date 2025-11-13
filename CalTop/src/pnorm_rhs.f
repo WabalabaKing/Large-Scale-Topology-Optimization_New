@@ -292,12 +292,12 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !           Constitutive law
             nlgeom_undo=0
 
-            call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
-     &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
-     &           plconloc,xstate,xstateini,ielas,
-     &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
-     &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
-     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
+!            call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
+!     &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
+!     &           plconloc,xstate,xstateini,ielas,
+!     &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
+!     &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
+!     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
 !
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
@@ -470,10 +470,10 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   B(3,m2+3) = shp(3,m1)
                   B(4,m2+1) = shp(2,m1)   ! exy engineering
                   B(4,m2+2) = shp(1,m1)
-                  B(5,m2+1) = shp(3,m1)   ! exz engineering
-                  B(5,m2+3) = shp(1,m1)
-                  B(6,m2+2) = shp(3,m1)   ! eyz engineering
-                  B(6,m2+3) = shp(2,m1)
+                  B(6,m2+1) = shp(3,m1)   ! exz engineering
+                  B(6,m2+3) = shp(1,m1)
+                  B(5,m2+2) = shp(3,m1)   ! eyz engineering
+                  B(5,m2+3) = shp(2,m1)
                enddo
 
 ! ---          Convert to tensorial shear: Bten = R * Beng, R=diag(1,1,1,1/2,1/2,1/2)

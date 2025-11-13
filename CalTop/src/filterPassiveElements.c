@@ -16,7 +16,7 @@ void filterOutPassiveElems_density(double *design, int ne, int *passiveIDs, int 
 
         if (eid >= 1 && eid <= ne) 
         {
-            design[eid - 1] = 0.0;  // Convert to 0-based index
+            design[eid - 1] = 1.0;  // Convert to 0-based index
         } 
         else 
         {

@@ -19,10 +19,13 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include "CalculiX.h"
 
 static char *lakon1,*matname1,*sideload1;
+
+//static void *pnorm_explicitmt(ITG *i);
 
 static ITG *kon1,*ipkon1,*ne1,*nelcon1,*nrhcon1,*nalcon1,*ielmat1,*ielorien1,
     *norien1,*ntmat1_,*ithermal1,*iprestr1,*iperturb1,*iout1,*nmethod1,
@@ -38,20 +41,66 @@ static double *co1,*v1,*stx1,*elcon1,*rhcon1,*alcon1,*alzero1,*orab1,*t01,*t11,
     *ttime1,*plicon1,*plkcon1,*xstateini1,*xstiff1,*xstate1,*stiini1,
     *vini1,*ener1,*eei1,*enerini1,*springarea1,*reltime1,*coefmpc1,
     *cocon1,*qfx1,*thicke1,*emeini1,*shcon1,*xload1,*prop1,
-    *xloadold1,*pslavsurf1,*pmastsurf1,*clearini1,*xbody1;
+    *xloadold1,*pslavsurf1,*pmastsurf1,*clearini1,*xbody1, *vsan1;
 
-static double sigma01 = 1.0;     /* your allowable stress */
-static double eps1    = 1e-3;    /* same eps_relax used in resultsmech */
-static double rhomin1 = 1e-3;    /* same rho_min        */
-static double *djdrho1 = NULL;   /* per element sensiticvity dJ/drho_e (size = *ne) */
-static void *pnorm_explicitmt(void *arg);
+/* Stress aggregation terms */
+static double *sigma01, *eps1, *rhomin1, *pexp1;
+static double *djdrho_explicit1 = NULL;
+
+//    static double sigma01 = 1.0;     /* your allowable stress */
+//static double eps1    = 1e-3;    /* same eps_relax used in resultsmech */
+//static double rhomin1 = 1e-3;    /* same rho_min        */
+
 
 
 static double *design1, *penal1; /* Element densities and penalization paramter*/
 static double *rhs1=NULL;  /* per-thread RHS blocks*/
 //static double *brhs1 = NULL;  /* reduced adjoint RHS (global)*/
-static double p1 = 0.0;   /* p in p-norm */ 
+//static double p1 = 0.0;   /* p in p-norm */ 
 static double alpha1 = 0.0; /* scalar used in adjoint RHS */
+//static double *djdrho1 = NULL;   /* per element sensiticvity dJ/drho_e (size = *ne) */
+
+
+/* Evaluate P-norm J from the current global displacement vector v1
+   using your threaded stresspnormmt() routine. */
+static double eval_pnorm_J_fd(void)
+{
+    /* Clear per-thread accumulators */
+    for (ITG t = 0; t < num_cpus; ++t) {
+        size_t base = (size_t)t * 4;
+        qa1[base + 0] = 0.0;
+        qa1[base + 1] = 0.0;
+        qa1[base + 2] = 0.0;  /* ∑ w·vm^p */
+        qa1[base + 3] = 0.0;  /* ∑ w     */
+    }
+
+    /* Launch stresspnormmt across threads */
+    pthread_t *tida = (pthread_t*)malloc(sizeof(pthread_t) * (size_t)num_cpus);
+    ITG *ith = NULL;
+    NNEW(ith, ITG, num_cpus);
+
+    for (ITG i = 0; i < num_cpus; ++i) {
+        ith[i] = i;
+        pthread_create(&tida[i], NULL, (void*)stresspnormmt, (void*)&ith[i]);
+    }
+    for (ITG i = 0; i < num_cpus; ++i)
+        pthread_join(tida[i], NULL);
+
+    SFREE(ith);
+    free(tida);
+
+    /* Reduce to get J */
+    double sump = 0.0;
+    for (ITG t = 0; t < num_cpus; ++t)
+        sump += qa1[(size_t)t * 4 + 2];
+
+      //  printf("Current sump: %f \n", sump);
+    const double p = *pexp1;
+    return (sump > 0.0) ? pow(sump, 1.0 / p) : 0.0;
+}
+
+
+
 
 void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        double *v,double *stn,ITG *inum,double *stx,double *elcon,ITG *nelcon,
@@ -86,7 +135,8 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        ITG *islavsurf,ITG *ielprop,double *prop,double *energyini,
        double *energy,ITG *kscale,ITG *iponoel,ITG *inoel,ITG *nener,
        char *orname,ITG *network,ITG *ipobody,double *xbody,ITG *ibody,
-       char *typeboun, double *design, double *penal, double *brhs)
+       char *typeboun, double *design, double *penal, double *sigma0, double *eps, double *rhomin,
+       double *pexp, double *brhs, double *djdrho_explicit, double *Pnorm, int get_adjoint)
        
        {
 
@@ -165,6 +215,18 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	}
     }
 
+    /* Force iout = 0 for adjoint expand-only mode */
+    ITG iout_local = *iout;
+    ITG *iout_ptr = iout;
+
+    if (get_adjoint == 2)
+    {
+        iout_local = 0;
+        iout_ptr = &iout_local;
+    }
+
+
+
 // next line is to be inserted in a similar way for all other paralell parts
 
     if(*ne<num_cpus) num_cpus=*ne;
@@ -173,21 +235,19 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     
     /* 1. nodewise storage of the primary variables
        2. determination which derived variables have to be calculated */
-
-    FORTRAN(resultsini,(nk,v,ithermal,filab,iperturb,f,fn,
-       nactdof,iout,qa,vold,b,nodeboun,ndirboun,
-       xboun,nboun,ipompc,nodempc,coefmpc,labmpc,nmpc,nmethod,cam,neq,
-       veold,accold,bet,gam,dtime,mi,vini,nprint,prlab,
-       &intpointvarm,&calcul_fn,&calcul_f,&calcul_qa,&calcul_cauchy,
-       &ikin,&intpointvart,typeboun));
-
-   /* next statement allows for storing the displacements in each
-      iteration: for debugging purposes */
-
-    if((strcmp1(&filab[3],"I")==0)&&(*iout==0)){
-	FORTRAN(frditeration,(co,nk,kon,ipkon,lakon,ne,v,
-		ttime,ielmat,matname,mi,istep,iinc,ithermal));
+    if (get_adjoint!=2)
+    {
+        printf("    Displacement state eq. space -> nodal space\n");
+        FORTRAN(resultsini,(nk,v,ithermal,filab,iperturb,f,fn,
+        nactdof,iout_ptr,qa,vold,b,nodeboun,ndirboun,
+        xboun,nboun,ipompc,nodempc,coefmpc,labmpc,nmpc,nmethod,cam,neq,
+        veold,accold,bet,gam,dtime,mi,vini,nprint,prlab,
+        &intpointvarm,&calcul_fn,&calcul_f,&calcul_qa,&calcul_cauchy,
+        &ikin,&intpointvart,typeboun));
+        printf("done!\n");
     }
+
+
 
     /* calculating the stresses and material tangent at the 
        integration points; calculating the internal forces */
@@ -222,10 +282,78 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         nener1=nener;ikin1=ikin;mt1=mt;nk1=nk;ne01=ne0;thicke1=thicke;
         emeini1=emeini;pslavsurf1=pslavsurf;clearini1=clearini;
         pmastsurf1=pmastsurf;mortar1=mortar;ielprop1=ielprop;prop1=prop;
-        kscale1=kscale;
+        kscale1=kscale; sigma01 = sigma0; eps1 = eps; rhomin1 = rhomin; pexp1 = pexp;
+
+
+
+
+
+/*
+{
+    ITG mtloc = mi[1] + 1;                  // stride per node 
+    ITG ndof  = mtloc * (*nk);              // total length of v1 
+    for (ITG k = 0; k < ndof; ++k) v1[k] = 1.0;
+}
+
+*/
+
+/*
+// ---- Quick peek: first 12 raw entries of v1 ---- 
+{
+    ITG mtloc = mi[1] + 1;                    //stride per node 
+    ITG ndof  = mtloc * (*nk);
+    ITG nshow = (ndof < 12 ? ndof : 12);
+
+    printf("\nFirst %lld entries of v1 (mt=%lld, ndof=%lld):\n",
+           (long long)nshow, (long long)mtloc, (long long)ndof);
+    for (ITG k = 0; k < nshow; ++k) {
+        printf("  v1[%3lld] = %+ .15e\n", (long long)k, v1[k]);
+    }
+    printf("-------------------------------------------------------\n");
+    fflush(stdout);
+}
+ */
+
+/* 
+//---- Print displacement field (u,v,w) for Element 1 (C3D4) ---- 
+{
+    ITG e = 0;                       // first element (0-based index) 
+    ITG start = ipkon[e];            // start index in kon for element 1
+
+    if (start < 0) {
+        printf("Element 1 is inactive (ipkon[0] < 0)\n");
+    } else {
+        ITG mt = mi[1] + 1;          // stride per node in v/v1 
+        printf("\nElement 1 (C3D4) node displacements:\n");
+        for (int a = 0; a < 4; ++a) {               // C3D4 always has 4 nodes 
+            ITG node = kon[start + a];              // 1-based node number 
+            ITG base = mt * (node - 1);             // displacement offset 
+
+            double ux = v[base + 1];
+            double uy = v[base + 2];
+            double uz = v[base + 3];
+
+            printf("  local node %d (global %lld):  [% .6e  % .6e  % .6e]\n",
+                   a + 1, (long long)node, ux, uy, uz);
+        }
+        printf("-------------------------------------------------------\n");
+    }
+}
+*/
+
+// Pass an empty displacement field to stressPnorm() for sanity check
+//double*vsan;
+//NNEW(vsan, double, mt**nk);
+
+//vsan1 = vsan;
+
+
+
+
+        //static double *sigma01, *eps1, *rhomin1, *pexp1, *djdrho1_explicit = NULL;
 
 	/* calculating the stresses */
-	
+	/*
 	if(((*nmethod!=4)&&(*nmethod!=5))||(iperturb[0]>1))
     {
         printf("I am in results.c \n");
@@ -233,73 +361,97 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 		printf("Using up to %" ITGFORMAT " cpu(s) for the stress calculation.\n\n", num_cpus);
 	}
 
+    */
+
 
     fflush(stdout);
 
+    //printf("Current exponent in results(): %f", *pexp1);
 
-    /******************************************STRESS CALCULATION (P-NORM AGGREGATION************************************** */
+
+    /************************************************P-NORM AGGREGATION****************************************/
 
     design1 = design;
     penal1  = penal;
 
 	/* create threads and wait */
-
-	NNEW(ithread,ITG,num_cpus);    
-    /* Evaluate stress and perform P-norm aggregation  */
-	for(i=0; i<num_cpus; i++)  
-    {
-	    ithread[i]=i;
-	    pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
-        //pthread_create(&tid[i], NULL, (void *)resultsmechmt, (void *)&ithread[i]);
-	}
 	
+	NNEW(ithread,ITG,num_cpus);
 
-	for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+    if (get_adjoint == 0)
+    {
+        // NOTE: No penalization of xstiff here
+        printf(" Initializing fields...");
+        for(i=0; i<num_cpus; i++)  
+        {
+	        ithread[i]=i;
+	        pthread_create(&tid[i], NULL, (void *)resultsmechmt, (void *)&ithread[i]);
+            //pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
+    	}
+        for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+
+        SFREE(neapar);
+        SFREE(nebpar);
+        printf("done!\n");
+
+    }
+
+    if (get_adjoint == 1)
+    {
+        // STEP 1: Compute VM stress and aggregate (P-NORM) for Rho = 1 
+        printf("    Evaluating effective von Misses stress for the structure\n");
+
+	    for(i=0; i<num_cpus; i++)  
+        {
+	        ithread[i]=i;
+	        pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
+	    }
+
+	    for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
 	
+        /* p-norm variables reduced across threads */
+        double sumP = 0.0;  // Accumulated numerator
+        double sumV = 0.0;  // Accumulated denominator
 
-    double sumP = 0.0;  // Accumulated numerator
-    //double sumV = 0.0;  // Accumulated denominator
+        for (int t = 0; t < num_cpus; ++t)
+        {
+            size_t idx = (size_t)t *4;
+            sumP += qa1[idx + 2];   // thread's g_sump
+            sumV += qa1[idx + 3];   // thread's g_vol -> needed for p-mean
 
-    for (int t = 0; t < num_cpus; ++t)
-    {
-        size_t idx = (size_t)t *4;
-        sumP += qa1[idx + 2];   // thread's g_sump
-        //sumV += qa1[idx + 3];   // thread's g_vol -> needed for p-mean
+            /* restore CCX defaults so downstream code doesnt misinterpret */
+            qa1[idx + 2] = -1.0;   /* qa(3) */
+            qa1[idx + 3] =  0.0;   /* qa(4) */     
+        }
 
-        /* restore CCX defaults so downstream code doesnt misinterpret */
-        qa1[idx + 2] = -1.0;   /* qa(3) */
-        qa1[idx + 3] =  0.0;   /* qa(4) */     
-    }
+        /* must match the exponent used inside resultsmech() */
+        const double p = *pexp1; 
 
-    /* must match the exponent used inside resultsmech() */
-    p1 = 4.0;
+        //double J = 0.0;     /*  stress p-norm */
+        alpha1 = 0.0;       /* scalar used in adjoint RHS */
 
-    double J = 0.0;     /*  stress p-norm */
-    alpha1 = 0.0;       /* scalar used in adjoint RHS */
+        // Compute aggregated P-norm
+        if (sumP > 0.0)
+        {
+            // Compute P-norm based on Duysinx and Sigmund 2012
+            *Pnorm = pow(sumP, 1.0 / p);
+            alpha1 = pow(*Pnorm, (1.0 - p)); // A scalar term used in sensitivity eval
+        }
+        else
+        {
+            *Pnorm = 0.0;
+            alpha1 = 0.0;
+        }
+        
+        printf("    Aggregated stress P-norm: %.12e\n", *Pnorm);
+        //printf("J (p-norm)        : %.12e\n", *Pnorm);
+        //printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
 
-    //printf("Current sumP: %f \n", sumP);
-    //printf("Current sumV: %f \n", sumV);
-
-
-    // Compute the aggregated P-norm
-    if (sumP > 0.0) 
-    {   
-        // Aggregation based on Duysinx and Sigmind
-        J = pow(sumP, 1.0 / p1);
-        alpha1 = pow(sumP, (1.0 / p1) - 1.0);
-    }
-    else
-    {
-        J = 0.0;
-        alpha1 = 0.0;
-    }
-
-    printf("sumP (unnormalized): %.12e\n", sumP);
-    printf("J (p-norm)        : %.12e\n", J);
-    printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
+        
+    }  // end stress P-norm calculation
 
 
-    
+
 	for(i=0;i<mt**nk;i++)
     {
 	    fn[i]=fn1[i];
@@ -312,86 +464,330 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 		    fn[i]+=fn1[i+j*mt**nk];
 	    }
 	}
-    
+
 	SFREE(fn1);
     SFREE(ithread);
 
-    printf("done!");
-    /*SFREE(neapar);
-    SFREE(nebpar); */ // Free after stress calculation
 
+    /******************************P-NORM ADJOINT RHS CALCULATION***************************************/
 
-    /********************END STRESS CALCULATION *****************/
-    /************************************************************/
-
-    /************************************************** */
-    /*  STRESS-ADJOINT RHS CALCULATION */
-
-    printf("Assembling RHS for stress adjoint...");
-
-    /* Allocate per-thread RHS blocks and the reduced RHS */
-    NNEW(rhs1, double, num_cpus * mt * *nk);
-    //NNEW(brhs, double, mt * *nk);
-
-    //brhs1 = brhs;
-
-    /* Zero them (CalculiX NNEW doesn't zero by default) */
-    for (size_t zz = 0; zz < (size_t)num_cpus * mt * *nk; ++zz) rhs1[zz] = 0.0;
-    //for (size_t zz = 0; zz < (size_t)mt * *nk; ++zz)     brhs1[zz] = 0.0;
-
-    /* Spawn RHS threads */
-    NNEW(ithread, ITG, num_cpus);
-
-    for (i = 0; i < num_cpus; ++i) 
+    if (get_adjoint == 1)
     {
-        ithread[i] = i;
-        pthread_create(&tid[i], NULL, (void *)pnormRHSmt, (void *)&ithread[i]);
-    }
+        // STEP 2: ASSEMBLE RHS FOR P-NORM ADJOINT (TODO: ZHENG TO CORRECT)
+        printf("    Assembling RHS for stress adjoint using analytical solution");
 
-    for (i = 0; i < num_cpus; ++i) pthread_join(tid[i], NULL);
-    SFREE(ithread);
+        //Allocate per-thread RHS blocks and the reduced RHS
+        NNEW(rhs1, double, num_cpus * mt * *nk);
+
+        // Zero them (CalculiX NNEW doesn't zero by default)
+        for (size_t zz = 0; zz < (size_t)num_cpus * mt * *nk; ++zz) rhs1[zz] = 0.0;
 
 
-    /* Reduce per-thread blocks into brhs */
-    for (i = 0; i < mt * *nk; ++i) 
-    {
-        double acc = rhs1[i];
-        for (j = 1; j < num_cpus; ++j) 
+        // Spawn RHS threads
+        NNEW(ithread, ITG, num_cpus);
+
+        for (i = 0; i < num_cpus; ++i) 
         {
-            acc += rhs1[i + j * mt * *nk];
+            ithread[i] = i;
+            pthread_create(&tid[i], NULL, (void *)pnormRHSmt, (void *)&ithread[i]);
         }
-        /* Global Adjoint RHS seen by linstatic.c*/
-        brhs[i] = acc;
+
+        for (i = 0; i < num_cpus; ++i) pthread_join(tid[i], NULL);
+        SFREE(ithread);
+
+        // Reduce per-thread blocks into brhs 
+        for (i = 0; i < mt * *nk; ++i) 
+        {
+            double acc = rhs1[i];
+            for (j = 1; j < num_cpus; ++j) 
+            {
+                acc += rhs1[i + j * mt * *nk];
+            }
+            brhs[i] = acc;
+        }
+
+
+
+         //Done with per-thread storage
+	    SFREE(rhs1);
+        printf("done!\n");
+
+
+        /***************************************P-NORM RHS FD VERIFICATION***********************************/
+        /*
+        // ---------- FD check of dJ/du on first 12 displacement DOFs ---------- 
+        {
+            const ITG mtloc   = mi[1] + 1;   //stride per node 
+            const ITG ndof    = mtloc * (*nk);
+            const ITG ncheck  = 24;          // how many displacement DOFs to check 
+            const double J0   = eval_pnorm_J_fd();
+
+            printf("Current J0 %f", J0);
+
+            ITG tested = 0;
+            printf("    FD check on first %lld displacement DOFs (out of %lld total entries)\n",
+            (long long)ncheck, (long long)ndof);
+            printf("      %6s  %-22s  %-22s  %-12s\n",
+            "k", "dJ/du (FD)", "dJ/du (adjoint)", "rel.err");
+
+            for (ITG node = 1; node <= *nk && tested < ncheck; ++node) 
+            {
+                ITG base = mtloc * (node - 1);
+
+                // Skip temperature (base + 0); perturb only Ux, Uy, Uz 
+                for (ITG comp = 1; comp <= 3 && tested < ncheck; ++comp) 
+                {
+                    ITG k = base + comp;  // displacement component index 
+
+                    const double u0 = v1[k];
+                
+                    const double h  = 1e-06;
+
+                    v1[k] = u0 + h;
+                    const double Jp = eval_pnorm_J_fd();
+                   // printf("Current v1[k]: %f \n", v1[k]);
+                    v1[k] = u0;  // restore 
+                    //printf("Curent Jp: %f \n", Jp);
+
+                    const double dJdu_fd  = (Jp - J0) / h;
+                    const double dJdu_adj = brhs[k];  // analytical //
+                    const double rel_err = 
+                    (fabs(dJdu_adj) > 0.0) ? fabs(dJdu_fd - dJdu_adj) / fabs(dJdu_adj) : 0.0;
+
+                    printf("      %6lld  %+ .15e  %+ .15e  % .3e\n",
+                    (long long)k, dJdu_fd, dJdu_adj, rel_err);
+                    ++tested;
+                }
+            }
+        }
+        // ---------- end FD check ---------- //
+
+        */
+
+        
+        /**************************************P-NORM RHS FD EVALUATION***************************************/
+        /*
+        printf("    Assembling RHS via forward finite differences (ALL DOFs)...\n");
+
+        // Baseline J0 at current v1 /
+        const double J0 = eval_pnorm_J_fd();
+
+        // Full-space size and zero RHS /
+        const ITG mtloc = mi[1] + 1;
+        const ITG ndof  = mtloc * (*nk);
+        for (ITG k = 0; k < ndof; ++k) brhs[k] = 0.0;
+
+        // Progress reporting /
+        const ITG report_stride = (ndof > 20 ? ndof/20 : 1);
+
+        // FD loop over ALL DOFs (constrained included) /
+        for (ITG k = 0; k < ndof; ++k) 
+        {
+
+            const double u0 = v1[k];
+            const double h  = fmax(1.0e-8, 1.0e-6 * (1.0 + fabs(u0)));
+
+            v1[k] = u0 + h;              // bump //
+            const double Jp = eval_pnorm_J_fd();
+            v1[k] = u0;                   // restore //
+
+            brhs[k] = (Jp - J0) / h;      // forward FD //
+
+            if ((k % report_stride) == 0) 
+            {
+                printf("      FD RHS progress: %lld / %lld\r",
+                (long long)k, (long long)ndof);
+                fflush(stdout);
+            }
+        }
+        printf("      FD RHS progress: %lld / %lld\n",
+        (long long)ndof, (long long)ndof);
+        printf("    done!\n");
+
+        */
+
+        /*************************************P-NORM EXPLICIT TERM CALCULATION******************************/
+        
+        // STEP 3: COMPUTE EXPLICIT TERM FOR P-NORM ADJOINT (PRATEEK TO FIX)
+        djdrho_explicit1 = djdrho_explicit;
+
+        printf("    Assembling explicit term...");
+
+        /* allocate per-thread indices */
+        NNEW(ithread, ITG, num_cpus);
+
+        for (i = 0; i < num_cpus; ++i) 
+        {
+            ithread[i] = i;
+            pthread_create(&tid[i], NULL,
+            (void *(*)(void *))pnorm_explicitmt, (void *)&ithread[i]);
+        }
+
+        for (i = 0; i < num_cpus; ++i) 
+        {
+            pthread_join(tid[i], NULL);
+        }
+
+        SFREE(ithread);  
+
+
+        //printf(" Explicit dJ/drho assembled.\n");
+
+
+
+        printf("done!\n");
+       // SFREE(neapar);
+       // SFREE(nebpar);
+
     }
 
-
-    /* Done with per-thread storage*/
-	SFREE(rhs1);
-
-    /* STRESS EXPLICIT TERM CALCULATION */
-
-    /* allocate once per call to results(); zero it */
-    NNEW(djdrho1, double, *ne);
-    for (ITG e = 0; e < *ne; ++e) djdrho1[e] = 0.0;
-
-
-    /* Spawn explicit erm threads */
-    NNEW(ithread, ITG, num_cpus);
-
-    for (i = 0; i < num_cpus; ++i) 
+    if (get_adjoint == 1)
     {
-        ithread[i] = i;
-        pthread_create(&tid[i], NULL, pnorm_explicitmt, &ithread[i]);   // OK   
+        // STEP 1: Compute VM stress and aggregate (P-NORM) for Rho = 1 
+        printf("    Evaluating density-scaled element stress\n");
+
+         NNEW(ithread, ITG, num_cpus);
+
+
+	    for(i=0; i<num_cpus; i++)  
+        {
+	        ithread[i]=i;
+	        pthread_create(&tid[i], NULL, (void *)stresssimpmt, (void *)&ithread[i]);
+	    }
+
+	    for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+
+        SFREE(neapar);
+        SFREE(nebpar);
+
+        
     }
 
-    for (i = 0; i < num_cpus; ++i) pthread_join(tid[i], NULL);
-    SFREE(ithread);
 
-    printf("Explicit dJ/drho assembled.\n");
 
-    SFREE(neapar);
-    SFREE(nebpar);
-    	
+    /*********************************************P-NORM CALCULATION ENDS*******************************/
+
+    /************ Finite-difference (FD) validation of EXPLICIT part (all elems) ************/
+    if (get_adjoint == 4)
+    {
+        const double h = 1.0e-6;        /* absolute bump in rho_e */
+        ITG   nea_loc = 1, neb_loc = *ne, list_loc = 0;
+        ITG  *ilist_loc = NULL;
+
+        /* working copy of design */
+        double *design_fd = NULL;
+        NNEW(design_fd,double,*ne);
+        memcpy(design_fd, design1, sizeof(double)*(*ne));
+
+        /* storage for FD */
+        double *dJ_fd_exp = NULL;
+        NNEW(dJ_fd_exp,double,*ne);
+
+        const double p = *pexp1;
+
+        printf("\nElement  rho        dJ_exp(adj)        dJ_exp(FDc)         FD/adj\n");
+        printf("---------------------------------------------------------------------\n");
+
+        for (ITG e = 1; e <= *ne; ++e)
+        {
+            const ITG ei = e - 1;
+            const double rho0 = design_fd[ei];
+
+            /* central bumps (clamped into [0,1]) */
+            double rho_p = rho0 + h;
+            if (rho_p > 1.0) rho_p = 1.0;
+
+            double rho_m = rho0 - h;
+            if (rho_m < 0.0) rho_m = 0.0;
+
+            double dJfd = 0.0;
+
+            if ((rho_p == rho0) && (rho_m == rho0)) {
+                /* both sides clamped: derivative effectively zero */
+                dJfd = 0.0;
+            } else if (rho_m == rho0) {
+            /* fallback: forward (one-sided) */
+            double saved = rho0;
+            design_fd[ei] = rho_p;
+
+            double psum_p = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_p));
+            const double Jp = (psum_p>0.0) ? pow(psum_p, 1.0/p) : 0.0;
+
+            /* reuse base at rho0 for one-sided: compute once here */
+            design_fd[ei] = saved;
+            double psum_0 = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_0));
+                const double J0 = (psum_0>0.0) ? pow(psum_0, 1.0/p) : 0.0;
+
+            dJfd = (Jp - J0) / (rho_p - rho0);
+        } 
+        else if (rho_p == rho0) 
+        {
+            /* fallback: backward (one-sided) */
+            double saved = rho0;
+            design_fd[ei] = rho_m;
+
+            double psum_m = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_m));
+            const double Jm = (psum_m>0.0) ? pow(psum_m, 1.0/p) : 0.0;
+
+            /* base at rho0 */
+            design_fd[ei] = saved;
+            double psum_0 = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_0));
+            const double J0 = (psum_0>0.0) ? pow(psum_0, 1.0/p) : 0.0;
+
+            dJfd = (J0 - Jm) / (rho0 - rho_m);
+        } 
+        else {
+            /* true central difference */
+            double saved = rho0;
+
+            /* J(rho + h) */
+            design_fd[ei] = rho_p;
+            double psum_p = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_p));
+            const double Jp = (psum_p>0.0) ? pow(psum_p, 1.0/p) : 0.0;
+
+            /* J(rho - h) */
+            design_fd[ei] = rho_m;
+            double psum_m = 0.0;
+            FORTRAN(pnorm_value_from_stx,(co,kon,ipkon,lakon,ne,
+                stx,mi,design_fd,penal1,sigma01,eps1,rhomin1,pexp1,
+                &nea_loc,&neb_loc,&list_loc,ilist_loc,&psum_m));
+            const double Jm = (psum_m>0.0) ? pow(psum_m, 1.0/p) : 0.0;
+
+            /* restore */
+            design_fd[ei] = saved;
+
+            dJfd = (Jp - Jm) / (rho_p - rho_m);
+        }
+
+        const double dJadj = djdrho_explicit1[ei];
+        dJ_fd_exp[ei] = dJfd;
+
+        const double ratio = (fabs(dJadj)>0.0) ? (dJfd/dJadj) : 0.0;
+
+        printf("%-7ld  %-8.4f  %-18.9e %-18.9e %-10.6f\n",
+               (long)e, rho0, dJadj, dJfd, ratio);
+    }
+
+    SFREE(dJ_fd_exp);
+    SFREE(design_fd);
+}
+
+	
     
     /* determine the internal force */
 	qa[0]=qa1[0];
@@ -442,6 +838,94 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	SFREE(nal);
     }
 
+    /* calculating the thermal flux and material tangent at the 
+       integration points; calculating the internal point flux */
+
+    if((ithermal[0]>=2)&&(intpointvart==1))
+    {
+    
+        /* determining the element bounds in each thread */
+
+	    NNEW(neapar,ITG,num_cpus);
+	    NNEW(nebpar,ITG,num_cpus);
+	    elementcpuload(neapar,nebpar,ne,ipkon,&num_cpus);
+
+	    NNEW(fn1,double,num_cpus*mt**nk);
+	    NNEW(qa1,double,num_cpus*4);
+	    NNEW(nal,ITG,num_cpus);
+
+	    co1=co;kon1=kon;ipkon1=ipkon;lakon1=lakon;v1=v;
+        elcon1=elcon;nelcon1=nelcon;rhcon1=rhcon;nrhcon1=nrhcon;
+	    ielmat1=ielmat;ielorien1=ielorien;norien1=norien;orab1=orab;
+        ntmat1_=ntmat_;t01=t0;iperturb1=iperturb;iout1=iout;vold1=vold;
+        ipompc1=ipompc;nodempc1=nodempc;coefmpc1=coefmpc;nmpc1=nmpc;
+        dtime1=dtime;time1=time;ttime1=ttime;plkcon1=plkcon;
+        nplkcon1=nplkcon;xstateini1=xstateini;xstiff1=xstiff;
+        xstate1=xstate;npmat1_=npmat_;matname1=matname;mi1=mi;
+        ncmat1_=ncmat_;nstate1_=nstate_;cocon1=cocon;ncocon1=ncocon;
+        qfx1=qfx;ikmpc1=ikmpc;ilmpc1=ilmpc;istep1=istep;iinc1=iinc;
+        springarea1=springarea;calcul_fn1=calcul_fn;calcul_qa1=calcul_qa;
+        mt1=mt;nk1=nk;shcon1=shcon;nshcon1=nshcon;ithermal1=ithermal;
+        nelemload1=nelemload;nload1=nload;nmethod1=nmethod;reltime1=reltime;
+        sideload1=sideload;xload1=xload;xloadold1=xloadold;
+        pslavsurf1=pslavsurf;pmastsurf1=pmastsurf;mortar1=mortar;
+        clearini1=clearini;plicon1=plicon;nplicon1=nplicon;ne1=ne;
+        ielprop1=ielprop,prop1=prop;iponoel1=iponoel;inoel1=inoel;
+	    network1=network;ipobody1=ipobody;ibody1=ibody;xbody1=xbody;
+
+	    /* calculating the heat flux */
+	
+	    printf(" Using up to %" ITGFORMAT " cpu(s) for the heat flux calculation.\n\n", num_cpus);
+	
+	    /* create threads and wait */
+	
+	    NNEW(ithread,ITG,num_cpus);
+	    for(i=0; i<num_cpus; i++)  
+        {
+	        ithread[i]=i;
+	        pthread_create(&tid[i], NULL, (void *)resultsthermmt, (void *)&ithread[i]);
+	    }
+	    for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+	
+	    for(i=0;i<*nk;i++)
+        {
+		    fn[mt*i]=fn1[mt*i];
+	    }
+	    for(i=0;i<*nk;i++)
+        {
+	        for(j=1;j<num_cpus;j++)
+            {
+		        fn[mt*i]+=fn1[mt*i+j*mt**nk];
+	        }
+	    }
+	    SFREE(fn1);SFREE(ithread);SFREE(neapar);SFREE(nebpar);
+	
+        /* determine the internal concentrated heat flux */
+
+	    qa[1]=qa1[1];
+	    for(j=1;j<num_cpus;j++)
+        {
+	        qa[1]+=qa1[1+j*4];
+	    }
+	
+	    SFREE(qa1);
+	
+	    for(j=1;j<num_cpus;j++)
+        {
+	        nal[0]+=nal[j];
+	    }
+
+	    if(calcul_qa==1)
+        {
+	        if(nal[0]>0)
+            {
+		        qa[1]/=nal[0];
+	        }
+	    }
+        
+	    SFREE(nal);
+    }
+
     /* calculating the matrix system internal force vector */
 
     FORTRAN(resultsforc,(nk,f,fn,nactdof,ipompc,nodempc,
@@ -466,8 +950,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     */
   return;
 
-    }
-
+}
 
 /* subroutine for multithreading of resultsmech */
 
@@ -536,7 +1019,6 @@ void *stresspnormmt(ITG *i)
     qa1[indexqa + 1] = 0.0;   // qa(2) not used here
     qa1[indexqa + 2] = 0.0;   // will hold partial g_sump (∑ w·vm^p)
     qa1[indexqa + 3] = 0.0;   // will hold partial g_vol  (∑ w)
-
     
     FORTRAN(stresspnorm,(co1,kon1,ipkon1,lakon1,ne1,v1,
           stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
@@ -549,45 +1031,118 @@ void *stresspnormmt(ITG *i)
           springarea1,reltime1,&calcul_fn1,&calcul_qa1,&calcul_cauchy1,nener1,
 	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
 	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
-	  kscale1,&list1,ilist1, design1, penal1));
+	  kscale1,&list1,ilist1, design1, penal1, sigma01, eps1, rhomin1, pexp1));
+    return NULL;
+}
+
+void *stresssimpmt(ITG *i)
+{
+
+    ITG indexfn,indexqa,indexnal,nea,neb,list1,*ilist1=NULL;
+
+    indexfn=*i*mt1**nk1;
+    indexqa=*i*4;  // this thread's 4-slot window in qa1
+    indexnal=*i;
+
+    nea=neapar[*i]+1;
+    neb=nebpar[*i]+1;
+
+    list1=0;
+
+    
+    FORTRAN(stresssimp,(co1,kon1,ipkon1,lakon1,ne1,v1,
+          stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
+          ielmat1,ielorien1,norien1,orab1,ntmat1_,t01,t11,ithermal1,prestr1,
+          iprestr1,eme1,iperturb1,&fn1[indexfn],iout1,&qa1[indexqa],vold1,
+          nmethod1,
+          veold1,dtime1,time1,ttime1,plicon1,nplicon1,plkcon1,nplkcon1,
+          xstateini1,xstiff1,xstate1,npmat1_,matname1,mi1,ielas1,icmd1,
+          ncmat1_,nstate1_,stiini1,vini1,ener1,eei1,enerini1,istep1,iinc1,
+          springarea1,reltime1,&calcul_fn1,&calcul_qa1,&calcul_cauchy1,nener1,
+	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
+	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
+	  kscale1,&list1,ilist1, design1, penal1, sigma01, eps1, rhomin1, pexp1));
     return NULL;
 }
 
 /* thread entry for assembling the adjoint RHS of the p-norm functional */
 void *pnormRHSmt(ITG *i)
 {
+   ITG indexfn, indexqa, indexnal;      /* (1) declare these */
     ITG indexrhs, nea, neb, list1 = 0;
     ITG *ilist1 = NULL;
+
+    /* per-thread windows */
+    indexfn  = *i * mt1 * *nk1;          /* (1) define them */
+    indexqa  = *i * 4;
+    indexnal = *i;
 
     /* each thread writes into its own block in rhs1 */
     indexrhs = *i * mt1 * *nk1;
 
     nea = neapar[*i] + 1;
     neb = nebpar[*i] + 1;
-
+   /*
     FORTRAN(pnorm_rhs,(co1,kon1,ipkon1,lakon1,ne1,
-    stx1,xstiff1,mi1,&rhs1[indexrhs],&alpha1,&p1,design1,penal1,
-    &sigma01,&eps1,&rhomin1,
+    stx1,xstiff1,mi1,&rhs1[indexrhs],&alpha1,pexp1,design1,penal1,
+    sigma01,eps1,rhomin1,
     &nea,&neb,&list1,ilist1));
+    */
+    FORTRAN(pnorm_rhs,(co1,kon1,ipkon1,lakon1,ne1,v1,
+          stx1,elcon1,nelcon1,rhcon1,nrhcon1,alcon1,nalcon1,alzero1,
+          ielmat1,ielorien1,norien1,orab1,ntmat1_,t01,t11,ithermal1,prestr1,
+          iprestr1,eme1,iperturb1,&fn1[indexfn],iout1,&qa1[indexqa],vold1,
+          nmethod1,
+          veold1,dtime1,time1,ttime1,plicon1,nplicon1,plkcon1,nplkcon1,
+          xstateini1,xstiff1,xstate1,npmat1_,matname1,mi1,ielas1,icmd1,
+          ncmat1_,nstate1_,stiini1,vini1,ener1,eei1,enerini1,istep1,iinc1,
+          springarea1,reltime1,&calcul_fn1,&calcul_qa1,&calcul_cauchy1,nener1,
+	  &ikin1,&nal[indexnal],ne01,thicke1,emeini1,
+	  pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
+	  kscale1,&list1,ilist1, &rhs1[indexrhs], design1, penal1, sigma01, eps1, rhomin1, pexp1, &alpha1));
     return NULL;
 }
 
 /* thread entry for the explicit (density) part of dJ/drho */
-static void *pnorm_explicitmt(void *arg)
+void *pnorm_explicitmt(ITG *i)
 {
-    ITG id  = *(ITG*)arg;              // thread id
-    ITG nea = neapar[id] + 1;
-    ITG neb = nebpar[id] + 1;
+    ITG nea  = neapar[*i] + 1;
+    ITG neb  = nebpar[*i] + 1;
     ITG list1 = 0;
     ITG *ilist1 = NULL;
 
+    /* Writes into djdrho1[e] for e in [nea..neb] inside the Fortran code */
     FORTRAN(pnorm_explicit,(co1,kon1,ipkon1,lakon1,ne1,
-        stx1,mi1,design1,penal1,&sigma01,&eps1,&rhomin1,
-        &alpha1,&p1,&nea,&neb,&list1,ilist1,djdrho1));
+        stx1,mi1,design1,penal1,sigma01,eps1,rhomin1,
+        &alpha1,pexp1,&nea,&neb,&list1,ilist1,djdrho_explicit1));
+    
+       return NULL;
+}
+
+/* subroutine for multithreading of resultsmech for thermal calculations */
+
+void *resultsthermmt(ITG *i){
+
+    ITG indexfn,indexqa,indexnal,nea,neb;
+
+    indexfn=*i*mt1**nk1;
+    indexqa=*i*4;
+    indexnal=*i;
+
+    nea=neapar[*i]+1;
+    neb=nebpar[*i]+1;
+
+    FORTRAN(resultstherm,(co1,kon1,ipkon1,lakon1,v1,
+	   elcon1,nelcon1,rhcon1,nrhcon1,ielmat1,ielorien1,norien1,orab1,
+	   ntmat1_,t01,iperturb1,&fn1[indexfn],shcon1,nshcon1,
+	   iout1,&qa1[indexqa],vold1,ipompc1,nodempc1,coefmpc1,nmpc1,
+           dtime1,time1,ttime1,plkcon1,nplkcon1,xstateini1,xstiff1,xstate1,
+           npmat1_,matname1,mi1,ncmat1_,nstate1_,cocon1,ncocon1,
+           qfx1,ikmpc1,ilmpc1,istep1,iinc1,springarea1,
+	   &calcul_fn1,&calcul_qa1,&nal[indexnal],&nea,&neb,ithermal1,
+	   nelemload1,nload1,nmethod1,reltime1,sideload1,xload1,xloadold1,
+	   pslavsurf1,pmastsurf1,mortar1,clearini1,plicon1,nplicon1,ielprop1,
+	   prop1,iponoel1,inoel1,network1,ipobody1,xbody1,ibody1));
 
     return NULL;
 }
-
-
-
-
