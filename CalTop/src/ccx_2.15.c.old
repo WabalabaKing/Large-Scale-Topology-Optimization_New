@@ -2217,6 +2217,9 @@ while(istat>=0)
 
     FILE *rho_file;
     rho_file=fopen("rhos.dat","w"); //open in write mode
+
+    /* set the filtered element densities of passive elements to 1 */
+    filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
     
     /* loop over all elements and write element densities to file */
     for (int iii=0;iii<ne;iii++)
@@ -2224,8 +2227,7 @@ while(istat>=0)
       fprintf(rho_file,"%.15f  ,  %.15f \n",design[iii],rhoPhys[iii]);            
     }
 
-    /* set the filtered element densities of passive elements to 0 */
-    filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
+
 
     /* NOTE: In the first iteration, the rhoPhys do not account for the skin.
              However, all sensitivities at the end of the first iteration 
