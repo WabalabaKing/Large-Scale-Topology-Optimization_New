@@ -321,7 +321,7 @@ int main(int argc,char *argv[])
   double *gradComplFiltered=NULL; /**< filtered compliance  sensitivities */ 
   double *eleVolFiltered=NULL; /**< filtered element volume sensitivities */
   int *passiveIDs = NULL;
-  int numPassive = 0;
+  int numPassive = 0; /** < initialize number of passive elements to zero */
 
 
   double ctrl[56]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5};
@@ -1079,9 +1079,13 @@ while(istat>=0)
   /* Read element desitiies from .dat file, if absent, initialize the design to one */    
   rho(design,ne);
 
-  /* Set the element density of passive elements to 1 */
-  filterOutPassiveElems_density(design, ne, passiveIDs, numPassive);
-
+  if (numPassive > 1)
+  {
+    printf("  Setting raw element densitities for skin elements to 1 ...");
+    /* Set the element density of passive elements to 1 */
+    filterOutPassiveElems_density(design, ne, passiveIDs, numPassive);
+    printf("done\n");
+  }
   /* Define stress array here, pass to linstatic and then plot in write_vtu.c */
   NNEW(stx,double,6*mi[0]*ne);
 
@@ -1783,7 +1787,7 @@ while(istat>=0)
         NNEW(filternnzElems,ITG,ne_);
         NNEW(designFiltered,double,ne_);
 
-        
+        printf("Element density for the 10th element: %.4f \n", design[9]);
         /* apply the filter matrix on rho to get rhoPhys */ 
         printf("Filtering element densities...\n");
         filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
@@ -2104,17 +2108,23 @@ while(istat>=0)
       filterSensitivity_bin_buffered_mts3(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
       printf("done \n");
       
-      printf(" Filter passive elements for CG");
-      /* set the filtered CGx sens of passive elements to 0 */
-      filterOutPassiveElems_sens(dCGxFiltered, ne, passiveIDs, numPassive);
+      if (numPassive > 0)
+      {
 
-      /* set the filtered CGy sens of passive elements to 0 */
-      filterOutPassiveElems_sens(dCGyFiltered, ne, passiveIDs, numPassive);
+      
+        printf("  Setting CG sensitivites for skin elements to zero ...");
+        /* set the filtered CGx sens of passive elements to 0 */
+        filterOutPassiveElems_sens(dCGxFiltered, ne, passiveIDs, numPassive);
 
-      /* set the filtered CGz sens of passive elements to 0 */
-      filterOutPassiveElems_sens(dCGzFiltered, ne, passiveIDs, numPassive);
 
-      printf("done\n");
+        /* set the filtered CGy sens of passive elements to 0 */
+        filterOutPassiveElems_sens(dCGyFiltered, ne, passiveIDs, numPassive);
+
+
+        /* set the filtered CGz sens of passive elements to 0 */
+        filterOutPassiveElems_sens(dCGzFiltered, ne, passiveIDs, numPassive);
+        printf("done\n");
+      }
 
       printf(" Writing CG sensitivities to disk...");
       /* ... after you fill dCGx, dCGy, dCGz ... */
@@ -2153,14 +2163,14 @@ while(istat>=0)
       filterSensitivity_bin_buffered_mts(gradCompl, gradComplFiltered, ne, filternnz);
       printf("done! \n");
 
-      printf("  Filter passive elements...");
-
-      /* set the filtered element densities of passive elements to 1 */
-      //filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
-
-      /* set the filtered compliance sens of passive elements to 0 */
-      filterOutPassiveElems_sens(gradComplFiltered, ne, passiveIDs, numPassive);
-      printf("done\n");
+      
+      if (numPassive > 0)
+      {
+        /* set the filtered compliance sens of passive elements to 0 */
+        printf("  Setting compliance sensitivities for skin elements to 0 ...");
+        filterOutPassiveElems_sens(gradComplFiltered, ne, passiveIDs, numPassive);
+        printf("done\n");
+      }
 
       FILE *gradC;
       printf(" Writing compliance sensitivities...");
@@ -2179,9 +2189,14 @@ while(istat>=0)
       filterSensitivity_bin_buffered_mts(eleVol, eleVolFiltered, ne, filternnz);
       printf("done! \n");
 
-      /* set the filtered volumefraction sens of passive elements to 0 */
-      filterOutPassiveElems_sens(eleVolFiltered, ne, passiveIDs, numPassive);
-      
+      if (numPassive > 0)
+      {
+        /* set the filtered volumefraction sens of passive elements to 0 */
+        printf("  Setting volume fraction sensitivities for skin elements to 0 ...");
+        filterOutPassiveElems_sens(eleVolFiltered, ne, passiveIDs, numPassive);
+        printf("done! \n");
+      }
+
       printf(" Writing volume sensitivities...");
       write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
       printf("done!\n");
@@ -2196,7 +2211,7 @@ while(istat>=0)
      
       
       printf(" Writing objectives...");
-      write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, &Pnorm);
+      write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, passiveIDs, numPassive, &Pnorm);
       printf("done!\n");
         
   
@@ -2218,9 +2233,13 @@ while(istat>=0)
     FILE *rho_file;
     rho_file=fopen("rhos.dat","w"); //open in write mode
 
-    /* set the filtered element densities of passive elements to 1 */
-    filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
-    
+    if (numPassive > 0)
+    {
+      /* set the filtered element densities of passive elements to 1 */
+      printf("  Setting physical element densities to 1 ...");
+      filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
+      printf("done! \n");
+    }
     /* loop over all elements and write element densities to file */
     for (int iii=0;iii<ne;iii++)
     {

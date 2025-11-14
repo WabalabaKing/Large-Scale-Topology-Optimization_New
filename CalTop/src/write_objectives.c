@@ -22,6 +22,8 @@ void write_objectives(int ne,
                                 const double *cgx, 
                                 const double *cgy, 
                                 const double *cgz,
+                                const int *passiveIDs,   // ***skin element IDs (from passiveElements)
+                                int numPassive,       
                                 const double *pnorm)
 {
     const char *filename = "objectives.csv";
@@ -62,16 +64,30 @@ void write_objectives(int ne,
     fprintf(obj_file, "COMPLIANCE, ORIGINAL VOLUME, DESIGN VOLUME, VOLUME_FRACTION, DISCRETENESS, MASS, CGx, CGy, CGz, PNORM\n");
 
     /* Loop over all elements and compute the initial and current volume*/
+    // NOTE: Compute initial volume and discretness_sum for structure with skin included
     for (int i = 0; i < ne; i++)
     {
         initialVol_sum+= eleVol[i];
-        designVol_sum+= (eleVol[i]*rhoPhys[i]);
+        //designVol_sum+= (eleVol[i]*rhoPhys[i]);
         discreteness_sum += rhoPhys[i] * (1.0 - rhoPhys[i]);
 
-        //fprintf(sens_file, "%.15f,%.15f,%.15f\n", eleVol[i], eleVol[i] * rhoPhys[i], eleVolFiltered[i]);
+        // Compute design volume excluding skin elements
+        //int is_skin = 0;
+        //for (int k = 0; k < numPassive; k++)
+       // {
+        //    if(passiveIDs[k] == i +1)
+         //   {
+         //       // Found skin elements, break 
+         //       is_skin = 1;
+         //       break;
+         //   }
+       // }
+
+        //if(!is_skin)
+        //{
+            designVol_sum += eleVol[i] * rhoPhys[i];
+        //}
     }
-
-
 
      /* Compute volume fraction */
     double volume_fraction = designVol_sum / initialVol_sum;
