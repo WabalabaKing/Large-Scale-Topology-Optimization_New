@@ -1081,7 +1081,7 @@ while(istat>=0)
 
   if (numPassive > 1)
   {
-    printf("  Setting raw element densitities for skin elements to 1 ...");
+    printf("Setting raw element densitities for skin elements to 1 ...");
     /* Set the element density of passive elements to 1 */
     filterOutPassiveElems_density(design, ne, passiveIDs, numPassive);
     printf("done\n");
@@ -1764,6 +1764,9 @@ while(istat>=0)
       printf("  Density filter radius             %.2f\n", rmin);
       printf("  Non zeros in Filtermatrix         %d\n", fnnzassumed);
       printf("\n");
+      printf("SKIN DEFINITION \n");
+      printf("  Number of skin elements           %.2f\n", numPassive);
+      printf("\n");
       printf("STRESS AGGREGATION \n");
       printf("  P-norm exponent                   %.2f\n", pexp);
       printf("  Stress relaxation                 %.2f\n", eps_relax);
@@ -2035,7 +2038,7 @@ while(istat>=0)
     {
       printf("SENSITIVITY ANALYSIS-----------------------------------------|\n\n");
       
-      printf(" Allocating memory for sensitivities...");
+      printf("  Allocating memory for sensitivities...");
       /* allocate memory for compliance gradient and initialize to zero */
       NNEW(gradCompl,double,ne_);
 
@@ -2073,7 +2076,7 @@ while(istat>=0)
 
 
       /* Evaluate sensitivities */
-      printf( "Evaluating compliance sensitivities...");
+      printf("  Evaluating compliance sensitivities...");
 	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
@@ -2100,7 +2103,7 @@ while(istat>=0)
       /*---------------------------------C.G SENSITIVITY FILTERING AND I/O ----------------------------------------*/
 
 
-      printf(" Evaluate and filter CG sensitivities...");
+      printf("  Evaluate and filter CG sensitivities...");
       compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
                             dCGx, dCGy, dCGz);
@@ -2126,12 +2129,12 @@ while(istat>=0)
         printf("done\n");
       }
 
-      printf(" Writing CG sensitivities to disk...");
+      printf("  Writing CG sensitivities to disk...");
       /* ... after you fill dCGx, dCGy, dCGz ... */
       int rc = write_cg_sens("cg_sens.csv", ne, dCGxFiltered, dCGyFiltered, dCGzFiltered);
       if (rc != 0) 
       {
-        printf("Unable to write CG sensitivities to disk!\n");
+        printf("  Unable to write CG sensitivities to disk!\n");
       }
 
       printf("done!\n");
@@ -2159,7 +2162,7 @@ while(istat>=0)
       /*-------------------------------------COMPLIANCE SENSITIVITY FILTERING AND I/O----------------------------------*/
       double compliance_sum=0;
 
-      printf(" Filter compliance gradient ");
+      printf("  Filter compliance gradient ");
       filterSensitivity_bin_buffered_mts(gradCompl, gradComplFiltered, ne, filternnz);
       printf("done! \n");
 
@@ -2173,7 +2176,7 @@ while(istat>=0)
       }
 
       FILE *gradC;
-      printf(" Writing compliance sensitivities...");
+      printf("  Writing compliance sensitivities...");
       write_compliance_sensitivities(ne,gradCompl,gradComplFiltered,elCompl,&compliance_sum);
       printf("done!\n");
 
@@ -2185,7 +2188,7 @@ while(istat>=0)
       /*-------------------------------------VOLUME SENSITIVITY FILTERING AND I/O----------------------------------*/
 
       FILE *elV_file;
-      printf(" Filter element volume gradient ");
+      printf("  Filter element volume gradient ");
       filterSensitivity_bin_buffered_mts(eleVol, eleVolFiltered, ne, filternnz);
       printf("done! \n");
 
@@ -2197,7 +2200,7 @@ while(istat>=0)
         printf("done! \n");
       }
 
-      printf(" Writing volume sensitivities...");
+      printf("  Writing volume sensitivities...");
       write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
       printf("done!\n");
 
@@ -2210,7 +2213,7 @@ while(istat>=0)
       printf("\n\nOUTPUT FILEDS--------------------------------------------------------------|\n\n");
      
       
-      printf(" Writing objectives...");
+      printf("  Writing objectives...");
       write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, passiveIDs, numPassive, &Pnorm);
       printf("done!\n");
         
