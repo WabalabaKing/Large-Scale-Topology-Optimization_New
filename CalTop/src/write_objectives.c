@@ -72,21 +72,21 @@ void write_objectives(int ne,
         discreteness_sum += rhoPhys[i] * (1.0 - rhoPhys[i]);
 
         // Compute design volume excluding skin elements
-        //int is_skin = 0;
-        //for (int k = 0; k < numPassive; k++)
-       // {
-        //    if(passiveIDs[k] == i +1)
-         //   {
-         //       // Found skin elements, break 
-         //       is_skin = 1;
-         //       break;
-         //   }
-       // }
+        int is_skin = 0;
+        for (int k = 0; k < numPassive; k++)
+        {
+            if(passiveIDs[k] == i +1)
+            {
+                // Found skin elements, break 
+                is_skin = 1;
+                break;
+            }
+        }
 
-        //if(!is_skin)
-        //{
+        if(!is_skin)
+        {
             designVol_sum += eleVol[i] * rhoPhys[i];
-        //}
+        }
     }
 
      /* Compute volume fraction */
