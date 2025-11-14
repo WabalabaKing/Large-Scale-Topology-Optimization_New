@@ -2313,6 +2313,17 @@ c                     endif
      &                        ier,ipoinp,inp,inl,ipol)
             call getnewline(inpc,textpart,istat,n,key,iline,ipol,inl,
      &           ipoinp,inp,ipoinpc)
+
+         elseif(textpart(1)(1:3).eq.'*CG') then
+            write(*,*), 'CG flag set'
+            call getnewline(inpc,textpart,istat,n,key,iline,ipol,inl,
+     &           ipoinp,inp,ipoinpc)
+
+         elseif(textpart(1)(1:6).eq.'*PNORM') then
+            write(*,*), 'PNORM flag set'
+            call getnewline(inpc,textpart,istat,n,key,iline,ipol,inl,
+     &           ipoinp,inp,ipoinpc)
+
          elseif(textpart(1)(1:13).eq.'*USERMATERIAL') then
             ntmatl=0
             do i=2,n

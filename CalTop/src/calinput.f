@@ -45,6 +45,7 @@
      &  iuel,nuel_,nodempcref,coefmpcref,ikmpcref,memmpcref_,
      &  mpcfreeref,maxlenmpcref,memmpc_,isens,namtot,nstam,dacon,
      &  vel,nef,velo,veloo)
+
 !
       implicit none
 !
@@ -131,6 +132,7 @@
      &  alpha,physcon(*),coefmpcref(*),vel(nef,*),velo(*),veloo(*)
 !
       save solid,ianisoplas,out3d,pretension
+
 !
       integer nentries
       parameter(nentries=17)
@@ -143,6 +145,8 @@
       ibasemotion=0
       iamplitudedefault=0
       ier=0
+
+   
 !
       maxsectors=1
       if(mcs.ne.0) then
@@ -193,6 +197,7 @@
       cflux_flag=.false.
       objective_flag=.false.
       constraint_flag=.false.
+
 !
       if(istep.eq.0) then
 !
@@ -239,7 +244,7 @@
          ianisoplas=0
          pretension=.false.
 !
-      endif
+      endif ! end istep .eq. 0 
 !
       call getnewline(inpc,textpart,istat,n,key,iline,ipol,inl,
      &    ipoinp,inp,ipoinpc)
@@ -258,7 +263,11 @@ c         write(*,*) textpart(1)
             call amplitudes(inpc,textpart,amname,amta,namta,nam,
      &        nam_,namtot_,irstrt,istep,istat,n,iline,ipol,inl,ipoinp,
      &        inp,ipoinpc,namtot,ier)
-!
+
+!        Parse Stress sensitivity flag     
+         elseif(textpart(1)(1:3).eq.'*CG') then
+            write(*,*) 'Detecting CG flag'
+
          elseif(textpart(1)(1:11).eq.'*BASEMOTION') then
             call basemotions(inpc,textpart,amname,nam,ibasemotion,
      &           xboun,ndirboun,iamboun,typeboun,nboun,istep,istat,n,
@@ -390,6 +399,7 @@ c         write(*,*) textpart(1)
      &        maxsectors,idefforc,ipompc,nodempc,
      &        nmpc,ikmpc,ilmpc,labmpc,iamplitudedefault,namtot,ier)
             cload_flag=.true.
+
 !
          elseif(textpart(1)(1:17).eq.'*COMPLEXFREQUENCY') then
             call complexfrequencys(inpc,textpart,nmethod,

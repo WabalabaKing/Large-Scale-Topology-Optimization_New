@@ -1011,7 +1011,7 @@ while(istat>=0)
   /* reading the input file */
   if(istep==0)mortar=-1;
 
-
+  
   FORTRAN(calinput,(co,&nk,kon,ipkon,lakon,&nkon,&ne,
             nodeboun,ndirboun,xboun,&nboun,
 	    ipompc,nodempc,coefmpc,&nmpc,&nmpc_,nodeforc,ndirforc,xforc,&nforc,
@@ -1041,7 +1041,7 @@ while(istat>=0)
 	    nodempcref,coefmpcref,ikmpcref,&memmpcref_,&mpcfreeref,
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
-
+  
     /* Define a system-defined structure to get information about a file
        Returns 0 if file is found */
     struct stat buffer;
