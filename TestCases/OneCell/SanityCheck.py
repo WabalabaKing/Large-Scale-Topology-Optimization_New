@@ -1,161 +1,221 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 15 19:19:35 2025
+
+@author: wz10
+"""
+
 import numpy as np
+import copy
 
-# ===========================
-# Tetrahedral element B-matrix and volume
-# ===========================
-def tet_B_matrix(nodes):
-    """
-    nodes: 4x3 array of node coordinates
-    Returns:
-        B: 6x12 strain-displacement matrix
-        V: volume of tetrahedron
-    """
-    x = nodes[:,0]
-    y = nodes[:,1]
-    z = nodes[:,2]
-
-    J = np.array([
-        [x[1]-x[0], x[2]-x[0], x[3]-x[0]],
-        [y[1]-y[0], y[2]-y[0], y[3]-y[0]],
-        [z[1]-z[0], z[2]-z[0], z[3]-z[0]]
+def C_matrix(E, nu):
+    """3D isotropic elasticity matrix"""
+    lam = E*nu / ((1+nu)*(1-2*nu))
+    mu  = E / (2*(1+nu))
+    C = np.array([
+        [lam+2*mu, lam,      lam,      0, 0, 0],
+        [lam,      lam+2*mu, lam,      0, 0, 0],
+        [lam,      lam,      lam+2*mu, 0, 0, 0],
+        [0, 0, 0, mu, 0, 0],
+        [0, 0, 0, 0, mu, 0],
+        [0, 0, 0, 0, 0, mu]
     ])
-    V = np.linalg.det(J)/6.0
-    if V <= 0:
-        raise ValueError("Negative tetrahedron volume!")
+    return C
 
-    Jinv = np.linalg.inv(J)
+def B_matrix(coords):
+    x = coords[:,0]
+    y = coords[:,1]
+    z = coords[:,2]
 
-    # Gradients of shape functions in reference tetrahedron
-    dN_hat = np.array([
-        [-1,-1,-1],
-        [ 1, 0, 0],
-        [ 0, 1, 0],
-        [ 0, 0, 1]
-    ])
-    dN = dN_hat @ Jinv.T  # 4x3
+    # Volume
+    V = np.linalg.det(np.array([
+        [1,x[0],y[0],z[0]],
+        [1,x[1],y[1],z[1]],
+        [1,x[2],y[2],z[2]],
+        [1,x[3],y[3],z[3]]
+    ])) / 6.0
 
-    # Build B-matrix 6x12
+    # Coefficients
+    b = np.zeros(4)
+    c = np.zeros(4)
+    d = np.zeros(4)
+    node_idx = [[0,1,2,3],[1,0,2,3],[2,0,1,3],[3,0,1,2]]
+    for i in range(4):
+        ii,j,k,l = node_idx[i]
+        b[i] = y[j]*(z[k]-z[l]) + y[k]*(z[l]-z[j]) + y[l]*(z[j]-z[k])
+        c[i] = z[j]*(x[k]-x[l]) + z[k]*(x[l]-x[j]) + z[l]*(x[j]-x[k])
+        d[i] = x[j]*(y[k]-y[l]) + x[k]*(y[l]-y[j]) + x[l]*(y[j]-y[k])
+
+    # Construct B matrix
     B = np.zeros((6,12))
     for i in range(4):
-        B[0,3*i]     = dN[i,0]
-        B[1,3*i+1]   = dN[i,1]
-        B[2,3*i+2]   = dN[i,2]
-        B[3,3*i]     = dN[i,1]
-        B[3,3*i+1]   = dN[i,0]
-        B[4,3*i+1]   = dN[i,2]
-        B[4,3*i+2]   = dN[i,1]
-        B[5,3*i]     = dN[i,2]
-        B[5,3*i+2]   = dN[i,0]
+        B[0, 3*i]   = b[i]
+        B[1, 3*i+1] = c[i]
+        B[2, 3*i+2] = d[i]
+        B[3, 3*i]   = c[i]
+        B[3, 3*i+1] = b[i]
+        B[4, 3*i+1] = d[i]
+        B[4, 3*i+2] = c[i]
+        B[5, 3*i]   = d[i]
+        B[5, 3*i+2] = b[i]
+
+    B /= (6*V)
     return B, V
 
-# ===========================
-# Material matrix for isotropic linear elastic
-# ===========================
-def material_D(E, nu):
-    lam = E * nu / ((1+nu)*(1-2*nu))
-    mu  = E / (2*(1+nu))
-    D = np.zeros((6,6))
-    # normal terms
-    D[0:3,0:3] = lam
-    np.fill_diagonal(D[0:3,0:3], lam+2*mu)
-    # shear terms (engineering strain)
-    D[3:,3:] = mu*np.eye(3)
-    return D
-
-# ===========================
-# FEM solver
-# ===========================
-def fem_2tet(nodes, elements, E0, rho, nu, load, fixed_nodes):
-    n_nodes = nodes.shape[0]
-    ndof = n_nodes * 3
-    K = np.zeros((ndof, ndof))
-    F = np.zeros(ndof)
-    F += load
-
-    # Assembly
-    for elemI, elem in enumerate(elements):
-        E = E0 * rho[elemI]
-        coords = nodes[elem]
-        B, V = tet_B_matrix(coords)
-        D = material_D(E, nu)
-        Ke = B.T @ D @ B *V
-
-        # Map DOFs
-        dofs = np.zeros(12, dtype=int)
-        for i,n in enumerate(elem):
-            dofs[3*i:3*i+3] = [3*n, 3*n+1, 3*n+2]
-
-        # Assemble
+def assemble_K(nodes, elems, E0, density, nu,penal):
+    n_dof = 3*len(nodes)
+    K = np.zeros((n_dof, n_dof))
+    for e, conn in enumerate(elems):
+        coords = nodes[conn]
+        E = (density[e]**penal) * E0
+        C = C_matrix(E, nu)
+        B, V = B_matrix(coords)
+        Ke = B.T @ C @ B * V
+        dofs = []
+        for n in conn:
+            dofs.extend([3*n,3*n+1,3*n+2])
         for i in range(12):
             for j in range(12):
-                K[dofs[i],dofs[j]] += Ke[i,j]
+                K[dofs[i], dofs[j]] += Ke[i,j]
+    return K
 
-    # Apply BCs
-    for n in fixed_nodes:
-        for d in range(3):
-            fd = 3*n + d
-            K[fd,:] = 0
-            K[:,fd] = 0
-            K[fd,fd] = 1
-            F[fd] = 0
+def apply_bc(K, F, bc):
+    """bc: list of tuples (node_index, dof_index, value)"""
+    for node,dof,val in bc:
+        idx = 3*node + dof
+        K[idx,:] = 0
+        K[:,idx] = 0
+        K[idx,idx] = 1
+        F[idx] = val
+    return K, F
 
-    # Solve
-    u = np.linalg.solve(K,F)
+def FEM_solver(nodes, elems, E0, density, nu, F, bc,penal):
+    K = assemble_K(nodes, elems, E0, density, nu,penal)
+    K, F = apply_bc(K, F, bc)
+    U = np.linalg.solve(K,F)
+    return U,K
+def dKdrho(nodes, elems, E0, density, nu, F, bc,penal):
+    K = assemble_K(nodes, elems, E0*penal, density, nu, (penal-1))
+    K, F = apply_bc(K, F, bc)
+    return K
+def von_mises_energy(nodes, elems, density, E0, nu, U,penal):
+    vm = np.zeros(len(elems))
+    for e, conn in enumerate(elems):
+        coords = nodes[conn]
+        E = (density[e]**penal)*E0
+        C = C_matrix(E,nu)
+        B, V = B_matrix(coords)
+        Vvm = np.array([
+        [1, -0.5, -0.5, 0, 0, 0],
+        [-0.5, 1, -0.5, 0, 0, 0],
+        [-0.5, -0.5, 1, 0, 0, 0],
+        [0, 0, 0, 3, 0, 0],
+        [0, 0, 0, 0, 3, 0],
+        [0, 0, 0, 0, 0, 3]
+                            ])
+        dofs = []
+        for n in conn:
+            dofs.extend([3*n,3*n+1,3*n+2])
+        ue = U[dofs]
+        M = B.T @ C.T @Vvm@ C @ B 
+        vm[e] = np.sqrt(ue.T @ M @ ue)
+    return vm, M
+def constructM_elem(nodes, elem, density, E0, nu, penal):
+    coords = nodes[elem]
+    E = (density**penal)*E0
+    C = C_matrix(E,nu)
+    B, V = B_matrix(coords)
+    Vvm = np.array([
+        [1, -0.5, -0.5, 0, 0, 0],
+        [-0.5, 1, -0.5, 0, 0, 0],
+        [-0.5, -0.5, 1, 0, 0, 0],
+        [0, 0, 0, 3, 0, 0],
+        [0, 0, 0, 0, 3, 0],
+        [0, 0, 0, 0, 0, 3]
+                            ])
+    Me = B.T @ C.T @Vvm@ C @ B 
+    return Me
+    
+# -------------------------------
+# Example usage:
+nodes = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1],[2/3,2/3,2/3]]) # 5 nodes
+elems = np.array([[0,1,2,3],[1,2,3,4]])                        # 2 tetra
+density = np.array([1.0,1.0])
+F = np.zeros(3*len(nodes))
+F[4*3] = -0.57  # Apply force in x-direction on node 1
+F[4*3+1] = -0.57  # Apply force in x-direction on node 1
+F[4*3+2] = -0.57  # Apply force in x-direction on node 1
+bc = [(0,0,0),(0,1,0),(0,2,0)]  # Fix node 0
+rho = np.array([0.12,0.12])
+rho1 = np.array([1.0,1.0])
+########################    1 element problem
+#nodes = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]]) # 5 nodes
+#elems = np.array([[0,1,2,3]])                        # 2 tetra
+#F = np.zeros(3*len(nodes))
+#F[0*3] = -0.57  # Apply force in x-direction on node 1
+#F[0*3+1] = -0.57  # Apply force in x-direction on node 1
+#F[0*3+2] = -0.57  # Apply force in x-direction on node 1
+#bc = [(1,0,0),(1,1,0),(1,2,0),
+#      (2,0,0),(2,1,0),(2,2,0),
+#      (3,0,0),(3,1,0),(3,2,0)]  # Fix node 0
+#rho = np.array([0.8])
+#rho1 = np.array([1.0])
+###################################################################
+###Here are the variables to check
+E0 = 4e6
+nu = 0.3
+sigmin=0.001
+relax=0.001
+Pexp = 1       #checked
+penal = 4
+#Do solid calculations
 
-    # Postprocess von Mises per element
-    vm = np.zeros(len(elements))
-    for elemI, elem in enumerate(elements):
-        E = E0 * rho[elemI]
-        coords = nodes[elements[elemI]]
-        B, V = tet_B_matrix(coords)
-        D = material_D(E, nu)
+U,K = FEM_solver(nodes, elems, E0, rho, nu, F, bc,penal)
+vm,M = von_mises_energy(nodes, elems,rho, E0, nu, U,penal)
+sigE = vm/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rho
+#correspond to eqn 18: Me0 should be M0
 
-        # DOFs
-        dofs = np.zeros(12, dtype=int)
-        for i,n in enumerate(elements[elemI]):
-            dofs[3*i:3*i+3] = [3*n, 3*n+1, 3*n+2]
-        u_e = u[dofs]
-
-        strain = B @ u_e
-        stress = D @ strain
-        sxx, syy, szz, sxy, syz, sxz = stress
-
-        vm[elemI] = np.sqrt(
-            0.5*((sxx - syy)**2 + (syy - szz)**2 + (szz - sxx)**2)
-            + 3*(sxy**2 + syz**2 + sxz**2)
-        )
-
-    return u, vm
-
-# ===========================
-# Example input
-# ===========================
-nodes = np.array([
-    [0,0,0],   # 0 fixed
-    [1,0,0],   # 1
-    [0,1,0],   # 2
-    [0,0,1],   # 3
-    [0.6666666666,0.6666666666,0.6666666666],   # 4 loaded
-])
-
-elements = np.array([
-    [0,1,2,3],
-    [1,2,3,4]
-])
-
-E0 = 4.0e6
-rho = [1,1]
-nu  = 0.33
-
-# Unit load at node 4
-load = np.zeros(3*len(nodes))
-load[3*4:3*4+3] = [-0.57735,-0.57735,-0.57735]  # normal to face of nodes 2,3,4
-
-# Node 0 fixed
-fixed_nodes = [0]
-
-# Solve
-u, vm = fem_2tet(nodes, elements, E0, rho, nu, load, fixed_nodes)
-
-print("Nodal displacements (u,v,w):\n", u.reshape(-1,3))
-print("Von Mises stress per element:\n", vm)
+#print("Nodal displacements:\n", U.reshape(-1,3))
+print("Element von Mises stress (energy-based):\n", vm)
+Pnorm = sum(sigE**Pexp)**(1/Pexp)
+dPdrho_FD_his=np.zeros(len(elems))
+dPdrho_ADJ_his=np.zeros(len(elems))
+######################FD Calculation of d Pnorm d rho:#########################
+h=1e-7
+for i in range(len(elems)):
+    rhoP= copy.deepcopy(rho)
+    rhoP[i]=rhoP[i]-h
+    Up,Kp = FEM_solver(nodes, elems, E0, rhoP, nu, F, bc,penal)
+    vmP,Mp = von_mises_energy(nodes, elems, rho, E0, nu, Up,penal) 
+    sigEP = vmP/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rhoP   #rho or rhoP?
+    #Note here we uses curent Me and U=Up  for eqn 18
+    PnormP=sum(sigEP**Pexp)**(1/Pexp)
+    dPdrho_FD= (Pnorm-PnormP)/h
+    dPdrho_FD_his[i]=dPdrho_FD
+    print("dPnormd_rho_FD: ", dPdrho_FD)
+######################ADJ Calculation of d Pnorm d rho:#######################
+rhs=np.zeros(len(nodes)*3)
+for i in range(len(elems)):
+    node = elems[i]
+    ue = np.zeros(12)
+    for j in range(len(node)):
+        N = node[j]
+        uN =np.array( [U[N*3],U[N*3+1],U[N*3+2]])
+        ue[j*3:j*3+3] = uN
+    Me = constructM_elem(nodes, node, rho[i], E0, nu,penal)
+    rhsT = (sigE[i]**(Pexp-1))/(sigmin*np.sqrt(ue.T@Me@ue))* (Me @ ue)   
+    for k,j in enumerate(node):
+        rhs[j*3]=rhs[j*3]+rhsT[k*3]
+        rhs[j*3+1]=rhs[j*3+1]+rhsT[k*3+1]
+        rhs[j*3+2]=rhs[j*3+2]+rhsT[k*3+2]
+#This means Eqn 23 M0 are also current M, not M@rho=1
+qb = np.linalg.solve(K,rhs)
+for i in range(len(elems)):
+    rhoP= copy.deepcopy(rho)*0.0
+    rhoP[i]=rho[i]    #Corresponding to def rho
+    dKdr = dKdrho(nodes, elems, E0, rhoP, nu, F, bc,penal)
+    dPdrho_ADJ=Pnorm/(Pnorm**Pexp)*(-qb.T@dKdr@U)
+    dPdrho_ADJ_his[i]=dPdrho_ADJ
+    print("dPnormd_rho_ADJ: ", dPdrho_ADJ)    
+relError = (dPdrho_ADJ_his-dPdrho_FD_his)/dPdrho_FD_his *100
+print("Relative Error:\n", relError) 

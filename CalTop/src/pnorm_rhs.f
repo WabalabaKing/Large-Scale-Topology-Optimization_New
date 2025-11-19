@@ -447,8 +447,6 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   Bten(5,m1)=B(5,m1)
                   Bten(6,m1)=B(6,m1)
                enddo
-               write(*,*),"Bmat",Bten
-               !0.5d0*
 !  ---         von-Misses selecter Vec in tensorial Voigt (3D)
                Vec = 0.d0
                Vec(1,1)=1.d0
