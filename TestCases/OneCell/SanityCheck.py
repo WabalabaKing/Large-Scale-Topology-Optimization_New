@@ -146,7 +146,7 @@ F[4*3] = -0.57  # Apply force in x-direction on node 1
 F[4*3+1] = -0.57  # Apply force in x-direction on node 1
 F[4*3+2] = -0.57  # Apply force in x-direction on node 1
 bc = [(0,0,0),(0,1,0),(0,2,0)]  # Fix node 0
-rho = np.array([0.12,0.12])
+rho = np.array([1.0,1.0])
 rho1 = np.array([1.0,1.0])
 ########################    1 element problem
 #nodes = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]]) # 5 nodes
@@ -176,8 +176,9 @@ sigE = vm/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rho
 #correspond to eqn 18: Me0 should be M0
 
 #print("Nodal displacements:\n", U.reshape(-1,3))
-print("Element von Mises stress (energy-based):\n", vm)
+
 Pnorm = sum(sigE**Pexp)**(1/Pexp)
+print("Pnorm:\n", Pnorm)
 dPdrho_FD_his=np.zeros(len(elems))
 dPdrho_ADJ_his=np.zeros(len(elems))
 ######################FD Calculation of d Pnorm d rho:#########################
@@ -210,6 +211,8 @@ for i in range(len(elems)):
         rhs[j*3+2]=rhs[j*3+2]+rhsT[k*3+2]
 #This means Eqn 23 M0 are also current M, not M@rho=1
 qb = np.linalg.solve(K,rhs)
+for i in range(len(rhs)):
+    print("RHS: ", rhs[i])
 for i in range(len(elems)):
     rhoP= copy.deepcopy(rho)*0.0
     rhoP[i]=rho[i]    #Corresponding to def rho

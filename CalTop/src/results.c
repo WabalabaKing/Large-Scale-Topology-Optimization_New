@@ -521,7 +521,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         {
             const ITG mtloc   = mi[1] + 1;   //stride per node 
             const ITG ndof    = mtloc * (*nk);
-            const ITG ncheck  = 4;          // how many displacement DOFs to check 
+            const ITG ncheck  = 15;          // how many displacement DOFs to check 
             for(i=0; i<num_cpus; i++)  
             {
 	            ithread[i]=i;

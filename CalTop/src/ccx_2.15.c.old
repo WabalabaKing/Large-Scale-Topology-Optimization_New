@@ -1835,10 +1835,10 @@ while(istat>=0)
         //filterVector(&ipkon,design,designFiltered,FilterMatrixs,filternnzElems,rowFilters,colFilters,&ne,&ttime,timepar,&fnnzassumed, &qfilter, filternnz);
 
         /* Try the multi-threaded */
-        printf("Filtering element densities...\n");
+//        printf("Filtering element densities...\n");
         //filterDensity_buffered_dat_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
-        filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
-        printf("Done!");
+//        filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
+//        printf("Done!");
 
         // DEBUG: Print first five and last five values of designFiltered
         /*
@@ -1856,7 +1856,7 @@ while(istat>=0)
 
         */
 
-
+        designFiltered=design;
         rhoPhys=designFiltered;
       }
       else
