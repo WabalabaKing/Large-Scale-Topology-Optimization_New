@@ -360,7 +360,7 @@ int main(int argc,char *argv[])
   double eps_relax = 1e-03;
   double rhomin = 1e-06;
   double pexp = 1.0;
-  int stress_adjoint = 0;
+  int stress_adjoint = 1; // Set this to 1 for now. 
 
   ITG itertop= 1; /**<iteration counter in topology optimization */
   ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
@@ -2132,7 +2132,7 @@ while(istat>=0)
 	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
 
-             printf("done\n");
+      printf("done\n");
 
       //printf("done!\n");
       // Mass and C.G properties

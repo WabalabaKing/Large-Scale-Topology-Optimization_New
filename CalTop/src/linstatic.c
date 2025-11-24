@@ -428,7 +428,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 		//printf(" Computing the Right Hand Side after mafillsmas...");
   		NNEW(b,double,*neq);
-
+		/*
 		double res_l2 = 0.0;   // ||b||_2
 
   		for(k=0;k<*neq;++k)
@@ -444,7 +444,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		//printf("L2-norm : %f \n", res_l2);
 
 		//printf("done!\n");
-
+		*/
 
   		SFREE(fext);
   		SFREE(f);

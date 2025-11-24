@@ -427,27 +427,17 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         /* must match the exponent used inside resultsmech() */
         const double p = *pexp1; 
 
-        //double J = 0.0;     /*  stress p-norm */
-        alpha1 = 0.0;       /* scalar used in adjoint RHS */
 
         // Compute aggregated P-norm
         if (sumP > 0.0)
         {
             // Compute P-norm based on Duysinx and Sigmund 2012
             *Pnorm = pow(sumP, 1.0 / p);
-            alpha1 = pow(*Pnorm, (1.0 - p)); // A scalar term used in sensitivity eval
         }
         else
         {
             *Pnorm = 0.0;
-            alpha1 = 0.0;
         }
-        
-        printf("    Aggregated stress P-norm: %.12e\n", *Pnorm);
-        //printf("J (p-norm)        : %.12e\n", *Pnorm);
-        //printf("alpha1 = J^(1-p2)  : %.12e\n", alpha1);
-
-        
     }  // end stress P-norm calculation
 
 
@@ -473,6 +463,9 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
     if (get_adjoint == 1)
     {
+        printf("    Skipping adjoint term evals for now\n");
+        // NOTE: This step is incorrect. Will wait for Zheng to add the correct implementation
+        /*
         // STEP 2: ASSEMBLE RHS FOR P-NORM ADJOINT (TODO: ZHENG TO CORRECT)
         printf("    Assembling RHS for stress adjoint using analytical solution");
 
@@ -512,108 +505,19 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	    SFREE(rhs1);
         printf("done!\n");
 
-
-        /***************************************P-NORM RHS FD VERIFICATION***********************************/
-        /*
-        // ---------- FD check of dJ/du on first 12 displacement DOFs ---------- 
-        {
-            const ITG mtloc   = mi[1] + 1;   //stride per node 
-            const ITG ndof    = mtloc * (*nk);
-            const ITG ncheck  = 24;          // how many displacement DOFs to check 
-            const double J0   = eval_pnorm_J_fd();
-
-            printf("Current J0 %f", J0);
-
-            ITG tested = 0;
-            printf("    FD check on first %lld displacement DOFs (out of %lld total entries)\n",
-            (long long)ncheck, (long long)ndof);
-            printf("      %6s  %-22s  %-22s  %-12s\n",
-            "k", "dJ/du (FD)", "dJ/du (adjoint)", "rel.err");
-
-            for (ITG node = 1; node <= *nk && tested < ncheck; ++node) 
-            {
-                ITG base = mtloc * (node - 1);
-
-                // Skip temperature (base + 0); perturb only Ux, Uy, Uz 
-                for (ITG comp = 1; comp <= 3 && tested < ncheck; ++comp) 
-                {
-                    ITG k = base + comp;  // displacement component index 
-
-                    const double u0 = v1[k];
-                
-                    const double h  = 1e-06;
-
-                    v1[k] = u0 + h;
-                    const double Jp = eval_pnorm_J_fd();
-                   // printf("Current v1[k]: %f \n", v1[k]);
-                    v1[k] = u0;  // restore 
-                    //printf("Curent Jp: %f \n", Jp);
-
-                    const double dJdu_fd  = (Jp - J0) / h;
-                    const double dJdu_adj = brhs[k];  // analytical //
-                    const double rel_err = 
-                    (fabs(dJdu_adj) > 0.0) ? fabs(dJdu_fd - dJdu_adj) / fabs(dJdu_adj) : 0.0;
-
-                    printf("      %6lld  %+ .15e  %+ .15e  % .3e\n",
-                    (long long)k, dJdu_fd, dJdu_adj, rel_err);
-                    ++tested;
-                }
-            }
-        }
-        // ---------- end FD check ---------- //
-
         */
 
-        
-        /**************************************P-NORM RHS FD EVALUATION***************************************/
-        /*
-        printf("    Assembling RHS via forward finite differences (ALL DOFs)...\n");
-
-        // Baseline J0 at current v1 /
-        const double J0 = eval_pnorm_J_fd();
-
-        // Full-space size and zero RHS /
-        const ITG mtloc = mi[1] + 1;
-        const ITG ndof  = mtloc * (*nk);
-        for (ITG k = 0; k < ndof; ++k) brhs[k] = 0.0;
-
-        // Progress reporting /
-        const ITG report_stride = (ndof > 20 ? ndof/20 : 1);
-
-        // FD loop over ALL DOFs (constrained included) /
-        for (ITG k = 0; k < ndof; ++k) 
-        {
-
-            const double u0 = v1[k];
-            const double h  = fmax(1.0e-8, 1.0e-6 * (1.0 + fabs(u0)));
-
-            v1[k] = u0 + h;              // bump //
-            const double Jp = eval_pnorm_J_fd();
-            v1[k] = u0;                   // restore //
-
-            brhs[k] = (Jp - J0) / h;      // forward FD //
-
-            if ((k % report_stride) == 0) 
-            {
-                printf("      FD RHS progress: %lld / %lld\r",
-                (long long)k, (long long)ndof);
-                fflush(stdout);
-            }
-        }
-        printf("      FD RHS progress: %lld / %lld\n",
-        (long long)ndof, (long long)ndof);
-        printf("    done!\n");
-
-        */
 
         /*************************************P-NORM EXPLICIT TERM CALCULATION******************************/
         
+        /*
+        // NOTE: Avoid computing the explicit term for now -> will come back to this alter when Zheng is done computing the full adjoint
         // STEP 3: COMPUTE EXPLICIT TERM FOR P-NORM ADJOINT (PRATEEK TO FIX)
         djdrho_explicit1 = djdrho_explicit;
 
         printf("    Assembling explicit term...");
 
-        /* allocate per-thread indices */
+        // allocate per-thread indices 
         NNEW(ithread, ITG, num_cpus);
 
         for (i = 0; i < num_cpus; ++i) 
@@ -638,7 +542,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         printf("done!\n");
        // SFREE(neapar);
        // SFREE(nebpar);
-
+    */
     }
 
     if (get_adjoint == 1)

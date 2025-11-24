@@ -33,120 +33,156 @@ ITG nthread_mkl=0;
 void pardiso_factor(double *ad, double *au, double *adb, double *aub, 
                 double *sigma,ITG *icol, ITG *irow, 
 		ITG *neq, ITG *nzs, ITG *symmetryflag, ITG *inputformat,
-		ITG *jq, ITG *nzs3){
+		ITG *jq, ITG *nzs3)
+	{
 
-  char *env;
-/*  char env1[32]; */
-  ITG i,j,k,l,maxfct=1,mnum=1,phase=12,nrhs=1,*perm=NULL,mtype,
-      msglvl=0,error=0,*irowpardiso=NULL,kflag,kstart,n,ifortran,
-      lfortran,index,id,k2;
-  ITG ndim,nthread,nthread_v;
-  double *b=NULL,*x=NULL;
+  		char *env;
+		/*  char env1[32]; */
+  		ITG i,j,k,l,maxfct=1,mnum=1,phase=12,nrhs=1,*perm=NULL,mtype,
+      		msglvl=0,error=0,*irowpardiso=NULL,kflag,kstart,n,ifortran,
+      		lfortran,index,id,k2;
+  		ITG ndim,nthread,nthread_v;
 
-  if(*symmetryflag==0){
-      printf(" Factoring the system of equations using the symmetric pardiso solver\n");
-  }else{
-      printf(" Factoring the system of equations using the unsymmetric pardiso solver\n");
-  }
+  		double *b=NULL,*x=NULL;
 
-  iparm[0]=0;
-/* set MKL_NUM_THREADS to min(CCX_NPROC_EQUATION_SOLVER,OMP_NUM_THREADS)
-   must be done once  */
-  if (nthread_mkl == 0) {
-    nthread=1;
-    env=getenv("MKL_NUM_THREADS");
-    if(env) {
-      nthread=atoi(env);}
-    else {
-      env=getenv("OMP_NUM_THREADS");
-      if(env) {nthread=atoi(env);}
-    }
-    env=getenv("CCX_NPROC_EQUATION_SOLVER");
-    if(env) {
-      nthread_v=atoi(env);
-      if (nthread_v <= nthread) {nthread=nthread_v;}
-    }
-    if (nthread < 1) {nthread=1;}
-    sprintf(envMKL,"MKL_NUM_THREADS=%" ITGFORMAT "",nthread);  
-    putenv(envMKL);
-    nthread_mkl=nthread;
-  }
+  		if(*symmetryflag==0)
+		{
+      		printf(" Factoring the system of equations using the symmetric pardiso solver\n");
+  		}
+		else
+		{
+      		printf(" Factoring the system of equations using the unsymmetric pardiso solver\n");
+  		}
+
+  		iparm[0]=0;
+		/* set MKL_NUM_THREADS to min(CCX_NPROC_EQUATION_SOLVER,OMP_NUM_THREADS)
+   			must be done once  */
+  		if (nthread_mkl == 0) 
+		{
+    		nthread=1;
+    		env=getenv("MKL_NUM_THREADS");
+    		if(env) 
+			{
+      			nthread=atoi(env);
+			}
+    		else 
+			{
+      			env=getenv("OMP_NUM_THREADS");
+      			if(env) 
+				{
+					nthread=atoi(env);
+				}
+    		}
+    		env=getenv("CCX_NPROC_EQUATION_SOLVER");
+    		if(env) 
+			{
+      			nthread_v=atoi(env);
+      			if (nthread_v <= nthread) 
+				{
+					nthread=nthread_v;
+				}
+    		}
+    		if (nthread < 1) 
+			{
+				nthread=1;
+			}
+    		sprintf(envMKL,"MKL_NUM_THREADS=%" ITGFORMAT "",nthread);  
+    		putenv(envMKL);
+    		nthread_mkl=nthread;
+  		}
     
-  printf(" number of threads =% d\n\n",nthread_mkl);
+  		printf(" number of threads =% d\n\n",nthread_mkl);
 
-  for(i=0;i<64;i++){pt[i]=0;}
+  		for(i=0;i<64;i++)
+		{
+			pt[i]=0;
+		}
 
-  if(*symmetryflag==0){
+  		if(*symmetryflag==0)
+		{
 
-      /* symmetric matrix; the subdiagonal entries are stored
-         column by column in au, the diagonal entries in ad;
-         pardiso needs the entries row per row */      
+      		/* symmetric matrix; the subdiagonal entries are stored
+         	column by column in au, the diagonal entries in ad;
+         	pardiso needs the entries row per row */      
 
-      mtype=-2;
+      		mtype=-2;
 
       
-      ndim=*neq+*nzs;
+      		ndim=*neq+*nzs;
       
-      NNEW(pointers,ITG,*neq+1);
-      NNEW(icolpardiso,ITG,ndim);
-      NNEW(aupardiso,double,ndim);
+      		NNEW(pointers,ITG,*neq+1);
+      		NNEW(icolpardiso,ITG,ndim);
+      		NNEW(aupardiso,double,ndim);
       
-      k=ndim;
-      l=*nzs;
+      		k=ndim;
+      		l=*nzs;
       
-      if(*sigma==0.){
-	  pointers[*neq]=ndim+1;
-	  for(i=*neq-1;i>=0;--i){
-	      for(j=0;j<icol[i];++j){
-		  icolpardiso[--k]=irow[--l];
-		  aupardiso[k]=au[l];
-	      }
-	      pointers[i]=k--;
-	      icolpardiso[k]=i+1;
-	      aupardiso[k]=ad[i];
-	  }
-      }
-      else{
-	  pointers[*neq]=ndim+1;
-	  for(i=*neq-1;i>=0;--i){
-	      for(j=0;j<icol[i];++j){
-		  icolpardiso[--k]=irow[--l];
-		  aupardiso[k]=au[l]-*sigma*aub[l];
-	      }
-	      pointers[i]=k--;
-	      icolpardiso[k]=i+1;
-	      aupardiso[k]=ad[i]-*sigma*adb[i];
-	  }
-      }
-  }else{
-      mtype=11;
+      		if(*sigma==0.)
+			{
+	  			pointers[*neq]=ndim+1;
 
-      if(*inputformat==3){
+	  			for(i=*neq-1;i>=0;--i)
+				{
+	      			for(j=0;j<icol[i];++j)
+					{
+		  				icolpardiso[--k]=irow[--l];
+		  				aupardiso[k]=au[l];
+	      			}
+	      			pointers[i]=k--;
+	      			icolpardiso[k]=i+1;
+	      			aupardiso[k]=ad[i];
+	  			}
+      		}
+      		else
+			{
+	  			pointers[*neq]=ndim+1;
+	  			for(i=*neq-1;i>=0;--i)
+				{
+	      			for(j=0;j<icol[i];++j)
+					{
+		  				icolpardiso[--k]=irow[--l];
+		  				aupardiso[k]=au[l]-*sigma*aub[l];
+	      			}
+	      			pointers[i]=k--;
+	      			icolpardiso[k]=i+1;
+	      			aupardiso[k]=ad[i]-*sigma*adb[i];
+	  			}
+      		}
+  		}
+		else
+		{
+      		mtype=11;
 
-          /* off-diagonal terms  are stored column per
-             column from top to bottom in au;
-             diagonal terms are stored in ad  */
+      		if(*inputformat==3)
+			{
 
-	  ndim=*neq+*nzs;
-	  NNEW(pointers,ITG,*neq+1);
-	  NNEW(irowpardiso,ITG,ndim);	  
-	  NNEW(icolpardiso,ITG,ndim);
-	  NNEW(aupardiso,double,ndim);
+          		/* off-diagonal terms  are stored column per
+            	 column from top to bottom in au;
+             	diagonal terms are stored in ad  */
+
+	  			ndim=*neq+*nzs;
+	  			NNEW(pointers,ITG,*neq+1);
+	  			NNEW(irowpardiso,ITG,ndim);	  
+	  			NNEW(icolpardiso,ITG,ndim);
+	  			NNEW(aupardiso,double,ndim);
 	  
-	  k=0;
-	  k2=0;
-	  for(i=0;i<*neq;i++){
-	      for(j=0;j<icol[i];j++){
-		  if(au[k]>1.e-12||au[k]<-1.e-12){
-		      icolpardiso[k2]=i+1;
-		      irowpardiso[k2]=irow[k];
-		      aupardiso[k2]=au[k];
-		      k2++;		  
-		  }
-		  k++;	      
-	      }	  
-	  }  
-	  /* diagonal terms */  
+	  			k=0;
+	  			k2=0;
+	  			for(i=0;i<*neq;i++)
+				{
+	      			for(j=0;j<icol[i];j++)
+					{
+		  				if(au[k]>1.e-12||au[k]<-1.e-12)
+						{
+		      				icolpardiso[k2]=i+1;
+		      				irowpardiso[k2]=irow[k];
+		      				aupardiso[k2]=au[k];
+		      				k2++;		  
+		  				}
+		  				k++;	      
+	      			}	  
+	  			}  
+	  			/* diagonal terms */  
 	  for(i=0;i<*neq;i++){
 	      icolpardiso[k2]=i+1;
 	      irowpardiso[k2]=i+1;
