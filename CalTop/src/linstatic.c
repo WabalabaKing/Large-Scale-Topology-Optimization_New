@@ -298,6 +298,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   		/* determining the system matrix and the external forces */
 
+		// Diagonal entries of stiffness matrix K
   		NNEW(ad,double,*neq);
   		NNEW(fext,double,*neq);
 
@@ -339,6 +340,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
       		/* creating the right size au */
 
+
       		NNEW(au,double,nzs[2]);
       		rhsi=0;
 			//      nmethodl=2;
@@ -360,6 +362,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 			/* linear static calculation */
 
 			printf(" Starting linstatic calculation...\n");
+
+			// Off-diagonal entries of stiffness matrix K
       		NNEW(au,double,*nzs);
       		nmethodl=*nmethod;
 
@@ -428,7 +432,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 		//printf(" Computing the Right Hand Side after mafillsmas...");
   		NNEW(b,double,*neq);
-		/*
+		
 		double res_l2 = 0.0;   // ||b||_2
 
   		for(k=0;k<*neq;++k)
@@ -444,7 +448,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		//printf("L2-norm : %f \n", res_l2);
 
 		//printf("done!\n");
-		*/
+		
 
   		SFREE(fext);
   		SFREE(f);
@@ -507,8 +511,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				#ifdef PARDISO
 				// Call PARDISO to solve linear system
 				//printf("Calling PARSIDO from linstatic.c \n");
-      			//pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
-		   		//&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+      		//	pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
+		   //		&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 
 				printf(" PARDISO: factorizing K...\n");
 				pardiso_factor(ad,au,adb,aub,&sigma,  /* adb/aub may be NULL if unused */

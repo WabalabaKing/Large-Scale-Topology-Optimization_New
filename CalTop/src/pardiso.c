@@ -404,26 +404,62 @@ void pardiso_factor(double *ad, double *au, double *adb, double *aub,
                    b,x,&error));
   		return;
 	}
+/*
+ * ----------------------------------------------------------------------
+ * Function: pardiso_solve
+ * ----------------------------------------------------------------------
+ * Purpose:
+ *    Solves the linear system A * x = b using the factorization
+ *    produced earlier by pardiso_factor(). The solution overwrites b.
+ *    This function invokes PARDISO with phase = 33 (solve only).
+ *
+ * Arguments:
+ *    b            - [in/out]  Right-hand side vector(s). On return,
+ *                              contains the computed solution(s).
+ *    neq          - [in]      Number of equations.
+ *    symmetryflag - [in]      0 = symmetric system, 1 = unsymmetric.
+ *    nrhs         - [in]      Number of right-hand sides.
+ *
+ * Output:
+ *    - Solution is written into b.
+ *    - No matrix memory is modified; uses the existing PARDISO pt[] data.
+ *
+ * Notes:
+ *    - Requires that pardiso_factor() has already been called.
+ *    - Allocates a temporary solution vector x and copies results into b.
+ *    - Thread count is inherited from the first call to pardiso_factor().
+ *
+ * ----------------------------------------------------------------------
+ */
 
-void pardiso_solve(double *b, ITG *neq,ITG *symmetryflag,ITG *nrhs){
+void pardiso_solve(double *b, ITG *neq,ITG *symmetryflag,ITG *nrhs)
+{
 
   ITG maxfct=1,mnum=1,phase=33,*perm=NULL,mtype,
-      msglvl=1,i,error=0;
+    	msglvl=1,i,error=0;
   double *x=NULL;
 
-  if(*symmetryflag==0){
-      printf(" Solving the system of equations using the symmetric pardiso solver\n");
-  }else{
-      printf(" Solving the system of equations using the unsymmetric pardiso solver\n");
+  if(*symmetryflag==0)
+  {
+    printf(" Solving the system of equations using the symmetric pardiso solver\n");
+  }
+  else
+  {
+    printf(" Solving the system of equations using the unsymmetric pardiso solver\n");
   }
 
-  if(*symmetryflag==0){
-      mtype=-2;
-  }else{
-      mtype=11;
+  if(*symmetryflag==0)
+  {
+    mtype=-2;
   }
+  else
+  {
+    mtype=11;
+  }
+
   iparm[0]=0;
-/* pardiso_factor has been called befor, MKL_NUM_THREADS=nthread_mkl is set*/
+
+	/* pardiso_factor has been called befor, MKL_NUM_THREADS=nthread_mkl is set*/
 
   printf(" number of threads =% d\n\n",nthread_mkl);
 
@@ -439,16 +475,48 @@ void pardiso_solve(double *b, ITG *neq,ITG *symmetryflag,ITG *nrhs){
   return;
 }
 
-void pardiso_cleanup(ITG *neq,ITG *symmetryflag){
+/*
+ * ----------------------------------------------------------------------
+ * Function: pardiso_cleanup
+ * ----------------------------------------------------------------------
+ * Purpose:
+ *    Releases all PARDISO internal memory associated with the matrix
+ *    factorization and frees the CSR arrays allocated during
+ *    pardiso_factor(). Uses PARDISO phase = -1 (memory release).
+ *
+ * Arguments:
+ *    neq          - [in]  Number of equations.
+ *    symmetryflag - [in]  0 = symmetric matrix, 1 = unsymmetric.
+ *
+ * Output:
+ *    No return value. Frees global arrays:
+ *        icolpardiso
+ *        aupardiso
+ *        pointers
+ *    and clears all PARDISO internal structures in pt[].
+ *
+ * Notes:
+ *    - Must be called after all solves are complete.
+ *    - Safe to call even in one-shot solve (used by pardiso_main()).
+ *
+ * ----------------------------------------------------------------------
+ */
+
+
+void pardiso_cleanup(ITG *neq,ITG *symmetryflag)
+{
 
   ITG maxfct=1,mnum=1,phase=-1,*perm=NULL,nrhs=1,mtype,
       msglvl=0,error=0;
   double *b=NULL,*x=NULL;
 
-  if(*symmetryflag==0){
-      mtype=-2;
-  }else{
-      mtype=11;
+  if(*symmetryflag==0)
+  {
+    mtype=-2;
+  }
+  else
+  {
+    mtype=11;
   }
 
   FORTRAN(pardiso,(pt,&maxfct,&mnum,&mtype,&phase,neq,aupardiso,
@@ -462,22 +530,75 @@ void pardiso_cleanup(ITG *neq,ITG *symmetryflag){
   return;
 }
 
+/*
+ * ----------------------------------------------------------------------
+ * Function: pardiso_main
+ * ----------------------------------------------------------------------
+ * Purpose:
+ *    Convenience wrapper that performs the complete PARDISO workflow
+ *    for a single solve:
+ *       1) Assemble and factor the system matrix (pardiso_factor),
+ *       2) Solve A * x = b for the given right-hand side(s)
+ *          (pardiso_solve),
+ *       3) Release all PARDISO and matrix-related memory
+ *          (pardiso_cleanup).
+ *
+ * Arguments:
+ *    ad       - [in]  Diagonal entries of stiffness matrix K.
+ *    au       - [in]  Off-diagonal entries of stiffness matrix K.
+ *    adb      - [in]  Diagonal entries of auxiliary matrix (e.g., mass) M.
+ *    aub      - [in]  Off-diagonal entries of M.
+ *    sigma    - [in]  Scalar shift; if non-zero, K - sigma*M is factored.
+ *
+ *    b        - [in/out]  Right-hand side(s). On return, contains the
+ *                          solution vector(s).
+ *
+ *    icol     - [in]  Number of off-diagonal entries in each column of K.
+ *    irow     - [in]  Row indices for off-diagonal terms.
+ *
+ *    neq      - [in]  Number of equations (matrix dimension).
+ *    nzs      - [in]  Number of off-diagonal nonzeros.
+ *
+ *    symmetryflag - [in]  0 = symmetric system, 1 = unsymmetric system.
+ *    inputformat   - [in]  CalculiX matrix storage format
+ *                          (1 = split triangular, 3 = column-based).
+ *
+ *    jq       - [in]  Column pointer array for upper triangle
+ *                     (used when inputformat = 1).
+ *    nzs3     - [in]  Offset into au for upper triangular entries.
+ *
+ *    nrhs     - [in]  Number of right-hand sides.
+ *
+ * Output:
+ *    - Overwrites b with the solution(s) of the linear system.
+ *    - Internally allocates and frees all data structures for PARDISO.
+ *
+ * Notes:
+ *    - Returns immediately if *neq == 0 (empty system).
+ *    - Suitable for single load case / one-shot solves.
+ *      For repeated solves with the same matrix and different RHS,
+ *      call pardiso_factor(), then pardiso_solve() repeatedly,
+ *      and finally pardiso_cleanup().
+ *
+ * ----------------------------------------------------------------------
+ */
 void pardiso_main(double *ad, double *au, double *adb, double *aub, 
          double *sigma,double *b, ITG *icol, ITG *irow, 
-	 ITG *neq, ITG *nzs,ITG *symmetryflag,ITG *inputformat,
-	 ITG *jq, ITG *nzs3,ITG *nrhs){
+	ITG *neq, ITG *nzs,ITG *symmetryflag,ITG *inputformat,
+	ITG *jq, ITG *nzs3,ITG *nrhs)
+	{
 
-  if(*neq==0) return;
+  		if(*neq==0) return;
 
-  pardiso_factor(ad,au,adb,aub,sigma,icol,irow, 
-		 neq,nzs,symmetryflag,inputformat,jq,nzs3);
+  		pardiso_factor(ad,au,adb,aub,sigma,icol,irow, 
+			neq,nzs,symmetryflag,inputformat,jq,nzs3);
 
-  pardiso_solve(b,neq,symmetryflag,nrhs);
+  		pardiso_solve(b,neq,symmetryflag,nrhs);
 
-  pardiso_cleanup(neq,symmetryflag);
+  		pardiso_cleanup(neq,symmetryflag);
 
-  return;
-}
+  		return;
+	}
 
 #endif
 
