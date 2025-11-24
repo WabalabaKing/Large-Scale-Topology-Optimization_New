@@ -510,17 +510,17 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 			{
 				#ifdef PARDISO
 				// Call PARDISO to solve linear system
-				//printf("Calling PARSIDO from linstatic.c \n");
-      		//	pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
-		   //		&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+				printf("Calling PARSIDO from linstatic.c \n");
+      			pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
+		   		&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 
-				printf(" PARDISO: factorizing K...\n");
-				pardiso_factor(ad,au,adb,aub,&sigma,  /* adb/aub may be NULL if unused */
-               		icol,irow,neq,nzs,&symmetryflag,&inputformat,jq,&nzs[2]);
+				//printf(" PARDISO: factorizing K...\n");
+				//pardiso_factor(ad,au,adb,aub,&sigma,  /* adb/aub may be NULL if unused */
+               	//	icol,irow,neq,nzs,&symmetryflag,&inputformat,jq,&nzs[2]);
 
 				/* --- Primal solve: K u = b --- */
-				printf(" PARDISO: solving primal...\n");
-				pardiso_solve(b,neq,&symmetryflag,&nrhs);
+				//printf(" PARDISO: solving primal...\n");
+				//pardiso_solve(b,neq,&symmetryflag,&nrhs);
 
 				#else
             	printf("*ERROR in linstatic: the PARDISO library is not linked\n\n");
