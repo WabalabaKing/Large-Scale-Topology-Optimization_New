@@ -443,17 +443,17 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  		//res_l2 += r * r;
   		}
 
-		double *btemp;
-		NNEW(btemp,double,*neq);
+		//double *btemp;
+		//NNEW(btemp,double,*neq);
 
 
-  		for(k=0;k<*neq;++k)
-  		{
-	  		double r = fext[k] - f[k];
-      		btemp[k] = r;
+  		//for(k=0;k<*neq;++k)
+  	//	{
+	 // 		double r = fext[k] - f[k];
+     // 		btemp[k] = r;
 	 
 	  		//res_l2 += r * r;
-  		}
+  	//	}
 
 		//res_l2 = sqrt(res_l2);
 
@@ -535,9 +535,9 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 				//printf("nrhs value: %d\n", nrhs);
 				// Call PARDISO to solve linear system
-				printf("Calling PARSIDO from linstatic.c \n");
-      			pardiso_main(ad,au,adb,aub,&sigma,btemp,icol,irow,neq,nzs,
-		   		&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+				//printf("Calling PARSIDO from linstatic.c \n");
+      			//pardiso_main(ad,au,adb,aub,&sigma,btemp,icol,irow,neq,nzs,
+		   		//&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 				
 
 				printf("Caling PARDISO @ second pass..\n");

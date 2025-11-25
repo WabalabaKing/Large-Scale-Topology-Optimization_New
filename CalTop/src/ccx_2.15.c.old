@@ -360,7 +360,7 @@ int main(int argc,char *argv[])
   double eps_relax = 1e-03;
   double rhomin = 1e-06;
   double pexp = 1.0;
-  int stress_adjoint = 1; // Set this to 1 for now. 
+  int stress_adjoint = 1; // Set this to 1 for now.
 
   ITG itertop= 1; /**<iteration counter in topology optimization */
   ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
@@ -373,6 +373,16 @@ int main(int argc,char *argv[])
 
   ITG *rowFilters=NULL; /**<row index */
   ITG *colFilters=NULL; /**<column matrix */
+
+  /* Additional variables for preCICE MDO coupling 
+      preCICE is used only of  aparticipant name is provided as a command line argument
+  */
+
+  char preciceParticipantName[256] = "", configFilename[256] = "config.yml";
+  int preciceUsed = 0;
+
+
+
 
   #ifdef CALCULIX_MPI
   MPI_Init(&argc, &argv) ;
@@ -489,7 +499,27 @@ else
     }
   }
 
-}
+  for (i = 1; i<argc;i++)
+  {
+    if(strcmp1(argv[i], "-precice-participant") == 0)
+    {
+      preciceUsed = 1;
+
+      /* Make sure there is a participant name after the flag */
+
+      if (i+1 < argc)
+      {
+        strcpy(preciceParticipantName, argv[i+1]);
+      }
+      else
+      {
+        fprintf(stderr, "Error: -precice-particiapnt flag requires a name\n");
+      }
+      break;
+    }
+  }
+
+} // End parsing all command line arguments
 
 
 /* Assign default value for penalty parameter */
