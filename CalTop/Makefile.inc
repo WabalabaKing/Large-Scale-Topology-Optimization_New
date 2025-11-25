@@ -1074,6 +1074,8 @@ $(SRC_DIR)/write_CGSens.c \
 $(SRC_DIR)/filterSens_bin_mt_s_group.c \
 $(SRC_DIR)/write_StressSens.c \
 $(SRC_DIR)/adjoint_eq_2_node.c \
+$(SRC_DIR)/linstatic_MDO.c \
+
 
 
 

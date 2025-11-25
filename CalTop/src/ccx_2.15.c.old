@@ -1830,7 +1830,7 @@ while(istat>=0)
       printf("MDO \n");
       if (staticMDO)
       {
-        printf("  Static aeroelasticity           YES\n");
+        printf("  Static aeroelasticity            YES\n");
       }
       else{
         printf("  Static aeroelasticity           NO\n");
