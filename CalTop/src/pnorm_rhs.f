@@ -526,7 +526,6 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                
                do m1=1,12
                   rhs_loc(m1) = coeff * rhs_loc(m1)
-!                  rhs_loc(m1) = coeff 
                enddo
 
 ! ---          Scatter to global rhs(1..3, node)

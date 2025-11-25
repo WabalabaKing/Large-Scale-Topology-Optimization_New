@@ -464,8 +464,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     if (get_adjoint == 1)
     {
         printf("    Skipping adjoint term evals for now\n");
-        // NOTE: This step is incorrect. Will wait for Zheng to add the correct implementation
-        /*
+        
         // STEP 2: ASSEMBLE RHS FOR P-NORM ADJOINT (TODO: ZHENG TO CORRECT)
         printf("    Assembling RHS for stress adjoint using analytical solution");
 
@@ -505,7 +504,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	    SFREE(rhs1);
         printf("done!\n");
 
-        */
+        
 
 
         /*************************************P-NORM EXPLICIT TERM CALCULATION******************************/

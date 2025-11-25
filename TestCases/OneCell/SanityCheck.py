@@ -211,10 +211,13 @@ for i in range(len(elems)):
         rhs[j*3+2]=rhs[j*3+2]+rhsT[k*3+2]
 #This means Eqn 23 M0 are also current M, not M@rho=1
 qb = np.linalg.solve(K,rhs)
+Kred = K[3:,3:]
+rhsred = rhs[3:]
+qbred = np.linalg.solve(Kred,rhsred)
 for i in range(len(rhs)):
     print(f"RHS[{i}] = {rhs[i]:.4e}")
-for i in range(len(rhs)):
-    print(f"Q_tilda[{i}] = {qb[i]:.4e}")
+for i in range(len(qbred)):
+    print(f"Q_tilda[{i}] = {qbred[i]:.4e}")
 for i in range(len(elems)):
     rhoP= copy.deepcopy(rho)*0.0
     rhoP[i]=rho[i]    #Corresponding to def rho

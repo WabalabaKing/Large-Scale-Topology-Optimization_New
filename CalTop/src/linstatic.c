@@ -611,13 +611,15 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				FORTRAN(adjrhs_scatter_linstatic_nompc,(nk, neq, mi, nactdof,brhs,b_adj,nboun, nodeboun, ndirboun));
 				printf("b_adj before solve:\n");
 				for (int i = 0; i < *neq; ++i) {
-    				printf("b_adj[%d] = %g\n", i, brhs[i]);
+    				printf("b_adj[%d] = %g\n", i, b_adj[i]);
 					}
-				printf(" SKIPPING PARSIDO: adjoint solve \n");
-      			//pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
-				
+				printf("PARSIDO: adjoint solve \n");
+      			pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
 				// At this point we have the explicit and adjoint variables.
-
+				printf("b_adj AFTER solve:\n");
+				for (int i = 0; i < *neq; ++i) {
+    				printf("b_adj[%d] = %g\n", i, b_adj[i]);
+					}
 				double *lam = NULL, *stn=NULL, *inum=NULL;
 				/* allocate minimal outputs and reuse existing arrays and args*/
 				NNEW(lam, double, mt**nk); // Adjoint variables in nodal space
