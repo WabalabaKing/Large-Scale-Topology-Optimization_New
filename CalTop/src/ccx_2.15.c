@@ -1785,6 +1785,7 @@ while(istat>=0)
 
   // Set preciceUSed to 1
   preciceUsed = 1;
+  int staticMDO = 0;
   if (preciceUsed)
   {
     int isStaticOrDynamic = (nmethod == 1) || (nmethod == 4);
@@ -1800,6 +1801,8 @@ while(istat>=0)
     else if (isStatic && !isThermalAnalysis)
     {
       printf("Static aeroelastic analysis\n");
+      printf("Setting static MDO flag to 1\n");
+      staticMDO = 1;
     }
   }
 
@@ -1824,6 +1827,14 @@ while(istat>=0)
 	    }
 
       printf("\nTOPOLOGY OPTIMIZATION PARAMTERS----------------------------|\n");
+      printf("MDO \n");
+      if (staticMDO)
+      {
+        printf("  Static aeroelasticity            YES\n");
+      }
+      else{
+        printf("  Static aeroelasticity           NO\n");
+      }
       printf("SIMP \n");
       printf("  Penalty parameter                 %.2f\n", pstiff);
       printf("\n");
@@ -1853,7 +1864,8 @@ while(istat>=0)
       {
       printf("  PNORM                             YES\n");
       }
-      else{
+      else
+      {
       printf("  PNORM                             NO\n");
       }
       
