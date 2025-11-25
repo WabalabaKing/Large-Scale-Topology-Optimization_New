@@ -378,7 +378,8 @@ int main(int argc,char *argv[])
       preCICE is used only of  aparticipant name is provided as a command line argument
   */
 
-  char preciceParticipantName[256] = "", configFilename[256] = "config.yml";
+  char preciceParticipantName[256] = "sampleSolver";
+  char configFilename[256] = "config.yml";
   int preciceUsed = 0;
 
 
@@ -1781,6 +1782,26 @@ while(istat>=0)
   /* nmethod=10: electromagnetic eigenvalue problems */
   /* nmethod=11: superelement creation or Green function calculation */
   /* nmethod=12: sensitivity analysis  */
+
+  // Set preciceUSed to 1
+  preciceUsed = 1;
+  if (preciceUsed)
+  {
+    int isStaticOrDynamic = (nmethod == 1) || (nmethod == 4);
+    int isDynamic = nmethod == 4;
+    int isStatic  = nmethod == 1;
+    int isThermalAnalysis = ithermal[0] >= 2;
+
+    if(isStaticOrDynamic && isThermalAnalysis)
+    {
+      printf("CHT analysis coupling is currently not supported in CalTOP\n");
+    }
+
+    else if (isStatic && !isThermalAnalysis)
+    {
+      printf("Static aeroelastic analysis\n");
+    }
+  }
 
 
   /* if solving static analysis or green function calculation */
