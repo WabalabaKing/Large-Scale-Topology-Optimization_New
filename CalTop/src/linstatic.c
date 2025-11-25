@@ -603,17 +603,19 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 				/* Resuse the same assembly used for the internal force vector:
 					it maps nodal vectors -> active DOF vector */
-				/*
+				
 				ITG calc_fn = 1, calc_f = 1;
 				FORTRAN(resultsforc,(nk,b_adj,brhs,nactdof,ipompc,nodempc,
                        		coefmpc,labmpc,nmpc,mi,fmpc,&calc_fn,&calc_f));
-				*/
+				
 				FORTRAN(adjrhs_scatter_linstatic_nompc,(nk, neq, mi, nactdof,brhs,b_adj,nboun, nodeboun, ndirboun));
-					
-
+				printf("b_adj before solve:\n");
+				for (int i = 0; i < *neq; ++i) {
+    				printf("b_adj[%d] = %g\n", i, brhs[i]);
+					}
 				printf(" SKIPPING PARSIDO: adjoint solve \n");
       			//pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
-	
+				
 				// At this point we have the explicit and adjoint variables.
 
 				double *lam = NULL, *stn=NULL, *inum=NULL;
@@ -645,7 +647,6 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				*/
 
 				adjoint_eq_2_node(nk, nactdof, nboun, nodeboun,ndirboun,mi,lam, b_adj);
-
 
 				/* Allocate memory for implicit derivative*/
 				NNEW(djdrho_impl, double, *ne);
