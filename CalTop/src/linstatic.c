@@ -509,6 +509,17 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     		else if(*isolver==7)
 			{
 				#ifdef PARDISO
+
+				/* NOTE:
+					sigma = 0 for all linear elastic calculations
+					neq   = Stiffness matrix size
+					nzs   = Number of non-zeros in stiffness matrix
+					symmetryflag 	= 0 for linear-elastic system
+					inputformat 	= 0 for all linear-elastic systems	
+
+				*/	
+
+				printf("inputformat value: %d\n", inputformat);
 				// Call PARDISO to solve linear system
 				printf("Calling PARSIDO from linstatic.c \n");
       			pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
