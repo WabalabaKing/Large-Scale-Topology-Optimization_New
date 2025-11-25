@@ -1,6 +1,17 @@
 # CalTop: A CalculiX-based Topology Optimization Framework
 
 ## Overview
+
+These is broad consensus that the decarbonization of the aviation sector by the year 2025 will require cordinated progress across four primary domains: **Technology**, aircraft operations, sustainable aviation fuels and out-of-sector abatement. CalTop is a large-scale aerostructrual topology optimization framework that is develoepd to synthesize novel structrual layouts for the next generation of aircraft configurations. 
+
+The aerostructural optimization framework consists of the three main components:
+
+## CalGeo
+
+## CalFilt
+
+## CalTop
+
 CalTop is a high-performance topology optimization framework built upon **CalculiX 2.15**, featuring advanced solvers such as **SPOOLES, PARDISO, SUPERLU, and PASTIX**. It implements a **density-based finite element framework** interfaced with **IPOPT** for gradient-based optimization. Additionally, CalTop integrates with **SU2_CFD** to solve **static aero-elastic topology optimization problems**.
 
 ## Features
