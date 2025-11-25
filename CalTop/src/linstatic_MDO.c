@@ -21,6 +21,8 @@
 #include "CalculiX.h"
 #include <string.h>
 
+#include "preCICE/PreciceInterface.h"
+
 #include <math.h>
 #ifdef SPOOLES
    #include "spooles.h"
@@ -154,7 +156,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	    double *coUpdated = NULL;
 	    NNEW(coUpdated,double,3**nk);
 	    memcpy(coUpdated, co, 3**nk*sizeof(double));
-        SFREE(coUpdated);
+    
 
 
   		/* dummy arguments for the results call */
@@ -300,7 +302,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         /*---Adapter: Create the interfaces and initialize the coupling---*/
         printf("Initializing aeroelastic interface with %s and %s \n", preciceParticipantName, configFilename);
 
-        //Precice_Setup( configFilename, preciceParticipantName, &simulationData );
+        Precice_Setup( configFilename, preciceParticipantName, &simulationData );
 
         int counter = 0;
 
@@ -313,8 +315,6 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
             /*---See if coupling data (aerodynamic tractions)need to be read---*/
             Precice_ReadCouplingData(&simulationData);
-
-
 
   		    /* allocating a field for the instantaneous amplitude */
 
