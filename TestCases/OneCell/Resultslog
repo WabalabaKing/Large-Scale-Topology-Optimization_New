@@ -57,3 +57,22 @@ Implicit Terms:  -12002.717039494135
  //calTop 
 implicit terms  -11639.065315410122     
 implicit terms  -11999.644121410576  
+
+
+//dPnorm drho //python
+dPnormd_rho_ADJ:  -11641.901551044175
+dPnormd_rho_ADJ:  -12002.717039494135
+
+//CalTop
+dPdrho = -11639.065315
+dPdrho = -11999.644121
+
+//Different Inputs pexp=2, penal =5
+//python
+dPnormd_rho_ADJ:  -10041.242721926481
+dPnormd_rho_ADJ:  -10874.591079214755
+//Caltop
+dPdrho = -10041.242723
+dPdrho = -10874.591079
+
+

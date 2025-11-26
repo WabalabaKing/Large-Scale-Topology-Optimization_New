@@ -166,8 +166,8 @@ E0 = 4e6
 nu = 0.3
 sigmin=0.001
 relax=0.001
-Pexp = 1       #checked
-penal = 4
+Pexp = 2       #checked
+penal = 5
 #Do solid calculations
 
 U,K = FEM_solver(nodes, elems, E0, rho, nu, F, bc,penal)
@@ -226,7 +226,6 @@ for i in range(len(elems)):
     dKdr = dKdrho(nodes, elems, E0, rhoP, nu, F, bc,penal)
     dPdrho_ADJ=Pnorm/(Pnorm**Pexp)*(-qb.T@dKdr@U+sigE[i]**(Pexp-1)*relax/(rho[i]**2))
     Imp = (-qb.T@dKdr@U+sigE[i]**(Pexp-1)*relax/(rho[i]**2))
-    print("Implicit Terms: ", Imp)
     dPdrho_ADJ_his[i]=dPdrho_ADJ
     print("dPnormd_rho_ADJ: ", dPdrho_ADJ)    
 relError = (dPdrho_ADJ_his-dPdrho_FD_his)/dPdrho_FD_his *100

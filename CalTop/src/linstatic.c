@@ -679,15 +679,18 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
    				- adjoint nodal field: lam (just expanded)
 				*/
 				FORTRAN(pnorm_implicit_c3d4,(co,kon,ipkon,lakon,ne,mi,
-        		xstiff, vold, lam, design, penal,pexp,eps,
+        		xstiff, v, lam, design, penal,pexp,eps,
         		&nea_loc, &neb_loc, &list_loc, ilist_loc, djdrho_impl));
 
 
 				/* Assemble the global P-norm sensitivity */
-
+				
+				double PnormMult;
+				PnormMult = *Pnorm/pow(*Pnorm,*pexp);
 				for (int i = 0; i < *ne; ++i)
 				{
-					dPnorm_drho[i] = djdrho_expl[i] + djdrho_impl[i];
+					dPnorm_drho[i] = PnormMult* djdrho_impl[i];
+					printf("dPdrho = %f\n", dPnorm_drho[i]);
 				}
 
 				

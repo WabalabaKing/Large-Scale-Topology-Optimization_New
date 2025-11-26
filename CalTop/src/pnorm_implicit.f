@@ -174,7 +174,6 @@ c------ ce = penal * rho^(penal-1)   (same logic as e_c3d_se.f)
 c------ accumulate implicit sensitivity
          djdrho(i) = djdrho(i) - ce * dotlam  + vm
          !now we have qbar*dkdrho*q
-         write(*,*),"implicit terms", djdrho(i)
       enddo
 
       return
