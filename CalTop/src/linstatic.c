@@ -440,10 +440,22 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  		double r = fext[k] - f[k];
       		b[k] = r;
 	 
-	  		res_l2 += r * r;
+	  		//res_l2 += r * r;
   		}
 
-		res_l2 = sqrt(res_l2);
+		//double *btemp;
+		//NNEW(btemp,double,*neq);
+
+
+  		//for(k=0;k<*neq;++k)
+  	//	{
+	 // 		double r = fext[k] - f[k];
+     // 		btemp[k] = r;
+	 
+	  		//res_l2 += r * r;
+  	//	}
+
+		//res_l2 = sqrt(res_l2);
 
 		//printf("L2-norm : %f \n", res_l2);
 
@@ -515,14 +527,21 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 					neq   = Stiffness matrix size
 					nzs   = Number of non-zeros in stiffness matrix
 					symmetryflag 	= 0 for linear-elastic system
-					inputformat 	= 0 for all linear-elastic systems	
+					inputformat 	= 0 for all linear-elastic systems
+					jq 				= not required for linear elastic systems
+					nrhs            = 1 for all linear elastic systems
 
 				*/	
 
-				printf("inputformat value: %d\n", inputformat);
+				//printf("nrhs value: %d\n", nrhs);
 				// Call PARDISO to solve linear system
-				printf("Calling PARSIDO from linstatic.c \n");
-      			pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
+				//printf("Calling PARSIDO from linstatic.c \n");
+      			//pardiso_main(ad,au,adb,aub,&sigma,btemp,icol,irow,neq,nzs,
+		   		//&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+				
+
+				printf("Caling PARDISO @ second pass..\n");
+				pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
 		   		&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 
 				//printf(" PARDISO: factorizing K...\n");

@@ -360,7 +360,7 @@ int main(int argc,char *argv[])
   double eps_relax = 1e-03;
   double rhomin = 1e-06;
   double pexp = 1.0;
-  int stress_adjoint = 1; // Set this to 1 for now. 
+  int stress_adjoint = 1; // Set this to 1 for now.
 
   ITG itertop= 1; /**<iteration counter in topology optimization */
   ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
@@ -373,6 +373,17 @@ int main(int argc,char *argv[])
 
   ITG *rowFilters=NULL; /**<row index */
   ITG *colFilters=NULL; /**<column matrix */
+
+  /* Additional variables for preCICE MDO coupling 
+      preCICE is used only of  aparticipant name is provided as a command line argument
+  */
+
+  char preciceParticipantName[256] = "sampleSolver";
+  char configFilename[256] = "config.yml";
+  int preciceUsed = 0;
+
+
+
 
   #ifdef CALCULIX_MPI
   MPI_Init(&argc, &argv) ;
@@ -489,7 +500,27 @@ else
     }
   }
 
-}
+  for (i = 1; i<argc;i++)
+  {
+    if(strcmp1(argv[i], "-precice-participant") == 0)
+    {
+      preciceUsed = 1;
+
+      /* Make sure there is a participant name after the flag */
+
+      if (i+1 < argc)
+      {
+        strcpy(preciceParticipantName, argv[i+1]);
+      }
+      else
+      {
+        fprintf(stderr, "Error: -precice-particiapnt flag requires a name\n");
+      }
+      break;
+    }
+  }
+
+} // End parsing all command line arguments
 
 
 /* Assign default value for penalty parameter */
@@ -1752,6 +1783,29 @@ while(istat>=0)
   /* nmethod=11: superelement creation or Green function calculation */
   /* nmethod=12: sensitivity analysis  */
 
+  // Set preciceUSed to 1
+  preciceUsed = 1;
+  int staticMDO = 0;
+  if (preciceUsed)
+  {
+    int isStaticOrDynamic = (nmethod == 1) || (nmethod == 4);
+    int isDynamic = nmethod == 4;
+    int isStatic  = nmethod == 1;
+    int isThermalAnalysis = ithermal[0] >= 2;
+
+    if(isStaticOrDynamic && isThermalAnalysis)
+    {
+      printf("CHT analysis coupling is currently not supported in CalTOP\n");
+    }
+
+    else if (isStatic && !isThermalAnalysis)
+    {
+      printf("Static aeroelastic analysis\n");
+      printf("Setting static MDO flag to 1\n");
+      staticMDO = 1;
+    }
+  }
+
 
   /* if solving static analysis or green function calculation */
   if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
@@ -1773,6 +1827,14 @@ while(istat>=0)
 	    }
 
       printf("\nTOPOLOGY OPTIMIZATION PARAMTERS----------------------------|\n");
+      printf("MDO \n");
+      if (staticMDO)
+      {
+        printf("  Static aeroelasticity            YES\n");
+      }
+      else{
+        printf("  Static aeroelasticity           NO\n");
+      }
       printf("SIMP \n");
       printf("  Penalty parameter                 %.2f\n", pstiff);
       printf("\n");
@@ -1802,7 +1864,8 @@ while(istat>=0)
       {
       printf("  PNORM                             YES\n");
       }
-      else{
+      else
+      {
       printf("  PNORM                             NO\n");
       }
       
