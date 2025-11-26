@@ -137,6 +137,8 @@ c------ calculate effective vm stress
          vm2 = 0.5d0*vm2 + 3.d0*(sig(4)**(2.d0) + sig(5)**(2.d0)) 
          vm2 = vm2+3.d0*(sig(6)**(2.d0))
          vm  = dsqrt(vm2) + relax-relax/(rho**penal)
+         if (vm .lt. 0.d0) vm  = 0.d0
+
 c------ internal nodal forces k0u += B^T * sig * vol
          do n=1,12
             do m=1,6
