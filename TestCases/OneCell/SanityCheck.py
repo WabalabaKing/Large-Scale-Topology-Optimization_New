@@ -145,7 +145,7 @@ F = np.zeros(3*len(nodes))
 F[4*3] = -0.57  # Apply force in x-direction on node 1
 F[4*3+1] = -0.57  # Apply force in x-direction on node 1
 F[4*3+2] = -0.57  # Apply force in x-direction on node 1
-bc = [(0,0,0),(0,1,0),(0,2,0)]  # Fix node 0
+bc = [(0,0,0),(0,1,0),(0,2,0),(1,0,0),(1,1,0),(1,2,0),(2,0,0),(2,1,0),(2,2,0)]  # Fix node 0
 rho = np.array([1.0,1.0])
 rho1 = np.array([1.0,1.0])
 ########################    1 element problem
@@ -174,8 +174,10 @@ U,K = FEM_solver(nodes, elems, E0, rho, nu, F, bc,penal)
 vm,M = von_mises_energy(nodes, elems,rho, E0, nu, U,penal)
 sigE = vm/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rho
 #correspond to eqn 18: Me0 should be M0
+for i in range(len(sigE)):
+    print(vm[i])
 
-#print("Nodal displacements:\n", U.reshape(-1,3))
+print("Nodal displacements:\n", U.reshape(-1,3))
 
 Pnorm = sum(sigE**Pexp)**(1/Pexp)
 print("Pnorm:\n", Pnorm)
@@ -188,7 +190,7 @@ for i in range(len(elems)):
     rhoP[i]=rhoP[i]-h
     Up,Kp = FEM_solver(nodes, elems, E0, rhoP, nu, F, bc,penal)
     vmP,Mp = von_mises_energy(nodes, elems, rho, E0, nu, Up,penal) 
-    sigEP = vmP/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rhoP   #rho or rhoP?
+    sigEP = vmP/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rhoP   
     #Note here we uses curent Me and U=Up  for eqn 18
     PnormP=sum(sigEP**Pexp)**(1/Pexp)
     dPdrho_FD= (Pnorm-PnormP)/h
@@ -211,8 +213,8 @@ for i in range(len(elems)):
         rhs[j*3+2]=rhs[j*3+2]+rhsT[k*3+2]
 #This means Eqn 23 M0 are also current M, not M@rho=1
 qb = np.linalg.solve(K,rhs)
-Kred = K[3:,3:]
-rhsred = rhs[3:]
+Kred = K[9:,9:]
+rhsred = rhs[9:]
 qbred = np.linalg.solve(Kred,rhsred)
 for i in range(len(rhs)):
     print(f"RHS[{i}] = {rhs[i]:.4e}")
@@ -222,7 +224,9 @@ for i in range(len(elems)):
     rhoP= copy.deepcopy(rho)*0.0
     rhoP[i]=rho[i]    #Corresponding to def rho
     dKdr = dKdrho(nodes, elems, E0, rhoP, nu, F, bc,penal)
-    dPdrho_ADJ=Pnorm/(Pnorm**Pexp)*(-qb.T@dKdr@U)
+    dPdrho_ADJ=Pnorm/(Pnorm**Pexp)*(-qb.T@dKdr@U+sigE[i]**(Pexp-1)*relax/(rho[i]**2))
+    Imp = (-qb.T@dKdr@U+sigE[i]**(Pexp-1)*relax/(rho[i]**2))
+    print("Implicit Terms: ", Imp)
     dPdrho_ADJ_his[i]=dPdrho_ADJ
     print("dPnormd_rho_ADJ: ", dPdrho_ADJ)    
 relError = (dPdrho_ADJ_his-dPdrho_FD_his)/dPdrho_FD_his *100

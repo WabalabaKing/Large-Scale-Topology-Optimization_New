@@ -517,7 +517,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                sigeT=0.d0
                do m1=1,12
                   do ia=1,12
-                  sigeT = sigeT+uel(m1)*MeN(m1,ia)*uel(ia)
+                     sigeT = sigeT+uel(m1)*MeN(m1,ia)*uel(ia)
                   enddo
                enddo
                sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
@@ -531,11 +531,11 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
 ! ---          Scatter to global rhs(1..3, node)
                 do m1=1,4   ! Loop over all DOFs.
                   rhs(1,konl(m1)) = rhs(1,konl(m1))
-     &            + ((-1)**(konl(m1)))*rhs_loc(3*(m1-1)+1)
+     &            + rhs_loc(3*(m1-1)+1)
                   rhs(2,konl(m1)) = rhs(2,konl(m1)) 
-     &            + ((-1)**(konl(m1)))*rhs_loc(3*(m1-1)+2)
+     &            + rhs_loc(3*(m1-1)+2)
                   rhs(3,konl(m1)) = rhs(3,konl(m1)) 
-     &            + ((-1)**(konl(m1)))*rhs_loc(3*(m1-1)+3)
+     &            + rhs_loc(3*(m1-1)+3)
                 enddo
               !endif
             endif ! End if nope .eq. 4 condition
@@ -543,9 +543,9 @@ c----------------------------------------------------------------------
 
 !
          enddo  ! <--- end of integration over element Gauss points
-!         do m1=1,12
-!            write(*,'(ES10.2)'),uel(m1)
-!         enddo
+         !do m1=1,12
+         !   write(*,'(ES10.2)'),uel(m1)
+         !enddo
       enddo ! <--- end of loop over all elements
       !write(*,*), 'Gsump:', g_sump
 ! ------------------------

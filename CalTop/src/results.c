@@ -416,6 +416,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         for (int t = 0; t < num_cpus; ++t)
         {
             size_t idx = (size_t)t *4;
+            
             sumP += qa1[idx + 2];   // thread's g_sump
             sumV += qa1[idx + 3];   // thread's g_vol -> needed for p-mean
 
@@ -470,7 +471,6 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
         //Allocate per-thread RHS blocks and the reduced RHS
         NNEW(rhs1, double, num_cpus * mt * *nk);
-
         // Zero them (CalculiX NNEW doesn't zero by default)
         for (size_t zz = 0; zz < (size_t)num_cpus * mt * *nk; ++zz) rhs1[zz] = 0.0;
 

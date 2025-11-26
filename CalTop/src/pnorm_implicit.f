@@ -1,7 +1,7 @@
 
 
       subroutine pnorm_implicit_c3d4(co,kon,ipkon,lakon,ne,mi,
-     &     xstiff, v, lam, design, penal,
+     &     xstiff, v, lam, design, penal, pexp, relax,
      &     nea, neb, list, ilist, djdrho)
 
 c--- Implicit term for dJ/drho_e using ce = penal * rho^(penal-1)
@@ -20,8 +20,11 @@ c      v(0:mi(2),nk)       : primal nodal field (displacements)
 c      lam(0:mi(2),nk)     : adjoint nodal field (same layout as v)
 c      design(ne)          : element densities (clamped to [0,1] here)
 c      penal               : SIMP exponent
+c      pexp                : the exponential term for Pnorm calculations
+c      relax               : stress relaxation factor
 c      nea,neb             : element range (can pass 1,ne)
 c      list, ilist(*)      : optional selection; if list=1 use ilist(k)
+
 c
 c    Output:
 c      djdrho_impl(ne)          : accumulates the implicit contribution
@@ -42,9 +45,11 @@ c--- fields
 
 c--- material (D) store
       real*8 xstiff(27,mi(1),*)
+!     THIS IS NOT THE CONST. MATRIX! 
+!     xstiff(1,jj,i) is E and xstiff(2,jj,i) is nu
 
 c--- design / params
-      real*8 design(*), penal, heav
+      real*8 design(*), penal, heav, pexp, relax
 
 c--- output
       real*8 djdrho(*)
@@ -54,7 +59,7 @@ c--- locals
       real*8 B(6,12), ue(12), le(12), k0u(12), dotlam
       real*8 eps(6), sig(6), rho, ce, rho_eff
       integer a, m, n, m1
-
+      real*8 vm,vm2
 c--- Gauss rule (C3D4, 1 point)
       include 'gauss.f'
 
@@ -123,8 +128,15 @@ c------ strain eps = B * u
          enddo
 
 c------ stress sig = D * eps  (use xstiff mapping like in your RHS code)
-         call mult_D_vec(sig, eps, xstiff(1,jj,i))
+         call mult_D_vec(sig, eps, xstiff(1,jj,i),xstiff(2,jj,i))
+c------ calculate effective vm stress
+         rho = design(i)
 
+         vm2 = (sig(1)-sig(2))**(2.d0)
+         vm2=vm2+(sig(2)-sig(3))**(2.d0) + (sig(3)-sig(1))**(2.d0)
+         vm2 = 0.5d0*vm2 + 3.d0*(sig(4)**(2.d0) + sig(5)**(2.d0)) 
+         vm2 = vm2+3.d0*(sig(6)**(2.d0))
+         vm  = dsqrt(vm2) + relax-relax/(rho**penal)
 c------ internal nodal forces k0u += B^T * sig * vol
          do n=1,12
             do m=1,6
@@ -140,7 +152,7 @@ c------ lambda^T * (K0 u)
          enddo
 
 c------ ce = penal * rho^(penal-1)   (same logic as e_c3d_se.f)
-         rho = design(i)
+         
          if (rho .lt. 0.d0) rho = 0.d0
          if (rho .gt. 1.d0 ) rho = 1.d0
          rho_eff = dmax1(rho, 1e-06)
@@ -160,8 +172,9 @@ c------ ce = penal * rho^(penal-1)   (same logic as e_c3d_se.f)
          ce = penal * rho_eff**(penal-1.d0) * heav
 
 c------ accumulate implicit sensitivity
-         djdrho(i) = djdrho(i) - ce * dotlam
-
+         djdrho(i) = djdrho(i) - ce * dotlam  + vm
+         !now we have qbar*dkdrho*q
+         write(*,*),"implicit terms", djdrho(i)
       enddo
 
       return
@@ -194,11 +207,11 @@ c        exy
          B(4,col+1) = shp(2,j)
          B(4,col+2) = shp(1,j)
 c        exz
-         B(5,col+1) = shp(3,j)
-         B(5,col+3) = shp(1,j)
+         B(6,col+1) = shp(3,j)
+         B(6,col+3) = shp(1,j)
 c        eyz
-         B(6,col+2) = shp(3,j)
-         B(6,col+3) = shp(2,j)
+         B(5,col+2) = shp(3,j)
+         B(5,col+3) = shp(2,j)
       enddo
 
       return
@@ -209,28 +222,33 @@ c======================================================================
 c  sig = D * eps using CalculiX xstiff packed layout (same as your RHS)
 c  xD(1..27) holds upper-triangular 6x6 mapping in CCX’s order.
 c======================================================================
-      subroutine mult_D_vec(sig,eps,xD)
+      subroutine mult_D_vec(sig,eps,E,nu)
       implicit none
-      real*8 sig(6), eps(6), xD(27)
+      real*8 sig(6), eps(6), E, nu,al,um
+      real*8 xD(7)
+
+      um = E/(2.d0*(1.d0+nu))                  ! G
+      al = nu*E/((1.d0+nu)*(1.d0-2.d0*nu))     ! lambda
+      xD( 1)=(al+2.d0*um)  ! C11
+      xD( 2)= al           ! C12
+      xD( 3)= (al+2.d0*um)  ! C22
+      xD( 4)= al           ! C13
+      xD( 5)= al           ! C23
+      xD( 6)= (al+2.d0*um)  ! C33
+      xD(7)= um           ! C44 (τ12/ε12_tensorial)
 
 c  Unrolled like in your RHS (ptv computation), matching CCX layout
       sig(1)= xD( 1)*eps(1) + xD( 2)*eps(2) + xD( 4)*eps(3)
-     &      + xD( 7)*eps(4) + xD(11)*eps(5) + xD(16)*eps(6)
 
       sig(2)= xD( 2)*eps(1) + xD( 3)*eps(2) + xD( 5)*eps(3)
-     &      + xD( 8)*eps(4) + xD(12)*eps(5) + xD(17)*eps(6)
 
       sig(3)= xD( 4)*eps(1) + xD( 5)*eps(2) + xD( 6)*eps(3)
-     &      + xD( 9)*eps(4) + xD(13)*eps(5) + xD(18)*eps(6)
 
-      sig(4)= xD( 7)*eps(1) + xD( 8)*eps(2) + xD( 9)*eps(3)
-     &      + xD(10)*eps(4) + xD(14)*eps(5) + xD(19)*eps(6)
+      sig(4)= xD(7)*eps(4) 
 
-      sig(5)= xD(11)*eps(1) + xD(12)*eps(2) + xD(13)*eps(3)
-     &      + xD(14)*eps(4) + xD(15)*eps(5) + xD(20)*eps(6)
+      sig(5)= xD(7)*eps(5)
 
-      sig(6)= xD(16)*eps(1) + xD(17)*eps(2) + xD(18)*eps(3)
-     &      + xD(19)*eps(4) + xD(20)*eps(5) + xD(21)*eps(6)
+      sig(6)= xD(7)*eps(6)
 
       return
       end

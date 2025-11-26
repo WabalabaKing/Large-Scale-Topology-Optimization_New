@@ -28,7 +28,7 @@ DES
 ** Section Assignment
 *SOLID SECTION, ELSET=BEAM, MATERIAL=EL
 *Nset, nset=FIXED
-1
+1, 2,3
 *Nset, nset=LOADED
 5
 ** Fix all nodes on the fixed end (x=0)
