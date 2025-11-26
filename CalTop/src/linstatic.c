@@ -628,17 +628,13 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                        		coefmpc,labmpc,nmpc,mi,fmpc,&calc_fn,&calc_f));
 				
 				FORTRAN(adjrhs_scatter_linstatic_nompc,(nk, neq, mi, nactdof,brhs,b_adj,nboun, nodeboun, ndirboun));
-				printf("b_adj before solve:\n");
-				for (int i = 0; i < *neq; ++i) {
-    				printf("b_adj[%d] = %g\n", i, b_adj[i]);
-					}
+
 				printf("PARSIDO: adjoint solve \n");
-      			pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
+      			pardiso_main(ad,au,adb,aub,&sigma,b_adj,icol,irow,neq,nzs,
+		   			&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 				// At this point we have the explicit and adjoint variables.
 				printf("b_adj AFTER solve:\n");
-				for (int i = 0; i < *neq; ++i) {
-    				printf("b_adj[%d] = %g\n", i, b_adj[i]);
-					}
+
 				double *lam = NULL, *stn=NULL, *inum=NULL;
 				/* allocate minimal outputs and reuse existing arrays and args*/
 				NNEW(lam, double, mt**nk); // Adjoint variables in nodal space
@@ -683,7 +679,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
    				- adjoint nodal field: lam (just expanded)
 				*/
 				FORTRAN(pnorm_implicit_c3d4,(co,kon,ipkon,lakon,ne,mi,
-        		xstiff, vold, lam, design, penal,
+        		xstiff, vold, lam, design, penal,pexp,eps,
         		&nea_loc, &neb_loc, &list_loc, ilist_loc, djdrho_impl));
 
 
