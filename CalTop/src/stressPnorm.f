@@ -264,20 +264,16 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                   emec0(m1)=emeini(m1,jj,i)
                enddo
             endif
-
 ! --- SIMP penalization for linear isotropic (mattyp == 1) ---
+            mattyp = 1
             if (mattyp .eq. 1) then
 !              write(*,*) 'Scaling the C matrix!'
-              rho_e   = design(i)
-              if (rho_e .lt. 0.d0) rho_e = 0.d0
-              if (rho_e .gt. 1.d0) rho_e = 1.d0
-              rho_eff = max(rho_e, rho_min)
+              rho_e   = design(m)
 !              Based on the definition of effective von Misses 
 !              stress in Duysinx and Sigmnd, the penalized
 !              rho cancels out in the stress term with
 !              relaxation. Pass rho_p = 1 below
-!             rho_p   = rho_eff**penal
-               rho_p = 1.d0
+              rho_p   = rho_e**penal
 !              Note: Since we are not penalizing the stress here
 !              von Misses must be penalized in ccx_2.15.c 
 !              when writing to .vtu file
@@ -288,12 +284,12 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !           calculating the local stiffness and stress
 !           Constitutive law
             nlgeom_undo=0
-            call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
+            call mechmodel_simp(elconloc,elas,emec,kode,emec0,ithermal,
      &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
      &           plconloc,xstate,xstateini,ielas,
      &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
      &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
-     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
+     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo, rho_p)
 !
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
@@ -348,7 +344,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
             vm  = dsqrt(vm2)
 
-!            write(*,*), 'Currrent vm:', vm
+            !write(*,*), 'Currrent vm:', vm
 
 !  --- filtered design alread in [0,1] (clamp defenseively)  ---
             rho_e = design(i)

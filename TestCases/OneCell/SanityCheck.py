@@ -67,7 +67,10 @@ def assemble_K(nodes, elems, E0, density, nu,penal):
     K = np.zeros((n_dof, n_dof))
     for e, conn in enumerate(elems):
         coords = nodes[conn]
-        E = (density[e]**penal) * E0
+        if density[e]!=0:
+            E = (density[e]**penal) * E0
+        else:
+            E=0
         C = C_matrix(E, nu)
         B, V = B_matrix(coords)
         Ke = B.T @ C @ B * V
@@ -140,14 +143,12 @@ def constructM_elem(nodes, elem, density, E0, nu, penal):
 # Example usage:
 nodes = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1],[2/3,2/3,2/3]]) # 5 nodes
 elems = np.array([[0,1,2,3],[1,2,3,4]])                        # 2 tetra
-density = np.array([1.0,1.0])
 F = np.zeros(3*len(nodes))
 F[4*3] = -0.57  # Apply force in x-direction on node 1
 F[4*3+1] = -0.57  # Apply force in x-direction on node 1
 F[4*3+2] = -0.57  # Apply force in x-direction on node 1
 bc = [(0,0,0),(0,1,0),(0,2,0),(1,0,0),(1,1,0),(1,2,0),(2,0,0),(2,1,0),(2,2,0)]  # Fix node 0
-rho = np.array([1.0,1.0])
-rho1 = np.array([1.0,1.0])
+rho = np.array([0.15,0.52])
 ########################    1 element problem
 #nodes = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]]) # 5 nodes
 #elems = np.array([[0,1,2,3]])                        # 2 tetra
@@ -164,10 +165,10 @@ rho1 = np.array([1.0,1.0])
 ###Here are the variables to check
 E0 = 4e6
 nu = 0.3
-sigmin=0.001
-relax=0.001
-Pexp = 2       #checked
-penal = 5
+sigmin=0.002
+relax=0.00001
+penal = 3
+Pexp = 6       #checked
 #Do solid calculations
 
 U,K = FEM_solver(nodes, elems, E0, rho, nu, F, bc,penal)
@@ -176,8 +177,6 @@ sigE = vm/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rho
 #correspond to eqn 18: Me0 should be M0
 for i in range(len(sigE)):
     print(vm[i])
-
-print("Nodal displacements:\n", U.reshape(-1,3))
 
 Pnorm = sum(sigE**Pexp)**(1/Pexp)
 print("Pnorm:\n", Pnorm)
@@ -195,7 +194,6 @@ for i in range(len(elems)):
     PnormP=sum(sigEP**Pexp)**(1/Pexp)
     dPdrho_FD= (Pnorm-PnormP)/h
     dPdrho_FD_his[i]=dPdrho_FD
-    print("dPnormd_rho_FD: ", dPdrho_FD)
 ######################ADJ Calculation of d Pnorm d rho:#######################
 rhs=np.zeros(len(nodes)*3)
 for i in range(len(elems)):
@@ -205,7 +203,7 @@ for i in range(len(elems)):
         N = node[j]
         uN =np.array( [U[N*3],U[N*3+1],U[N*3+2]])
         ue[j*3:j*3+3] = uN
-    Me = constructM_elem(nodes, node, rho[i], E0, nu,penal)
+    Me = constructM_elem(nodes, node, rho[i], E0, nu, penal)
     rhsT = (sigE[i]**(Pexp-1))/(sigmin*np.sqrt(ue.T@Me@ue))* (Me @ ue)   
     for k,j in enumerate(node):
         rhs[j*3]=rhs[j*3]+rhsT[k*3]
@@ -216,16 +214,11 @@ qb = np.linalg.solve(K,rhs)
 Kred = K[9:,9:]
 rhsred = rhs[9:]
 qbred = np.linalg.solve(Kred,rhsred)
-for i in range(len(rhs)):
-    print(f"RHS[{i}] = {rhs[i]:.4e}")
-for i in range(len(qbred)):
-    print(f"Q_tilda[{i}] = {qbred[i]:.4e}")
 for i in range(len(elems)):
     rhoP= copy.deepcopy(rho)*0.0
     rhoP[i]=rho[i]    #Corresponding to def rho
     dKdr = dKdrho(nodes, elems, E0, rhoP, nu, F, bc,penal)
-    dPdrho_ADJ=Pnorm/(Pnorm**Pexp)*(-qb.T@dKdr@U+sigE[i]**(Pexp-1)*relax/(rho[i]**2))
-    Imp = (-qb.T@dKdr@U+sigE[i]**(Pexp-1)*relax/(rho[i]**2))
+    dPdrho_ADJ=Pnorm/(Pnorm**Pexp)*(-qb.T@dKdr@U+(sigE[i]**(Pexp-1))*relax/(rhoP[i]**2))
     dPdrho_ADJ_his[i]=dPdrho_ADJ
     print("dPnormd_rho_ADJ: ", dPdrho_ADJ)    
 relError = (dPdrho_ADJ_his-dPdrho_FD_his)/dPdrho_FD_his *100

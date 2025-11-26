@@ -305,6 +305,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !     &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
 !     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
             mattyp=1
+            rho_e = design(m)
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
 
@@ -316,6 +317,8 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                   enddo
                   e  = elas(1)
                   un = elas(2)
+                  
+                  e = e*(rho_e**penal)
 
                   um = e/(2.d0*(1.d0+un))                  ! G
                   al = un*e/((1.d0+un)*(1.d0-2.d0*un))     ! lambda
@@ -359,7 +362,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !--------------------------------------------------------------!
 
 !  --- filtered design alread in [0,1] (clamp defenseively)  ---
-            rho_e = design(m)
+            
             ! (optional clamp, safe if design may drift)
             if (rho_e .lt. 0.d0) rho_e = 0.d0
             if (rho_e .gt. 1.d0) rho_e = 1.d0
@@ -520,6 +523,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                      sigeT = sigeT+uel(m1)*MeN(m1,ia)*uel(ia)
                   enddo
                enddo
+               !write(*,*),"vm from ENERGY:",dsqrt(sigeT)
                sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
                if (sige .lt. 0.d0) sige=0.d0
 

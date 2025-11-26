@@ -114,9 +114,9 @@
          endif
 !
 !        determining the type: isotropic, orthotropic or anisotropic         
-!
          if(nelas.le.2) then
             mattyp=1
+            
          elseif(nelas.le.9) then
             mattyp=2
          else

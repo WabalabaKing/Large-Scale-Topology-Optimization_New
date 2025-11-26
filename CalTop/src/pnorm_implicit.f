@@ -60,6 +60,7 @@ c--- locals
       real*8 eps(6), sig(6), rho, ce, rho_eff
       integer a, m, n, m1
       real*8 vm,vm2
+      real*8 Epen
 c--- Gauss rule (C3D4, 1 point)
       include 'gauss.f'
 
@@ -126,15 +127,17 @@ c------ strain eps = B * u
                eps(m) = eps(m) + B(m,n)*ue(n)
             enddo
          enddo
+         rho = design(i)
+         Epen = (rho**(penal-1))*xstiff(1,jj,i)*penal
 
 c------ stress sig = D * eps  (use xstiff mapping like in your RHS code)
-         call mult_D_vec(sig, eps, xstiff(1,jj,i),xstiff(2,jj,i))
+         call mult_D_vec(sig, eps, Epen,xstiff(2,jj,i))
 c------ calculate effective vm stress
-         rho = design(i)
+         
 
-         vm2 = (sig(1)-sig(2))**(2.d0)
-         vm2=vm2+(sig(2)-sig(3))**(2.d0) + (sig(3)-sig(1))**(2.d0)
-         vm2 = 0.5d0*vm2 + 3.d0*(sig(4)**(2.d0) + sig(5)**(2.d0)) 
+         vm2 = ((sig(1)-sig(2))**(2.d0))
+         vm2=vm2+((sig(2)-sig(3))**(2.d0))+((sig(3)-sig(1))**(2.d0))
+         vm2 = 0.5d0*vm2 + 3.d0*((sig(4)**(2.d0)) + (sig(5)**(2.d0))) 
          vm2 = vm2+3.d0*(sig(6)**(2.d0))
          vm  = dsqrt(vm2) + relax-relax/(rho**penal)
          if (vm .lt. 0.d0) vm  = 0.d0
@@ -171,10 +174,11 @@ c------ ce = penal * rho^(penal-1)   (same logic as e_c3d_se.f)
          !   ce = penal * rho**(penal-1.d0)
          !endif
 
-         ce = penal * rho_eff**(penal-1.d0) * heav
+         !ce = penal * rho_eff**(penal-1.d0) * heav
 
 c------ accumulate implicit sensitivity
-         djdrho(i) = djdrho(i) - ce * dotlam  + vm
+         djdrho(i) = djdrho(i)-dotlam +(vm**(pexp-1))*relax/(rho**2.d0)
+         !write(*,*),"IMP1",dotlam
          !now we have qbar*dkdrho*q
       enddo
 

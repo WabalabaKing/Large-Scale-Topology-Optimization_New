@@ -1891,7 +1891,9 @@ while(istat>=0)
         printf("Element density for the 10th element: %.4f \n", design[9]);
         /* apply the filter matrix on rho to get rhoPhys */ 
         printf("Filtering element densities...\n");
-        filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
+        //filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
+        for ( int i=0; i<ne_; ++i)
+        {designFiltered[i]=design[i];}
         printf("Done!");
 
         // DEBUG: Print first five and last five values of designFiltered

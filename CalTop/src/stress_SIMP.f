@@ -941,6 +941,7 @@ c     Bernhardi end
             endif
 
 ! --- SIMP penalization for linear isotropic (mattyp == 1) ---
+            write(*,*),"matype stressSIMP",mattyp
             if (mattyp .eq. 1) then
 !              write(*,*) 'Scaling the C matrix!'
               rho_e   = design(i)

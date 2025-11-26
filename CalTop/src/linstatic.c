@@ -633,7 +633,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       			pardiso_main(ad,au,adb,aub,&sigma,b_adj,icol,irow,neq,nzs,
 		   			&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 				// At this point we have the explicit and adjoint variables.
-				printf("b_adj AFTER solve:\n");
+				
 
 				double *lam = NULL, *stn=NULL, *inum=NULL;
 				/* allocate minimal outputs and reuse existing arrays and args*/
@@ -664,7 +664,6 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				*/
 
 				adjoint_eq_2_node(nk, nactdof, nboun, nodeboun,ndirboun,mi,lam, b_adj);
-
 				/* Allocate memory for implicit derivative*/
 				NNEW(djdrho_impl, double, *ne);
 				
@@ -684,7 +683,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 
 				/* Assemble the global P-norm sensitivity */
-				
+				printf("Pnorm: %f \n",*Pnorm);
 				double PnormMult;
 				PnormMult = *Pnorm/pow(*Pnorm,*pexp);
 				for (int i = 0; i < *ne; ++i)
