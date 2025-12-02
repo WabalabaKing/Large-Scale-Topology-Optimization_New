@@ -503,49 +503,11 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
          //Done with per-thread storage
 	    SFREE(rhs1);
         printf("done!\n");
-
-        
-
-
-        /*************************************P-NORM EXPLICIT TERM CALCULATION******************************/
-        
-        /*
-        // NOTE: Avoid computing the explicit term for now -> will come back to this alter when Zheng is done computing the full adjoint
-        // STEP 3: COMPUTE EXPLICIT TERM FOR P-NORM ADJOINT (PRATEEK TO FIX)
-        djdrho_explicit1 = djdrho_explicit;
-
-        printf("    Assembling explicit term...");
-
-        // allocate per-thread indices 
-        NNEW(ithread, ITG, num_cpus);
-
-        for (i = 0; i < num_cpus; ++i) 
-        {
-            ithread[i] = i;
-            pthread_create(&tid[i], NULL,
-            (void *(*)(void *))pnorm_explicitmt, (void *)&ithread[i]);
-        }
-
-        for (i = 0; i < num_cpus; ++i) 
-        {
-            pthread_join(tid[i], NULL);
-        }
-
-        SFREE(ithread);  
-
-
-        //printf(" Explicit dJ/drho assembled.\n");
-
-
-
-        printf("done!\n");
-       // SFREE(neapar);
-       // SFREE(nebpar);
-    */
     }
 
     if (get_adjoint == 1)
     {
+        /*
         // STEP 1: Compute VM stress and aggregate (P-NORM) for Rho = 1 
         printf("    Evaluating density-scaled element stress\n");
 
@@ -559,7 +521,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	    }
 
 	    for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
-
+        */
         SFREE(neapar);
         SFREE(nebpar);
 

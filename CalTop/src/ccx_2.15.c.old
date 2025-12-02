@@ -1891,9 +1891,9 @@ while(istat>=0)
         printf("Element density for the 10th element: %.4f \n", design[9]);
         /* apply the filter matrix on rho to get rhoPhys */ 
         printf("Filtering element densities...\n");
-        //filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
-        for ( int i=0; i<ne_; ++i)
-        {designFiltered[i]=design[i];}
+        filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
+        //for ( int i=0; i<ne_; ++i)
+        //{designFiltered[i]=design[i];}
         printf("Done!");
 
         // DEBUG: Print first five and last five values of designFiltered
@@ -1972,7 +1972,7 @@ while(istat>=0)
 
       // NOTE: Filter, write and free stress array here to reduce memory signature
       /*--------------------------------------STRESS SENSITIVITY FILTERING AND I/O -----------------------------------*/
-
+      eval_PNORM=1;
       if (eval_PNORM == 1)
       {
         printf(" Filter element stress (P-norm) gradient ");

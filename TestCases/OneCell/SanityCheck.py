@@ -148,7 +148,7 @@ F[4*3] = -0.57  # Apply force in x-direction on node 1
 F[4*3+1] = -0.57  # Apply force in x-direction on node 1
 F[4*3+2] = -0.57  # Apply force in x-direction on node 1
 bc = [(0,0,0),(0,1,0),(0,2,0),(1,0,0),(1,1,0),(1,2,0),(2,0,0),(2,1,0),(2,2,0)]  # Fix node 0
-rho = np.array([0.15,0.52])
+rho = np.array([0.5,0.5])
 ########################    1 element problem
 #nodes = np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]]) # 5 nodes
 #elems = np.array([[0,1,2,3]])                        # 2 tetra
@@ -165,10 +165,10 @@ rho = np.array([0.15,0.52])
 ###Here are the variables to check
 E0 = 4e6
 nu = 0.3
-sigmin=0.002
-relax=0.00001
-penal = 3
-Pexp = 6       #checked
+sigmin=0.001
+relax=0.001
+penal = 2
+Pexp = 2      #checked
 #Do solid calculations
 
 U,K = FEM_solver(nodes, elems, E0, rho, nu, F, bc,penal)
@@ -183,19 +183,21 @@ print("Pnorm:\n", Pnorm)
 dPdrho_FD_his=np.zeros(len(elems))
 dPdrho_ADJ_his=np.zeros(len(elems))
 ######################FD Calculation of d Pnorm d rho:#########################
-h=1e-7
+h=1e-5
 for i in range(len(elems)):
     rhoP= copy.deepcopy(rho)
     rhoP[i]=rhoP[i]-h
     Up,Kp = FEM_solver(nodes, elems, E0, rhoP, nu, F, bc,penal)
-    vmP,Mp = von_mises_energy(nodes, elems, rho, E0, nu, Up,penal) 
-    sigEP = vmP/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rhoP   
+    vmP,Mp = von_mises_energy(nodes, elems, rhoP, E0, nu, Up, penal) 
+    sigEP = vmP/sigmin+np.ones(len(elems))*relax-np.ones(len(elems))*relax/rhoP[i]   
     #Note here we uses curent Me and U=Up  for eqn 18
     PnormP=sum(sigEP**Pexp)**(1/Pexp)
     dPdrho_FD= (Pnorm-PnormP)/h
     dPdrho_FD_his[i]=dPdrho_FD
+    print("dPnormd_rho_FD: ", dPdrho_FD)  
 ######################ADJ Calculation of d Pnorm d rho:#######################
 rhs=np.zeros(len(nodes)*3)
+explicit = np.zeros(len(elems))
 for i in range(len(elems)):
     node = elems[i]
     ue = np.zeros(12)
@@ -203,7 +205,20 @@ for i in range(len(elems)):
         N = node[j]
         uN =np.array( [U[N*3],U[N*3+1],U[N*3+2]])
         ue[j*3:j*3+3] = uN
-    Me = constructM_elem(nodes, node, rho[i], E0, nu, penal)
+    #Construct RHS
+    #w = (sigE[i])**(Pexp-1)/(Pnorm**(Pexp-1)*sigmin)
+    #coords = nodes[node]
+    #D = C_matrix(E0*rho[i]**penal,nu)
+    #B, V = B_matrix(coords)
+    #rhsT = w*D@B@ue
+    #print(rhsT)
+    Me = constructM_elem(nodes, node, rho[i], E0, nu, penal)    
+    #M0 = constructM_elem(nodes, node, 1.0, E0, nu, penal)
+    #explicit[i] = (2*penal/rho[i])*(ue.T@Me@ue)*sigE[i]**(Pexp-1)/(sigmin*2*vm[i])
+    explicit[i] = sigE[i]**(Pexp-1)*vm[i]*penal/(sigmin*rho[i])+(sigE[i]**(Pexp-1))*relax/(rhoP[i]**2)
+    print("sigE",sigE[i])
+    print("explicit1",(sigE[i]**(Pexp-1))*relax/(rhoP[i]**2))
+    print("explicit2",sigE[i]**(Pexp-1)*vm[i]*penal/(sigmin*rho[i]))
     rhsT = (sigE[i]**(Pexp-1))/(sigmin*np.sqrt(ue.T@Me@ue))* (Me @ ue)   
     for k,j in enumerate(node):
         rhs[j*3]=rhs[j*3]+rhsT[k*3]
@@ -218,7 +233,7 @@ for i in range(len(elems)):
     rhoP= copy.deepcopy(rho)*0.0
     rhoP[i]=rho[i]    #Corresponding to def rho
     dKdr = dKdrho(nodes, elems, E0, rhoP, nu, F, bc,penal)
-    dPdrho_ADJ=Pnorm/(Pnorm**Pexp)*(-qb.T@dKdr@U+(sigE[i]**(Pexp-1))*relax/(rhoP[i]**2))
+    dPdrho_ADJ=Pnorm/(Pnorm**Pexp)*(explicit[i]-qb.T@dKdr@U)
     dPdrho_ADJ_his[i]=dPdrho_ADJ
     print("dPnormd_rho_ADJ: ", dPdrho_ADJ)    
 relError = (dPdrho_ADJ_his-dPdrho_FD_his)/dPdrho_FD_his *100

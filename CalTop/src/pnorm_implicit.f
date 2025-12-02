@@ -1,7 +1,7 @@
 
 
       subroutine pnorm_implicit_c3d4(co,kon,ipkon,lakon,ne,mi,
-     &     xstiff, v, lam, design, penal, pexp, relax,
+     &     xstiff, v, lam, design, penal, pexp, relax, sig0,
      &     nea, neb, list, ilist, djdrho)
 
 c--- Implicit term for dJ/drho_e using ce = penal * rho^(penal-1)
@@ -22,6 +22,7 @@ c      design(ne)          : element densities (clamped to [0,1] here)
 c      penal               : SIMP exponent
 c      pexp                : the exponential term for Pnorm calculations
 c      relax               : stress relaxation factor
+c      sig0                : minimum stress allowable
 c      nea,neb             : element range (can pass 1,ne)
 c      list, ilist(*)      : optional selection; if list=1 use ilist(k)
 
@@ -50,6 +51,7 @@ c--- material (D) store
 
 c--- design / params
       real*8 design(*), penal, heav, pexp, relax
+      real*8 sig0
 
 c--- output
       real*8 djdrho(*)
@@ -57,10 +59,13 @@ c--- output
 c--- locals
       real*8 xl(3,4), shp(4,4), xsj, xi, et, ze, weight
       real*8 B(6,12), ue(12), le(12), k0u(12), dotlam
-      real*8 eps(6), sig(6), rho, ce, rho_eff
+      real*8 eps(6), sig(6), rho, ce, rho_eff,sigP(6)
       integer a, m, n, m1
-      real*8 vm,vm2
+      real*8 vm,vm2,sige
       real*8 Epen
+      real*8 E
+      real*8 expli1
+      real*8 expli2
 c--- Gauss rule (C3D4, 1 point)
       include 'gauss.f'
 
@@ -129,23 +134,25 @@ c------ strain eps = B * u
          enddo
          rho = design(i)
          Epen = (rho**(penal-1))*xstiff(1,jj,i)*penal
-
+         E    = (rho**(penal))*xstiff(1,jj,i)
 c------ stress sig = D * eps  (use xstiff mapping like in your RHS code)
-         call mult_D_vec(sig, eps, Epen,xstiff(2,jj,i))
+         call mult_D_vec(sig, eps, E,xstiff(2,jj,i))
+         call mult_D_vec(sigP, eps, Epen,xstiff(2,jj,i))
 c------ calculate effective vm stress
          
 
          vm2 = ((sig(1)-sig(2))**(2.d0))
-         vm2=vm2+((sig(2)-sig(3))**(2.d0))+((sig(3)-sig(1))**(2.d0))
+         vm2 = vm2+((sig(2)-sig(3))**(2.d0))
+         vm2 = vm2+((sig(3)-sig(1))**(2.d0))
          vm2 = 0.5d0*vm2 + 3.d0*((sig(4)**(2.d0)) + (sig(5)**(2.d0))) 
          vm2 = vm2+3.d0*(sig(6)**(2.d0))
-         vm  = dsqrt(vm2) + relax-relax/(rho**penal)
-         if (vm .lt. 0.d0) vm  = 0.d0
-
+         vm  = dsqrt(vm2) 
+         sige = vm/sig0+ relax-relax/(rho**penal)
+         if (sige .lt. 0.d0) sige  = 0.d0
 c------ internal nodal forces k0u += B^T * sig * vol
          do n=1,12
             do m=1,6
-               k0u(n) = k0u(n) + B(m,n)*sig(m)
+               k0u(n) = k0u(n) + B(m,n)*sigP(m)
             enddo
             k0u(n) = k0u(n) * (xsj*weight)
          enddo
@@ -177,7 +184,14 @@ c------ ce = penal * rho^(penal-1)   (same logic as e_c3d_se.f)
          !ce = penal * rho_eff**(penal-1.d0) * heav
 
 c------ accumulate implicit sensitivity
-         djdrho(i) = djdrho(i)-dotlam +(vm**(pexp-1))*relax/(rho**2.d0)
+         djdrho(i) = djdrho(i)-dotlam !Implicit
+         expli1 = (sige**(pexp-1))*relax/(rho**2.d0) 
+         expli2 = (sige**(pexp-1))*vm*penal/(rho*sig0)
+         !write(*,*),"VM",vm
+         !write(*,*),"sigE",sige
+         !write(*,*),"explicit1",expli1
+         !write(*,*),"explicit2",expli2
+         djdrho(i) = djdrho(i)+expli1+expli2
          !write(*,*),"IMP1",dotlam
          !now we have qbar*dkdrho*q
       enddo

@@ -4204,7 +4204,8 @@ void FORTRAN(pnorm_implicit_c3d4,
   double *design,    /* element densities */
   double *penal,     /* SIMP exponent (by ref) */
   double *pexp,      /* exponential value for Pnorm*/
-  double *relax,      /* relaxation factor for pnorm*/
+  double *relax,     /* relaxation factor for pnorm*/
+  double *sig0,      /* minimum stress allowable */ 
   ITG    *nea,       /* start element index */
   ITG    *neb,       /* end element index */
   ITG    *list,      /* 0: all, 1: use ilist */
