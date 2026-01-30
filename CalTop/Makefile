@@ -4,6 +4,14 @@
 # Define paths for SPOOLES and ARPACK
 SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/Spooles/src
 ARPACK_PATH = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/Deps/ARPACK
+YAML_PREFIX = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/Deps/yaml-cpp-yaml-cpp-0.6.2
+
+# Get the CFLAGS and LIBS from pkg-config (preCICE version >= 1.4.0).
+# If pkg-config cannot find the libprecice.pc meta-file, you may need to set the
+# path where this is stored into PKG_CONFIG_PATH when building the adapter.
+PKGCONF_CFLAGS  = $(shell pkg-config --cflags libprecice)
+PKGCONF_LIBS    = $(shell pkg-config --libs libprecice)
+
 
 #Directories
 SRC_DIR = src
@@ -22,6 +30,11 @@ FFLAGS = -Wall -O3 -fallow-argument-mismatch -std=gnu
 
 CC = cc
 FC = gfortran
+
+# Add preCICE include flags
+CFLAGS += $(PKGCONF_CFLAGS)
+
+CFLAGS += -I$(YAML_PREFIX)/include
 
 #INTEL MKL
 MKL_LIB= /opt/intel/oneapi/mkl/2025.1/lib/intel64
@@ -51,6 +64,8 @@ OCCXC_EXTRA = $(SCCXC_EXTRA:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 OCCXF = $(SCCXF:$(SRC_DIR)/%.f=$(OBJ_DIR)/%.o)
 OCCXC = $(SCCXC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OCCXCXX = $(SCCXCXX:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
 
 OCCXMAIN = $(OBJ_DIR)/ccx_2.15.o
 OCCXMAINFILT = $(OBJ_DIR)/calFilt.o
@@ -61,14 +76,33 @@ LIBS = \
 	$(MKL_LIB)/libmkl_intel_lp64.a \
 	$(MKL_LIB)/libmkl_gnu_thread.a \
 	$(MKL_LIB)/libmkl_core.a \
-	-Wl,--end-group -lpthread -lm -ldl
+	-Wl,--end-group \
+	$(PKGCONF_LIBS) \
+	-lpthread -lm -ldl -lstdc++
 
-# Object file compilation rules
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+LIBS   += -L$(YAML_PREFIX)/build -lyaml-cpp
+
+# Object file compilation rules -> WORKS when all files are in src itself
+#$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+#	$(CC) $(CFLAGS) -I$(MKL_INCLUDE) -c $< -o $@
+
+#$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f | $(OBJ_DIR)
+#	$(FC) $(FFLAGS) -c $< -o $@
+
+# Object file compilation rules (support subdirectories under $(SRC_DIR))
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -I$(MKL_INCLUDE) -c $< -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f
+	@mkdir -p $(dir $@)
 	$(FC) $(FFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	g++ -std=c++11 $(CFLAGS) -c $< -o $@
+
+
 
 # Build calTop executable
 $(BIN_DIR)/calTop.exe: $(OCCXMAIN) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
@@ -84,7 +118,7 @@ $(BIN_DIR)/calFilt.exe: $(OCCXMAINFILT) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
 	@echo "Build calFilt.exe successfully!"
 
 # Build static library
-ccx_2.15.a: $(OCCXF) $(OCCXC) | $(OBJ_DIR)
+ccx_2.15.a: $(OCCXF) $(OCCXC) $(OCCXCXX) | $(OBJ_DIR)
 	ar vr $@ $^
 
 # Install target (default: install in current directory)

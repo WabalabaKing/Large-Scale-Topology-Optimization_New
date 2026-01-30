@@ -394,7 +394,7 @@ int main(int argc,char *argv[])
   if(argc==1)
   { 
     /* Inadequate input arguments */
-    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION\n");
+    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION -precice-particiapant PARTICIPANT NAME  \n");
     FORTRAN(stop,());
   }
 
@@ -415,11 +415,10 @@ else
     if(strcmp1(argv[i],"-v")==0)
     {
       /* Print version */
-	    printf("\nThis is CALTOP v1.0: A CalculiX-based large-scale topology optimization framework \n");
-      printf(" Authors: Prateek Ranjan, Massachusetts Institute of Technology \n");
-      printf(" Authors: Ghanendra Das, Georgia Institute of Technology \n");
-      printf(" Authors: Wanzheng Zheng, University of Illinois at Urbana-Champaign \n");
-      printf(" Kai. A James, Georgia Institute of Technology \n");
+	    printf("\nThis is CALFSI v1.0: A CalculiX-based Fluid-Structure Interaction solver \n");
+        printf(" Authors: Prateek Ranjan, Massachusetts Institute of Technology \n");
+
+        printf(" Kai. A James, Georgia Institute of Technology \n");
 	    FORTRAN(stop,());
     }
   }
@@ -1940,7 +1939,7 @@ while(istat>=0)
        NNEW(dPnorm_drho, double, ne);
       
   
-	    linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
+	    linstatic_MDO(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
 	     ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,ndirforc,xforc,
              &nforc, nelemload,sideload,xload,&nload,
 	     nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
@@ -1956,7 +1955,7 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho);
+	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho, preciceParticipantName,configFilename, ikforc, ilforc);
 
       endl = time(NULL);
 

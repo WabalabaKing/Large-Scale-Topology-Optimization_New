@@ -21,7 +21,7 @@
 #include "CalculiX.h"
 #include <string.h>
 
-#include "preCICE/PreciceInterface.h"
+#include "PreciceInterface.h"
 
 #include <math.h>
 #ifdef SPOOLES
@@ -102,7 +102,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
              char *orname,double *design, double *penal, double *stx, double *sigma0, double *eps,
-			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, char *preciceParticipantName, char *configFilename)
+			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, char *preciceParticipantName, char *configFilename, ITG *ikforc, ITG *ilforc)
 	{
 
   		char description[13]="            ",*lakon=NULL,stiffmatrix[132]="",
@@ -300,7 +300,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 
         /*---Adapter: Create the interfaces and initialize the coupling---*/
-        printf("Initializing aeroelastic interface with %s and %s \n", preciceParticipantName, configFilename);
+        printf("Initializing static aeroelastic interface with %s and %s \n", preciceParticipantName, configFilename);
 
         Precice_Setup( configFilename, preciceParticipantName, &simulationData );
 
@@ -356,7 +356,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		    NNEW(djdrho_expl, double, *ne);
   		    NNEW(fn,double,mt**nk);
 		    NNEW(brhs,double,mt**nk);
-  		    //NNEW(stx,double,6*mi[0]**ne); No passing stx as an input argument to linstatic
+  		    //NNEW(stx,double,6*mi[0]**ne); Now passing stx as an input argument to linstatic
   		    NNEW(inum,ITG,*nk);
 
   		    results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
@@ -383,7 +383,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   		    SFREE(v);
 		    SFREE(fn);
 		    SFREE(brhs);
-		    //SFREE(stx); No free stx in main driver
+		    //SFREE(stx); Now free stx in main driver
 		    SFREE(inum);
 		    SFREE(djdrho_expl);
   		    iout=1;

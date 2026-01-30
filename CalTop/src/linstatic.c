@@ -252,7 +252,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		NNEW(djdrho_expl, double, *ne);
   		NNEW(fn,double,mt**nk);
 		NNEW(brhs,double,mt**nk);
-  		//NNEW(stx,double,6*mi[0]**ne); No passing stx as an input argument to linstatic
+  		//NNEW(stx,double,6*mi[0]**ne); Now passing stx as an input argument to linstatic
   		NNEW(inum,ITG,*nk);
 
 	
@@ -286,7 +286,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   		SFREE(v);
 		SFREE(fn);
 		SFREE(brhs);
-		//SFREE(stx); No free stx in main driver
+		//SFREE(stx); Now free stx in main driver
 		SFREE(inum);
 		SFREE(djdrho_expl);
   		iout=1;
