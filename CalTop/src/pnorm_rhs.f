@@ -513,7 +513,9 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                do m1=1,12
                   rhs_loc(m1)=0.d0
                   do ia = 1,12
-                     rhs_loc(m1)=rhs_loc(m1) + MeN(m1,ia)*uel(ia)
+                  !TESTMARK
+                     rhs_loc(m1)=rhs_loc(m1)+MeN(m1,ia)*uel(ia)
+
                   enddo
                enddo
 ! ---          Build ||sigma_e||
@@ -525,10 +527,16 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                enddo
                !write(*,*),"vm from ENERGY:",dsqrt(sigeT)
                sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
+               !write(*,*), 'Currrent vmRHS:', dsqrt(sigeT)
                if (sige .lt. 0.d0) sige=0.d0
 
 ! ---          Construct the coeff
-               coeff = (sige**(pexp-1))/(sig0*dsqrt(sigeT))
+               !TESTMARK
+               if (sigeT .lt. 1e-5 ) then
+                  coeff = 0
+               else
+                  coeff = (sige**(pexp-1))/(sig0*dsqrt(sigeT))
+               endif
                
                do m1=1,12
                   rhs_loc(m1) = coeff * rhs_loc(m1)
@@ -555,5 +563,6 @@ c----------------------------------------------------------------------
       enddo ! <--- end of loop over all elements
       !write(*,*), 'Gsump:', g_sump
 ! ------------------------
+      
       return
       end

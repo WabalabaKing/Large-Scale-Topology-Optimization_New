@@ -343,9 +343,6 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             vm2 = (sx-sy)*(sx-sy) + (sy-sz)*(sy-sz) + (sz-sx)*(sz-sx)
             vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
             vm  = dsqrt(vm2)
-
-            !write(*,*), 'Currrent vm:', vm
-
 !  --- filtered design alread in [0,1] (clamp defenseively)  ---
             rho_e = design(i)
             ! (optional clamp, safe if design may drift)
@@ -356,12 +353,13 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             rho_p = rho_eff**penal
 
 ! --- Duysinx-Sigmund effective von Misses stress measure for an element
+! TESTMARK
             phi = (vm/ (sig0)) + eps_relax - (eps_relax/rho_eff)
 ! --- Consider effective von Misses stress (phi) > 0 only
             if (phi .lt. 0.d0) phi = 0.d0
 
-!           write(*,*), 'Phi: ', phi
-
+            !write(*,*), 'Phi: ', vm
+            
 ! --- With effective von Misses stress calculated, raise to pexp
 ! --- and sum over all elements
 ! --- P-norm aggregation for this element

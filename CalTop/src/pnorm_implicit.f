@@ -115,8 +115,8 @@ c------ single Gauss point for C3D4
 
 c------ shape & jacobian
          call shape4tet(xi,et,ze,xl,xsj,shp,iflag)
-         if (xsj.le.0.d0) cycle
-
+         !if (xsj.le.0.d0) cycle
+         xsj = dabs(xsj)
 c------ build B (6x12) from global derivatives dN/dx = shp(1,*), etc.
 c       Voigt order: [exx eyy ezz exy exz eyz]
          do a=1,12
@@ -133,21 +133,27 @@ c------ strain eps = B * u
             enddo
          enddo
          rho = design(i)
-         Epen = (rho**(penal-1))*xstiff(1,jj,i)*penal
-         E    = (rho**(penal))*xstiff(1,jj,i)
+         ! Hard coded xstiff call, should be xstiff(1,jj,i), due to memory leak
+         Epen = (rho**(penal-1))*xstiff(1,jj,1)*penal
+         E    = (rho**(penal))*xstiff(1,jj,1)
+         !Epen = (rho**(penal-1))*10*penal
+         !E    = (rho**(penal))*10
 c------ stress sig = D * eps  (use xstiff mapping like in your RHS code)
-         call mult_D_vec(sig, eps, E,xstiff(2,jj,i))
-         call mult_D_vec(sigP, eps, Epen,xstiff(2,jj,i))
-c------ calculate effective vm stress
-         
 
-         vm2 = ((sig(1)-sig(2))**(2.d0))
-         vm2 = vm2+((sig(2)-sig(3))**(2.d0))
-         vm2 = vm2+((sig(3)-sig(1))**(2.d0))
-         vm2 = 0.5d0*vm2 + 3.d0*((sig(4)**(2.d0)) + (sig(5)**(2.d0))) 
-         vm2 = vm2+3.d0*(sig(6)**(2.d0))
-         vm  = dsqrt(vm2) 
-         sige = vm/sig0+ relax-relax/(rho**penal)
+         call mult_D_vec(sig, eps, E,xstiff(2,jj,1))
+         call mult_D_vec(sigP, eps, Epen,xstiff(2,jj,1))
+c------ calculate effective vm stress
+         vm2 = (sig(1)-sig(2))**2
+         vm2 = vm2 + (sig(2)-sig(3))**2
+         vm2 = vm2 + (sig(3)-sig(1))**2
+         vm2 = 0.5d0*vm2
+         vm2 = vm2 + 3.d0* (sig(4))**2 
+         vm2 = vm2 + 3.d0* (sig(5))**2 
+         vm2 = vm2 + 3.d0* (sig(6))**2 
+         vm = sqrt(vm2)
+         !write(*,*), 'rho', rho
+         !write(*,*), 'vmImplicit', vm
+         sige = vm/sig0+ relax-relax/(rho)
          if (sige .lt. 0.d0) sige  = 0.d0
 c------ internal nodal forces k0u += B^T * sig * vol
          do n=1,12
@@ -185,13 +191,19 @@ c------ ce = penal * rho^(penal-1)   (same logic as e_c3d_se.f)
 
 c------ accumulate implicit sensitivity
          djdrho(i) = djdrho(i)-dotlam !Implicit
-         expli1 = (sige**(pexp-1))*relax/(rho**2.d0) 
-         expli2 = (sige**(pexp-1))*vm*penal/(rho*sig0)
-         !write(*,*),"VM",vm
+         !write(*,*),"ImplicitPart: ",djdrho(i) 
+         if (sige .lt. 1e-4) then
+            
+            expli1 = 0.0
+            expli2 = 0.0
+         else
+            expli1 = (sige**(pexp-1))*relax/(rho**2.d0) 
+            expli2 = (sige**(pexp-1))*vm*penal/(rho*sig0)
+         endif
          !write(*,*),"sigE",sige
-         !write(*,*),"explicit1",expli1
+         !write(*,*),"explicit",expli1+expli2
          !write(*,*),"explicit2",expli2
-         djdrho(i) = djdrho(i)+expli1+expli2
+         djdrho(i) = (djdrho(i)+expli1+expli2)
          !write(*,*),"IMP1",dotlam
          !now we have qbar*dkdrho*q
       enddo
