@@ -378,7 +378,7 @@ int main(int argc,char *argv[])
       preCICE is used only of  aparticipant name is provided as a command line argument
   */
 
-  char preciceParticipantName[256] = "sampleSolver";
+  char preciceParticipantName[256] = "";
   char configFilename[256] = "config.yml";
   int preciceUsed = 0;
 
@@ -499,27 +499,36 @@ else
     }
   }
 
-  for (i = 1; i<argc;i++)
+  for (i = 1; i < argc; i++)
   {
-    if(strcmp1(argv[i], "-precice-participant") == 0)
+    if (strcmp1(argv[i], "-precice-participant") == 0)
     {
-      preciceUsed = 1;
-
-      /* Make sure there is a participant name after the flag */
-
-      if (i+1 < argc)
+      if (i + 1 < argc)
       {
-        strcpy(preciceParticipantName, argv[i+1]);
+        preciceUsed = 1;
+        strcpy(preciceParticipantName, argv[i + 1]);
       }
       else
       {
-        fprintf(stderr, "Error: -precice-particiapnt flag requires a name\n");
+        fprintf(stderr,
+        "ERROR: -precice-participant flag requires a participant name\n");
+        FORTRAN(stop,());
       }
-      break;
     }
   }
+}
 
-} // End parsing all command line arguments
+/* precice-participant name must be passed */
+if (!preciceUsed) {
+  fprintf(stderr,
+    "\nERROR: preCICE participant name not provided.\n"
+    "You must run calFSI with:\n"
+    "  -precice-participant <PARTICIPANT_NAME>\n\n"
+    "Example:\n"
+    "  calFSI.exe -i jobname -precice-participant StructureSolver\n\n");
+  FORTRAN(stop,());
+}
+
 
 
 /* Assign default value for penalty parameter */
