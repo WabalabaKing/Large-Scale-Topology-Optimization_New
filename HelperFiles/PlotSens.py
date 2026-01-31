@@ -84,6 +84,7 @@ def main():
     ap.add_argument("--compliance", required=True, help="Path to compliance_*.csv")
     ap.add_argument("--volume", required=True, help="Path to volume_*.csv")
     ap.add_argument("--cg", required=False, help="Path to CG sensitivities CSV (optional)")
+    ap.add_argument("--stx", required=False, help="Path to Pnorm sensitivities CSV (optional)")
     ap.add_argument("--xmin", type=int, default=0, help="Optional min element index")
     ap.add_argument("--xmax", type=int, default=None, help="Optional max element index")
     ap.add_argument("--out", default="sensitivities.png", help="Output filename")
@@ -105,6 +106,7 @@ def main():
 
     # Load CG data if provided
     cg_present = args.cg is not None
+    pnorm_present = args.cg is not None
     if cg_present:
         cg = pd.read_csv(args.cg)
         cg.columns = cg.columns.str.strip()
@@ -114,9 +116,17 @@ def main():
         s_cgx = cg[cgx_col].astype(float)
         s_cgy = cg[cgy_col].astype(float)
         s_cgz = cg[cgz_col].astype(float)
-
+        cg_present = args.cg is not None
+    if pnorm_present:
+        pnorm = pd.read_csv(args.stx)
+        pnorm.columns = pnorm.columns.str.strip()
+        pnormS  = find_col(pnorm, ["PNORM GRADIENT"])
+        s_pnorm = pnorm[pnormS].astype(float)
     # Determine slice range
-    n = min(len(s_comp), len(s_vol), len(s_cgx)) if cg_present else min(len(s_comp), len(s_vol))
+    if cg_present:
+        n = min(len(s_comp), len(s_vol), len(s_cgx)) 
+    elif pnorm_present:
+        n = min(len(s_comp), len(s_vol),len(s_pnorm))
     xmin = max(0, args.xmin)
     xmax = min(n, args.xmax) if args.xmax is not None else n
 
@@ -127,6 +137,8 @@ def main():
         s_cgx = s_cgx.iloc[xmin:xmax].reset_index(drop=True)
         s_cgy = s_cgy.iloc[xmin:xmax].reset_index(drop=True)
         s_cgz = s_cgz.iloc[xmin:xmax].reset_index(drop=True)
+    if pnorm_present:
+        s_pnorm = s_pnorm.iloc[xmin:xmax].reset_index(drop=True)
 
     # Setup subplots
     nrows = 5 if cg_present else 2
@@ -157,6 +169,10 @@ def main():
         axs[4].set_ylabel(r"$\partial CG_z/ \partial \rho$", fontsize=22, fontname="Times New Roman")
 
         axs[4].set_xlabel("Element index", fontsize=22, fontname="Times New Roman")
+    if pnorm_present:
+        axs[2].plot(s_pnorm, linewidth=0.5, color = "C1", alpha = 0.8)
+        axs[2].set_ylabel(r"$\partial P-Norm/ \partial \rho$", fontsize=22, fontname="Times New Roman")
+
 
     else:
         axs[1].set_xlabel("Element index", fontsize=22, fontname="Times New Roman")

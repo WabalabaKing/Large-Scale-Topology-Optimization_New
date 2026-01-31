@@ -1894,7 +1894,7 @@ while(istat>=0)
         filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
         //for ( int i=0; i<ne_; ++i)
         //{designFiltered[i]=design[i];}
-        printf("Done!");
+        //printf("Done!");
 
         // DEBUG: Print first five and last five values of designFiltered
         /*

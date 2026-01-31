@@ -1,0 +1,292 @@
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 108
+Non-zero lower triangular matrix elements: 1440
+Static aeroelastic analysis
+Setting static MDO flag to 1
+
+TOPOLOGY OPTIMIZATION PARAMTERS----------------------------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 5.00
+
+FILTER MATRIX 
+  Density filter radius             0.60
+  Non zeros in Filtermatrix         60
+
+SKIN DEFINITION 
+  Number of skin elements           0
+
+STRESS AGGREGATION 
+  P-norm exponent                   30.00
+  Stress relaxation                 0.00
+  Stress threshold                  9.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES
+  Volume fraction:                  YES
+  Center of mass                    NO
+  PNORM                             NO
+|------------------------------------------------------------|
+
+Penalization parameter found --> will evaluate senitivities
+Checking if filter matrix needs to be built 
+Element density for the 10th element: 1.0000 
+Filtering element densities...
+Filternnz total: 2308
+Using 4 thread(s) to filter vector
+
+
+SOLVING LINEAR SYSTEM----------------------------------------|
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Starting linstatic calculation...
+ Using up to 4 cpu(s) for the symmetric stiffness/mass contributions.
+
+Caling PARDISO @ second pass..
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 4
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 4
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.000053 s
+Time spent in additional calculations                            : 0.000086 s
+Total time spent                                                 : 0.000139 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           108
+             number of non-zeros in A:      1548
+             number of non-zeros in A (%): 13.271605
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 128
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    17
+             size of largest supernode:               48
+             number of non-zeros in L:                4114
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              4115
+             gflop   for the numerical factorization: 0.000116
+
+             gflop/s for the numerical factorization: 0.626621
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  1.520123e-16
+
+========================================
+STRESS CALCULATION
+========================================
+    Displacement state eq. space -> nodal space
+done!
+    Evaluating effective von Misses stress for the structure
+    Skipping adjoint term evals for now
+    Assembling RHS for stress adjoint using analytical solutiondone!
+
+========== SCATTER CHECK ==========
+Checking first 10 nodes:
+Node 1: brhs=[0.000e+00,0.000e+00,0.000e+00] -> b_adj DOFs: [BC] [BC] [BC] 
+Node 2: brhs=[0.000e+00,0.000e+00,0.000e+00] -> b_adj DOFs: [0]=0.000e+00 [1]=0.000e+00 [2]=0.000e+00 
+Node 3: brhs=[-1.265e-63,-8.525e-64,8.385e-64] -> b_adj DOFs: [3]=-1.265e-63 [4]=-8.525e-64 [5]=8.385e-64 
+Node 4: brhs=[-2.189e-07,5.455e-07,1.041e-07] -> b_adj DOFs: [6]=-2.189e-07 [7]=5.455e-07 [8]=1.041e-07 
+Node 5: brhs=[3.532e-02,-4.596e-02,2.198e-01] -> b_adj DOFs: [9]=3.532e-02 [10]=-4.596e-02 [11]=2.198e-01 
+Node 6: brhs=[-4.106e-02,1.471e-01,-3.138e-02] -> b_adj DOFs: [12]=-4.106e-02 [13]=1.471e-01 [14]=-3.138e-02 
+Node 7: brhs=[6.137e-21,6.056e-21,1.208e-21] -> b_adj DOFs: [15]=6.137e-21 [16]=6.056e-21 [17]=1.208e-21 
+Node 8: brhs=[-5.009e-47,1.767e-48,-9.310e-47] -> b_adj DOFs: [18]=-5.009e-47 [19]=1.767e-48 [20]=-9.310e-47 
+Node 9: brhs=[9.588e-07,-4.779e-07,5.269e-07] -> b_adj DOFs: [21]=9.588e-07 [22]=-4.779e-07 [23]=5.269e-07 
+Node 10: brhs=[-3.174e-01,2.668e-01,1.381e+00] -> b_adj DOFs: [24]=-3.174e-01 [25]=2.668e-01 [26]=1.381e+00 
+==================================
+
+PARSIDO: adjoint solve 
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 4
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 4
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.000035 s
+Time spent in additional calculations                            : 0.000088 s
+Total time spent                                                 : 0.000123 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           108
+             number of non-zeros in A:      1548
+             number of non-zeros in A (%): 13.271605
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 128
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    17
+             size of largest supernode:               48
+             number of non-zeros in L:                4114
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              4115
+             gflop   for the numerical factorization: 0.000116
+
+             gflop/s for the numerical factorization: 0.966716
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  2.258046e-16
+
+========== ADJOINT EXPANSION: b_adj -> lam ==========
+Expanded to 48 nodes:
+Node  1: lam=[0.000000e+00, 0.000000e+00, 0.000000e+00] | DOF map: 1:BC 2:BC 3:BC 
+Node  2: lam=[6.539792e-02, -2.098275e-02, 9.512006e-02] | DOF map: 1->b_adj[0]=6.540e-02 2->b_adj[1]=-2.098e-02 3->b_adj[2]=9.512e-02 
+Node  3: lam=[-8.557894e-03, -8.735278e-02, -1.110730e-01] | DOF map: 1->b_adj[3]=-8.558e-03 2->b_adj[4]=-8.735e-02 3->b_adj[5]=-1.111e-01 
+Node  4: lam=[7.562142e-03, 8.856510e-03, -3.231777e-02] | DOF map: 1->b_adj[6]=7.562e-03 2->b_adj[7]=8.857e-03 3->b_adj[8]=-3.232e-02 
+Node  5: lam=[5.177861e-02, -1.994299e-02, 1.605660e-01] | DOF map: 1->b_adj[9]=5.178e-02 2->b_adj[10]=-1.994e-02 3->b_adj[11]=1.606e-01 
+Node  6: lam=[-4.750795e-03, 4.521756e-02, -9.732464e-03] | DOF map: 1->b_adj[12]=-4.751e-03 2->b_adj[13]=4.522e-02 3->b_adj[14]=-9.732e-03 
+Node  7: lam=[6.804322e-03, -9.299578e-03, 5.149742e-03] | DOF map: 1->b_adj[15]=6.804e-03 2->b_adj[16]=-9.300e-03 3->b_adj[17]=5.150e-03 
+Node  8: lam=[-3.120786e-03, 1.229849e-02, -1.039874e-02] | DOF map: 1->b_adj[18]=-3.121e-03 2->b_adj[19]=1.230e-02 3->b_adj[20]=-1.040e-02 
+====================================================
+
+Element  rho          djdrho          Final dJ/drho  
+----------------------------------------------------------
+1        4.997800e-01 -2.125190e-04   -2.457058e-04  
+2        7.696591e-01 -1.595542e-03   -1.844701e-03  
+3        1.000000e+00 -4.428180e-01   -5.119682e-01  
+4        9.013360e-01 -2.094621e-03   -2.421716e-03  
+5        5.367089e-01 7.692829e-04    8.894136e-04   
+6        9.999999e-01 -1.560989e-02   -1.804751e-02  
+7        9.661779e-01 -2.227531e-02   -2.575381e-02  
+8        1.286013e-02 1.577245e-10    1.823546e-10   
+9        5.654638e-02 1.704380e-07    1.970535e-07   
+10       1.000000e+00 -3.416614e-01   -3.950150e-01  
+
+ Time taken for linstatic.c is 0.00000000 seconds 
+ Filter element stress (P-norm) gradient using 4 thread(s) done 
+|------------------------------------------------------------|
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 4 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 4 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 4 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 4 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 0.603 
+ Mass:                       0.664 
+ Aggregated stress (P-norm): 0.995 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                               48
+Number of elements:                           123
+Integration points / element:                   1
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             2
+Single point constraints:                      72
+Multiple point constraints:                     1
+Sets:                                           5
+Terms in all sets:                            309
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+
+ STEP            1
+
+ Static analysis was selected
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 

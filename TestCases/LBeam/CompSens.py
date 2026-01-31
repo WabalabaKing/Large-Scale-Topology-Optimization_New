@@ -179,16 +179,16 @@ def main():
         description="Central FD check for P-norm stress sensitivities (uses constant h=1e-6 by default)."
     )
     ap.add_argument("-i", "--input", default="LBeam", help="Job/input name without extension (default: SCB)")
-    ap.add_argument("-p", "--penal", type=float, default=3.0)
-    ap.add_argument("-r", "--radius", type=float, default=0.05)
-    ap.add_argument("-f", "--filternnz", type=int, default=500)
-    ap.add_argument("--pexp", type=int, default=3)
-    ap.add_argument("--sigmin", type=float, default=100)
+    ap.add_argument("-p", "--penal", type=float, default=5.0)
+    ap.add_argument("-r", "--radius", type=float, default=0.03)
+    ap.add_argument("-f", "--filternnz", type=int, default=1000)
+    ap.add_argument("--pexp", type=int, default=10)
+    ap.add_argument("--sigmin", type=float, default=20)
     ap.add_argument("--sigrelax", type=float, default=0.001)
     ap.add_argument("--h", type=float, default=1e-6, help="Constant absolute perturbation (default 1e-6)")
     ap.add_argument("--outdir", default="Sensitivity_stress_CFD")
-    ap.add_argument("--max-elems", type=int, default=5000, help="Limit number of elements")
-    ap.add_argument("--start-idx", type=int, default=10999, help="Start element index")
+    ap.add_argument("--max-elems", type=int, default=2, help="Limit number of elements")
+    ap.add_argument("--start-idx", type=int, default=0, help="Start element index")
     args = ap.parse_args()
 
     verify_stress_sens_cfd(
