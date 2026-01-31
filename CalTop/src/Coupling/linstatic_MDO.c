@@ -201,41 +201,41 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     /*---Asign values to CCX structure to hold coupling variables---*/
     struct SimulationData simulationData = 
     {
-        .ialset = ialset,
-        .ielmat = ielmat,
-        .istartset = istartset,
-        .iendset = iendset,
-        .kon = kon,
-        .ipkon = ipkon,
-        .lakon = &lakon,
-        .co = co,
-        .set = set,
-        .nset = *nset,
-        .ikboun = ikboun,
-        .ikforc = ikforc,
-        .ilboun = ilboun,
-        .ilforc = ilforc,
-        .nboun = *nboun,
-        .nforc = *nforc,
-        .nelemload = nelemload,
-        .nload = *nload,
-        .sideload = sideload,
-        .mt = mt,
-        .nk = *nk,
-        .theta = &theta,
-        //.dtheta = &dtheta,
-        .tper = tper,
-        .nmethod = nmethod,
-        .xload = xload,
-        .xforc = xforc,
-        .xboun = xboun,
-        .ntmat_ = ntmat_,
-        .vold = vold,
-        .veold = veold,
-        .fn = fn,
-        .cocon = cocon,
-        .ncocon = ncocon,
-        .mi = mi
+        .ialset = ialset,    				/*---Member of a set or surface. This is a node for node set, an element for element set---*/
+        .ielmat = ielmat,					/*---Contains the material number for element i ---*/
+        .istartset = istartset,				/*---Pointer to ialset containing the first set number---*/
+        .iendset = iendset,					/*---Pointer to ialset containing the last set number---*/
+        .kon = kon,							/*---Containts topology of all elements---*/
+        .ipkon = ipkon,						/*---Points to the location in field kon preceding the topology of element i---*/
+        .lakon = &lakon,					/*---Containts label for element i (C3D4, C3D8...)---*/
+        .co = co,							/*---Node coordinates---*/
+        .set = set,							/*---Name of the set: User defined name---*/
+        .nset = *nset,						/*---Number of sets, including surfaces---*/
+        .ikboun = ikboun,					/*---Containts all DOFs of the boundary conditions---*/
+        .ikforc = ikforc,					/*---Ordered array of the DOFs corresponiding to the point loads---*/
+        .ilboun = ilboun,					/*---Containts all the boundary conditions---*/
+        .ilforc = ilforc,					/*---Original SPC number for ikforc(i)---*/
+        .nboun = *nboun,   					/*---Total number of boundary conditions (Single Point Constraints)---*/	
+        .nforc = *nforc,							/*---Number of point loads---*/
+        .nelemload = nelemload,						/*---Element to which distributed load is applied----*/
+        .nload = *nload,							/*---Number of facial distributed loads---*/
+        .sideload = sideload,						/*---Load label; indicated element size to which load is applied---*/
+        .mt = mt, 									/*---Not sure---*/
+        .nk = *nk,									/*---Highest node number---*/
+        .theta = &theta,  							/*---Normalized (by tper) size of all previous increments and not including present increment---*/
+        //.dtheta = &dtheta,						/*---Normalized (by tper) increment size---*/
+        .tper = tper,								/*---Use given step size---*/
+        .nmethod = nmethod,  						/*---Flag that deifnes numerical method: 1: static linear or nonlinear, 2: frequency (linear), 3: buckling, 4: dynamic linear or non-linear, etc---*/
+        .xload = xload,								/*---Concentrated load in direction of idof of node "node" (global coordinates)---*/
+        .xforc = xforc,   							/*---Scalar value of the force in one direction---*/
+        .xboun = xboun,								/*---Magnitude of constraint at end of a step---*/
+        .ntmat_ = ntmat_,  							/*---Maximum number of temperature data points for any material property for any material---*/
+        .vold = vold,								/*---Displacement of node j in direction i at the start of an iteration---*/
+        .veold = veold,   							/*---Velocity of node j in direction i at the start of an iteration---*/
+        .fn = fn, 									/*---values of forces read from calculix---*/
+        .cocon = cocon,								/*---Conductivity coefficient k at location---*/
+        .ncocon = ncocon,							/*---Number of conductivity constants---*/
+        .mi = mi   									/*---Not sure---*/
     };
 
 
@@ -306,6 +306,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
         int counter = 0;
 
+		/* --- Main coupling loop --- */
         while (Precice_IsCouplingOngoing() )
         {
             counter = counter + 1;
@@ -313,7 +314,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             /* Adapter: adjust solver time step */
             Precice_AdjustSolverTimestep( &simulationData );
 
-            /*---See if coupling data (aerodynamic tractions)need to be read---*/
+            /*---Retrieve nodal forces and apply to CCX simulation data struct (sim->xforc)---*/
             Precice_ReadCouplingData(&simulationData);
 
   		    /* allocating a field for the instantaneous amplitude */
@@ -685,7 +686,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 /*---Copy current v into vold---*/
                 memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
 
-                /*---Save the current displacement state for implicit calculations---*/
+                /*---Save the current displacement state (vold) for implicit calculations---*/
                 if(Precice_IsWriteCheckpointRequired())
                 {
                     Precice_WriteIterationCheckpoint( &simulationData, vold );
