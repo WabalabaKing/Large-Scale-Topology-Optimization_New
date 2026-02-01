@@ -569,6 +569,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     			NNEW(v,double,mt**nk);
     			NNEW(fn,double,mt**nk);
 				NNEW(brhs,double,mt**nk);
+				DMEMSET(brhs,0,mt**nk,0.0);
     			NNEW(stn,double,6**nk);
     			NNEW(inum,ITG,*nk);
 				NNEW(djdrho_expl, double, *ne);

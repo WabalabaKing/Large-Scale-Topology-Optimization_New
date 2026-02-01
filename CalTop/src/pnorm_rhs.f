@@ -91,6 +91,7 @@
 
 !     work arrays for Me*u_e path (C3D4 block)
       integer ia, ib
+      integer ii
       real*8 Bten(6,12)
       real*8 Vec(6,6)
       real*8 uel(12)
@@ -116,7 +117,7 @@
      &  nal,qa,fn,ener,eme,eei,ielmat,prestr,
      &  emeini
 !
-      intent(inout) xstiff,stx, rhs
+      intent(inout) stx,rhs
 !
       include "gauss.f"
 !
@@ -132,7 +133,7 @@
 ! --- Begin loop over all elements starting from nea
       do m=nea,neb
 !        
-         
+         mattyp=1
          if(list.eq.1) then
             i=ilist(m)
          else
@@ -283,7 +284,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 
 ! ---       SIMP penalization for linear isotropic (mattyp == 1) ---
             if (mattyp .eq. 1) then
-              rho_e   = design(m)
+              rho_e   = design(i)
               if (rho_e .lt. 0.d0) rho_e = 0.d0
               if (rho_e .gt. 1.d0) rho_e = 1.d0
               rho_eff = max(rho_e, rho_min)
@@ -304,16 +305,16 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !     &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
 !     &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
 !     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
-            mattyp=1
-            rho_e = design(m)
+            
+            rho_e = design(i)
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
 
 !               Build full 6X6 C (voigt, tensoral shear)
                 if (mattyp.eq.1) then
 !               Isotropic
-                  do i=1,2
-                     elas(i)=elconloc(i)
+                  do ii=1,2
+                     elas(ii)=elconloc(ii)
                   enddo
                   e  = elas(1)
                   un = elas(2)
@@ -328,28 +329,28 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !                 7:C14  8:C24  9:C34 10:C44 11:C15 12:C25
 !                 13:C35 14:C45 15:C55 16:C16 17:C26 18:C36
 !                 19:C46 20:C56 21:C66
-                  xstiff( 1,jj,i)=(al+2.d0*um)  ! C11
-                  xstiff( 2,jj,i)= al           ! C12
-                  xstiff( 3,jj,i)= (al+2.d0*um)  ! C22
-                  xstiff( 4,jj,i)= al           ! C13
-                  xstiff( 5,jj,i)= al           ! C23
-                  xstiff( 6,jj,i)= (al+2.d0*um)  ! C33
-
-                  xstiff( 7,jj,i)=0.d0                ! C14
-                  xstiff( 8,jj,i)=0.d0                ! C24
-                  xstiff( 9,jj,i)=0.d0                ! C34
-                  xstiff(10,jj,i)= um           ! C44 (τ12/ε12_tensorial)
-                  xstiff(11,jj,i)=0.d0                ! C15
-                  xstiff(12,jj,i)=0.d0                ! C25
-                  xstiff(13,jj,i)=0.d0                ! C35
-                  xstiff(14,jj,i)=0.d0                ! C45
-                  xstiff(15,jj,i)= um           ! C55 (τ13/ε13_tensorial)
-                  xstiff(16,jj,i)=0.d0                ! C16
-                  xstiff(17,jj,i)=0.d0                ! C26
-                  xstiff(18,jj,i)=0.d0                ! C36
-                  xstiff(19,jj,i)=0.d0                ! C46
-                  xstiff(20,jj,i)=0.d0                ! C56
-                  xstiff(21,jj,i)= um           ! C66 (τ23/ε23_tensorial)
+!                  xstiff( 1,jj,i)=(al+2.d0*um)  ! C11
+!                  xstiff( 2,jj,i)= al           ! C12
+!                  xstiff( 3,jj,i)= (al+2.d0*um)  ! C22
+!                  xstiff( 4,jj,i)= al           ! C13
+!                  xstiff( 5,jj,i)= al           ! C23
+!                  xstiff( 6,jj,i)= (al+2.d0*um)  ! C33!
+!
+!                  xstiff( 7,jj,i)=0.d0                ! C14
+!                  xstiff( 8,jj,i)=0.d0                ! C24
+!                  xstiff( 9,jj,i)=0.d0                ! C34
+!                  xstiff(10,jj,i)= um           ! C44 (τ12/ε12_tensorial)
+!                  xstiff(11,jj,i)=0.d0                ! C15
+!                  xstiff(12,jj,i)=0.d0                ! C25
+!                  xstiff(13,jj,i)=0.d0                ! C35
+!                  xstiff(14,jj,i)=0.d0                ! C45
+!                  xstiff(15,jj,i)= um           ! C55 (τ13/ε13_tensorial)
+!                  xstiff(16,jj,i)=0.d0                ! C16
+!                  xstiff(17,jj,i)=0.d0                ! C26
+!                  xstiff(18,jj,i)=0.d0                ! C36
+!                  xstiff(19,jj,i)=0.d0                ! C46
+!                  xstiff(20,jj,i)=0.d0                ! C56
+!                  xstiff(21,jj,i)= um           ! C66 (τ23/ε23_tensorial)
                endif
             endif
 !           calculation of the Cauchy stresses (skip for linear CalTop)
@@ -383,43 +384,60 @@ c           skip if vm or phi yields zero gradient
 ! ---- unpack xstiff(:,jj,i) -> full symmetric C(6,6) in tensorial Voigt ----
                
                C = 0.d0
-               C(1,1)=xstiff( 1,jj,i);
-               C(2,1)=xstiff( 2,jj,i); 
-               C(2,2)=xstiff( 3,jj,i);
-               C(3,1)=xstiff( 4,jj,i); 
-               C(3,2)=xstiff( 5,jj,i); 
-               C(3,3)=xstiff( 6,jj,i);
-               C(4,1)=xstiff( 7,jj,i); 
-               C(4,2)=xstiff( 8,jj,i); 
-               C(4,3)=xstiff( 9,jj,i); 
-               C(4,4)=xstiff(10,jj,i);
-               C(5,1)=xstiff(11,jj,i);
-               C(5,2)=xstiff(12,jj,i); 
-               C(5,3)=xstiff(13,jj,i); 
-               C(5,4)=xstiff(14,jj,i); 
-               C(5,5)=xstiff(15,jj,i);
-               C(6,1)=xstiff(16,jj,i); 
-               C(6,2)=xstiff(17,jj,i); 
-               C(6,3)=xstiff(18,jj,i); 
-               C(6,4)=xstiff(19,jj,i); 
-               C(6,5)=xstiff(20,jj,i); 
-               C(6,6)=xstiff(21,jj,i);
+               C(1,1) = (al+2.d0*um)  ! C11
+               C(2,1) = al            ! C12  
+               C(2,2) = (al+2.d0*um)  ! C22
+               C(3,1) = al            ! C13
+               C(3,2) = al            ! C23
+               C(3,3) = (al+2.d0*um)  ! C33
+               C(4,4) = um            ! C44
+               C(5,5) = um            ! C55
+               C(6,6) = um            ! C66
+               ! Mirror to make symmetric
+               C(1,2) = C(2,1)
+               C(1,3) = C(3,1)
+               C(2,3) = C(3,2)
+               if (m .le. 10) then
+                  write(*,*) 'pnorm_rhs: m=', m, 'i=', i, 'rho=', rho_e
+                  write(*,*) 'C(1,1)=', C(1,1), 'C(4,4)=', C(4,4)
+               endif
+               !C(1,1)=xstiff( 1,jj,i);
+               !C(2,1)=xstiff( 2,jj,i); 
+               !C(2,2)=xstiff( 3,jj,i);
+               !C(3,1)=xstiff( 4,jj,i); 
+               !C(3,2)=xstiff( 5,jj,i); 
+               !C(3,3)=xstiff( 6,jj,i);
+               !C(4,1)=xstiff( 7,jj,i); 
+               !C(4,2)=xstiff( 8,jj,i); 
+               !C(4,3)=xstiff( 9,jj,i); 
+               !C(4,4)=xstiff(10,jj,i);
+               !C(5,1)=xstiff(11,jj,i);
+               !C(5,2)=xstiff(12,jj,i); 
+               !C(5,3)=xstiff(13,jj,i); 
+               !C(5,4)=xstiff(14,jj,i); 
+               !C(5,5)=xstiff(15,jj,i);
+               !C(6,1)=xstiff(16,jj,i); 
+               !C(6,2)=xstiff(17,jj,i); 
+               !C(6,3)=xstiff(18,jj,i); 
+               !C(6,4)=xstiff(19,jj,i); 
+               !C(6,5)=xstiff(20,jj,i); 
+               !C(6,6)=xstiff(21,jj,i);
 ! mirror upper triangle
-               C(1,2)=C(2,1); 
-               C(1,3)=C(3,1); 
-               C(1,4)=C(4,1); 
-               C(1,5)=C(5,1); 
-               C(1,6)=C(6,1);
-               C(2,3)=C(3,2);
-               C(2,4)=C(4,2); 
-               C(2,5)=C(5,2); 
-               C(2,6)=C(6,2);
-               C(3,4)=C(4,3);
-               C(3,5)=C(5,3);
-               C(3,6)=C(6,3);
-               C(4,5)=C(5,4);
-               C(4,6)=C(6,4);
-               C(5,6)=C(6,5);
+               !C(1,2)=C(2,1); 
+               !C(1,3)=C(3,1); 
+               !C(1,4)=C(4,1); 
+               !C(1,5)=C(5,1); 
+               !C(1,6)=C(6,1);
+               !C(2,3)=C(3,2);
+               !C(2,4)=C(4,2); 
+               !C(2,5)=C(5,2); 
+               !C(2,6)=C(6,2);
+               !C(3,4)=C(4,3);
+               !C(3,5)=C(5,3);
+               !C(3,6)=C(6,3);
+               !C(4,5)=C(5,4);
+               !C(4,6)=C(6,4);
+               !C(5,6)=C(6,5);
 
 
 c             Build B for C3D4 (engineering shear), from shp(derivs)
@@ -526,18 +544,30 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   enddo
                enddo
                !write(*,*),"vm from ENERGY:",dsqrt(sigeT)
+               if (m .le. 10) then
+                  write(*,*) 'After M calc: sigeT=', sigeT
+               endif
                sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
                !write(*,*), 'Currrent vmRHS:', dsqrt(sigeT)
+               if (m .le. 10) then
+                  write(*,*) 'Before clamp: sige=', sige, 'sigeT=', sigeT
+               endif
+               if (m .le. 10) then
+                  write(*,*) 'eps_relax=', eps_relax,'rho_eff=',rho_eff
+               endif
                if (sige .lt. 0.d0) sige=0.d0
 
 ! ---          Construct the coeff
                !TESTMARK
-               if (sigeT .lt. 1e-5 ) then
+               if (sigeT .lt. 0.0 ) then
                   coeff = 0
                else
                   coeff = (sige**(pexp-1))/(sig0*dsqrt(sigeT))
                endif
-               
+               if (m .le. 5) then
+                  write(*,*) 'Elem', i,'rho=',rho_e,'vol=',xsj*weight,
+     &                       'sigeT=',sigeT,'sige=',sige,'coeff=',coeff
+               endif             
                do m1=1,12
                   rhs_loc(m1) = coeff * rhs_loc(m1)
                enddo

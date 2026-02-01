@@ -134,8 +134,12 @@ c------ strain eps = B * u
          enddo
          rho = design(i)
          ! Hard coded xstiff call, should be xstiff(1,jj,i), due to memory leak
-         Epen = (rho**(penal-1))*xstiff(1,jj,1)*penal
-         E    = (rho**(penal))*xstiff(1,jj,1)
+         Epen = (rho**(penal-1))*xstiff(1,jj,i)*penal
+         E    = (rho**(penal))*xstiff(1,jj,i)
+         if (k .le. 10) then
+            write(*,*) 'pnorm_impl: k=', k, 'i=', i, 'rho=', rho,
+     &               'E0=', xstiff(1,jj,1), 'nu=', xstiff(2,jj,1)
+         endif
          !Epen = (rho**(penal-1))*10*penal
          !E    = (rho**(penal))*10
 c------ stress sig = D * eps  (use xstiff mapping like in your RHS code)
@@ -192,14 +196,8 @@ c------ ce = penal * rho^(penal-1)   (same logic as e_c3d_se.f)
 c------ accumulate implicit sensitivity
          djdrho(i) = djdrho(i)-dotlam !Implicit
          !write(*,*),"ImplicitPart: ",djdrho(i) 
-         if (sige .lt. 1e-4) then
-            
-            expli1 = 0.0
-            expli2 = 0.0
-         else
-            expli1 = (sige**(pexp-1))*relax/(rho**2.d0) 
-            expli2 = (sige**(pexp-1))*vm*penal/(rho*sig0)
-         endif
+         expli1 = (sige**(pexp-1))*relax/(rho**2.d0) 
+         expli2 = (sige**(pexp-1))*vm*penal/(rho*sig0)
          !write(*,*),"sigE",sige
          !write(*,*),"explicit",expli1+expli2
          !write(*,*),"explicit2",expli2
