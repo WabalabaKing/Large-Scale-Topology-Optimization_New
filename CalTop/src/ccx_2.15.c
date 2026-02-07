@@ -394,7 +394,7 @@ int main(int argc,char *argv[])
   if(argc==1)
   { 
     /* Inadequate input arguments */
-    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION\n");
+    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION --cg_eval YES\n");
     FORTRAN(stop,());
   }
 
@@ -515,6 +515,20 @@ else
       else
       {
         fprintf(stderr, "Error: -precice-particiapnt flag requires a name\n");
+      }
+      break;
+    }
+  }
+
+  /* Center of Gravity evaluation flag */
+  for(i=1; i<argc; i++)
+  {
+    if(strcmp1(argv[i],"--cg_eval")==0)
+    {
+      if (i+1 < argc &&
+          (strcmp1(argv[i+1],"YES")==0 || strcmp1(argv[i+1],"yes")==0))
+      {
+        eval_CG = 1;
       }
       break;
     }
