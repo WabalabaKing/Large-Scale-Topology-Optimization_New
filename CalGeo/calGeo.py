@@ -87,7 +87,7 @@ def extract_su2_mesh_data_with_element_index(su2_filepath, output_filepath="mesh
         out.write("**This file contains mesh information\n")
         out.write("*NODE, NSET=NALL\n")
         for i, (x, y, z) in enumerate(node_data, start=1):
-            out.write(f"      {i}, {x}, {y}, {z}\n")
+            out.write(f"      {i}, {x:.10f}, {y:.10f}, {z:.10f}\n")
 
         out.write("\n*ELEMENT, TYPE=C3D4, ELSET=EALL\n")
 
