@@ -234,131 +234,55 @@ void Precice_ReadCouplingData( SimulationData * sim )
 					break;
         		case FORCES:
 					// Read and set forces as concentrated loads (Neumann BC)
-					precicec_readBlockVectorData( interfaces[i]->forcesDataID, interfaces[i]->numNodes, interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData );
-					setNodeForces( interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData, interfaces[i]->numNodes, interfaces[i]->dim, interfaces[i]->xforcIndices, sim->xforc);
+					precicec_readBlockVectorData( interfaces[i]->forcesDataID,
+						 						  interfaces[i]->numNodes,
+												  interfaces[i]->preciceNodeIDs,
+												  interfaces[i]->nodeVectorData );
+
+				    //Set forces or CalTop using xforc
+					setNodeForces( interfaces[i]->preciceNodeIDs,
+								   interfaces[i]->nodeVectorData,
+								   interfaces[i]->numNodes,
+								   interfaces[i]->dim,
+								   interfaces[i]->xforcIndices,
+								   sim->xforc);
+
 					printf( "Reading FORCES coupling data with ID '%d'. \n",interfaces[i]->forcesDataID );
           			int Number_nodes = interfaces[i]->numNodes;
           			printf( "Number of Interface nodes '%d'. \n", Number_nodes);
-        //    for ( int k = 0; k < 3 * Number_nodes; k++)
-        //   {
-      //      printf( "Nodal frc '%lf'. \n", interfaces[i]->nodeVectorData[k]);
-    //       }
-          double *Fx;
-          double *Fy;
-          double *Fz;
-          double *NID;
-          double *F;
-          F = (double*) malloc(3*Number_nodes*sizeof(double));
-          NID = (int*) malloc(Number_nodes*sizeof(double));
-          Fx = (double*) malloc(Number_nodes*sizeof(double));
-          Fy = (double*) malloc(Number_nodes*sizeof(double));
-          Fz = (double*) malloc(Number_nodes*sizeof(double));
 
-          for ( int k = 0; k < 3 * Number_nodes; k++)
-          {
-            F[k] =  interfaces[i]->nodeVectorData[k];
-          }
+          			FILE *f = fopen("Forces_precice.csv","w");
+					fprintf(f, "nodeID,Fx,Fy,Fz\n");
+					for (int a = 0; a < Number_nodes; ++a) 
+					{
+    					int nid = interfaces[i]->nodeIDs[a];            // your solver node labels
+    					double Fx = interfaces[i]->nodeVectorData[3*a + 0];
+    					double Fy = interfaces[i]->nodeVectorData[3*a + 1];
+    					double Fz = interfaces[i]->nodeVectorData[3*a + 2];
+    					fprintf(f, "%d,%.16e,%.16e,%.16e\n", nid, Fx, Fy, Fz);
+					}
+					fclose(f);
 
-          for ( int k = 0; k < Number_nodes; k++)
-          {
-            NID[k] =  interfaces[i]->nodeIDs[k];
-          }
+					double Fx_tot = 0.0;
+					double Fy_tot = 0.0;
+					double Fz_tot = 0.0;
 
-          // Assign the first and last values for Fx
+					for (int a = 0; a < Number_nodes; ++a) 
+					{
+    					Fx_tot += interfaces[i]->nodeVectorData[3*a + 0];
+    					Fy_tot += interfaces[i]->nodeVectorData[3*a + 1];
+    					Fz_tot += interfaces[i]->nodeVectorData[3*a + 2];
+					}
 
-          Fx[0] = F[0];
-          Fy[0] = F[1];
-          Fz[0] = F[2];
-
-          Fx[Number_nodes-1] = F[3*Number_nodes-3];
-          Fy[Number_nodes-1] = F[3*Number_nodes-2];
-          Fz[Number_nodes-1] = F[3*Number_nodes-1];
-
-		  double sum_x = 0.0;
-		  double sum_y = 0.0;
-		  double sum_z = 0.0;
-
-		  int Count_x  = 0;
-		  int Count_y  = 0;
-		  int Count_z  = 0;
-		  double Fx_Avg, Fy_Avg, Fz_Avg;
-
-          for (int n = 1; n <Number_nodes-2; n++)
-          {
-              Fx[n] = F[3*n];
-			  sum_x +=Fx[n];
-			  Count_x++;
-          }
-
-		  Fx_Avg = (sum_x/Count_x);
+					printf("\n--------------------------------------------------\n");
+					printf("Total interface force X: % .12e N\n", Fx_tot);
+					printf("Total interface force Y: % .12e N\n", Fy_tot);
+					printf("Total interface force Z: % .12e N\n", Fz_tot);
+					printf("--------------------------------------------------\n\n");
 
 
-          for (int n = 1; n < Number_nodes-2; n++)
-          {
-            Fy[n] = F[3*n+1];
-			sum_y +=Fy[n];
-			Count_y++;
-          }
-		  Fy_Avg = (sum_y/Count_y);
+				break;
 
-          for (int n = 1; n < Number_nodes-2; n++)
-          {
-            Fz[n] = F[3*n+2];
-			sum_z +=Fz[n];
-			Count_z++;
-          }
-		  Fz_Avg = (sum_z/Count_z);
-
-		  /*---Compute total traction magnitude action on the elastic body---*/
-		  double traction_Tot = sum_x + sum_y + sum_z;
-
-		  /*---Print average Forces in all dimensions---*/
-
-          printf("\n");
-		  printf("---------------------------------------------------------------------------\n");
-		  printf("Average aerodynamic traction in x: %lf \n", Fx_Avg);
-		  printf("Average aerodynamic traction in y: %lf \n", Fy_Avg);
-		  printf("Average aerodynamic traction in z: %lf \n", Fz_Avg);
-		  printf("---------------------------------------------------------------------------\n");
-		  printf("\n");
-
-
-		  printf("\n");
-		  printf("---------------------------------------------------------------------------\n");
-		  printf("Total aerodynamic traction: %15.9f \n", traction_Tot);
-		  printf("---------------------------------------------------------------------------\n");
-		  printf("\n");
-
-
-          FILE *fptr;
-          fptr = fopen("Forces.csv", "w");
-          if (fptr == NULL)
-          {
-            printf("ERROR! Unable to open write-file.\n");
-            exit(1);
-          }
-            fprintf(fptr, " Surface Node ID  Fx (N)  Fy (N) Fz (N) \n");
-          for ( int aa = 0; aa < Number_nodes ; aa ++)
-          {
-            fprintf(fptr, " %lf , %lf , %lf  , %lf \n", NID[aa], Fx[aa], Fy[aa], Fz[aa]);
-          }
-           fclose(fptr);
-
-        //  for ( int k = 0; k < Number_nodes; k++)
-        //  {
-        //    printf(  " %lf, %lf, %lf, %lf \n", NID[k], Fx[k], Fy[k], Fz[k]);
-        //  }
-          free(NID);
-          free(Fx);
-          free(Fy);
-          free(Fz);
-          free(F);
-
-          //  for ( int k = 0; k < Number_nodes; k++)
-          // {
-          //  printf( "Nodal ID Global'%d'. \n", interfaces[i]->nodeIDs[k]);
-        //   }
-					break;
 				case DISPLACEMENTS:
 					// Read and set displacements as single point constraints (Dirichlet BC)
 					precicec_readBlockVectorData( interfaces[i]->displacementsDataID, interfaces[i]->numNodes, interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData );
@@ -471,31 +395,93 @@ void Precice_WriteCouplingData( SimulationData * sim )
 					printf( "Writing HEAT_TRANSFER_COEFF coupling data with ID '%d'. \n",interfaces[i]->kDeltaWriteDataID );
 					free( myKDelta );
 					break; */
+
 				case DISPLACEMENTS:
-					getNodeDisplacements( interfaces[i]->nodeIDs, interfaces[i]->numNodes, interfaces[i]->dim, sim->vold, sim->mt, interfaces[i]->nodeVectorData );
-					precicec_writeBlockVectorData( interfaces[i]->displacementsDataID, interfaces[i]->numNodes, interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData );
+					getNodeDisplacements( interfaces[i]->nodeIDs, 
+										  interfaces[i]->numNodes, 
+										  interfaces[i]->dim, 
+										  sim->vold, 
+										  sim->mt, 
+										  interfaces[i]->nodeVectorData);
+
+
+					/* ---------------- Max absolute displacements ---------------- */
+  					int nNodes = interfaces[i]->numNodes;
+  					double *U  = interfaces[i]->nodeVectorData;
+  					double maxUx = 0.0, maxUy = 0.0, maxUz = 0.0;
+
+  					for (int k = 0; k < nNodes; ++k) 
+					{
+    					double ux = fabs(U[3*k + 0]);
+    					double uy = fabs(U[3*k + 1]);
+    					double uz = fabs(U[3*k + 2]);
+
+    					if (ux > maxUx) maxUx = ux;
+    					if (uy > maxUy) maxUy = uy;
+    					if (uz > maxUz) maxUz = uz;
+  					}
+  					printf("\n");
+  					printf("--------------------------------------------------------------\n");
+  					printf(" Max absolute displacement at interface (CalculiX → SU2)\n");
+  					printf("   |Ux|max = %15.6e\n", maxUx);
+  					printf("   |Uy|max = %15.6e\n", maxUy);
+  					printf("   |Uz|max = %15.6e\n", maxUz);
+  					printf("--------------------------------------------------------------\n\n");
+  					/* --------------------------------------------------------------- */
+
+					precicec_writeBlockVectorData( interfaces[i]->displacementsDataID, 
+												   interfaces[i]->numNodes,
+												   interfaces[i]->preciceNodeIDs,
+												interfaces[i]->nodeVectorData);
+
 					printf( "Writing DISPLACEMENTS coupling data with ID '%d'. \n",interfaces[i]->displacementsDataID );
+
 					break;
 				case DISPLACEMENTDELTAS:
 					getNodeDisplacementDeltas( interfaces[i]->nodeIDs, interfaces[i]->numNodes, interfaces[i]->dim, sim->vold, sim->coupling_init_v, sim->mt, interfaces[i]->nodeVectorData );
 					
-					double sumx = 0;
-					double sumy = 0;
-					double sumz = 0;
-					for(int k = 0 ; k < interfaces[i]->numNodes ; k++ )
+					//double sumx = 0;
+					//double sumy = 0;
+					//double sumz = 0;
+					//for(int k = 0 ; k < interfaces[i]->numNodes ; k++ )
+				//	{
+				//		int nodeIdx = interfaces[i]->nodeIDs[k] - 1; //The node Id starts with 1, not with 0, therefore, decrement is necessary
+	  			//		//printf("DispX %lf, DispY %lf, DispZ %lf \n", sim->vold[nodeIdx * sim->mt + 0 + 1], sim->vold[nodeIdx * sim->mt + 1 + 1], sim->vold[nodeIdx * sim->mt + 2 + 1]);
+				//		sumx = sumx + sim->vold[nodeIdx * sim->mt + 0 + 1];
+				//		sumy = sumy + sim->vold[nodeIdx * sim->mt + 1 + 1];
+					//	sumz = sumz + sim->vold[nodeIdx * sim->mt + 2 + 1];
+					//}
+
+				///	double Sum = sumx + sumy + sumz;
+
+					/*---Print the total displacements along each direction---*/
+			//		printf("Net displacement X: %15.9f\n", sumx );
+			//		printf("Net displacement Y: %15.9f\n", sumy );
+			//		printf("Net displacement Z: %15.9f\n", sumz );
+
+					double sumx=0.0, sumy=0.0, sumz=0.0;
+					double maxAbsUx=0.0, maxAbsUy=0.0, maxAbsUz=0.0;
+					double maxMag=0.0;
+
+					for (int k=0; k<interfaces[i]->numNodes; ++k) 
 					{
-						int nodeIdx = interfaces[i]->nodeIDs[k] - 1; //The node Id starts with 1, not with 0, therefore, decrement is necessary
-	  					//printf("DispX %lf, DispY %lf, DispZ %lf \n", sim->vold[nodeIdx * sim->mt + 0 + 1], sim->vold[nodeIdx * sim->mt + 1 + 1], sim->vold[nodeIdx * sim->mt + 2 + 1]);
-						sumx = sumx + sim->vold[nodeIdx * sim->mt + 0 + 1];
-						sumy = sumy + sim->vold[nodeIdx * sim->mt + 1 + 1];
-						sumz = sumz + sim->vold[nodeIdx * sim->mt + 2 + 1];
+    					double dux = interfaces[i]->nodeVectorData[3*k + 0];
+    					double duy = interfaces[i]->nodeVectorData[3*k + 1];
+    					double duz = interfaces[i]->nodeVectorData[3*k + 2];
+
+    					sumx += dux; sumy += duy; sumz += duz;
+
+    					if (fabs(dux) > maxAbsUx) maxAbsUx = fabs(dux);
+    					if (fabs(duy) > maxAbsUy) maxAbsUy = fabs(duy);
+   	 					if (fabs(duz) > maxAbsUz) maxAbsUz = fabs(duz);
+
+    					double mag = sqrt(dux*dux + duy*duy + duz*duz);
+    					if (mag > maxMag) maxMag = mag;
 					}
 
-					double Sum = sumx + sumy + sumz;
-
-					/*---Print the total discplacements along each direction---*/
-					printf("Net displacement: %15.9f", Sum );
-
+					printf("Delta disp sums:  X=% .6e  Y=% .6e  Z=% .6e\n", sumx, sumy, sumz);
+					printf("Max |delta|:      X=% .6e  Y=% .6e  Z=% .6e  max|dU|=% .6e\n",
+       				maxAbsUx, maxAbsUy, maxAbsUz, maxMag);
 					
 
 					precicec_writeBlockVectorData( interfaces[i]->displacementDeltasDataID, interfaces[i]->numNodes, interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData );
