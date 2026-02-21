@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include "CalculiX.h"
+#include "CalFSI.h"
 #include <string.h>
 
 #include "PreciceInterface.h"

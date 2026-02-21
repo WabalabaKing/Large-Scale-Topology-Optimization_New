@@ -1,102 +1,143 @@
-
 .PHONY: all clean install uninstall
 
-# Define paths for SPOOLES and ARPACK
+# ============================================================
+# Paths for external dependencies
+# ============================================================
 SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/Spooles/src
-ARPACK_PATH = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/Deps/ARPACK
-YAML_PREFIX = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/Deps/yaml-cpp-yaml-cpp-0.6.2
+ARPACK_PATH  = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/Deps/ARPACK
+YAML_PREFIX  = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/Deps/yaml-cpp-yaml-cpp-0.6.2
 
-# Get the CFLAGS and LIBS from pkg-config (preCICE version >= 1.4.0).
-# If pkg-config cannot find the libprecice.pc meta-file, you may need to set the
-# path where this is stored into PKG_CONFIG_PATH when building the adapter.
-PKGCONF_CFLAGS  = $(shell pkg-config --cflags libprecice)
-PKGCONF_LIBS    = $(shell pkg-config --libs libprecice)
+# Intel MKL
+MKL_LIB     = /opt/intel/oneapi/mkl/2025.1/lib/intel64
+MKL_INCLUDE = /opt/intel/oneapi/mkl/2025.1/include
 
+CMPLR_PATH  = /opt/intel/oneapi/compiler/2025.1/bin
 
-#Directories
-SRC_DIR = src
-OBJ_DIR = obj
+# ============================================================
+# Directories
+# ============================================================
+SRC_DIR     = src
+OBJ_DIR     = obj
 INCLUDE_DIR = include
-BIN_DIR = bin
+BIN_DIR     = bin
 
 # Installation Prefix (Default: Current Directory)
 PREFIX ?= $(shell pwd)
-BINDIR = $(PREFIX)/bin
+BINDIR  = $(PREFIX)/bin
 
+# ============================================================
+# Build mode switch
+#   MDO=0 : NO preCICE, NO src/Coupling/*, build calTop + calFilt
+#   MDO=1 : Enable FSI (preCICE + src/Coupling/*), also build calFSI
+# ============================================================
+MDO ?= 0
+
+# ============================================================
+# Include additional definitions (SCCXF, SCCXC, SCCXCXX, OPT, etc.)
+#   Makefile.inc may contain src/Coupling/* sources; we will
+#   strip them out below when MDO=0.
+# ============================================================
+include Makefile.inc
+
+# ============================================================
+# Remove all src/Coupling/* sources when MDO=0
+# ============================================================
+ifeq ($(MDO),0)
+  SCCXF   := $(filter-out $(SRC_DIR)/Coupling/%,$(SCCXF))
+  SCCXC   := $(filter-out $(SRC_DIR)/Coupling/%,$(SCCXC))
+  SCCXCXX := $(filter-out $(SRC_DIR)/Coupling/%,$(SCCXCXX))
+endif
+
+# ============================================================
 # Compiler and flags
-CFLAGS = -Wall $(OPT) -fopenmp -pthread -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I$(MKL_INCLUDE) -I$(INCLUDE_DIR)
-
-FFLAGS = -Wall -O3 -fallow-argument-mismatch -std=gnu
-
+# ============================================================
 CC = cc
 FC = gfortran
 
-# Add preCICE include flags
-CFLAGS += $(PKGCONF_CFLAGS)
+# Base CFLAGS (no preCICE yet)
+CFLAGS = -Wall $(OPT) -fopenmp -pthread \
+         -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 \
+         -I$(MKL_INCLUDE) -I$(INCLUDE_DIR) \
+         -I$(YAML_PREFIX)/include
 
-CFLAGS += -I$(YAML_PREFIX)/include
+# Fortran flags
+FFLAGS = -Wall -O3 -fallow-argument-mismatch -std=gnu
 
-#INTEL MKL
-MKL_LIB= /opt/intel/oneapi/mkl/2025.1/lib/intel64
-MKL_INCLUDE=/opt/intel/oneapi/mkl/2025.1/include
+# preCICE flags (used only when MDO=1)
+PKGCONF_CFLAGS  = $(shell pkg-config --cflags libprecice 2>/dev/null)
+PKGCONF_LIBS    = $(shell pkg-config --libs   libprecice 2>/dev/null)
 
-CMPLR_PATH=/opt/intel/oneapi/compiler/2025.1/bin
+ifeq ($(MDO),1)
+  CFLAGS += $(PKGCONF_CFLAGS) -DWITH_PRECICE
+else
+  CFLAGS += -DNO_PRECICE
+endif
 
-# Defauilt target
-all: $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe $(BIN_DIR)/calFSI.exe
+# ============================================================
+# Source files and objects for main programs
+# ============================================================
+SCCXMAIN      = $(SRC_DIR)/ccx_2.15.c
+SCCXCMAINFILT = $(SRC_DIR)/calFilt.c
 
+OCCXMAIN      = $(OBJ_DIR)/ccx_2.15.o
+OCCXMAINFILT  = $(OBJ_DIR)/calFilt.o
 
+# FSI coupling main (only defined/used when MDO=1)
+ifeq ($(MDO),1)
+  SCCXMAINFSI = $(SRC_DIR)/Coupling/calFSI.c
+  OCCXMAINFSI = $(OBJ_DIR)/Coupling/calFSI.o
+endif
 
-# Ensure object directory exists
+# Extra C sources (you can extend this if needed)
+SCCXC_EXTRA = $(SCCXCMAINFILT)
+OCCXC_EXTRA = $(SCCXC_EXTRA:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
+# Objects generated from Makefile.inc source lists
+OCCXF   = $(SCCXF:$(SRC_DIR)/%.f=$(OBJ_DIR)/%.o)
+OCCXC   = $(SCCXC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OCCXCXX = $(SCCXCXX:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
+# ============================================================
+# Libraries
+# ============================================================
+LIBS = \
+  $(ARPACK_PATH)/libarpack_INTEL.a -Wl,--start-group  \
+  $(MKL_LIB)/libmkl_intel_lp64.a \
+  $(MKL_LIB)/libmkl_gnu_thread.a \
+  $(MKL_LIB)/libmkl_core.a \
+  -Wl,--end-group \
+  -lpthread -lm -ldl -lstdc++
+
+# YAML-cpp is always linked
+LIBS += -L$(YAML_PREFIX)/build -lyaml-cpp
+
+# preCICE libs only when MDO=1
+ifeq ($(MDO),1)
+  LIBS += $(PKGCONF_LIBS)
+endif
+
+# ============================================================
+# Default targets (executables)
+# ============================================================
+ALL_BINS := $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe
+
+ifeq ($(MDO),1)
+  ALL_BINS += $(BIN_DIR)/calFSI.exe
+endif
+
+# Default target
+all: $(ALL_BINS)
+
+# Ensure object/bin directories exist
 $(OBJ_DIR) $(BIN_DIR):
 	mkdir -p $@
 
-# Include additional makefile if necessary
-include Makefile.inc
-
-# Source files and objects
-SCCXMAIN = $(SRC_DIR)/ccx_2.15.c
-SCCXCMAINFILT = $(SRC_DIR)/calFilt.c
-SCCXMAINFSI   = $(SRC_DIR)/Coupling/calFSI.c
-
-
-
-SCCXC_EXTRA = $(SCCXMAINFILT)
-OCCXC_EXTRA = $(SCCXC_EXTRA:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-
-
-OCCXF = $(SCCXF:$(SRC_DIR)/%.f=$(OBJ_DIR)/%.o)
-OCCXC = $(SCCXC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-OCCXCXX = $(SCCXCXX:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-
-
-OCCXMAIN = $(OBJ_DIR)/ccx_2.15.o
-OCCXMAINFILT = $(OBJ_DIR)/calFilt.o
-OCCXMAINFSI   = $(OBJ_DIR)/Coupling/calFSI.o
-
-# Libraries
-LIBS = \
-	$(ARPACK_PATH)/libarpack_INTEL.a -Wl,--start-group  \
-	$(MKL_LIB)/libmkl_intel_lp64.a \
-	$(MKL_LIB)/libmkl_gnu_thread.a \
-	$(MKL_LIB)/libmkl_core.a \
-	-Wl,--end-group \
-	$(PKGCONF_LIBS) \
-	-lpthread -lm -ldl -lstdc++
-
-LIBS   += -L$(YAML_PREFIX)/build -lyaml-cpp
-
-# Object file compilation rules -> WORKS when all files are in src itself
-#$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-#	$(CC) $(CFLAGS) -I$(MKL_INCLUDE) -c $< -o $@
-
-#$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f | $(OBJ_DIR)
-#	$(FC) $(FFLAGS) -c $< -o $@
-
-# Object file compilation rules (support subdirectories under $(SRC_DIR))
+# ============================================================
+# Object file compilation rules (support subdirectories)
+# ============================================================
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -I$(MKL_INCLUDE) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f
 	@mkdir -p $(dir $@)
@@ -106,52 +147,64 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	g++ -std=c++11 $(CFLAGS) -c $< -o $@
 
+# ============================================================
+# Static library build
+#   NOTE: Coupling sources have already been removed from
+#   SCCXF/SCCXC/SCCXCXX when MDO=0, so ccx_2.15.a will not
+#   contain any src/Coupling/* objects in that case.
+# ============================================================
+ccx_2.15.a: $(OCCXF) $(OCCXC) $(OCCXCXX) | $(OBJ_DIR)
+	ar vr $@ $^
 
+# ============================================================
+# Executables
+# ============================================================
 
-# Build calTop executable
+# calTop
 $(BIN_DIR)/calTop.exe: $(OCCXMAIN) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
 	./date.pl
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ccx_2.15.c -o $(OBJ_DIR)/ccx_2.15.o
 	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
 	@echo "Build calTop.exe successfully!"
 
-#Build calFilt executable
+# calFilt
 $(BIN_DIR)/calFilt.exe: $(OCCXMAINFILT) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/calFilt.c -o $(OBJ_DIR)/calFilt.o
 	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAINFILT) ccx_2.15.a $(LIBS)
 	@echo "Build calFilt.exe successfully!"
-	
-# Build calFSI executable
+
+# calFSI (only meaningful when MDO=1)
+ifeq ($(MDO),1)
 $(BIN_DIR)/calFSI.exe: $(OCCXMAINFSI) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
 	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAINFSI) ccx_2.15.a $(LIBS)
 	@echo "Build calFSI.exe successfully!"
+endif
 
-
-# Build static library
-ccx_2.15.a: $(OCCXF) $(OCCXC) $(OCCXCXX) | $(OBJ_DIR)
-	ar vr $@ $^
-
-# Install target (default: install in current directory)
-install: $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe $(BIN_DIR)/calFSI.exe
+# ============================================================
+# Install / Uninstall
+# ============================================================
+install: $(ALL_BINS)
 	@echo "Installing executables to $(BINDIR)"
 	mkdir -p $(BINDIR)
-	cp $(BIN_DIR)/calTop.exe $(BINIR)/
+	cp $(BIN_DIR)/calTop.exe  $(BINDIR)/
 	cp $(BIN_DIR)/calFilt.exe $(BINDIR)/
-	cp $(BIN_DIR)/calFSI.exe $(BINDIR)/
+ifeq ($(MDO),1)
+	cp $(BIN_DIR)/calFSI.exe  $(BINDIR)/
+endif
 	chmod +x $(BINDIR)/calTop.exe
 	chmod +x $(BINDIR)/calFilt.exe
+ifeq ($(MDO),1)
 	chmod +x $(BINDIR)/calFSI.exe
+endif
 
-
-# Uninstall target
 uninstall:
 	@echo "Removing executables from $(BINDIR)"
 	rm -f $(BINDIR)/calTop.exe
 	rm -f $(BINDIR)/calFilt.exe
 	rm -f $(BINDIR)/calFSI.exe
 
-	
-
-
+# ============================================================
+# Clean
+# ============================================================
 clean:
-	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe $(BIN_DIR)/calFSI.exe ccx_2.15.a
+	rm -rf $(OBJ_DIR) $(BIN_DIR) ccx_2.15.a
