@@ -1,0 +1,157 @@
+
+.PHONY: all clean install uninstall
+
+# Define paths for SPOOLES and ARPACK
+SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/Spooles/src
+ARPACK_PATH = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/Deps/ARPACK
+YAML_PREFIX = /home/prateekr/Documents/Github/Large-Scale-Topology-Optimization/Deps/yaml-cpp-yaml-cpp-0.6.2
+
+# Get the CFLAGS and LIBS from pkg-config (preCICE version >= 1.4.0).
+# If pkg-config cannot find the libprecice.pc meta-file, you may need to set the
+# path where this is stored into PKG_CONFIG_PATH when building the adapter.
+PKGCONF_CFLAGS  = $(shell pkg-config --cflags libprecice)
+PKGCONF_LIBS    = $(shell pkg-config --libs libprecice)
+
+
+#Directories
+SRC_DIR = src
+OBJ_DIR = obj
+INCLUDE_DIR = include
+BIN_DIR = bin
+
+# Installation Prefix (Default: Current Directory)
+PREFIX ?= $(shell pwd)
+BINDIR = $(PREFIX)/bin
+
+# Compiler and flags
+CFLAGS = -Wall $(OPT) -fopenmp -pthread -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 -I$(MKL_INCLUDE) -I$(INCLUDE_DIR)
+
+FFLAGS = -Wall -O3 -fallow-argument-mismatch -std=gnu
+
+CC = cc
+FC = gfortran
+
+# Add preCICE include flags
+CFLAGS += $(PKGCONF_CFLAGS)
+
+CFLAGS += -I$(YAML_PREFIX)/include
+
+#INTEL MKL
+MKL_LIB= /opt/intel/oneapi/mkl/2025.1/lib/intel64
+MKL_INCLUDE=/opt/intel/oneapi/mkl/2025.1/include
+
+CMPLR_PATH=/opt/intel/oneapi/compiler/2025.1/bin
+
+# Defauilt target
+all: $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe $(BIN_DIR)/calFSI.exe
+
+
+
+# Ensure object directory exists
+$(OBJ_DIR) $(BIN_DIR):
+	mkdir -p $@
+
+# Include additional makefile if necessary
+include Makefile.inc
+
+# Source files and objects
+SCCXMAIN = $(SRC_DIR)/ccx_2.15.c
+SCCXCMAINFILT = $(SRC_DIR)/calFilt.c
+SCCXMAINFSI   = $(SRC_DIR)/Coupling/calFSI.c
+
+
+
+SCCXC_EXTRA = $(SCCXMAINFILT)
+OCCXC_EXTRA = $(SCCXC_EXTRA:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
+
+OCCXF = $(SCCXF:$(SRC_DIR)/%.f=$(OBJ_DIR)/%.o)
+OCCXC = $(SCCXC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OCCXCXX = $(SCCXCXX:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+
+
+OCCXMAIN = $(OBJ_DIR)/ccx_2.15.o
+OCCXMAINFILT = $(OBJ_DIR)/calFilt.o
+OCCXMAINFSI   = $(OBJ_DIR)/Coupling/calFSI.o
+
+# Libraries
+LIBS = \
+	$(ARPACK_PATH)/libarpack_INTEL.a -Wl,--start-group  \
+	$(MKL_LIB)/libmkl_intel_lp64.a \
+	$(MKL_LIB)/libmkl_gnu_thread.a \
+	$(MKL_LIB)/libmkl_core.a \
+	-Wl,--end-group \
+	$(PKGCONF_LIBS) \
+	-lpthread -lm -ldl -lstdc++
+
+LIBS   += -L$(YAML_PREFIX)/build -lyaml-cpp
+
+# Object file compilation rules -> WORKS when all files are in src itself
+#$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+#	$(CC) $(CFLAGS) -I$(MKL_INCLUDE) -c $< -o $@
+
+#$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f | $(OBJ_DIR)
+#	$(FC) $(FFLAGS) -c $< -o $@
+
+# Object file compilation rules (support subdirectories under $(SRC_DIR))
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -I$(MKL_INCLUDE) -c $< -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f
+	@mkdir -p $(dir $@)
+	$(FC) $(FFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	g++ -std=c++11 $(CFLAGS) -c $< -o $@
+
+
+
+# Build calTop executable
+$(BIN_DIR)/calTop.exe: $(OCCXMAIN) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
+	./date.pl
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ccx_2.15.c -o $(OBJ_DIR)/ccx_2.15.o
+	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
+	@echo "Build calTop.exe successfully!"
+
+#Build calFilt executable
+$(BIN_DIR)/calFilt.exe: $(OCCXMAINFILT) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/calFilt.c -o $(OBJ_DIR)/calFilt.o
+	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAINFILT) ccx_2.15.a $(LIBS)
+	@echo "Build calFilt.exe successfully!"
+	
+# Build calFSI executable
+$(BIN_DIR)/calFSI.exe: $(OCCXMAINFSI) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
+	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAINFSI) ccx_2.15.a $(LIBS)
+	@echo "Build calFSI.exe successfully!"
+
+
+# Build static library
+ccx_2.15.a: $(OCCXF) $(OCCXC) $(OCCXCXX) | $(OBJ_DIR)
+	ar vr $@ $^
+
+# Install target (default: install in current directory)
+install: $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe $(BIN_DIR)/calFSI.exe
+	@echo "Installing executables to $(BINDIR)"
+	mkdir -p $(BINDIR)
+	cp $(BIN_DIR)/calTop.exe $(BINIR)/
+	cp $(BIN_DIR)/calFilt.exe $(BINDIR)/
+	cp $(BIN_DIR)/calFSI.exe $(BINDIR)/
+	chmod +x $(BINDIR)/calTop.exe
+	chmod +x $(BINDIR)/calFilt.exe
+	chmod +x $(BINDIR)/calFSI.exe
+
+
+# Uninstall target
+uninstall:
+	@echo "Removing executables from $(BINDIR)"
+	rm -f $(BINDIR)/calTop.exe
+	rm -f $(BINDIR)/calFilt.exe
+	rm -f $(BINDIR)/calFSI.exe
+
+	
+
+
+clean:
+	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe $(BIN_DIR)/calFSI.exe ccx_2.15.a
