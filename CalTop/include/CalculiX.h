@@ -119,6 +119,10 @@ void rho(double *design,int ne);
 
 void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy);
 
+void tecplot_vtu_passive(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy, int *passiveIDS, int numPassive);
+
+void tecplot_vtu_active(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy, int *passiveIDS, int numPassive);
+
 void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum, double *Mass, double *cgx, double *cgy, double *cgz, int *passiveIDs, int numPassive, double* pnorm);
 
 void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
