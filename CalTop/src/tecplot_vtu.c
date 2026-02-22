@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 /**
  * @file tecplot_vtu.c
@@ -102,18 +103,49 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </PointData>\n");
 
-    // Write Cell Stress data
-    fprintf(fp, "      <CellData Scalars=\"density\">\n");
-    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
+    // Write Cell Stress and Density data
+    // Set default scalar to VonMises (nice for coloring in ParaView)
+    fprintf(fp, "      <CellData Scalars=\"VonMises\">\n");
+
+    // --- Von Mises scalar per cell ---
+    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"VonMises\" NumberOfComponents=\"1\" format=\"ascii\">\n");
     for (int cell = 0; cell < ne; cell++) {
-        fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n", stx[6*cell], stx[6*cell+1], stx[6*cell+2], stx[6* cell+3],stx[6*cell+4],stx[6*cell+5]);
+        double sxx = stx[6*cell    ];
+        double syy = stx[6*cell + 1];
+        double szz = stx[6*cell + 2];
+        double sxy = stx[6*cell + 3];
+        double syz = stx[6*cell + 4];
+        double szx = stx[6*cell + 5];
+
+        double vm = sqrt(
+            0.5 * ( (sxx - syy)*(sxx - syy)
+                  + (syy - szz)*(syy - szz)
+                  + (szz - sxx)*(szz - sxx) )
+          + 3.0 * ( sxy*sxy + syz*syz + szx*szx )
+        );
+
+        fprintf(fp, "      %.8f\n", vm);
     }
     fprintf(fp, "        </DataArray>\n");
 
-    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Density\" NumberOfComponents=\"1\" format=\"ascii\">\n");
-    for (int cell = 0; cell < ne; cell++) {
-        fprintf(fp, "      %.8f\n",  rhoPhy[cell]);
+    // --- Full 6-component stress tensor per cell ---
+    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
+    for (int cell = 0; cell < ne; cell++) 
+    {
+        fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n",
+                stx[6*cell    ], stx[6*cell + 1], stx[6*cell + 2],
+                stx[6*cell + 3], stx[6*cell + 4], stx[6*cell + 5]);
     }
+    fprintf(fp, "        </DataArray>\n");
+
+    // --- Density per cell ---
+    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Density\" NumberOfComponents=\"1\" format=\"ascii\">\n");
+    
+    for (int cell = 0; cell < ne; cell++) 
+    {
+        fprintf(fp, "      %.8f\n", rhoPhy[cell]);
+    }
+    
     fprintf(fp, "        </DataArray>\n");
 
     fprintf(fp, "      </CellData>\n");
