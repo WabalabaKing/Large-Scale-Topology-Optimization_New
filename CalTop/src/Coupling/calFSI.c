@@ -2388,10 +2388,21 @@ while(istat>=0)
              filtered for skin definition.
              Hence, second iteration onwards, the raw desnities remain as 1 since the densities are all zero.  */
 
-    /* Write elastic fields to a vtu file */
-    printf("\nWriting output fields...");
-    tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
-    printf("done!\n\n");
+    if (numPassive > 0)
+    {
+      /* write output fields for passive elements */
+      printf("  \nWriting output fields for active and passive elements ...");
+      tecplot_vtu_passive(nk, ne, co, kon, ipkon, vold, stx, rhoPhys, passiveIDs, numPassive);
+      tecplot_vtu_active(nk, ne, co, kon, ipkon, vold, stx, rhoPhys, passiveIDs, numPassive);
+      printf("done\n");
+    }
+    else
+    {
+      /* Write elastic fields to a vtu file */
+      printf("\nWriting output fields...");
+      tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
+      printf("done!\n\n");
+    }
 
     /* ensure any buffered data is written to file */
     fflush(rho_file); 
