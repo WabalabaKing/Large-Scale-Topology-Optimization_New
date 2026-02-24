@@ -72,7 +72,7 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
     fprintf(fp, "      <Cells>\n");
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
     for (int ielem = 0; ielem < ne; ielem++) {
-        for (int j = 0; j < 4; j++) {  // Assuming quadrilateral elements
+        for (int j = 0; j < 4; j++) {  // Always tetrahedral elements
             fprintf(fp, " %d", kon[ipkon[ielem] + j]-1);
         }
         fprintf(fp, "\n");
@@ -89,7 +89,7 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
     // Write cell types
     fprintf(fp, "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n");
     for (int ielem = 0; ielem < ne; ielem++) {
-        fprintf(fp, " 10\n");  // Assuming VTU type 10 for quadrilaterals
+        fprintf(fp, " 10\n");  //  VTU type 10 for 4-node tetrahedra
     }
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </Cells>\n");
@@ -210,10 +210,10 @@ void tecplot_vtu_passive(int nk, int ne,
     }
     fprintf(fp, "        </DataArray>\n");
 
-    // Types (VTK_QUAD = 9 for 4-node quads)
+    // Types (VTK_TETRA = 10 for 4-node tets)
     fprintf(fp, "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n");
     for (int k = 0; k < numPassive; k++) {
-        fprintf(fp, " 9\n");
+        fprintf(fp, " 10\n");
     }
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </Cells>\n");
@@ -367,10 +367,10 @@ void tecplot_vtu_active(int nk, int ne,
     }
     fprintf(fp, "        </DataArray>\n");
 
-    // Types: VTK_QUAD = 9
+    // Types: VTK_TET = 10
     fprintf(fp, "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n");
     for (int i = 0; i < numActive; i++) {
-        fprintf(fp, " 9\n");
+        fprintf(fp, " 10\n");
     }
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </Cells>\n");
