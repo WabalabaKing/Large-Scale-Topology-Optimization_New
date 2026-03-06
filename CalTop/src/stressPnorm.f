@@ -268,7 +268,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             mattyp = 1
             if (mattyp .eq. 1) then
 !              write(*,*) 'Scaling the C matrix!'
-              rho_e   = design(m)
+              rho_e   = design(i)
 !              Based on the definition of effective von Misses 
 !              stress in Duysinx and Sigmnd, the penalized
 !              rho cancels out in the stress term with
@@ -344,7 +344,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
             vm  = dsqrt(vm2)
 !  --- filtered design alread in [0,1] (clamp defenseively)  ---
-            rho_e = design(i)
+            rho_e = design(m)
             ! (optional clamp, safe if design may drift)
             if (rho_e .lt. 0.d0) rho_e = 0.d0
             if (rho_e .gt. 1.d0) rho_e = 1.d0
