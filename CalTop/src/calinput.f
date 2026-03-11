@@ -517,7 +517,8 @@ c
             call deformationplasticitys(inpc,textpart,elcon,nelcon,
      &        imat,ntmat_,ncmat_,irstrt,istep,istat,n,iperturb,
      &        iline,ipol,inl,ipoinp,inp,ipoinpc,ier)
-!
+
+!        Scan for material density flag and if true call densitys() 
          elseif(textpart(1)(1:8).eq.'*DENSITY') then
             call densitys(inpc,textpart,rhcon,nrhcon,
      &        imat,ntmat_,irstrt,istep,istat,n,iline,ipol,

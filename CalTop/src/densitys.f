@@ -21,7 +21,8 @@
      &  ipoinpc,ier)
 !
 !     reading the input deck: *DENSITY
-!
+!     This subroutine reads the data lines that coome after the *DENSITY
+!     card and stores them in the desnity material array rhcon
       implicit none
 !
       character*1 inpc(*)

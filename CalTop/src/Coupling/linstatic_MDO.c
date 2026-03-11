@@ -282,7 +282,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   		if(*nbody>0)
   		{	  
-			printf("Computing body forces...");
+			printf("Assigning body force definition to elements...");
       		ifreebody=*ne+1;
       		NNEW(ipobody,ITG,2*ifreebody**nbody);
 
