@@ -800,7 +800,8 @@ c            call orthotropic(elas,anisox)
          endif
 !
 !           initialisation for the body forces
-!
+!           takes material density into account
+         rho = 2700.d0*rhoi
          om=omx*rho
          if(rhsi.eq.1) then
             if(nbody.ne.0) then

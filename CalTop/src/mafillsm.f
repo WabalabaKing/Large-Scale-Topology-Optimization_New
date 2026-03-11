@@ -135,6 +135,7 @@ c      write(*,*) loc(index1)
 !     mechanical analysis: loop over all elements
 !
       do i=nea,neb
+!       for each element i, rhoi becomes the element density
         rhoi=design(i)
         if((ipkon(i).lt.0).or.(lakon(i)(1:1).eq.'F')) cycle
         indexe=ipkon(i)
