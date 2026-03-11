@@ -28,7 +28,7 @@
      &  nstate_,xstateini,xstate,ne0,ipkon,thicke,
      &  integerglob,doubleglob,tieset,istartset,iendset,ialset,ntie,
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,kscale,
-     &	rhoi,penal)
+     &	rhoi,penal,matdens)
 !
 !     computation of the element matrix and rhs for the element with
 !     the topology in konl
@@ -83,7 +83,7 @@
      &  plicon(0:2*npmat_,ntmat_,*),plkcon(0:2*npmat_,ntmat_,*),
      &  xstiff(27,mi(1),*),plconloc(802),dtime,ttime,time,tvar(2),
      &  sax(60,60),ffax(60),gs(8,4),a,stress(6),stre(3,3),
-     &  pslavsurf(3,*),pmastsurf(6,*),xmass,rhoi,penal
+     &  pslavsurf(3,*),pmastsurf(6,*),xmass,rhoi,penal,matdens
 !
       intent(in) co,kon,lakonl,p1,p2,omx,bodyfx,nbody,
      &  nelem,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -801,7 +801,7 @@ c            call orthotropic(elas,anisox)
 !
 !           initialisation for the body forces
 !           takes material density into account
-         rho = 2700.d0*rhoi
+         rho = matdens*rhoi
          om=omx*rho
          if(rhsi.eq.1) then
             if(nbody.ne.0) then

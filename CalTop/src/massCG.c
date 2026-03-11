@@ -105,14 +105,15 @@ void compute_mass_cg_and_cg_sens(
 void compute_mass(
     size_t ne,
     const double *eleVol,
-    const double *rhoPhys)
+    const double *rhoPhys,
+    const double mat_dens)
 {
     // ---------- 1) Compute total mass and first moments ----------
     double mass  = 0.0;   // Σ m_i
 
     for (size_t i = 0; i < ne; ++i) 
     {
-        const double mi = 2700 *rhoPhys[i]* eleVol[i];   // m_i = ρ_i V_i
+        const double mi = mat_dens *rhoPhys[i]* eleVol[i];   // m_i = ρ_i V_i
         //const double mi = 2700;
         mass += mi;
     }

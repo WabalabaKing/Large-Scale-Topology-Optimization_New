@@ -1097,25 +1097,9 @@ while(istat>=0)
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
 
-  printf("\nMaterial densities:\n");
-
-  for(int mat=0; mat<nmat; mat++)
-  {
-    int nentries = nrhcon[mat];
-
-    for(int j=0; j<nentries; j++)
-    {
-        double density =
-            rhcon[1 + 2*j + 2*ntmat_*mat];
-
-        double temperature =
-            rhcon[0 + 2*j + 2*ntmat_*mat];
-
-        printf("Material %d  Entry %d  Density = %f  Temp = %f\n",
-               mat+1, j+1, density, temperature);
-    }
-  }
-
+    /* Define material density for gravity loads */
+    double mat_dens;  // Material density
+    mat_dens = rhcon[1];
   
     /* Define a system-defined structure to get information about a file
        Returns 0 if file is found */

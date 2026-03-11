@@ -32,8 +32,9 @@
      &  xstateini,xstate,thicke,integerglob,doubleglob,
      &  tieset,istartset,iendset,ialset,ntie,nasym,pslavsurf,pmastsurf,
      &  mortar,clearini,ielprop,prop,ne0,fnext,nea,neb,kscale,
-     &  iponoel,inoel,network,design,penal)
-!
+     &  iponoel,inoel,network,design,penal, matdens)
+!     
+!     Note: matdens is material density
 !     filling the stiffness matrix in spare matrix format (sm)
 !
       implicit none
@@ -72,7 +73,7 @@
      &  plicon(0:2*npmat_,ntmat_,*),plkcon(0:2*npmat_,ntmat_,*),
      &  xstiff(27,mi(1),*),veold(0:mi(2),*),om,valu2,value,dtime,ttime,
      &  time,thicke(mi(3),*),doubleglob(*),clearini(3,9,*),
-     &  pslavsurf(3,*),pmastsurf(6,*),design(*),rhoi,penal
+     &  pslavsurf(3,*),pmastsurf(6,*),design(*),rhoi,penal, matdens
 !
       intent(in) co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,
      &  xboun,nboun,
@@ -89,7 +90,7 @@
      &  coriolis,ibody,xloadold,reltime,veold,nstate_,
      &  xstateini,thicke,integerglob,doubleglob,
      &  tieset,istartset,iendset,ialset,ntie,nasym,pslavsurf,pmastsurf,
-     &  mortar,clearini,ielprop,prop,ne0,nea,neb,design,penal
+     &  mortar,clearini,ielprop,prop,ne0,nea,neb,design,penal, matdens
 !
       intent(inout) fext,ad,au,adb,aub,xload,nmethod,cgr,springarea,
      &  xstate
@@ -250,7 +251,7 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &          springarea,nstate_,xstateini,xstate,ne0,ipkon,thicke,
      &          integerglob,doubleglob,tieset,istartset,
      &          iendset,ialset,ntie,nasym,pslavsurf,pmastsurf,mortar,
-     &          clearini,ielprop,prop,kscale,rhoi,penal)
+     &          clearini,ielprop,prop,kscale,rhoi,penal,matdens)
         else
            call e_c3d_u(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,ff,i,
      &          nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,

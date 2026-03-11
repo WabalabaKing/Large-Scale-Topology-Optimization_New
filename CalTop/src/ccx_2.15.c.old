@@ -1080,7 +1080,7 @@ while(istat>=0)
 	    velo,veloo));
 
     /* Define material density for gravity loads */
-    double mat_dens;
+    double mat_dens;  // Material density
     mat_dens = rhcon[1];
   
     /* Define a system-defined structure to get information about a file
@@ -1925,7 +1925,7 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho);
+	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho, &mat_dens);
 
       endl = time(NULL);
 
@@ -2139,7 +2139,7 @@ while(istat>=0)
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
 
 
-      compute_mass(ne_, eleVol, rhoPhys);
+      compute_mass(ne_, eleVol, rhoPhys, mat_dens);
 
       SFREE(eleVol);
       SFREE(elCompl);

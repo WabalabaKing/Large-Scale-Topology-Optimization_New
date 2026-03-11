@@ -42,7 +42,7 @@ static double *co1,*xboun1,*coefmpc1,*xforc1,*xload1,*xbody1,*cgr1,
     *plicon1,*plkcon1,*xstiff1,*dtime1,*physcon1,*shcon1,*cocon1,
     *ttime1,*time1,*xloadold1,*reltime1,*veold1,*springarea1,
     *xstateini1,*xstate1,*thicke1,*doubleglob1,*pslavsurf1,*pmastsurf1,
-    *clearini1,*prop1,*fnext1=NULL, *design1, *penal1 ;
+    *clearini1,*prop1,*fnext1=NULL, *design1, *penal1, *matdens1 ;
 
 void mafillsmmain(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *nodeboun,ITG *ndirboun,double *xboun,
@@ -78,7 +78,8 @@ void mafillsmmain(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       double *clearini,ITG *ielprop,double *prop,ITG *ne0,
 	       double *fnext,ITG *kscale,ITG *iponoel,ITG *inoel,
 	       ITG *network,ITG *ntrans,ITG *inotr,double *trab, double *design,
-           double *penal){
+           double *penal, double *mat_dens)
+           {
 
     ITG i,j,mt=mi[1]+1;
 
@@ -230,7 +231,7 @@ void mafillsmmain(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
     iendset1=iendset;ialset1=ialset;ntie1=ntie;nasym1=nasym;
     pslavsurf1=pslavsurf;pmastsurf1=pmastsurf;mortar1=mortar;
     clearini1=clearini;ielprop1=ielprop;prop1=prop;ne01=ne0;kscale1=kscale;
-    iponoel1=iponoel;inoel1=inoel;network1=network,design1=design, penal1=penal;
+    iponoel1=iponoel;inoel1=inoel;network1=network,design1=design, penal1=penal, matdens1 = mat_dens;
 
     /* calculating the stiffness/mass */
 
@@ -492,7 +493,7 @@ void *mafillsmmt(ITG *i){
 	    tieset1,istartset1,iendset1,ialset1,ntie1,nasym1,pslavsurf1,
 	    pmastsurf1,mortar1,clearini1,ielprop1,prop1,ne01,
 	    &fnext1[indexfnext],&nea,&neb,kscale1,iponoel1,inoel1,network1,design1,
-        penal1));
+        penal1, matdens1));
 
     return NULL;
 }
