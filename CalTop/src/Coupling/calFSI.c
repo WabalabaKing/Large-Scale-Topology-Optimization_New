@@ -276,7 +276,7 @@ int main(int argc,char *argv[])
   double  *thicke=NULL; /**< element thickness values */
   double  *offset=NULL; /**< offsets in elementrs like beams or shells where nodes are not necessarily positioned at the centeriod */
   double *elcon=NULL; /**< material properties related elasticity for the elements */
-  double  *rhcon=NULL; /**< material properties related to thermal conductivity */
+  double  *rhcon=NULL; /**< material properties array */
   double  *alcon=NULL; /**< material properties related to specific material type */
   double  *alzero=NULL; /**< material properties related to thermal expansion for isotropic materials */
   double  *t0=NULL; /**< initial temperature values for nodes or elemenrts */
@@ -1066,7 +1066,7 @@ while(istat>=0)
   /* reading the input file */
   if(istep==0)mortar=-1;
 
-  
+  /* rhcon is populated for material DENSITY */
   FORTRAN(calinput,(co,&nk,kon,ipkon,lakon,&nkon,&ne,
             nodeboun,ndirboun,xboun,&nboun,
 	    ipompc,nodempc,coefmpc,&nmpc,&nmpc_,nodeforc,ndirforc,xforc,&nforc,
@@ -1096,6 +1096,26 @@ while(istat>=0)
 	    nodempcref,coefmpcref,ikmpcref,&memmpcref_,&mpcfreeref,
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
+
+  printf("\nMaterial densities:\n");
+
+  for(int mat=0; mat<nmat; mat++)
+  {
+    int nentries = nrhcon[mat];
+
+    for(int j=0; j<nentries; j++)
+    {
+        double density =
+            rhcon[1 + 2*j + 2*ntmat_*mat];
+
+        double temperature =
+            rhcon[0 + 2*j + 2*ntmat_*mat];
+
+        printf("Material %d  Entry %d  Density = %f  Temp = %f\n",
+               mat+1, j+1, density, temperature);
+    }
+  }
+
   
     /* Define a system-defined structure to get information about a file
        Returns 0 if file is found */

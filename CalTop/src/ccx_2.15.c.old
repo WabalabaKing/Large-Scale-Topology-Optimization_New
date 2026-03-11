@@ -1078,6 +1078,10 @@ while(istat>=0)
 	    nodempcref,coefmpcref,ikmpcref,&memmpcref_,&mpcfreeref,
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
 	    velo,veloo));
+
+    /* Define material density for gravity loads */
+    double mat_dens;
+    mat_dens = rhcon[1];
   
     /* Define a system-defined structure to get information about a file
        Returns 0 if file is found */
@@ -1808,21 +1812,27 @@ while(istat>=0)
       printf("SENSITIVITY FLAGS \n");
       printf("  Compliance:                       YES\n");
       printf("  Volume fraction:                  YES\n");
+
       if (eval_CG == 1)
       {
-      printf("  Center of mass                    YES\n");
-      }
-      else{
-      printf("  Center of mass                    NO\n");
-      }
-      if (eval_PNORM == 1)
-      {
-      printf("  PNORM                             YES\n");
+        printf("  Center of mass                    YES\n");
       }
       else
       {
-      printf("  PNORM                             NO\n");
+        printf("  Center of mass                    NO\n");
       }
+
+      if (eval_PNORM == 1)
+      {
+        printf("  PNORM                             YES\n");
+      }
+      else
+      {
+        printf("  PNORM                             NO\n");
+      }
+      printf("MATERIAL PROPERTY \n");
+      printf("  Material density                  %.1f\n", mat_dens);
+
       
     
       printf("|------------------------------------------------------------|\n");
