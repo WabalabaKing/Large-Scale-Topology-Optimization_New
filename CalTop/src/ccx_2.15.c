@@ -2105,7 +2105,47 @@ while(istat>=0)
   } // end if nmethod ==2
 
 
+  /* Compute mass of the structrue for naive FEA*/
+    /* allocate memory for element volume and initialize to zero */
 
+    if (pSupplied ==0)
+    {
+      NNEW(eleVol,double,ne_);
+
+      NNEW(elCG,double,3*ne_);
+
+            NNEW(gradCompl,double,ne_);
+
+      /* allocate memory for element complaince and initialize to zero */
+      NNEW(elCompl,double,ne_);
+
+      	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
+	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
+             ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
+	     nactdof,icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
+	     ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
+	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
+             t0,t1,t1old,ithermal,prestr,&iprestr, vold,iperturb,sti,nzs,
+	     &kode,filab,eme,&iexpl,plicon,
+             nplicon,plkcon,nplkcon,&xstate,&npmat_,matname,
+	     &isolver,mi,&ncmat_,&nstate_,cs,&mcs,&nkon,&ener,
+             xbounold,xforcold,xloadold,amname,amta,namta,
+             &nam,iamforc,iamload,iamt1,iamboun,&ttime,
+             output,set,&nset,istartset,iendset,ialset,&nprint,prlab,
+             prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
+	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
+	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
+	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
+             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
+
+
+      compute_mass(ne_, eleVol, rhoPhys);
+
+      SFREE(eleVol);
+      SFREE(elCompl);
+      SFREE(elCG);
+      SFREE(gradCompl);
+    }
   
     /* adjoint sensitivity calculation */
     if(pSupplied!=0)
@@ -2243,6 +2283,7 @@ while(istat>=0)
                             NULL, NULL, NULL);
       
         printf("done \n");
+        SFREE(elCG);
       }
       /*---------------------------------------------------------------------------------------------------------------*/      
 
@@ -2272,6 +2313,7 @@ while(istat>=0)
       printf("done!\n");
 
       SFREE(gradCompl);
+      SFREE(elCompl);
       SFREE(gradComplFiltered);
       
       /*---------------------------------------------------------------------------------------------------------------*/
@@ -2330,7 +2372,7 @@ while(istat>=0)
     if (numPassive > 0)
     {
       /* set the filtered element densities of passive elements to 1 */
-      printf("  Setting physical element densities to 1 ...");
+      printf("  Setting physical element densities for passive elements to 1 ...");
       filterOutPassiveElems_density(rhoPhys, ne, passiveIDs, numPassive);
       printf("done! \n");
     }
@@ -2570,12 +2612,6 @@ while(istat>=0)
 
   
 
-//free up space
-/* if(pSupplied!=0){SFREE(filternnzElem);SFREE(FilterMatrix);SFREE(rowFilter);SFREE(colFilter);
-   SFREE(gradCompl);SFREE(elCompl);SFREE(eleVol);SFREE(elCG);
-   SFREE(gradComplFiltered);SFREE(eleVolFiltered);SFREE(designFiltered);
- }*/
-
 
 
   /* Free topolology-optimization related fields */
@@ -2584,11 +2620,7 @@ while(istat>=0)
   SFREE(rowFilters);
   SFREE(colFilters);
  
-  
-  
-  SFREE(elCG);
-  //SFREE(gradComplFiltered);
-  //SFREE(eleVolFiltered);
+
   SFREE(designFiltered);
 
   rhoPhys = NULL;
