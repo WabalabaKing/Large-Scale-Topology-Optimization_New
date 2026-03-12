@@ -1876,6 +1876,8 @@ while(istat>=0)
       {
       printf("  PNORM                             NO\n");
       }
+      printf("MATERIAL PROPERTY \n");
+      printf("  Material density                  %.1f\n", mat_dens);
       
     
       printf("|------------------------------------------------------------|\n");
@@ -1968,7 +1970,7 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho, preciceParticipantName,configFilename, ikforc, ilforc);
+	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho, &mat_dens, preciceParticipantName,configFilename, ikforc, ilforc);
 
       endl = time(NULL);
 
@@ -2147,7 +2149,47 @@ while(istat>=0)
     }
   } // end if nmethod ==2
 
+    /* Compute mass of the structrue for naive FEA*/
+    /* allocate memory for element volume and initialize to zero */
 
+    if (pSupplied ==0)
+    {
+      NNEW(eleVol,double,ne_);
+
+      NNEW(elCG,double,3*ne_);
+
+            NNEW(gradCompl,double,ne_);
+
+      /* allocate memory for element complaince and initialize to zero */
+      NNEW(elCompl,double,ne_);
+
+      	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
+	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
+             ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
+	     nactdof,icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
+	     ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
+	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
+             t0,t1,t1old,ithermal,prestr,&iprestr, vold,iperturb,sti,nzs,
+	     &kode,filab,eme,&iexpl,plicon,
+             nplicon,plkcon,nplkcon,&xstate,&npmat_,matname,
+	     &isolver,mi,&ncmat_,&nstate_,cs,&mcs,&nkon,&ener,
+             xbounold,xforcold,xloadold,amname,amta,namta,
+             &nam,iamforc,iamload,iamt1,iamboun,&ttime,
+             output,set,&nset,istartset,iendset,ialset,&nprint,prlab,
+             prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
+	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
+	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
+	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
+             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
+
+
+      compute_mass(ne_, eleVol, rhoPhys, mat_dens);
+
+      SFREE(eleVol);
+      SFREE(elCompl);
+      SFREE(elCG);
+      SFREE(gradCompl);
+    }
 
   
     /* adjoint sensitivity calculation */
@@ -2286,6 +2328,7 @@ while(istat>=0)
                             NULL, NULL, NULL);
       
         printf("done \n");
+        SFREE(elCG);
       }
       /*---------------------------------------------------------------------------------------------------------------*/      
 
@@ -2315,6 +2358,7 @@ while(istat>=0)
       printf("done!\n");
 
       SFREE(gradCompl);
+      SFREE(elCompl);
       SFREE(gradComplFiltered);
       
       /*---------------------------------------------------------------------------------------------------------------*/
@@ -2626,10 +2670,7 @@ while(istat>=0)
   SFREE(colFilters);
  
   
-  
-  SFREE(elCG);
-  //SFREE(gradComplFiltered);
-  //SFREE(eleVolFiltered);
+
   SFREE(designFiltered);
 
   rhoPhys = NULL;

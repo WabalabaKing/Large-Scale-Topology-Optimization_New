@@ -102,7 +102,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
              char *orname,double *design, double *penal, double *stx, double *sigma0, double *eps,
-			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, char *preciceParticipantName, char *configFilename, ITG *ikforc, ITG *ilforc)
+			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, double *mat_dens, char *preciceParticipantName, char *configFilename, ITG *ikforc, ITG *ilforc)
 	{
 
   		char description[13]="            ",*lakon=NULL,stiffmatrix[132]="",
@@ -492,7 +492,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             xstateini,xstate,thicke,integerglob,doubleglob,
 	        tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 	        pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
-	        iponoel,inoel,&network,ntrans,inotr,trab,design,penal);
+	        iponoel,inoel,&network,ntrans,inotr,trab,design,penal, mat_dens);
 
   		    /* check for negative Jacobians */
   		    if(nmethodl==0) *nmethod=0;

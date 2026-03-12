@@ -793,7 +793,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       NNEW(ad,double,neq[1]);
       NNEW(au,double,nzs[1]);
 
-      mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xbounact,nboun,
+   /*   mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xbounact,nboun,
 		  ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
 		  nforc,nelemload,sideload,xloadact,nload,xbodyact,ipobody,
 		  nbody,cgr,ad,au,fext,nactdof,icol,jq,irow,neq,nzl,
@@ -809,7 +809,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                   xstateini,xstate,thicke,integerglob,doubleglob,
 		  tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 		  pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
-		  iponoel,inoel,network,ntrans,inotr,trab,design,penal);
+		  iponoel,inoel,network,ntrans,inotr,trab,design,penal); */
       
       if(*nmethod==0){
 	  
@@ -1870,7 +1870,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 	if(*nmethod==4) DMEMSET(fnext,0,mt**nk,0.);
 
-	mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xbounact,nboun,
+/*	mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xbounact,nboun,
 		  ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
 		  nforc,nelemload,sideload,xloadact,nload,xbodyact,ipobody,
 		  nbody,cgr,ad,au,fext,nactdof,icol,jq,irow,neq,nzl,
@@ -1886,7 +1886,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                   xstateini,xstate,thicke,integerglob,doubleglob,
 		  tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 		  pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
-		  iponoel,inoel,network,ntrans,inotr,trab, design,penal);
+		  iponoel,inoel,network,ntrans,inotr,trab, design,penal); */
 
 	if(nasym==1){
 	    RENEW(au,double,2*nzs[1]);

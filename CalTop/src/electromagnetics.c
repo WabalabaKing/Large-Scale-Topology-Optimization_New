@@ -462,7 +462,7 @@ void electromagnetics(double **cop, ITG *nk, ITG **konp, ITG **ipkonp,
   NNEW(ad,double,neq[1]);
   NNEW(au,double,nzs[1]);
   
-  mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xbounold,nboun,
+ /* mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xbounold,nboun,
 		    ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
 		    &null,nelemload,sideload,xloadact,&null,xbodyact,ipobody,
 		    &null,cgr,ad,au,fext,nactdof,icol,jq,irow,neq,nzl,
@@ -478,7 +478,7 @@ void electromagnetics(double **cop, ITG *nk, ITG **konp, ITG **ipkonp,
 		    xstateini,xstate,thicke,integerglob,doubleglob,
 		    tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 		    pmastsurf,&mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
-	            iponoel,inoel,network,ntrans,inotr,trab,design,penal);
+	            iponoel,inoel,network,ntrans,inotr,trab,design,penal); */
   
   if(nmethodact==0){
       

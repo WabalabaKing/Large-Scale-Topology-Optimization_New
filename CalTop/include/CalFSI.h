@@ -2285,7 +2285,7 @@ void linstatic(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     double *thicke,char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho);
+             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, double *mat_dens);
 
 void linstatic_MDO(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     ITG *ne,
@@ -2322,7 +2322,7 @@ void linstatic_MDO(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     double *thicke,char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, char *preciceParticipantName, char *configFilename, ITG *ikforc, ITG *ilforc);
+             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, double *mat_dens, char *preciceParticipantName, char *configFilename, ITG *ikforc, ITG *ilforc);
 
 
 void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
@@ -2781,7 +2781,7 @@ void FORTRAN(mafillsm,(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *nasym,double *pslavsurf,double *pmastsurf,ITG *mortar,
 	       double *clearini,ITG *ielprop,double *prop,ITG *ne0,
 	       double *fnext,ITG *nea,ITG *neb,ITG *kscale,ITG *iponoel,
-	       ITG *inoel,ITG *network, double *design,double *penal));
+	       ITG *inoel,ITG *network, double *design,double *penal, double* matdens));
 
 void FORTRAN(mafillsmcsse,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *ipompc,ITG *nodempc,double *coefmpc,
@@ -2921,7 +2921,7 @@ void mafillsmmain(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       double *clearini,ITG *ielprop,double *prop,ITG *ne0,
 	       double *fnext,ITG *kscale,ITG *iponoel,ITG *inoel,
 	       ITG *network,ITG *ntrans,ITG *inotr,double *trab,double *design,
-		   double *penal);
+		   double *penal, double *mat_dens);
 
 void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *nodeboun,ITG *ndirboun,double *xboun,

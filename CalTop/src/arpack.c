@@ -426,8 +426,10 @@ void arpack(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   NNEW(fext,double,neq[1]);
 
+  double mat_dens = 0.0;
+
   if(*iperturb==0){
-    mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xboun,nboun,
+    /*mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xboun,nboun,
 	      ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforc,
 	      nforc,nelemload,sideload,xload,nload,xbody,ipobody,nbody,cgr,
 	      ad,au,fext,nactdof,icol,jq,irow,neq,nzl,nmethod,
@@ -443,10 +445,10 @@ void arpack(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
               xstateini,xstate,thicke,integerglob,doubleglob,
 	      tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 	      pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
-	      iponoel,inoel,&network,ntrans,inotr,trab,design,penal);
+	      iponoel,inoel,&network,ntrans,inotr,trab,design,penal, mat_dens); */
   }
   else{
-      mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xboun,nboun,
+     /* mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xboun,nboun,
 	      ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforc,
 	      nforc,nelemload,sideload,xload,nload,xbody,ipobody,nbody,cgr,
 	      ad,au,fext,nactdof,icol,jq,irow,neq,nzl,nmethod,
@@ -462,7 +464,7 @@ void arpack(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
               xstateini,xstate,thicke,integerglob,doubleglob,
 	      tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 	      pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
-	      iponoel,inoel,&network,ntrans,inotr,trab,design,penal);
+	      iponoel,inoel,&network,ntrans,inotr,trab,design,penal, mat_dens); */
 
       if(nasym==1){
 	  RENEW(au,double,nzs[2]+nzs[1]);
