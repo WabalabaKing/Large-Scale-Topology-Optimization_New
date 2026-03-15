@@ -43,7 +43,7 @@
  * ```
  */
 
-void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy) 
+void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *lakon, int mi0, double *v, double *stx, double *rhoPhy) 
     
     {
     FILE *fp = fopen("elastic_Field.vtu", "w");
@@ -71,7 +71,10 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
     fprintf(fp, "      <Cells>\n");
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
     for (int ielem = 0; ielem < ne; ielem++) {
-        for (int j = 0; j < 4; j++) {  // Assuming quadrilateral elements
+        char *lk= &lakon[8*ielem];
+        int nope = 4;
+        if (lk[3]=='1' && lk[4]=='0') nope = 10;
+        for (int j = 0; j < nope; j++) {  // Node # based on nope (C3D4or C3D10)
             fprintf(fp, " %d", kon[ipkon[ielem] + j]-1);
         }
         fprintf(fp, "\n");
@@ -80,15 +83,20 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
 
     // Write offsets
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n");
+    int offset = 0;
     for (int ielem = 0; ielem < ne; ielem++) {
-        fprintf(fp, " %d\n", (ielem + 1) * 4);
+        char *lk = &lakon[8*ielem];
+        offset += (lk[3]=='1' && lk[4]=='0') ? 10 : 4;
+        fprintf(fp, " %d\n", offset);
     }
     fprintf(fp, "        </DataArray>\n");
 
     // Write cell types
     fprintf(fp, "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n");
     for (int ielem = 0; ielem < ne; ielem++) {
-        fprintf(fp, " 10\n");  // Assuming VTU type 10 for quadrilaterals
+        char *lk = &lakon[8*ielem];
+        int vtktype = (lk[3]=='1' && lk[4]=='0') ? 24 : 10;
+        fprintf(fp, " %d\n", vtktype);
     }
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </Cells>\n");
@@ -106,7 +114,16 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
     fprintf(fp, "      <CellData Scalars=\"density\">\n");
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
     for (int cell = 0; cell < ne; cell++) {
-        fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n", stx[6*cell], stx[6*cell+1], stx[6*cell+2], stx[6* cell+3],stx[6*cell+4],stx[6*cell+5]);
+        char *lk = &lakon[8*cell];
+        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+        double s[6] = {0,0,0,0,0,0};
+        for (int gp = 0; gp < ngp; gp++) {
+            for (int c = 0; c < 6; c++)
+                s[c] += stx[6*mi0*cell + 6*gp + c];
+        }
+        for (int c = 0; c < 6; c++) s[c] /= ngp;
+        fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n",
+                s[0], s[1], s[2], s[3], s[4], s[5]);
     }
     fprintf(fp, "        </DataArray>\n");
 

@@ -117,7 +117,7 @@ void filterOutPassiveElems_sens(double *sens, int ne, int *passiveIDs, int numPa
 
 void rho(double *design,int ne);
 
-void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy);
+void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, char *lakon, int mi0, double *v, double *stx, double *rhoPhy);
 
 void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum, double *Mass, double *cgx, double *cgy, double *cgz, int *passiveIDs, int numPassive, double* pnorm);
 
@@ -3496,7 +3496,9 @@ void nonlingeo(double **co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     ITG **islavsurfp,double **pslavsurfp,double **clearinip,
 	     ITG *nmat,double *xmodal,ITG *iaxial,ITG *inext,ITG *nprop,
 	     ITG *network,char *orname,double *vel,ITG *nef,
-	     double *velo,double *veloo, double *design,double *penal);
+	     double *velo,double *veloo, double *design,double *penal,
+            double *sigma0, double *eps_relax, double *rhomin,
+            double *pexp, double *Pnorm, double *dPnorm_drho);
 
 void FORTRAN(nonlinmpc,(double *co,double *vold,ITG *ipompc,ITG *nodempc,
 		   double *coefmpc,char *labmpc,ITG *nmpc,ITG *ikboun,

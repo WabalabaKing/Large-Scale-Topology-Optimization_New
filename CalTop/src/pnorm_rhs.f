@@ -85,21 +85,21 @@
 
 !     variables for accumulating adjoint rhs
       real*8 g(6), ptv(6), invvm, fac
-      real*8 B(6,12), rhs_loc(12)
+      real*8 B(6,30), rhs_loc(30)
       real*8 rhs(0:mi(2),*)
       real*8 C(6,6)
 
 !     work arrays for Me*u_e path (C3D4 block)
       integer ia, ib
       integer ii
-      real*8 Bten(6,12)
+      real*8 Bten(6,30)
       real*8 Vec(6,6)
-      real*8 uel(12)
+      real*8 uel(30)
       real*8 s(6), t(6)
       real*8 coeff
-      real*8 MeN (12,12)
-      real*8 MNtemp(6,12)
-      real*8 TN(6,12)
+      real*8 MeN (30,30)
+      real*8 MNtemp(6,30)
+      real*8 TN(6,30)
       real*8 sige, sigeT
 !     
 
@@ -167,14 +167,15 @@
 
          indexe=ipkon(i)
 
-!        Set number of nodes for C3D4 element
-         if(lakonl(4:4).eq.'4') then
+!        Set number of nodes and integration pts for C3D4 and C3D10 element
+         if(lakonl(4:5).eq.'10') then
+            nope=10
+            mint3d=4
+         elseif(lakonl(4:4).eq.'4') then
             nope=4
-         endif
-
-!        Set number integration points for C3D4
-         if(lakonl(4:4).eq.'4') then
-            mint3d=1  ! One integration point per each C3D4 element
+            mint3d=1
+         else
+            cycle
          endif
 
 !        Gather nodal displacements
@@ -192,7 +193,12 @@
          do jj=1,mint3d
 
             ! Get integration weight for this element
-            if(lakonl(4:4).eq.'4') then
+            if(lakonl(4:5).eq.'10') then
+               xi=gauss3d5(1,jj)
+               et=gauss3d5(2,jj)
+               ze=gauss3d5(3,jj)
+               weight=weight3d5(jj)
+            elseif(lakonl(4:4).eq.'4') then
                xi=gauss3d4(1,jj)
                et=gauss3d4(2,jj)
                ze=gauss3d4(3,jj)
@@ -202,6 +208,8 @@
             ! Compute shape func values
             if(nope.eq.4) then
                call shape4tet(xi,et,ze,xl,xsj,shp,iflag)
+            elseif(nope.eq.10) then
+               call shape10tet(xi,et,ze,xl,xsj,shp,iflag)
             endif
             
 !
@@ -372,7 +380,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             rho_p = rho_eff**penal
 
 c----- RHS accumulation (minimal: C3D4 only) --------------------------
-            if (nope.eq.4) then
+            if (nope.eq.4 .or. nope.eq.10) then
 
 c           skip if vm or phi yields zero gradient
 !              if (vm.gt.0.d0) then
@@ -442,12 +450,12 @@ c           skip if vm or phi yields zero gradient
 
 c             Build B for C3D4 (engineering shear), from shp(derivs)
 c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
-               do m1=1,12
+               do m1=1,3*nope
                   B(1,m1)=0.d0; B(2,m1)=0.d0; B(3,m1)=0.d0
                   B(4,m1)=0.d0; B(5,m1)=0.d0; B(6,m1)=0.d0
                enddo
 
-               do m1=1,4
+               do m1=1,nope
                   m2 = 3*(m1-1)
                   B(1,m2+1) = shp(1,m1)
                   B(2,m2+2) = shp(2,m1)
@@ -460,7 +468,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   B(5,m2+3) = shp(2,m1)
                enddo
 ! ---          Convert to tensorial shear: Bten = R * Beng, R=diag(1,1,1,1/2,1/2,1/2)
-               do m1=1,12
+               do m1=1,3*nope
                   Bten(1,m1)=B(1,m1)
                   Bten(2,m1)=B(2,m1)
                   Bten(3,m1)=B(3,m1)
@@ -484,7 +492,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                Vec(6,6)=3.d0
 
 ! ---          Gather u_e (12 X1) from vl(:,:)
-               do m1=1,4
+               do m1=1,nope
                   uel(3*(m1-1)+1) = vl(1,m1)
                   uel(3*(m1-1)+2) = vl(2,m1)
                   uel(3*(m1-1)+3) = vl(3,m1)
@@ -494,7 +502,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
 ! ---         s = C * (Bten * u_e) (tensorial stress)
 ! ---         TN=C*B (6x12)
                do ia=1,6
-                  do ib=1,12
+                  do ib=1,3*nope
                      TN(ia,ib)=C(ia,1)*Bten(1,ib)
      &                        +C(ia,2)*Bten(2,ib)
      &                        +C(ia,3)*Bten(3,ib)
@@ -506,7 +514,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
 
 ! ---          M0temp=V*TN
                do ia=1,6
-                  do ib=1,12
+                  do ib=1,3*nope
                      MNtemp(ia,ib)=Vec(ia,1)*TN(1,ib)
      &                        +Vec(ia,2)*TN(2,ib)
      &                        +Vec(ia,3)*TN(3,ib)
@@ -516,8 +524,8 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   enddo
                enddo
 !  ---         Me0=T^T*M0temp
-               do ia=1,12
-                  do ib=1,12
+               do ia=1,3*nope
+                  do ib=1,3*nope
                      MeN(ia,ib)=TN(1,ia)*MNtemp(1,ib)
      &                         +TN(2,ia)*MNtemp(2,ib)
      &                         +TN(3,ia)*MNtemp(3,ib)
@@ -528,9 +536,9 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                enddo
 
 ! ---          Build Me0*u_e
-               do m1=1,12
+               do m1=1,3*nope
                   rhs_loc(m1)=0.d0
-                  do ia = 1,12
+                  do ia = 1,3*nope
                   !TESTMARK
                      rhs_loc(m1)=rhs_loc(m1)+MeN(m1,ia)*uel(ia)
 
@@ -538,8 +546,8 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                enddo
 ! ---          Build ||sigma_e||
                sigeT=0.d0
-               do m1=1,12
-                  do ia=1,12
+               do m1=1,3*nope
+                  do ia=1,3*nope
                      sigeT = sigeT+uel(m1)*MeN(m1,ia)*uel(ia)
                   enddo
                enddo
@@ -568,12 +576,12 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   write(*,*) 'Elem', i,'rho=',rho_e,'vol=',xsj*weight,
      &                       'sigeT=',sigeT,'sige=',sige,'coeff=',coeff
                endif             
-               do m1=1,12
+               do m1=1,3*nope
                   rhs_loc(m1) = coeff * rhs_loc(m1)
                enddo
 
 ! ---          Scatter to global rhs(1..3, node)
-                do m1=1,4   ! Loop over all DOFs.
+                do m1=1,nope   ! Loop over all DOFs.
                   rhs(1,konl(m1)) = rhs(1,konl(m1))
      &            + rhs_loc(3*(m1-1)+1)
                   rhs(2,konl(m1)) = rhs(2,konl(m1)) 

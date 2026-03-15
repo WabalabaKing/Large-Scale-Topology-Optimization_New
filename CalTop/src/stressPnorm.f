@@ -79,7 +79,7 @@
 
 !     p-norm variables 
       real*8 sx, sy, sz, txy, txz, tyz, vm, vm2, wgt
-      real*8 g_sump, g_vol, pexp
+      real*8 g_sump, g_vol, pexp, vm_sum
       real*8 rho_e, rho_min, rho_eff, rho_p, eps_relax, sig0, phi
 ! 
 
@@ -170,7 +170,7 @@
             enddo
          enddo
 !
-
+         vm_sum = 0.d0
 !     Begin loop over all integrations points per element
          do jj=1,mint3d
 
@@ -268,7 +268,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             mattyp = 1
             if (mattyp .eq. 1) then
 !              write(*,*) 'Scaling the C matrix!'
-              rho_e   = design(m)
+              rho_e   = design(i)
 !              Based on the definition of effective von Misses 
 !              stress in Duysinx and Sigmnd, the penalized
 !              rho cancels out in the stress term with
@@ -343,30 +343,18 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             vm2 = (sx-sy)*(sx-sy) + (sy-sz)*(sy-sz) + (sz-sx)*(sz-sx)
             vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
             vm  = dsqrt(vm2)
-!  --- filtered design alread in [0,1] (clamp defenseively)  ---
-            rho_e = design(i)
-            ! (optional clamp, safe if design may drift)
-            if (rho_e .lt. 0.d0) rho_e = 0.d0
-            if (rho_e .gt. 1.d0) rho_e = 1.d0
-
-            rho_eff = max(rho_e, rho_min)
-            rho_p = rho_eff**penal
-
-! --- Duysinx-Sigmund effective von Misses stress measure for an element
-! TESTMARK
-            phi = (vm/ (sig0)) + eps_relax - (eps_relax/rho_eff)
-! --- Consider effective von Misses stress (phi) > 0 only
-            if (phi .lt. 0.d0) phi = 0.d0
-
-            !write(*,*), 'Phi: ', vm
-            
-! --- With effective von Misses stress calculated, raise to pexp
-! --- and sum over all elements
-! --- P-norm aggregation for this element
-            g_sump = g_sump + (phi**pexp)
+            vm_sum = vm_sum+vm
 !
          enddo  ! <--- end of integration over element Gauss points
-
+         vm = vm_sum/dble(mint3d)
+         rho_e = design(i)
+         if (rho_e .lt. 0.d0) rho_e = 0.d0
+         if (rho_e .gt. 1.d0) rho_e = 1.d0
+         rho_eff = max(rho_e, rho_min)
+         rho_p = rho_eff**penal
+         phi = (vm / sig0) + eps_relax - (eps_relax / rho_eff)
+         if (phi .lt. 0.d0) phi = 0.d0
+         g_sump = g_sump + (phi**pexp)
       enddo   ! <--- end of loop over all elements
 !
 

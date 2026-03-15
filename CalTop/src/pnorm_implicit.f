@@ -1,6 +1,6 @@
 
 
-      subroutine pnorm_implicit_c3d4(co,kon,ipkon,lakon,ne,mi,
+      subroutine pnorm_implicit(co,kon,ipkon,lakon,ne,mi,
      &     xstiff, v, lam, design, penal, pexp, relax, sig0,
      &     nea, neb, list, ilist, djdrho)
 
@@ -35,8 +35,8 @@ c      djdrho_impl(ne)          : accumulates the implicit contribution
 c--- mesh
       integer ne, kon(*), ipkon(*), mi(*), nea, neb, list, ilist(*)
       character*8 lakon(*), lakonl
-      integer i,k,j,idx,nope,iflag,jj
-      integer konl(4)
+      integer i,k,j,idx,nope,mint3d, iflag,jj
+      integer konl(26)
 
 c--- geometry
       real*8 co(3,*)
@@ -57,11 +57,11 @@ c--- output
       real*8 djdrho(*)
 
 c--- locals
-      real*8 xl(3,4), shp(4,4), xsj, xi, et, ze, weight
-      real*8 B(6,12), ue(12), le(12), k0u(12), dotlam
+      real*8 xl(3,26), shp(4,26), xsj, xi, et, ze, weight
+      real*8 B(6,30), ue(30), le(30), k0u(30), dotlam
       real*8 eps(6), sig(6), rho, ce, rho_eff,sigP(6)
       integer a, m, n, m1
-      real*8 vm,vm2,sige
+      real*8 vm,vm2,sige, vm_sum
       real*8 Epen
       real*8 E
       real*8 expli1
@@ -71,7 +71,6 @@ c--- Gauss rule (C3D4, 1 point)
 
 c--- init
       iflag = 3
-      nope  = 4
 
 c--- element loop
       do k = nea, neb
@@ -83,11 +82,19 @@ c--- element loop
 
          if (ipkon(i).lt.0) cycle
          lakonl = lakon(i)
-         if (lakonl(4:4).ne.'4') cycle  ! C3D4 only
+         if (lakonl(4:4).eq.'4') then
+            nope = 4
+            mint3d = 1
+         elseif (lakonl(4:5).eq.'10') then
+            nope = 10
+            mint3d = 4
+         else
+            cycle
+         endif
 
 c------ gather connectivity & coords
          idx = ipkon(i)
-         do j=1,4
+         do j=1,nope
             konl(j) = kon(idx+j)
             xl(1,j) = co(1,konl(j))
             xl(2,j) = co(2,konl(j))
@@ -96,7 +103,7 @@ c------ gather connectivity & coords
 
 c------ local u and lambda (3 dofs per node, stacked)
          m = 0
-         do j=1,4
+         do j=1,nope
             ue(m+1) = v(1,konl(j))
             ue(m+2) = v(2,konl(j))
             ue(m+3) = v(3,konl(j))
@@ -106,101 +113,74 @@ c------ local u and lambda (3 dofs per node, stacked)
             m = m + 3
          enddo
 
-c------ single Gauss point for C3D4
-         jj     = 1
-         xi     = gauss3d4(1,jj)
-         et     = gauss3d4(2,jj)
-         ze     = gauss3d4(3,jj)
-         weight = weight3d4(jj)
-
-c------ shape & jacobian
-         call shape4tet(xi,et,ze,xl,xsj,shp,iflag)
-         !if (xsj.le.0.d0) cycle
-         xsj = dabs(xsj)
-c------ build B (6x12) from global derivatives dN/dx = shp(1,*), etc.
-c       Voigt order: [exx eyy ezz exy exz eyz]
-         do a=1,12
-            k0u(a) = 0.d0
-         enddo
-
-         call build_B_c3d4(shp,B)
-
-c------ strain eps = B * u
-         do m=1,6
-            eps(m) = 0.d0
-            do n=1,12
-               eps(m) = eps(m) + B(m,n)*ue(n)
+c------ gaussian integration for C3D4&D10
+         vm_sum = 0.d0
+         do jj=1,mint3d
+            if(lakonl(4:5).eq.'10') then
+               xi=gauss3d5(1,jj); et=gauss3d5(2,jj); ze=gauss3d5(3,jj)
+               weight=weight3d5(jj)
+               call shape10tet(xi,et,ze,xl,xsj,shp,iflag)
+            elseif(lakonl(4:4).eq.'4') then
+               xi=gauss3d4(1,jj); et=gauss3d4(2,jj); ze=gauss3d4(3,jj)
+               weight=weight3d4(jj)
+               call shape4tet(xi,et,ze,xl,xsj,shp,iflag)
+            endif
+            xsj = dabs(xsj)
+            do a=1,3*nope
+               k0u(a) = 0.d0
             enddo
-         enddo
-         rho = design(i)
-         ! Hard coded xstiff call, should be xstiff(1,jj,i), due to memory leak
-         Epen = (rho**(penal-1))*xstiff(1,jj,i)*penal
-         E    = (rho**(penal))*xstiff(1,jj,i)
-         if (k .le. 10) then
-            write(*,*) 'pnorm_impl: k=', k, 'i=', i, 'rho=', rho,
-     &               'E0=', xstiff(1,jj,1), 'nu=', xstiff(2,jj,1)
-         endif
-         !Epen = (rho**(penal-1))*10*penal
-         !E    = (rho**(penal))*10
+            call build_B_tet(shp,B,nope)
+c------ strain eps = B * u
+            do m=1,6
+               eps(m) = 0.d0
+               do n=1,3*nope
+                  eps(m) = eps(m) + B(m,n)*ue(n)
+               enddo
+            enddo
+            rho = design(i)
+
+            Epen = (rho**(penal-1))*xstiff(1,jj,i)*penal
+            E    = (rho**(penal))*xstiff(1,jj,i)
 c------ stress sig = D * eps  (use xstiff mapping like in your RHS code)
 
-         call mult_D_vec(sig, eps, E,xstiff(2,jj,1))
-         call mult_D_vec(sigP, eps, Epen,xstiff(2,jj,1))
+            call mult_D_vec(sig, eps, E,xstiff(2,jj,1))
+            call mult_D_vec(sigP, eps, Epen,xstiff(2,jj,1))
 c------ calculate effective vm stress
-         vm2 = (sig(1)-sig(2))**2
-         vm2 = vm2 + (sig(2)-sig(3))**2
-         vm2 = vm2 + (sig(3)-sig(1))**2
-         vm2 = 0.5d0*vm2
-         vm2 = vm2 + 3.d0* (sig(4))**2 
-         vm2 = vm2 + 3.d0* (sig(5))**2 
-         vm2 = vm2 + 3.d0* (sig(6))**2 
-         vm = sqrt(vm2)
-         !write(*,*), 'rho', rho
-         !write(*,*), 'vmImplicit', vm
-         sige = vm/sig0+ relax-relax/(rho)
-         if (sige .lt. 0.d0) sige  = 0.d0
+            vm2 = (sig(1)-sig(2))**2
+            vm2 = vm2 + (sig(2)-sig(3))**2
+            vm2 = vm2 + (sig(3)-sig(1))**2
+            vm2 = 0.5d0*vm2
+            vm2 = vm2 + 3.d0* (sig(4))**2 
+            vm2 = vm2 + 3.d0* (sig(5))**2 
+            vm2 = vm2 + 3.d0* (sig(6))**2 
+            vm_sum = vm_sum+dsqrt(max(vm2,0.d0))
 c------ internal nodal forces k0u += B^T * sig * vol
-         do n=1,12
-            do m=1,6
-               k0u(n) = k0u(n) + B(m,n)*sigP(m)
+            do n=1,3*nope
+               do m=1,6
+                  k0u(n) = k0u(n) + B(m,n)*sigP(m)
+               enddo
+               k0u(n) = k0u(n) * (xsj*weight)
             enddo
-            k0u(n) = k0u(n) * (xsj*weight)
-         enddo
+         enddo  !-------END of GP loop
+c------ element-average vm and sige
+         vm = vm_sum / dble(mint3d)
+         rho = design(i)
+         if (rho .lt. 0.d0) rho = 0.d0
+         if (rho .gt. 1.d0) rho = 1.d0
+         rho_eff = dmax1(rho, 1e-06)
+         sige = vm/sig0 + relax - relax/rho_eff
+         if (sige .lt. 0.d0) sige = 0.d0
 
 c------ lambda^T * (K0 u)
          dotlam = 0.d0
-         do n=1,12
+         do n=1,3*nope
             dotlam = dotlam + le(n)*k0u(n)
          enddo
 
-c------ ce = penal * rho^(penal-1)   (same logic as e_c3d_se.f)
-         
-         if (rho .lt. 0.d0) rho = 0.d0
-         if (rho .gt. 1.d0 ) rho = 1.d0
-         rho_eff = dmax1(rho, 1e-06)
-
-         if (rho .gt. 1e-06) then
-            heav = 1.d0
-         else
-            heav = 0.d0
-         endif
-
-         !if (rho.le.0.d0) then
-         !   ce = 0.d0
-         !else
-         !   ce = penal * rho**(penal-1.d0)
-         !endif
-
-         !ce = penal * rho_eff**(penal-1.d0) * heav
-
 c------ accumulate implicit sensitivity
          djdrho(i) = djdrho(i)-dotlam !Implicit
-         !write(*,*),"ImplicitPart: ",djdrho(i) 
          expli1 = (sige**(pexp-1))*relax/(rho**2.d0) 
          expli2 = (sige**(pexp-1))*vm*penal/(rho*sig0)
-         !write(*,*),"sigE",sige
-         !write(*,*),"explicit",expli1+expli2
-         !write(*,*),"explicit2",expli2
          djdrho(i) = (djdrho(i)+expli1+expli2)
          !write(*,*),"IMP1",dotlam
          !now we have qbar*dkdrho*q
@@ -214,17 +194,18 @@ c======================================================================
 c  Build B for a 4-node tet from CalculiX shape derivatives
 c  shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
 c======================================================================
-      subroutine build_B_c3d4(shp,B)
+      subroutine build_B_tet(shp,B,nope)
       implicit none
-      real*8 shp(4,4), B(6,12)
+      integer nope
+      real*8 shp(4,26), B(6,30)
       integer j, col
 
-      do j=1,12
+      do j=1,3*nope
          B(1,j)=0.d0; B(2,j)=0.d0; B(3,j)=0.d0
          B(4,j)=0.d0; B(5,j)=0.d0; B(6,j)=0.d0
       enddo
 
-      do j=1,4
+      do j=1,nope
          col = 3*(j-1)
 c        exx
          B(1,col+1) = shp(1,j)

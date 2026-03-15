@@ -724,7 +724,7 @@ printf("====================================================\n\n");
    				- primal nodal field: use vold (current solution in CCX)
    				- adjoint nodal field: lam (just expanded)
 				*/
-				FORTRAN(pnorm_implicit_c3d4,(co,kon,ipkon,lakon,ne,mi,
+				FORTRAN(pnorm_implicit,(co,kon,ipkon,lakon,ne,mi,
         		xstiff, v, lam, design, penal,pexp,eps,sigma0,
         		&nea_loc, &neb_loc, &list_loc, ilist_loc, djdrho_impl));
 

@@ -1806,7 +1806,7 @@ while(istat>=0)
     }
   }
 
-
+  NNEW(dPnorm_drho, double, ne);
   /* if solving static analysis or green function calculation */
   if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
   {
@@ -1943,7 +1943,7 @@ while(istat>=0)
 
       printf("\n\nSOLVING LINEAR SYSTEM----------------------------------------|\n\n");
 
-       NNEW(dPnorm_drho, double, ne);
+       
       
   
 	    linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
@@ -2039,7 +2039,8 @@ while(istat>=0)
 	     ics,&nintpoint,&mortar,
 	     &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
 	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
-	     velo,veloo, rhoPhys,&pstiff);
+	     velo,veloo, rhoPhys,&pstiff,
+       &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho);
 
 	      memmpc_=mpcinfo[0];
         mpcfree=mpcinfo[1];
@@ -2388,7 +2389,7 @@ while(istat>=0)
 
     /* Write elastic fields to a vtu file */
     printf("\nWriting output fields...");
-    tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
+    tecplot_vtu(nk, ne, co, kon, ipkon, lakon, mi[0], vold, stx, rhoPhys);
     printf("done!\n\n");
 
     /* ensure any buffered data is written to file */
