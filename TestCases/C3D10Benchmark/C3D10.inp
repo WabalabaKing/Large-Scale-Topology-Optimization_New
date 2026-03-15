@@ -862,7 +862,7 @@
 *NSET, NSET=Nfix1
    5,   6,   7,   8,  49,  88, 319, 321, 423, 424, 426, 429, 430, 554, 555
 *NSET, NSET=Load
-   1,   2
+   1,   2,  3,  4, 9, 10
 *BOUNDARY
 Nfix1,1
 Nfix1,2
@@ -884,15 +884,18 @@ Nfix1,6
 DES
 
 *SOLID SECTION, ELSET=EALL, MATERIAL=EL
+*AMPLITUDE, NAME=RAMP
+0.0, 0.0
+1.0, 1.0
 *STEP, NLGEOM
 *STATIC, DIRECT
-**Specify time step size and end time
-0.1, 1
-
-**Begin setup for static analysis
-
-** Define concentrated load on <nodeset>, <dof>, <magnitude>
-*CLOAD
+0.1, 1.0
+*CONTROLS, PARAMETERS=TIME INCREMENTATION
+10, 10, 10, 50, 10, 4, 12, 20, , , ,
+0.25, 0.5, 0.75, 0.85, , , ,
+*CONTROLS, PARAMETERS=FIELD
+0.005, 0.005, 1.0, 0.0, 0.02, 1e-5
+*CLOAD, AMPLITUDE=RAMP
 Load, 3, 0.5
 *END STEP
 

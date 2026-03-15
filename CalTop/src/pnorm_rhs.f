@@ -362,10 +362,10 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
                endif
             endif
 !           calculation of the Cauchy stresses (skip for linear CalTop)
-            if((calcul_cauchy.eq.1).and.(nlgeom_undo.eq.0)) then
+            !if((calcul_cauchy.eq.1).and.(nlgeom_undo.eq.0)) then
             
-               write(*,*), "Skipping Cauchy stress eval"
-            endif
+            !   write(*,*), "Skipping Cauchy stress eval"
+            !endif
 !--------------------------------------------------------------!
 !                       BEGIN P-NORM RHS EVAL                          
 !--------------------------------------------------------------!
@@ -405,10 +405,6 @@ c           skip if vm or phi yields zero gradient
                C(1,2) = C(2,1)
                C(1,3) = C(3,1)
                C(2,3) = C(3,2)
-               if (m .le. 10) then
-                  write(*,*) 'pnorm_rhs: m=', m, 'i=', i, 'rho=', rho_e
-                  write(*,*) 'C(1,1)=', C(1,1), 'C(4,4)=', C(4,4)
-               endif
                !C(1,1)=xstiff( 1,jj,i);
                !C(2,1)=xstiff( 2,jj,i); 
                !C(2,2)=xstiff( 3,jj,i);
@@ -552,17 +548,17 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   enddo
                enddo
                !write(*,*),"vm from ENERGY:",dsqrt(sigeT)
-               if (m .le. 10) then
-                  write(*,*) 'After M calc: sigeT=', sigeT
-               endif
-               sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
+               !if (m .le. 10) then
+               !   write(*,*) 'After M calc: sigeT=', sigeT
+               !endif
+               !sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
                !write(*,*), 'Currrent vmRHS:', dsqrt(sigeT)
-               if (m .le. 10) then
-                  write(*,*) 'Before clamp: sige=', sige, 'sigeT=', sigeT
-               endif
-               if (m .le. 10) then
-                  write(*,*) 'eps_relax=', eps_relax,'rho_eff=',rho_eff
-               endif
+               !if (m .le. 10) then
+               !   write(*,*) 'Before clamp: sige=', sige, 'sigeT=', sigeT
+               !endif
+               !if (m .le. 10) then
+               !   write(*,*) 'eps_relax=', eps_relax,'rho_eff=',rho_eff
+               !endif
                if (sige .lt. 0.d0) sige=0.d0
 
 ! ---          Construct the coeff
@@ -572,10 +568,10 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                else
                   coeff = (sige**(pexp-1))/(sig0*dsqrt(sigeT))
                endif
-               if (m .le. 5) then
-                  write(*,*) 'Elem', i,'rho=',rho_e,'vol=',xsj*weight,
-     &                       'sigeT=',sigeT,'sige=',sige,'coeff=',coeff
-               endif             
+               !if (m .le. 5) then
+               !   write(*,*) 'Elem', i,'rho=',rho_e,'vol=',xsj*weight,
+     &         !              'sigeT=',sigeT,'sige=',sige,'coeff=',coeff
+               !endif             
                do m1=1,3*nope
                   rhs_loc(m1) = coeff * rhs_loc(m1)
                enddo
