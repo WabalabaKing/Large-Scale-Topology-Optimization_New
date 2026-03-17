@@ -179,10 +179,10 @@ def main():
     ap = argparse.ArgumentParser(
         description="Central FD check for P-norm stress sensitivities (uses constant h=1e-6 by default)."
     )
-    ap.add_argument("-i", "--input", default="BUC", help="Job/input name without extension (default: SCB)")
+    ap.add_argument("-i", "--input", default="C3D10", help="Job/input name without extension (default: SCB)")
     ap.add_argument("-p", "--penal", type=float, default=5.0)
-    ap.add_argument("-r", "--radius", type=float, default=0.3)
-    ap.add_argument("-f", "--filternnz", type=int, default=60)
+    ap.add_argument("-r", "--radius", type=float, default=0.5)
+    ap.add_argument("-f", "--filternnz", type=int, default=100)
     ap.add_argument("--pexp", type=int, default=10)
     ap.add_argument("--sigmin", type=float, default=1)
     ap.add_argument("--sigrelax", type=float, default=0.0001)

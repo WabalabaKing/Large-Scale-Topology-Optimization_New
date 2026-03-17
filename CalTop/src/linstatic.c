@@ -73,7 +73,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
              char *orname,double *design, double *penal, double *stx, double *sigma0, double *eps,
-			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho)
+			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM)
 	{
 
   		char description[13]="            ",*lakon=NULL,stiffmatrix[132]="",
@@ -608,7 +608,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
             	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	    		islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-            	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl,Pnorm, 1);
+            	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl,Pnorm, (*eval_PNORM == 1) ? 1 : 0);
 				
 					
 				//printf("done calling results.c for static calculation: line: 1112 @ linstatic.c \n");

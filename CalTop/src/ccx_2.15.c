@@ -360,7 +360,6 @@ int main(int argc,char *argv[])
   double eps_relax = 1e-03;
   double rhomin = 1e-06;
   double pexp = 1.0;
-  int stress_adjoint = 1; // Set this to 1 for now.
 
   ITG itertop= 1; /**<iteration counter in topology optimization */
   ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
@@ -465,7 +464,6 @@ else
     {
       pexp=atof(argv[i+1]);
       /* With P-norm exponent passed, set eval_stress = 1*/
-      stress_adjoint = 1;
       break;
     }
   }  
@@ -524,6 +522,7 @@ else
 
 
 /* Assign default value for penalty parameter */
+
 if (pSupplied==0.0) 
 {
   pstiff=1.0;
@@ -1178,7 +1177,9 @@ while(istat>=0)
 
       */
   }
-
+  if (pexp > 1.0) {
+    eval_PNORM = (iperturb[0] >= 2) ? 2 : 1;
+  }
 
 
   if((abs(nmethod)!=1)||(iperturb[0]<2))icascade=0;
@@ -1897,14 +1898,13 @@ NNEW(dPnorm_drho, double, ne);
            xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
            ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
            orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin,
-           &pexp, &Pnorm, dPnorm_drho);
+           &pexp, &Pnorm, dPnorm_drho, &eval_PNORM);
 
       endl = time(NULL);
       printf("\n Time taken for linstatic.c is %.8f seconds \n",
              difftime(endl, startl));
 
       /* Filter and write P-norm stress sensitivity */
-      eval_PNORM=1;
       if(eval_PNORM == 1)
       {
         printf(" Filter element stress (P-norm) gradient ");
@@ -1982,7 +1982,7 @@ NNEW(dPnorm_drho, double, ne);
            &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
            xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
            velo,veloo,rhoPhys,&pstiff,
-           &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho);
+           &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho, &eval_PNORM);
 
       memmpc_=mpcinfo[0]; mpcfree=mpcinfo[1];
       icascade=mpcinfo[2]; maxlenmpc=mpcinfo[3];
@@ -2135,7 +2135,7 @@ NNEW(dPnorm_drho, double, ne);
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
 	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
-             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
+             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
       printf("done\n");
 

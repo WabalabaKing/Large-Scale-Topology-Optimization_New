@@ -30,7 +30,7 @@
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,distmin,
      &  ndesi,nodedesi,dfl,icoordinate,dxstiff,ne,xdesi,
      &  istartelem,ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &  ecompli,elvol,xcg,ycg,zcg)
+     &  ecompli,elvol,xcg,ycg,zcg,lam)
 !
 !     computation of the sensitivity of the element matrix multiplied by the
 !     displacements for the element with the topology in konl
@@ -89,7 +89,7 @@
      &  pslavsurf(3,*),pmastsurf(6,*),distmin,s0(60,60),xdesi(3,*),
      &  ds1(60,60),ff0(60),dfl(20,60),dxstiff(27,mi(1),ne,*),
      &  vl(0:mi(2),26),v(0:mi(2),*),sensi,ecompli,ku(60),uelem(60),
-     &  uku,penal,rhoi,elvol,xcg,ycg,zcg
+     &  uku,penal,rhoi,elvol,xcg,ycg,zcg,lam(0:mi(2),*),lam_e(30)
 !
       intent(in) co,kon,lakonl,p1,p2,omx,bodyfx,nbody,
      &  nelem,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -104,7 +104,7 @@
      &  integerglob,doubleglob,tieset,istartset,iendset,ialset,ntie,
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,
      &  distmin,ndesi,nodedesi,icoordinate,xdesi,istartelem,ialelem,
-     &  v,penal,rhoi
+     &  v,penal,rhoi, lam
 !
       intent(inout) sm,xload,nmethod,springarea,xstate,dfl,sensi,
      &  ecompli,elvol,xcg,ycg,zcg
@@ -457,6 +457,7 @@ c     Bernhardi end
          do k=1,3
             l=l+1
              uelem(l)=vl(k,j)
+             lam_e(l)=lam(k,konl(j))
  !            write(2,*) 'uelem',l,uelem(l)
          enddo
 	   enddo
@@ -1900,9 +1901,13 @@ c            alp=.2215d0
 !
          if((ieigenfrequency.ne.1).and.(iperturb(2).eq.1)) then
 !
-!           nonlinear geometric calculation: dK/ds does not have
-!           to be calculated (except for eigenfrequency calculations)
-!
+!           nonlinear geometric (TL): sensi = -(p/rho) * lam_e . fint_e
+!           fint_e = BL^T * S_v * dV, accumulated over Gauss points
+!           Uses shape10tet (C3D10, 4 GP) or shape4tet (C3D4, 1 GP)
+            write(*,*) '[DBG emod] e=',e,' un=',un
+            write(*,*)' rhoi=',rhoi,' penal=',penal
+            call tl_sens(xl,uelem,lam_e,nope,mint3d,
+     &           rhoi,penal,e,un,sensi,ecompli)
 !!!            if(idesvar.eq.0) then
 !     load vector
 !!               if((rhsi.eq.1).and.(idist.eq.1)) then
@@ -2041,23 +2046,22 @@ c            alp=.2215d0
 !
 
 !         Evaluate k*u
-!
-         do i=1,3*nope
-            do j=1,3*nope
-
-              ku(i)=ku(i)+s0(i,j)*uelem(j)
+         if(iperturb(2).ne.1) then
+            do i=1,3*nope
+               do j=1,3*nope
+                  ku(i)=ku(i)+s0(i,j)*uelem(j)
 !            write(10,*) uelem(c2), s0(c1,c2)
+               enddo
             enddo
-         enddo
 
 !         Evaluate u*k*u
-         do i=1,3*nope
-          uku=uku+ku(i)*uelem(i)
-         enddo
+            do i=1,3*nope
+               uku=uku+ku(i)*uelem(i)
+            enddo
 
-         sensi=(-penal)*(rhoi**(penal-1))*uku
-         ecompli=(rhoi**penal)*uku
-         
+            sensi=(-penal)*(rhoi**(penal-1))*uku
+            ecompli=(rhoi**penal)*uku
+         endif
          
 !         if((lakonl(7:7)).eq.'E')then
 !            elvol=dabs(elvol)*2
@@ -2068,5 +2072,196 @@ c            alp=.2215d0
                         
 c        close(200)
  !        close(300)
+      return
+      end
+
+!=====================================================================
+!  tl_sens: NL compliance sensitivity for one element (Total Lagrangian)
+!
+!  sensi   = -(p/rho) * (lam_e . fint_e)
+!  ecompli =            uelem  . fint_e
+!
+!  Calls CCX shape10tet / shape4tet — no reimplemented derivatives.
+!=====================================================================
+      subroutine tl_sens(xl,uelem,lam_e,nope,mint3d,
+     &     rhoi,penal,emod,nu,sensi,ecompli)
+!
+      implicit none
+!
+      integer nope,mint3d,ig,a,ii,jj,kk,rr,iflag
+      real*8 xl(3,10),uelem(30),lam_e(30)
+      real*8 rhoi,penal,emod,nu,sensi,ecompli
+      real*8 xi,eta,zeta,w,xsj
+      real*8 shp(4,10)
+      real*8 umat(3,10),gradu(3,3),fdef(3,3)
+      real*8 cten(3,3),eten(3,3),ev(6),sv(6)
+      real*8 dmat(6,6)
+      real*8 bl(6,30),fint(30)
+      real*8 elamlam,elammu,epen
+      real*8 dotlam,dotu,tmp
+!
+      include 'gauss.f'
+!
+      iflag = 3
+!
+!     penalised modulus and D matrix
+!
+      epen    = (rhoi**penal)*emod
+      elamlam = epen*nu/((1.d0+nu)*(1.d0-2.d0*nu))
+      elammu  = epen/(2.d0*(1.d0+nu))
+!
+      do ii=1,6
+         do jj=1,6
+            dmat(ii,jj)=0.d0
+         enddo
+      enddo
+      dmat(1,1)=elamlam+2.d0*elammu
+      dmat(2,2)=dmat(1,1)
+      dmat(3,3)=dmat(1,1)
+      dmat(1,2)=elamlam; dmat(2,1)=elamlam
+      dmat(1,3)=elamlam; dmat(3,1)=elamlam
+      dmat(2,3)=elamlam; dmat(3,2)=elamlam
+      dmat(4,4)=elammu
+      dmat(5,5)=elammu
+      dmat(6,6)=elammu
+!
+!     unpack uelem into umat(3,nope)
+!
+      do a=1,nope
+         do ii=1,3
+            umat(ii,a)=uelem(3*(a-1)+ii)
+         enddo
+      enddo
+!
+!     initialise fint
+!
+      do rr=1,3*nope
+         fint(rr)=0.d0
+      enddo
+!
+!     Gauss loop
+!
+      do ig=1,mint3d
+!
+         if(nope.eq.10) then
+            xi  =gauss3d5(1,ig)
+            eta =gauss3d5(2,ig)
+            zeta=gauss3d5(3,ig)
+            w   =weight3d5(ig)
+            call shape10tet(xi,eta,zeta,xl,xsj,shp,iflag)
+         else
+            xi  =gauss3d4(1,ig)
+            eta =gauss3d4(2,ig)
+            zeta=gauss3d4(3,ig)
+            w   =weight3d4(ig)
+            call shape4tet(xi,eta,zeta,xl,xsj,shp,iflag)
+         endif
+!
+!        deformation gradient F = I + grad(u)
+!        shp(1..3,a) = dNa/dx,dNa/dy,dNa/dz after shape*tet
+!
+         do ii=1,3
+            do jj=1,3
+               gradu(ii,jj)=0.d0
+            enddo
+         enddo
+         do a=1,nope
+            do ii=1,3
+               do jj=1,3
+                  gradu(ii,jj)=gradu(ii,jj)+umat(ii,a)*shp(jj,a)
+               enddo
+            enddo
+         enddo
+         do ii=1,3
+            do jj=1,3
+               fdef(ii,jj)=gradu(ii,jj)
+            enddo
+            fdef(ii,ii)=fdef(ii,ii)+1.d0
+         enddo
+!
+!        Green-Lagrange strain E = 0.5*(F^T F - I)
+!
+         do ii=1,3
+            do jj=1,3
+               cten(ii,jj)=0.d0
+               do kk=1,3
+                  cten(ii,jj)=cten(ii,jj)+fdef(kk,ii)*fdef(kk,jj)
+               enddo
+               eten(ii,jj)=0.5d0*cten(ii,jj)
+            enddo
+            eten(ii,ii)=eten(ii,ii)-0.5d0
+         enddo
+         ev(1)=eten(1,1)
+         ev(2)=eten(2,2)
+         ev(3)=eten(3,3)
+         ev(4)=2.d0*eten(1,2)
+         ev(5)=2.d0*eten(2,3)
+         ev(6)=2.d0*eten(1,3)
+!
+!        2nd PK stress S = D * E_v
+!
+         do ii=1,6
+            sv(ii)=0.d0
+            do jj=1,6
+               sv(ii)=sv(ii)+dmat(ii,jj)*ev(jj)
+            enddo
+         enddo
+!
+!        BL operator: BL(alpha,3*(a-1)+k) = F(k,alpha)*dNa/dx_alpha
+!
+         do rr=1,6
+            do a=1,nope
+               do kk=1,3
+                  bl(rr,3*(a-1)+kk)=0.d0
+               enddo
+            enddo
+         enddo
+         do a=1,nope
+            do kk=1,3
+               bl(1,3*(a-1)+kk)=fdef(kk,1)*shp(1,a)
+               bl(2,3*(a-1)+kk)=fdef(kk,2)*shp(2,a)
+               bl(3,3*(a-1)+kk)=fdef(kk,3)*shp(3,a)
+               bl(4,3*(a-1)+kk)=fdef(kk,1)*shp(2,a)
+     &                          +fdef(kk,2)*shp(1,a)
+               bl(5,3*(a-1)+kk)=fdef(kk,2)*shp(3,a)
+     &                          +fdef(kk,3)*shp(2,a)
+               bl(6,3*(a-1)+kk)=fdef(kk,1)*shp(3,a)
+     &                          +fdef(kk,3)*shp(1,a)
+            enddo
+         enddo
+!
+!        fint += BL^T * S_v * |J| * w
+!
+         do rr=1,3*nope
+            tmp=0.d0
+            do kk=1,6
+               tmp=tmp+bl(kk,rr)*sv(kk)
+            enddo
+            fint(rr)=fint(rr)+tmp*dabs(xsj)*w
+         enddo
+!
+      enddo
+!
+!     dot products
+!
+      write(*,*) '[DBG lam_e] ',lam_e(1),lam_e(2),lam_e(3),
+     &           lam_e(4),lam_e(5),lam_e(6)
+      write(*,*) '[DBG uelem] ',uelem(1),uelem(2),uelem(3),
+     &           uelem(4),uelem(5),uelem(6)
+      write(*,*) '[DBG fint]  ',fint(1),fint(2),fint(3),
+     &           fint(4),fint(5),fint(6)
+      dotlam=0.d0
+      dotu  =0.d0
+      do rr=1,3*nope
+         dotlam=dotlam+lam_e(rr)*fint(rr)
+         dotu  =dotu  +uelem(rr)*fint(rr)
+      enddo
+!
+
+      sensi  =-(penal/rhoi)*dotlam
+      write(*,*) '[DBG tl_sens] nope=',nope,' mint3d=',mint3d,
+     &     ' dotlam=',dotlam,' dotu=',dotu,' sensi=',sensi
+      ecompli=dotu
+!
       return
       end

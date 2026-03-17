@@ -2285,7 +2285,7 @@ void linstatic(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     double *thicke,char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho);
+             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM);
 
 
 void densityfilter(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
@@ -2805,7 +2805,7 @@ void FORTRAN(mafillsmse,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 	       double *dxstiff,double *xdesi,ITG *istartelem,ITG *ialelem,
 	       double *v,double *sigma,ITG *ieigenfrequency,double *design,
 		   double *penal,double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol));
+		   double *eleVol, double *lam));
 
 void FORTRAN(mafillsmse2,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *ipompc,ITG *nodempc,double *coefmpc,
@@ -2923,7 +2923,7 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *cyclicsymmetry,char *labmpc,ITG *ics,double *cs,
 	       ITG *mcs,ITG *ieigenfrequency, double *design,
 		   double *penal,double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol);
+		   double *eleVol,double *lam);
 
 void mafillsmmain_se2(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *nodeboun,ITG *ndirboun,double *xboun,
@@ -3498,7 +3498,7 @@ void nonlingeo(double **co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     ITG *network,char *orname,double *vel,ITG *nef,
 	     double *velo,double *veloo, double *design,double *penal,
             double *sigma0, double *eps_relax, double *rhomin,
-            double *pexp, double *Pnorm, double *dPnorm_drho);
+            double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM);
 
 void FORTRAN(nonlinmpc,(double *co,double *vold,ITG *ipompc,ITG *nodempc,
 		   double *coefmpc,char *labmpc,ITG *nmpc,ITG *ikboun,
@@ -4555,7 +4555,7 @@ void sensitivity(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     char *orname,ITG *nzsfreq,ITG *nlabel,double *physcon,
              char *jobnamef, double *design,double *penal,
 			 double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol);
+		   double *eleVol, int *eval_PNORM);
 
 void FORTRAN(sensitivity_glob,(double *dgdxtot,double *dgdxtotglob,ITG *nobject,
 	     ITG *ndesi,ITG *nodedesi,ITG *nk));

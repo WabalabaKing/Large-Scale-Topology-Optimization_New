@@ -82,7 +82,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *network,char *orname,double *vel,ITG *nef,
 	     double *velo,double *veloo, double *design,double *penal,
 		 double *sigma0, double *eps_relax, double *rhomin,
-         double *pexp, double *Pnorm, double *dPnorm_drho){
+         double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM){
 
   char description[13]="            ",*lakon=NULL,jobnamef[396]="",
       *sideface=NULL,*labmpc=NULL,*lakonf=NULL,
@@ -1926,7 +1926,12 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 	iperturb[0]=iperturb_sav[0];
 	iperturb[1]=iperturb_sav[1];
-
+	if(isensitivity){
+	    SFREE(adcpy);NNEW(adcpy,double,neq[1]);
+	    SFREE(aucpy);NNEW(aucpy,double,(nasym+1)*nzs[1]);
+	    memcpy(&adcpy[0],&ad[0],sizeof(double)*neq[1]);
+	    memcpy(&aucpy[0],&au[0],sizeof(double)*(nasym+1)*nzs[1]);
+	}
       }else{
 
 	/* calculating the external loading 
@@ -2220,10 +2225,10 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		      printf("*ERROR in nonlingeo: a sensitivity analysis \n is not allowed in combination with frictional contact \n\n");
 		      FORTRAN(stop,());
 		      }*/
-		  SFREE(adcpy);NNEW(adcpy,double,neq[1]);
-		  SFREE(aucpy);NNEW(aucpy,double,(nasym+1)*nzs[1]);
-		  memcpy(&adcpy[0],&ad[0],sizeof(double)*neq[1]);
-		  memcpy(&aucpy[0],&au[0],sizeof(double)*(nasym+1)*nzs[1]);
+		  //SFREE(adcpy);NNEW(adcpy,double,neq[1]);
+		  //SFREE(aucpy);NNEW(aucpy,double,(nasym+1)*nzs[1]);
+		  //memcpy(&adcpy[0],&ad[0],sizeof(double)*neq[1]);
+		  //memcpy(&aucpy[0],&au[0],sizeof(double)*(nasym+1)*nzs[1]);
 	      }
 	      SFREE(ad);SFREE(au);
 	  } 
@@ -2755,7 +2760,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
               mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	      islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
               inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
-			  design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm,1); 
+			  design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm, (*eval_PNORM == 2) ? 1 : 0); 
       
       memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
 
@@ -2859,7 +2864,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	    islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
             inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
-			design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm,1); 
+			design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm, (*eval_PNORM== 2) ? 1 : 0); 
     
     memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
 
