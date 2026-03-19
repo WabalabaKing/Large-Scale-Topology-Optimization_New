@@ -675,6 +675,43 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
                 simulationData.fn = fn;
 
+			    /* ------------------------------------------------------------
+   				Max absolute displacement components (x,y,z) from nodal field v
+   				Place this AFTER results(...) computed v, and BEFORE SFREE(v).
+   				------------------------------------------------------------ */
+				{
+    				double umax_x = 0.0, umax_y = 0.0, umax_z = 0.0;
+    				ITG node_umax_x = 0, node_umax_y = 0, node_umax_z = 0;
+
+    				for (ITG n = 0; n < *nk; ++n) 
+					{
+
+        				/* In CCX nodal vectors are typically stored as:
+           					v[n*mt + 1] = Ux, v[n*mt + 2] = Uy, v[n*mt + 3] = Uz
+           					(index 0 is usually temperature/unused depending on analysis)
+        				*/
+        				const double ux = v[n*mt + 1];
+        				const double uy = v[n*mt + 2];
+        				const double uz = v[n*mt + 3];
+
+        				const double ax = fabs(ux);
+        				const double ay = fabs(uy);
+        				const double az = fabs(uz);
+
+        				if (ax > umax_x) { umax_x = ax; node_umax_x = n + 1; } /* +1 => CCX node id style */
+        				if (ay > umax_y) { umax_y = ay; node_umax_y = n + 1; }
+        				if (az > umax_z) { umax_z = az; node_umax_z = n + 1; }
+    				}
+
+    				printf("\n========================================\n");
+    				printf("MAX |DISPLACEMENT| (nodal)\n");
+    				printf("========================================\n");
+    				printf("Max |Ux| = %.15e  at node %d\n", umax_x, (int)node_umax_x);
+    				printf("Max |Uy| = %.15e  at node %d\n", umax_y, (int)node_umax_y);
+    				printf("Max |Uz| = %.15e  at node %d\n", umax_z, (int)node_umax_z);
+    				printf("========================================\n\n");
+				}
+
                 SFREE(eei);
     		    if(*nener==1)
 			    {
