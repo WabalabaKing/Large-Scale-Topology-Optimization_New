@@ -117,5 +117,5 @@ void compute_mass(
         //const double mi = 2700;
         mass += mi;
     }
-    printf("Structural mass: %.2f", mass);
+    printf("Structural mass (Kg): %.2f", mass);
 }

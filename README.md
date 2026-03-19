@@ -8,25 +8,25 @@ The aerostructural optimization framework consists of the three main components:
 
 ## CalGeo
 
+A Python-based pre-processor that reads a .su2 solid mesh and generates traction and fixed surface .nam files for Finite Element Analysis.
+
+
 ## CalFilt
+
+A parallelized density filter generator that partitions the tetrahedral mesh and write density filter files to disk for downstream use in topology optimization
 
 ## CalTop
 
-CalTop is a high-performance topology optimization framework built upon **CalculiX 2.15**, featuring advanced solvers such as **SPOOLES, PARDISO, SUPERLU, and PASTIX**. It implements a **density-based finite element framework** interfaced with **IPOPT** for gradient-based optimization. Additionally, CalTop integrates with **SU2_CFD** to solve **static aero-elastic topology optimization problems**.
+ A multi-threaded topology optimization framework built upon **CalculiX 2.15**, featuring advanced solvers such as **SPOOLES, PARDISO, SUPERLU, and PASTIX**. It implements a **density-based finite element framework** interfaced with **IPOPT** for gradient-based optimization. Additionally, CalTop integrates with **SU2_CFD** to solve **static aero-elastic topology optimization problems**.
 
-## Features
-- **Finite Element Analysis (FEA):** Uses CalculiX for **linear** structural analysis.
-- **Fast Solvers:** Supports SPOOLES, PARDISO, SUPERLU, and PASTIX for fast stiffness matrix factorizations.
-- **Density-Based Topology Optimization:** Tetrahedral elements parameterized with densities.
-- **IPOPT Integration:** Utilizes the Interior Point OPTimizer for optimization.
-- **Sensitivities:** Computes analytical sensitivities for mass, compliance, center of gravity and material stress
-- **SU2_CFD Integration:** Utilized preCICE coupling adapter for force-displacement and adjoint sensitivties  tranfer to/from SU2.
 
 
 ## File Structure
 ```
-├── CalTop/                # Density-based Finite Element Analysis     
-    ├── src/               # Source code density-based CalculiX 2.15
+├── Large-Scale-Topology-Optimization/                # Density-based Finite Element Analysis     
+    ├── CalGeo/               # Source code density-based CalculiX 2.15
+    ├── CalTop/ 
+    ├── CalPy/ 
 │       ├── ccx_2.15.c     # Main CalculiX driver
 │       ├── add_file_1     # Optimization routine
 │       ├── add_file_2     # Density filtering and sensitivity analysis
