@@ -14,7 +14,7 @@ Nfix1,6
 **Add material named EL with elastic properties
 *MATERIAL,NAME=EL
 *ELASTIC
-10,0.3
+1e6,0.3
 
 ** Apply material EL to element set EALL
 *SOLID SECTION, ELSET=EALL, MATERIAL=EL
@@ -27,13 +27,17 @@ Nfix1,6
 DES
 
 *SOLID SECTION, ELSET=EALL, MATERIAL=EL
-*STEP
-*STATIC
+*STEP, NLGEOM
+*STATIC,DIRECT
+0.1,1.0
+*CONTROLS, PARAMETERS=TIME INCREMENTATION
+10, 10, 10, 50, 10, 4, 12, 20, , , ,
+0.25, 0.5, 0.75, 0.85, , , ,
 **Begin setup for static analysis
 
 ** Define concentrated load on <nodeset>, <dof>, <magnitude>
 *CLOAD
-Nsurface, 3, 0.5
+Nsurface, 3, 10000
 *END STEP
 s
 
