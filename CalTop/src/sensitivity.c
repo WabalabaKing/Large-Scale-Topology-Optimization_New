@@ -108,7 +108,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             *energy=NULL,*ener=NULL,*dxstiff=NULL,*d=NULL,*z=NULL,
             distmin,*df=NULL,*g0=NULL,*dgdx=NULL,sigma=0,*xinterpol=NULL,
             *dgdxglob=NULL,*extnor=NULL,*veold=NULL,*accold=NULL,bet,gam,
-            dtime,time,reltime=1.,*weightformgrad=NULL,*fint=NULL,*xnor=NULL,
+            dtime,time,reltime=1.,*weightformgrad=NULL,*fint=NULL,*fn0_out=NULL,*xnor=NULL,
             *dgdxdy=NULL, *lam_compl=NULL;
 
             FILE *f1;
@@ -888,6 +888,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 if((iperturb[1]==1))
                 {
                     NNEW(fint,double,*neq);
+                    NNEW(fn0_out,double,mt**nkon);
                     ishapeenergy=1;
                 }
       
@@ -933,7 +934,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 islavsurf,ielprop,prop,energyini,energy,df,&distmin,
 	            &ndesi,nodedesi,sti,nkon,jqs,irows,nactdofinv,
 	            &icoordinate,dxstiff,istartdesi,ialdesi,xdesi,
-	            &ieigenfrequency,fint,&ishapeenergy,typeboun);
+	            &ieigenfrequency,fint,&ishapeenergy,typeboun,fn0_out);
 	            
                 iout=1;
                 SFREE(v);
@@ -1068,7 +1069,7 @@ fflush(stdout);
 	                &distmin,&ndesi,nodedesi,df,&nzss,jqs,irows,
 	                &icoordinate,dxstiff,xdesi,istartelem,ialelem,v,&sigma,
 	                &cyclicsymmetry,labmpc,ics,cs,mcs,&ieigenfrequency,design,penal,
-                    gradCompl,elCompl,elCG,eleVol, lam_compl,fint);
+                    gradCompl,elCompl,elCG,eleVol, lam_compl,fn0_out);
                 
 
                 /* second order derivative */
@@ -1126,6 +1127,7 @@ fflush(stdout);
                 /* determining the values and the derivatives of the objective functions */
                 if(lam_compl!=NULL) SFREE(lam_compl);
                 if(fint!=NULL) SFREE(fint);
+                if(fn0_out!=NULL) SFREE(fn0_out);
                 iout=-1; 
             }
             

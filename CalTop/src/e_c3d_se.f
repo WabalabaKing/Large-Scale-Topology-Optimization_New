@@ -30,7 +30,7 @@
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,distmin,
      &  ndesi,nodedesi,dfl,icoordinate,dxstiff,ne,xdesi,
      &  istartelem,ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &  ecompli,elvol,xcg,ycg,zcg,lam, fint)
+     &  ecompli,elvol,xcg,ycg,zcg,lam, fn0_out)
 !
 !     computation of the sensitivity of the element matrix multiplied by the
 !     displacements for the element with the topology in konl
@@ -66,8 +66,7 @@
      &  nplicon(0:ntmat_,*),nplkcon(0:ntmat_,*),npmat_,nopered,
      &  ndesi,nodedesi(*),idesvar,node,kscale,iactive,ij,
      &  mass,stiffness,buckling,rhsi,coriolis,icoordinate,idir,ne,
-     &  istartelem(*),ialelem(*),ieigenfrequency,idesloc,expansion,
-     &  idof
+     &  istartelem(*),ialelem(*),ieigenfrequency,idesloc,expansion
 !
       real*8 co(3,*),xl(3,26),shp(4,26),xs2(3,7),veold(0:mi(2),*),
      &  s(60,60),w(3,3),p1(3),p2(3),bodyf(3),bodyfx(3),sigma,
@@ -91,7 +90,7 @@
      &  ds1(60,60),ff0(60),dfl(20,60),dxstiff(27,mi(1),ne,*),
      &  vl(0:mi(2),26),v(0:mi(2),*),sensi,ecompli,ku(60),uelem(60),
      &  uku,penal,rhoi,elvol,xcg,ycg,zcg,lam(0:mi(2),*),lam_e(30),
-     &  dotlam,dotu,fint(0:mi(2),*)
+     &  dotlam,dotu,fn0_out(0:mi(2),*)
 !
       intent(in) co,kon,lakonl,p1,p2,omx,bodyfx,nbody,
      &  nelem,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -106,7 +105,7 @@
      &  integerglob,doubleglob,tieset,istartset,iendset,ialset,ntie,
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,
      &  distmin,ndesi,nodedesi,icoordinate,xdesi,istartelem,ialelem,
-     &  v,penal,rhoi, lam, fint
+     &  v,penal,rhoi, lam, fn0_out
 !
       intent(inout) sm,xload,nmethod,springarea,xstate,dfl,sensi,
      &  ecompli,elvol,xcg,ycg,zcg
@@ -1909,8 +1908,8 @@ c            alp=.2215d0
             do j=1,nope
                do k=1,3
                   l=l+1
-                  dotlam=dotlam+lam_e(l)*fint(k,konl(j))
-                  dotu=dotu+uelem(l)*fint(k,konl(j))
+                  dotlam=dotlam+lam_e(l)*fn0_out(k,konl(j))
+                  dotu=dotu+uelem(l)*fn0_out(k,konl(j))
                enddo
             enddo
             sensi=-(penal/rhoi)*dotlam
