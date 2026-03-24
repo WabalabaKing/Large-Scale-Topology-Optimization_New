@@ -1017,12 +1017,7 @@ c                 emec0(m1)=emeini(m1,jj,i)
             skl(1,2)=skl(2,1)
             skl(1,3)=skl(3,1)
             skl(2,3)=skl(3,2)
-            if(i.eq.1.and.jj.eq.1)
-     &         write(*,*) 'nlgeom_undo=',nlgeom_undo,
-     &         ' skl11=',skl(1,1)
-            if(i.eq.1.and.jj.eq.1)
-     &         write(*,*) 'vkl11=',vkl(1,1),
-     &         ' vkl12=',vkl(1,2)
+            
 !
 !                 calculation of the nodal forces
 !

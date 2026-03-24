@@ -636,25 +636,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     				}
 				}
 				//FORTRAN(adjrhs_scatter_linstatic_nompc,(nk, neq, mi, nactdof,brhs,b_adj,nboun, nodeboun, ndirboun));
-				// ========== DIAGNOSTIC 1: Verify Scatter ==========
-				printf("\n========== SCATTER CHECK ==========\n");
-				printf("Checking first 10 nodes:\n");
-				for (k = 0; k < 10 && k < *nk; ++k) {
-    				printf("Node %lld: brhs=[%.3e,%.3e,%.3e] -> b_adj DOFs: ",
-           			(long long)(k+1),
-           			brhs[mt*k + 1], brhs[mt*k + 2], brhs[mt*k + 3]);
-    
-    			for (ITG idir = 1; idir <= 3; ++idir) {
-        			ITG idof = nactdof[idir + k*mt] - 1; // Convert to 0-based
-        			if (idof >= -1) {
-        		    printf("[%lld]=%.3e ", (long long)idof, b_adj[idof]);
-       					 } else {
-           			 printf("[BC] ");
-       				 }
-   						 }
-    				printf("\n");
-					}
-				printf("==================================\n\n");
+				
 				printf("PARSIDO: adjoint solve \n");
       			pardiso_main(ad,au,adb,aub,&sigma,b_adj,icol,irow,neq,nzs,
 		   			&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
@@ -690,28 +672,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				adjoint_eq_2_node(nk, nactdof, nboun, nodeboun,ndirboun,mi,lam, b_adj);
 				/* Allocate memory for implicit derivative*/
 				// ========== VERIFY EXPANSION ==========
-printf("\n========== ADJOINT EXPANSION: b_adj -> lam ==========\n");
-printf("Expanded to %lld nodes:\n", (long long)*nk);
 
-for (k = 0; k < 8; ++k) {
-    printf("Node %2lld: lam=[%12.6e, %12.6e, %12.6e] | ",
-           (long long)(k+1),
-           lam[1 + k*mt], lam[2 + k*mt], lam[3 + k*mt]);
-    
-    // Show the mapping
-    printf("DOF map: ");
-    for (ITG idir = 1; idir <= 3; ++idir) {
-        ITG idof = nactdof[idir + k*mt] - 1; // 0-based
-        if (idof >= 0) {
-            printf("%lld->b_adj[%lld]=%.3e ", 
-                   (long long)idir, (long long)idof, b_adj[idof]);
-        } else {
-            printf("%lld:BC ", (long long)idir);
-        }
-    }
-    printf("\n");
-}
-printf("====================================================\n\n");
 				NNEW(djdrho_impl, double, *ne);
 				
 				/* Work on all elements */
@@ -737,15 +698,6 @@ printf("====================================================\n\n");
 					dPnorm_drho[i] = PnormMult* djdrho_impl[i];
 
 				}
-printf("%-8s %-12s %-15s %-15s\n", 
-       "Element", "rho", "djdrho", "Final dJ/drho");
-printf("----------------------------------------------------------\n");
-
-for (int i = 0; i < (*ne < 10 ? *ne : 10); ++i) {
-    printf("%-8d %-12.6e %-15.6e %-15.6e\n",
-           i+1, design[i], djdrho_impl[i], dPnorm_drho[i]);
-}
-
 				
 
 
