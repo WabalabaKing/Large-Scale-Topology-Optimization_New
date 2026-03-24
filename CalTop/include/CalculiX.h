@@ -2805,7 +2805,7 @@ void FORTRAN(mafillsmse,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 	       double *dxstiff,double *xdesi,ITG *istartelem,ITG *ialelem,
 	       double *v,double *sigma,ITG *ieigenfrequency,double *design,
 		   double *penal,double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol, double *lam));
+		   double *eleVol, double *lam,double *fint));
 
 void FORTRAN(mafillsmse2,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *ipompc,ITG *nodempc,double *coefmpc,
@@ -2923,7 +2923,7 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *cyclicsymmetry,char *labmpc,ITG *ics,double *cs,
 	       ITG *mcs,ITG *ieigenfrequency, double *design,
 		   double *penal,double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol,double *lam);
+		   double *eleVol,double *lam,double *fint);
 
 void mafillsmmain_se2(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *nodeboun,ITG *ndirboun,double *xboun,

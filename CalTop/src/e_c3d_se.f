@@ -30,7 +30,7 @@
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,distmin,
      &  ndesi,nodedesi,dfl,icoordinate,dxstiff,ne,xdesi,
      &  istartelem,ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &  ecompli,elvol,xcg,ycg,zcg,lam)
+     &  ecompli,elvol,xcg,ycg,zcg,lam, fint)
 !
 !     computation of the sensitivity of the element matrix multiplied by the
 !     displacements for the element with the topology in konl
@@ -66,7 +66,8 @@
      &  nplicon(0:ntmat_,*),nplkcon(0:ntmat_,*),npmat_,nopered,
      &  ndesi,nodedesi(*),idesvar,node,kscale,iactive,ij,
      &  mass,stiffness,buckling,rhsi,coriolis,icoordinate,idir,ne,
-     &  istartelem(*),ialelem(*),ieigenfrequency,idesloc,expansion
+     &  istartelem(*),ialelem(*),ieigenfrequency,idesloc,expansion,
+     &  idof
 !
       real*8 co(3,*),xl(3,26),shp(4,26),xs2(3,7),veold(0:mi(2),*),
      &  s(60,60),w(3,3),p1(3),p2(3),bodyf(3),bodyfx(3),sigma,
@@ -89,7 +90,8 @@
      &  pslavsurf(3,*),pmastsurf(6,*),distmin,s0(60,60),xdesi(3,*),
      &  ds1(60,60),ff0(60),dfl(20,60),dxstiff(27,mi(1),ne,*),
      &  vl(0:mi(2),26),v(0:mi(2),*),sensi,ecompli,ku(60),uelem(60),
-     &  uku,penal,rhoi,elvol,xcg,ycg,zcg,lam(0:mi(2),*),lam_e(30)
+     &  uku,penal,rhoi,elvol,xcg,ycg,zcg,lam(0:mi(2),*),lam_e(30),
+     &  dotlam,dotu,fint(0:mi(2),*)
 !
       intent(in) co,kon,lakonl,p1,p2,omx,bodyfx,nbody,
      &  nelem,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -104,7 +106,7 @@
      &  integerglob,doubleglob,tieset,istartset,iendset,ialset,ntie,
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,
      &  distmin,ndesi,nodedesi,icoordinate,xdesi,istartelem,ialelem,
-     &  v,penal,rhoi, lam
+     &  v,penal,rhoi, lam, fint
 !
       intent(inout) sm,xload,nmethod,springarea,xstate,dfl,sensi,
      &  ecompli,elvol,xcg,ycg,zcg
@@ -1901,13 +1903,18 @@ c            alp=.2215d0
 !
          if((ieigenfrequency.ne.1).and.(iperturb(2).eq.1)) then
 !
-!           nonlinear geometric (TL): sensi = -(p/rho) * lam_e . fint_e
-!           fint_e = BL^T * S_v * dV, accumulated over Gauss points
-!           Uses shape10tet (C3D10, 4 GP) or shape4tet (C3D4, 1 GP)
-            write(*,*) '[DBG emod] e=',e,' un=',un
-            write(*,*)' rhoi=',rhoi,' penal=',penal
-            call tl_sens(xl,uelem,lam_e,nope,mint3d,
-     &           rhoi,penal,e,un,sensi,ecompli)
+            dotlam=0.d0
+            dotu=0.d0
+            l=0
+            do j=1,nope
+               do k=1,3
+                  l=l+1
+                  dotlam=dotlam+lam_e(l)*fint(k,konl(j))
+                  dotu=dotu+uelem(l)*fint(k,konl(j))
+               enddo
+            enddo
+            sensi=-(penal/rhoi)*dotlam
+            ecompli=dotu/(rhoi**penal)
 !!!            if(idesvar.eq.0) then
 !     load vector
 !!               if((rhsi.eq.1).and.(idist.eq.1)) then
@@ -2244,12 +2251,6 @@ c        close(200)
 !
 !     dot products
 !
-      write(*,*) '[DBG lam_e] ',lam_e(1),lam_e(2),lam_e(3),
-     &           lam_e(4),lam_e(5),lam_e(6)
-      write(*,*) '[DBG uelem] ',uelem(1),uelem(2),uelem(3),
-     &           uelem(4),uelem(5),uelem(6)
-      write(*,*) '[DBG fint]  ',fint(1),fint(2),fint(3),
-     &           fint(4),fint(5),fint(6)
       dotlam=0.d0
       dotu  =0.d0
       do rr=1,3*nope
@@ -2259,9 +2260,7 @@ c        close(200)
 !
 
       sensi  =-(penal/rhoi)*dotlam
-      write(*,*) '[DBG tl_sens] nope=',nope,' mint3d=',mint3d,
-     &     ' dotlam=',dotlam,' dotu=',dotu,' sensi=',sensi
-      ecompli=dotu
+      ecompli=dotu/(rhoi**penal)
 !
       return
       end

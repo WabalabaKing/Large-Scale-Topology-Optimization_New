@@ -885,9 +885,10 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       
                 /* needed for nonlinear strain energy */
 
-                if((iperturb[1]==1)&&(ishapeenergy==1))
+                if((iperturb[1]==1))
                 {
                     NNEW(fint,double,*neq);
+                    ishapeenergy=1;
                 }
       
                 /* allocating a field for the stiffness matrix 
@@ -1067,7 +1068,7 @@ fflush(stdout);
 	                &distmin,&ndesi,nodedesi,df,&nzss,jqs,irows,
 	                &icoordinate,dxstiff,xdesi,istartelem,ialelem,v,&sigma,
 	                &cyclicsymmetry,labmpc,ics,cs,mcs,&ieigenfrequency,design,penal,
-                    gradCompl,elCompl,elCG,eleVol, lam_compl);
+                    gradCompl,elCompl,elCG,eleVol, lam_compl,fint);
                 
 
                 /* second order derivative */
@@ -1124,6 +1125,7 @@ fflush(stdout);
       
                 /* determining the values and the derivatives of the objective functions */
                 if(lam_compl!=NULL) SFREE(lam_compl);
+                if(fint!=NULL) SFREE(fint);
                 iout=-1; 
             }
             

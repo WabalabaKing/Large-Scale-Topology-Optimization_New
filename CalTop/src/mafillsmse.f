@@ -30,7 +30,7 @@
      &  neb,distmin,ndesi,nodedesi,df,jqs,irows,dfl,
      &  icoordinate,dxstiff,xdesi,istartelem,ialelem,v,sigma,
      &  ieigenfrequency,design,penal,gradCompl,elCompl,elCG,
-     &  eleVol, lam )
+     &  eleVol, lam, fint)
 !
       implicit none
 !
@@ -67,7 +67,7 @@
      &  df(*),dxstiff(27,mi(1),ne,*),v(0:mi(2),*),design(*),
      &  rhoi,penal,tcompli,ecompli,sensi,elvol,gradCompl(*),
      &  elCompl(*), elCG(3,*),eleVol(*),xcg,ycg,zcg,
-     &  lam(0:mi(2),*), lam_dummy(4)
+     &  lam(0:mi(2),*), lam_dummy(4), fint(*)
 !
       intent(in) co,kon,ipkon,lakon,ne,ipompc,nodempc,coefmpc,nmpc,
      &  nelemload,sideload,nload,xbody,ipobody,nbody,nactdof,neq,
@@ -81,7 +81,7 @@
      &  ialset,ntie,nasym,pslavsurf,pmastsurf,mortar,clearini,
      &  ielprop,prop,ne0,nea,neb,ndesi,nodedesi,distmin,
      &  icoordinate,jqs,irows,dxstiff,xdesi,istartelem,ialelem,v,
-     &  design,penal,lam
+     &  design,penal,lam,fint
 !
       intent(inout) xload,nmethod,cgr,springarea,xstate,df,dfl,
      &  gradCompl,elCompl,elCG,eleVol
@@ -251,7 +251,7 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
      &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
      &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &           ecompli,elvol,xcg,ycg,zcg, lam)
+     &           ecompli,elvol,xcg,ycg,zcg, lam, fint)
             else
                call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
      &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
@@ -268,7 +268,7 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
      &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
      &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &           ecompli,elvol,xcg,ycg,zcg, lam_dummy)
+     &           ecompli,elvol,xcg,ycg,zcg, lam_dummy, fint)
             endif
 !
             elCompl(i)=ecompli

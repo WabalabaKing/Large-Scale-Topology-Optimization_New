@@ -14,7 +14,7 @@ Nfix1,6
 **Add material named EL with elastic properties
 *MATERIAL,NAME=EL
 *ELASTIC
-1e6,0.3
+1e3,0.3
 
 ** Apply material EL to element set EALL
 *SOLID SECTION, ELSET=EALL, MATERIAL=EL
@@ -37,7 +37,7 @@ DES
 
 ** Define concentrated load on <nodeset>, <dof>, <magnitude>
 *CLOAD
-Nsurface, 3, 10000
+Nsurface, 3, 10
 *END STEP
 s
 

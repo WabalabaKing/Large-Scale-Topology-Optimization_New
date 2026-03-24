@@ -188,7 +188,7 @@ def main():
     ap.add_argument("--sigrelax", type=float, default=0.0001)
     ap.add_argument("--h", type=float, default=1e-4, help="Constant absolute perturbation (default 1e-6)")
     ap.add_argument("--outdir", default="Sensitivity_stress_CFD")
-    ap.add_argument("--max-elems", type=int, default=3, help="Limit number of elements")
+    ap.add_argument("--max-elems", type=int, default=20, help="Limit number of elements")
     ap.add_argument("--start-idx", type=int, default=0, help="Start element index")
     args = ap.parse_args()
 
