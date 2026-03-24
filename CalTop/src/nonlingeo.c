@@ -34,6 +34,23 @@
 
 #define max(a,b) ((a) >= (b) ? (a) : (b))
 
+/*
+     nmethod: -1:visco (=static+creep) 
+!               0:no analysis 
+!               1:static
+!               2:frequency 
+!               3:buckling 
+!               4:linear dynamic
+!               5:steady state dynamics
+!               6:Coriolis frequency calculation
+!               7:flutter frequency calculation
+!               8:magnetostatics
+!               9:magnetodynamics (inductive heating)
+!               10:electromagnetic eigenvalue problems
+!               11:superelement creation
+!               12:sensitivity
+
+*/
 void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *ne, 
 	     ITG *nodeboun, ITG *ndirboun, double *xboun, ITG *nboun, 

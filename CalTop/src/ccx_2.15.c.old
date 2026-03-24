@@ -2106,7 +2106,7 @@ while(istat>=0)
 
 
   /* Compute mass of the structrue for naive FEA*/
-    /* allocate memory for element volume and initialize to zero */
+  /* allocate memory for element volume and initialize to zero */
 
     if (pSupplied ==0)
     {
@@ -2114,12 +2114,12 @@ while(istat>=0)
 
       NNEW(elCG,double,3*ne_);
 
-            NNEW(gradCompl,double,ne_);
+      NNEW(gradCompl,double,ne_);
 
       /* allocate memory for element complaince and initialize to zero */
       NNEW(elCompl,double,ne_);
 
-      	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
+      sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
 	     nactdof,icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
@@ -2145,7 +2145,7 @@ while(istat>=0)
       SFREE(elCompl);
       SFREE(elCG);
       SFREE(gradCompl);
-    }
+    } // end if pSupplied == 0
   
     /* adjoint sensitivity calculation */
     if(pSupplied!=0)
