@@ -1871,6 +1871,8 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       }
       
       if(*iexpl<=1){
+	iperturb[0]=iperturb_sav[0];
+	iperturb[1]=iperturb_sav[1];
 
 	/* calculating the local stiffness matrix and external loading */
 
@@ -1924,8 +1926,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	}
 	    
 
-	iperturb[0]=iperturb_sav[0];
-	iperturb[1]=iperturb_sav[1];
+
 	if(isensitivity){
 	    SFREE(adcpy);NNEW(adcpy,double,neq[1]);
 	    SFREE(aucpy);NNEW(aucpy,double,(nasym+1)*nzs[1]);

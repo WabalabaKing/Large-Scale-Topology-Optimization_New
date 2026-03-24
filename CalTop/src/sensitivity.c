@@ -109,7 +109,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             distmin,*df=NULL,*g0=NULL,*dgdx=NULL,sigma=0,*xinterpol=NULL,
             *dgdxglob=NULL,*extnor=NULL,*veold=NULL,*accold=NULL,bet,gam,
             dtime,time,reltime=1.,*weightformgrad=NULL,*fint=NULL,*fn0_out=NULL,*xnor=NULL,
-            *dgdxdy=NULL, *lam_compl=NULL;
+            *dgdxdy=NULL;
 
             FILE *f1;
   
@@ -990,65 +990,6 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 }
 
                 /* determining the system matrix and the external forces */
-                if(iperturb[1]==1)
-                {
-                    ITG idir, idof, mt=mi[1]+1;
-                    ITG symmetryflag=0, inputformat=0, nrhs=1;
-                    double *b_compl=NULL;
-                    NNEW(b_compl, double, neq[1]);
-                    NNEW(lam_compl, double, mt**nk);
-
-                    /* scatter Fext -> equation-DOF space */
-                    for(k=0;k<*nk;k++){
-                        for(idir=1;idir<=3;idir++){
-                            idof=nactdof[idir+k*mt]-1;
-                            if(idof>=0) b_compl[idof]=0.0;
-                        }
-                    }
-                    for(k=0;k<*nforc;k++){
-                        ITG node = nodeforc[2*k] - 1;
-                        ITG dir  = ndirforc[k];
-                        ITG idof2 = nactdof[dir + node*mt] - 1;
-                        if(idof2>=0) b_compl[idof2] += xforcact[k];
-                    }
-double b_norm=0.0; ITG kk;
-for(kk=0;kk<neq[1];kk++) b_norm+=b_compl[kk]*b_compl[kk];
-printf("[DBG scatter] nforc=%d ||b_compl||^2=%.6e\n",*nforc,b_norm);
-fflush(stdout);
-                    /* solve K_T * b_compl = Fext */
-                    if(*isolver==0){
-                        #ifdef SPOOLES
-                        spooles(ad,au,adb,aub,&sigma,b_compl,icol,irow,
-                            &neq[1],&nzs[1],&symmetryflag,&inputformat,&nzs[2]);
-                        #endif
-                    } else if(*isolver==7){
-                        #ifdef PARDISO
-                        pardiso_main(ad,au,adb,aub,&sigma,b_compl,icol,irow,
-                            &neq[1],&nzs[1],&symmetryflag,&inputformat,
-                            jq,&nzs[2],&nrhs);
-                        #endif
-                    }
-                    /* expand equation space -> nodal space */
-                    adjoint_eq_2_node(nk,nactdof,nboun,nodeboun,ndirboun,mi,
-                                      lam_compl,b_compl);
-double lam_norm=0.0, u_norm=0.0;
-for(kk=0;kk<mt**nk;kk++){
-    lam_norm+=lam_compl[kk]*lam_compl[kk];
-    u_norm+=vold[kk]*vold[kk];
-}
-printf("[DBG adjoint] ||lam_compl||^2=%.6e ||vold||^2=%.6e ratio=%.6e\n",
-       lam_norm,u_norm,lam_norm/(u_norm+1e-30));
-fflush(stdout);
-                    SFREE(b_compl);
-                }
-printf("[DBG sensitivity] iperturb[0]=%d iperturb[1]=%d lam_compl_is_null=%d\n",
-       iperturb[0], iperturb[1], (lam_compl==NULL)?1:0);
-if(lam_compl!=NULL){
-    double lam_norm=0.0; int kk;
-    for(kk=0;kk<(mi[1]+1)**nk;kk++) lam_norm+=lam_compl[kk]*lam_compl[kk];
-    printf("[DBG sensitivity] ||lam_compl||^2 = %e\n", lam_norm);
-}
-fflush(stdout);
                 mafillsmmain_se(co,nk,kon,ipkon,lakon,ne,nodeboun,
                     ndirboun,xbounact,nboun,
                     ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
@@ -1069,7 +1010,7 @@ fflush(stdout);
 	                &distmin,&ndesi,nodedesi,df,&nzss,jqs,irows,
 	                &icoordinate,dxstiff,xdesi,istartelem,ialelem,v,&sigma,
 	                &cyclicsymmetry,labmpc,ics,cs,mcs,&ieigenfrequency,design,penal,
-                    gradCompl,elCompl,elCG,eleVol, lam_compl,fn0_out);
+                    gradCompl,elCompl,elCG,eleVol,fn0_out);
                 
 
                 /* second order derivative */
@@ -1125,7 +1066,6 @@ fflush(stdout);
                 if(iorientation==1) SFREE(dxstiff);
       
                 /* determining the values and the derivatives of the objective functions */
-                if(lam_compl!=NULL) SFREE(lam_compl);
                 if(fint!=NULL) SFREE(fint);
                 if(fn0_out!=NULL) SFREE(fn0_out);
                 iout=-1; 

@@ -30,7 +30,7 @@
      &  neb,distmin,ndesi,nodedesi,df,jqs,irows,dfl,
      &  icoordinate,dxstiff,xdesi,istartelem,ialelem,v,sigma,
      &  ieigenfrequency,design,penal,gradCompl,elCompl,elCG,
-     &  eleVol, lam, fn0_out)
+     &  eleVol, fn0_out)
 !
       implicit none
 !
@@ -67,7 +67,7 @@
      &  df(*),dxstiff(27,mi(1),ne,*),v(0:mi(2),*),design(*),
      &  rhoi,penal,tcompli,ecompli,sensi,elvol,gradCompl(*),
      &  elCompl(*), elCG(3,*),eleVol(*),xcg,ycg,zcg,
-     &  lam(0:mi(2),*), lam_dummy(4), fn0_out(0:mi(2),*)
+     &  fn0_out(0:mi(2),*)
 !
       intent(in) co,kon,ipkon,lakon,ne,ipompc,nodempc,coefmpc,nmpc,
      &  nelemload,sideload,nload,xbody,ipobody,nbody,nactdof,neq,
@@ -81,7 +81,7 @@
      &  ialset,ntie,nasym,pslavsurf,pmastsurf,mortar,clearini,
      &  ielprop,prop,ne0,nea,neb,ndesi,nodedesi,distmin,
      &  icoordinate,jqs,irows,dxstiff,xdesi,istartelem,ialelem,v,
-     &  design,penal,lam,fn0_out
+     &  design,penal,fn0_out
 !
       intent(inout) xload,nmethod,cgr,springarea,xstate,df,dfl,
      &  gradCompl,elCompl,elCG,eleVol
@@ -233,9 +233,6 @@ c           ndof=ichar(lakon(i)(6:6))-48
             endif
 !
             if(iperturb(2).eq.1) then
-               write(*,*) '[DBG mafillsmse] NL branch elem=',i,
-     &              ' rhoi=',rhoi,' lam(1,kon(indexe+1))=',
-     &              lam(1,kon(indexe+1)) 
                call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
      &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
      &           alzero,ielmat,ielorien,norien,orab,ntmat_,
@@ -251,7 +248,7 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
      &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
      &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &           ecompli,elvol,xcg,ycg,zcg, lam, fn0_out)
+     &           ecompli,elvol,xcg,ycg,zcg, fn0_out)
             else
                call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
      &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
@@ -268,7 +265,7 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
      &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
      &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &           ecompli,elvol,xcg,ycg,zcg, lam_dummy, fn0_out)
+     &           ecompli,elvol,xcg,ycg,zcg, fn0_out)
             endif
 !
             elCompl(i)=ecompli
