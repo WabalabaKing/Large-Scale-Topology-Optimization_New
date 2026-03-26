@@ -273,7 +273,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 	  	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	  	islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, &Pnorm, 0);
+    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, Pnorm, 0);
 
 		// NOTE: At this point xstiff is not penalized
 		
@@ -674,7 +674,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	
 				// At this point we have the explicit and adjoint variables.
 
-				double *lam = NULL, *stn=NULL, *inum=NULL;
+				double *lam = NULL, *stn=NULL;
 				/* allocate minimal outputs and reuse existing arrays and args*/
 				NNEW(lam, double, mt**nk); // Adjoint variables in nodal space
 				NNEW(stn, double, 6**nk);

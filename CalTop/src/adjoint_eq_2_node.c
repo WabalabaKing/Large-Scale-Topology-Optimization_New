@@ -18,7 +18,7 @@ void adjoint_eq_2_node(
     double *B_adj     /* adjoint solution vector (length = neq) */
 )
 {
-    FORTRAN(resultsini_adjoint_linstatic_nompc,
-            (nk, lambda, nactdof, B_adj,
-             nodeboun, ndirboun, nboun, mi));
+   // FORTRAN(resultsini_adjoint_linstatic_nompc,
+    //        (nk, lambda, nactdof, B_adj,
+    //         nodeboun, ndirboun, nboun, mi));
 }

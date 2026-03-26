@@ -19,6 +19,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "CalculiX.h"
+#include <string.h>
 #ifdef SPOOLES
    #include "spooles.h"
 #endif
@@ -1184,7 +1185,7 @@ void electromagnetics(double **cop, ITG *nk, ITG **konp, ITG **ipkonp,
 	  }
 
 	  NNEW(adaux,double,neq[1]);
-	  FORTRAN(preconditioning,(ad,au,b,&neq[1],irow,jq,adaux));
+	//  FORTRAN(preconditioning,(ad,au,b,&neq[1],irow,jq,adaux));
 
 	  
 	  if(*isolver==0){

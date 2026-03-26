@@ -587,10 +587,10 @@ void radflowload(ITG *itg,ITG *ieg,ITG *ntg,ITG *ntr,double *adrad,
          ((*iit==0)&&(abs(*nmethod)==1))){
 
 #if defined(PARDISO)
-	if(ifactorization==1) pardiso_cleanup_as(ntr,&symmetryflag);
-	pardiso_factor_as(adrad,aurad,adbrad,aubrad,&sigma,icolrad,
-			  irowrad,ntr,nzsrad,jqrad);
-	ifactorization=1;
+//	if(ifactorization==1) pardiso_cleanup_as(ntr,&symmetryflag);
+//	pardiso_factor_as(adrad,aurad,adbrad,aubrad,&sigma,icolrad,
+//			  irowrad,ntr,nzsrad,jqrad);
+//	ifactorization=1;
 #elif defined(SPOOLES)
 	if(ifactorization==1) spooles_cleanup_rad();
 	spooles_factor_rad(adrad,aurad,adbrad,aubrad,&sigma,
@@ -607,7 +607,7 @@ void radflowload(ITG *itg,ITG *ieg,ITG *ntg,ITG *ntr,double *adrad,
       /* solving the system of equations */
 
 #if defined(PARDISO)
-          pardiso_solve_as(bcr,ntr);
+    //      pardiso_solve_as(bcr,ntr);
 
 #elif defined(SPOOLES)
           spooles_solve_rad(bcr,ntr);

@@ -57,9 +57,9 @@ void mastructrand(ITG *icols,ITG *jqs,ITG **mast1p,ITG **irowsp,ITG *ipointer,
       
       /* nodes within 4 times the correlation length */
       
-      FORTRAN(near3d_se,(xo,yo,zo,x,y,z,nx,ny,nz,&xo[idesvar],
-			 &yo[idesvar],&zo[idesvar],ndesi,neighbor,
-			 r,&nnodesinside,&corrlength));
+     // FORTRAN(near3d_se,(xo,yo,zo,x,y,z,nx,ny,nz,&xo[idesvar],
+	//		 &yo[idesvar],&zo[idesvar],ndesi,neighbor,
+//			 r,&nnodesinside,&corrlength));
       
       for(ii=0;ii<nnodesinside;ii++){
 	  jdof2=neighbor[ii];

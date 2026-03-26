@@ -133,7 +133,7 @@ void projectgradmain(ITG *nobject,char **objectsetp,double **dgdxglobp,
         RENEW(jqs,ITG,nactive+1);
         NNEW(ipointer,ITG,nactive);
      
-        mastructnmatrix(icols,jqs,&mast1,&irows,ipointer,&nzss,&nactive,&nnlconst);
+        //mastructnmatrix(icols,jqs,&mast1,&irows,ipointer,&nzss,&nactive,&nnlconst);
 
         RENEW(irows,ITG,nzss);
         SFREE(ipointer);
@@ -143,8 +143,8 @@ void projectgradmain(ITG *nobject,char **objectsetp,double **dgdxglobp,
         RENEW(ad,double,nactive);
         RENEW(au,double,nzss);    
   
-        FORTRAN(nmatrix,(ad,au,jqs,irows,ndesi,nodedesi,dgdxglob,&nactive,
-                nobject,&nnlconst,ipoacti,nk));
+        //FORTRAN(nmatrix,(ad,au,jqs,irows,ndesi,nodedesi,dgdxglob,&nactive,
+         //       nobject,&nnlconst,ipoacti,nk));
 
         /* Calculate inverse of the N-matrix */
 

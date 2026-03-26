@@ -173,9 +173,9 @@ void *thicknessmt(ITG *i){
     
     //printf("indexr=%" ITGFORMAT","ndesia=%" ITGFORMAT",ndesib=%" ITGFORMAT"\n",indexr,ndesia,ndesib);
 
-    FORTRAN(thickness,(dgdx1,nobject1,nodedesiboun1,&ndesiboun1,objectset1,
-                        xo1,yo1,zo1,x1,yy1,z1,nx1,ny1,nz1,co1,&ifree1,
-                        &ndesia,&ndesib,iobject1,ndesi1,dgdxglob1,nk1));
+ //   FORTRAN(thickness,(dgdx1,nobject1,nodedesiboun1,&ndesiboun1,objectset1,
+  //                      xo1,yo1,zo1,x1,yy1,z1,nx1,ny1,nz1,co1,&ifree1,
+ //                       &ndesia,&ndesib,iobject1,ndesi1,dgdxglob1,nk1));
 
     return NULL;
 }

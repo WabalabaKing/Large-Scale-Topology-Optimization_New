@@ -1,4 +1,5 @@
 #include <stddef.h>  // size_t
+#include <stdio.h>
 
 /*--------------------------------------------------------------
   compute_mass_cg_and_cg_sens

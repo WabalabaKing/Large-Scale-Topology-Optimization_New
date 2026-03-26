@@ -73,9 +73,9 @@ void *calcrhofacomp_mod_smart1mt(ITG *i){
     nfaceb=(*i+1)*nfacedelta;
     if((*i==*num_cpus1-1)&&(nfaceb<*nface1)) nfaceb=*nface1;
 
-    FORTRAN(calcrhofacomp_mod_smart,(vfa1,shcon1,ielmatf1,ntmat1_,mi1,ielfa1,
-				      ipnei1,vel1,nef1,flux1,gradpel1,gradtel1,
-				      xxj1,xlet1,&nfacea,&nfaceb));
+    //FORTRAN(calcrhofacomp_mod_smart,(vfa1,shcon1,ielmatf1,ntmat1_,mi1,ielfa1,
+//				      ipnei1,vel1,nef1,flux1,gradpel1,gradtel1,
+//				      xxj1,xlet1,&nfacea,&nfaceb));
 
     return NULL;
 }

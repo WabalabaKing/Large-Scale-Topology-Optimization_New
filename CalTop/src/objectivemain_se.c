@@ -198,8 +198,8 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 	}
 	else if(*isolver==7){
 #ifdef PARDISO
-	    pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[1],&nzs[1],
-			   &symmetryflag,&inputformat,jq,&nzs[2]);
+	//    pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[1],&nzs[1],
+	//		   &symmetryflag,&inputformat,jq,&nzs[2]);
 #else
 	    printf("*ERROR in objectivemain_se: the PARDISO library is not linked\n\n");
 	    FORTRAN(stop,());
@@ -412,7 +412,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 		    }
 		    else if(*isolver==7){
 #ifdef PARDISO
-			pardiso_solve(fint,&neq[1],&symmetryflag,&nrhs);
+		//	pardiso_solve(fint,&neq[1],&symmetryflag,&nrhs);
 #endif
 }	      
 	      
@@ -536,8 +536,8 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 		    }
 		    else if(*isolver==7){
 #ifdef PARDISO
-			pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[1],&nzs[1],
-				       &symmetryflag,&inputformat,jq,&nzs[2]);
+	//		pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[1],&nzs[1],
+	//			       &symmetryflag,&inputformat,jq,&nzs[2]);
 #else
 			printf("*ERROR in objectivemain_se: the PARDISO library is not linked\n\n");
 			FORTRAN(stop,());
@@ -584,7 +584,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 			}
 			else if(*isolver==7){
 #ifdef PARDISO
-			    pardiso_solve(b,&neq[1],&symmetryflag,&nrhs);
+		//	    pardiso_solve(b,&neq[1],&symmetryflag,&nrhs);
 #endif
 			}
 		    }else{
@@ -648,7 +648,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 		    }
 		    else if(*isolver==7){
 #ifdef PARDISO
-			pardiso_cleanup(&neq[1],&symmetryflag);
+	//		pardiso_cleanup(&neq[1],&symmetryflag);
 #endif
 		    }
 		}
@@ -725,7 +725,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 		   }
 		   else if(*isolver==7){
 #ifdef PARDISO
-		       pardiso_solve(b,&neq[1],&symmetryflag,&nrhs);
+		//       pardiso_solve(b,&neq[1],&symmetryflag,&nrhs);
 #endif
 		   }
 
@@ -761,8 +761,8 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 	       
 	       NNEW(dgdu,double,*neq);
 	       
-               FORTRAN(disp_sen_dv,(&nodeset,istartset,iendset,ialset,&iobject,
-		       mi,nactdof,dgdu,vold,objectset,nactdofinv,&neq[1]));
+           //    FORTRAN(disp_sen_dv,(&nodeset,istartset,iendset,ialset,&iobject,
+		    //   mi,nactdof,dgdu,vold,objectset,nactdofinv,&neq[1]));
                        
 	       /* Multiplication of dg/du with K^-1 */	    	      
 	    
@@ -785,14 +785,14 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 	       }
 	       else if(*isolver==7){
 #ifdef PARDISO
-	           pardiso_solve(dgdu,&neq[1],&symmetryflag,&nrhs);
+	  //         pardiso_solve(dgdu,&neq[1],&symmetryflag,&nrhs);
 #endif
 	       }
 	      
 	       /* calculation of total differential */
 	      
-	       FORTRAN(objective_disp_tot,(dgdx,df,ndesi,&iobject,jqs,
-                      irows,dgdu));
+	  //     FORTRAN(objective_disp_tot,(dgdx,df,ndesi,&iobject,jqs,
+       //               irows,dgdu));
 	    	    
 	       SFREE(dgdu);
 	       
@@ -979,7 +979,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 		}
 		else if(*isolver==7){
 #ifdef PARDISO
-		  pardiso_solve(b,&neq[1],&symmetryflag,&nrhs);
+	//	  pardiso_solve(b,&neq[1],&symmetryflag,&nrhs);
 #endif
 		}
 		
@@ -1255,7 +1255,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 	      }
 	      else if(*isolver==7){
 #ifdef PARDISO
-	          pardiso_solve(dgdu,&neq[1],&symmetryflag,&nrhs);
+	   //       pardiso_solve(dgdu,&neq[1],&symmetryflag,&nrhs);
 #endif
 	      }
 	      
@@ -1418,7 +1418,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 		    }
 		    else if(*isolver==7){
 #ifdef PARDISO
-			pardiso_solve(&b[neq[1]],&neq[1],&symmetryflag,&nrhs);
+		//	pardiso_solve(&b[neq[1]],&neq[1],&symmetryflag,&nrhs);
 #endif
 		    }
 	      
@@ -1465,7 +1465,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 			    }
 			    else if(*isolver==7){
 #ifdef PARDISO
-				pardiso_solve(&b[neq[1]],&neq[1],&symmetryflag,&num_cpusd);
+		//		pardiso_solve(&b[neq[1]],&neq[1],&symmetryflag,&num_cpusd);
 #endif
 			    }
 
@@ -1563,8 +1563,8 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 	         (strcmp1(&objectset[m*324],"FIXSHRINKAGE")==0)){
 	    iobject=m+1;
 
-            FORTRAN(fixnode,(nobject,nk,set,nset,istartset,iendset,ialset,
-	      &iobject,nodedesiinv,dgdxglob,objectset)); 
+    //        FORTRAN(fixnode,(nobject,nk,set,nset,istartset,iendset,ialset,
+	 //     &iobject,nodedesiinv,dgdxglob,objectset)); 
         }
     }
     
@@ -1589,7 +1589,7 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 	}
 	else if(*isolver==7){
 #ifdef PARDISO
-	    pardiso_cleanup(&neq[1],&symmetryflag);
+	  //  pardiso_cleanup(&neq[1],&symmetryflag);
 #endif
 	}
     }

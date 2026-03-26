@@ -17,6 +17,7 @@
 /*     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.         */
 
 #include <pthread.h>
+#include <string.h>
 
 #define Linux 1
 #define IRIX 2
@@ -125,9 +126,24 @@ void tecplot_vtu_active(int nk, int ne, double *co, int *kon, int *ipkon, double
 
 void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum, double *Mass, double *cgx, double *cgy, double *cgz, int *passiveIDs, int numPassive, double* pnorm);
 
+
+void compute_mass_cg_and_cg_sens(size_t ne, const double *eleVol, const double *rhoPhys, const double *elCG, double *M, double *cgx, double *cgy, double *cgz, double *dCGx_dRho, double *dCGy_dRho, double *dCGz_dRho);
+
+void compute_mass(size_t ne, const double *eleVol, const double *rhoPhys, const double mat_dens);
+
+
 void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
                 int *filternnzElems, int *drow, int *dcol, double *dval,
                 int ne, int ne0, int *filternnz, int *fnnzassumed);
+
+
+void filterDensity_buffered_bin_mt(double *Vector, double *VectorFiltered, int *filternnzElems, int *ne_ptr, int *fnnzassumed_ptr, double *q_ptr, int filternnz_total);                
+
+
+void filterSensitivity_bin_buffered_mts(const double *SensIn,
+                                  double *SensOut,
+                                  int ne,
+                                  long long nnz_total);
 
 void assembleFilter_beta(double *FilterMatrixs, int *rowFilters, int *colFilters,
                 int *filternnzElems, int ne, int ne0, int *filternnz, int *fnnzassumed);
@@ -2310,12 +2326,18 @@ void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **
                          ITG *mortar, double *rmin, ITG *filternnz,
                          ITG *filternnzElems, ITG itertop, ITG *fnnzassumed);
 
+
+void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
+                          ITG *ne, double *ttime, double *timepar,
+                          ITG *mortar, double *rmin, ITG *filternnz,
+                          ITG *filternnzElems, ITG itertop, ITG *fnnzassumed); 
+
 void filterVector(ITG **ipkonp,double *Vector, double *VectorFiltered,double *FilterMatrix,ITG *filternnzElem,ITG *rowFilter, ITG *colFilter,ITG *ne,double *ttime, double *timepar, ITG *fnnzassumed, double *q, ITG filternnz);
 
-void filterSensitivity_buffered_mt(const double *df_dxtilde,
-                                     double *df_dx,
-                                     int ne,
-                                     long long nnz_total);
+void filterSensitivity_buffered_mt(const double *df_dxtilde,double *df_dx, int ne,long long nnz_total);
+
+
+void filterSensitivity_bin_buffered_mts3(const double *dCGx,const double *dCGy,const double *dCGz,double *dCGxFiltered,double *dCGyFiltered,double *dCGzFiltered,int ne, long long nnz_total);
 
 /**
  * @brief Counts the number of lines in a given text file.
@@ -4194,6 +4216,7 @@ void FORTRAN(pnorm_value_from_stx,(double *co, ITG *kon, ITG *ipkon, char *lakon
                                    double *pexp, ITG *nea, ITG *neb, ITG *list,
                                    ITG *ilist, double *psum));
 
+void FORTRAN(adjrhs_scatter_linstatic_nompc,(ITG *nk, ITG* neq, ITG *mi, ITG *nactdof, double *rhs_nodal, double *rhs_eq,  ITG *nboun, ITG *nodeboun, ITG *ndirboun));
 
 void FORTRAN(pnorm_implicit_c3d4,
 ( double *co,        /* 3*nk */

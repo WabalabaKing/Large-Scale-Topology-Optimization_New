@@ -72,8 +72,8 @@ void *calcgammav1mt(ITG *i){
     nfaceb=(*i+1)*nfacedelta;
     if((*i==*num_cpus1-1)&&(nfaceb<*nface1)) nfaceb=*nface1;
 
-    FORTRAN(calcgammav,(ielfa1,vel1,gradvel1,gamma1,xlet1,xxj1,
-			 ipnei1,betam1,nef1,flux1,&nfacea,&nfaceb));
+    //FORTRAN(calcgammav,(ielfa1,vel1,gradvel1,gamma1,xlet1,xxj1,
+	//		 ipnei1,betam1,nef1,flux1,&nfacea,&nfaceb));
 
     return NULL;
 }

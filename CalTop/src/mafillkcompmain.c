@@ -148,14 +148,14 @@ void *mafillkcompmt(ITG *i){
 // next line! -> all parallel sections
     if((*i==num_cpus-1)&&(nefb<*nef1)) nefb=*nef1;
 	      
-    FORTRAN(mafillkcomp,(nef1,ipnei1,neifa1,neiel1,vfa1,xxn1,area1,
-			 au1,ad1,jq1,irow1,nzs1,
-			 b1,vel1,umfa1,xlet1,xle1,gradtfa1,xxi1,
-			 body1,volume1,ielfa1,lakonf1,ifabou1,
-			 nbody1,neq1,dtimef1,velo1,veloo1,cvfa1,hcfa1,cvel1,
-			 gradvel1,xload1,xrlfa1,xxj1,nactdohinv1,
-		         a11,a21,a31,flux1,&nefa,&nefb,iau61,xxni1,xxnj1,
-		         iturbulent1,f11,of21,yy1,umel1,gradkel1,gradoel1));
+    //FORTRAN(mafillkcomp,(nef1,ipnei1,neifa1,neiel1,vfa1,xxn1,area1,
+	//		 au1,ad1,jq1,irow1,nzs1,
+	//		 b1,vel1,umfa1,xlet1,xle1,gradtfa1,xxi1,
+	//		 body1,volume1,ielfa1,lakonf1,ifabou1,
+	//		 nbody1,neq1,dtimef1,velo1,veloo1,cvfa1,hcfa1,cvel1,
+	//		 gradvel1,xload1,xrlfa1,xxj1,nactdohinv1,
+	//	         a11,a21,a31,flux1,&nefa,&nefb,iau61,xxni1,xxnj1,
+	//	         iturbulent1,f11,of21,yy1,umel1,gradkel1,gradoel1));
 
     return NULL;
 }

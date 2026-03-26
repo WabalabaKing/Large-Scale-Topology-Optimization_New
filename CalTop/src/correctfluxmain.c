@@ -71,9 +71,9 @@ void *correctflux1mt(ITG *i){
     nefb=(*i+1)*nefdelta;
     if((*i==*num_cpus1-1)&&(nefb<*nef1)) nefb=*nef1;
 
-    FORTRAN(correctflux,(nef1,ipnei1,neifa1,neiel1,flux1,vfa1,advfa1,
-			  area1,vel1,xlet1,ielfa1,xle1,ifabou1,
-			  &nefa,&nefb));
+ //   FORTRAN(correctflux,(nef1,ipnei1,neifa1,neiel1,flux1,vfa1,advfa1,
+//			  area1,vel1,xlet1,ielfa1,xle1,ifabou1,
+//			  &nefa,&nefb));
 
     return NULL;
 }

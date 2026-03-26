@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "CalculiX.h"
+#include <string.h>
 #ifdef SPOOLES
 #include "spooles.h"
 #endif
@@ -120,7 +121,7 @@ void compfluid(double **cop, ITG *nk, ITG **ipkonfp, ITG *konf, char **lakonfp,
   ITG token;
 #endif
 	  
-  strcpy(fncvg,jobnamec);
+ // strcpy(fncvg,jobnamec);
   strcat(fncvg,".fcv");
 
   if((f3=fopen(fncvg,"w"))==NULL){
@@ -1010,9 +1011,9 @@ void compfluid(double **cop, ITG *nk, ITG **ipkonfp, ITG *konf, char **lakonfp,
 
 	      DMEMSET(vel,4**nef,5**nef,0.);
       
-	      FORTRAN(dslugm,(nef,&b[0],&vel[4**nef],&nelt,ia,ja,aua,
-			      &isym,&nsave,&itol,&tol,&itmax,&iter,
-			      &err,&ierr,&iunit,rgwk,&lenw,igwk,&leniw));
+	   //   FORTRAN(dslugm,(nef,&b[0],&vel[4**nef],&nelt,ia,ja,aua,
+	//		      &isym,&nsave,&itol,&tol,&itmax,&iter,
+	//		      &err,&ierr,&iunit,rgwk,&lenw,igwk,&leniw));
 	      SFREE(rgwk);SFREE(igwk);
 
               /* non-orthogonal pressure correction */
@@ -1056,10 +1057,10 @@ void compfluid(double **cop, ITG *nk, ITG **ipkonfp, ITG *konf, char **lakonfp,
 	      
 	      DMEMSET(vel,4**nef,5**nef,0.);
 	      
-	      FORTRAN(dslugm,(nef,&b[0],&vel[4**nef],&nelt,ia,ja,aua,
-			      &isym,&nsave,&itol,&tol,&itmax,&iter,
-			      &err,&ierr,&iunit,rgwk,&lenw,igwk,&leniw));
-			      SFREE(rgwk);SFREE(igwk);
+	  //    FORTRAN(dslugm,(nef,&b[0],&vel[4**nef],&nelt,ia,ja,aua,
+	//		      &isym,&nsave,&itol,&tol,&itmax,&iter,
+//			      &err,&ierr,&iunit,rgwk,&lenw,igwk,&leniw));
+//			      SFREE(rgwk);SFREE(igwk);
 
 	      }// end loop iitp
 	      
@@ -1757,7 +1758,7 @@ void compfluid(double **cop, ITG *nk, ITG **ipkonfp, ITG *konf, char **lakonfp,
 	      }else{
 		  iorienglob=0;
 	      }
-	      strcpy1(&cflag[0],&filab[2962],1);
+	    //  strcpy1(&cflag[0],&filab[2962],1);
 	      NNEW(stn,double,6**nk);
 	      FORTRAN(extrapolate,(sti,stn,ipkonf,inum,konf,lakonf,
 		      &nfield,nk,nef,mi,&ndim,orab,ielorienf,co,&iorienglob,
@@ -1775,7 +1776,7 @@ void compfluid(double **cop, ITG *nk, ITG **ipkonfp, ITG *konf, char **lakonfp,
 	      }else{
 		  iorienglob=0;
 	      }
-	      strcpy1(&cflag[0],&filab[3049],1);
+	   //   strcpy1(&cflag[0],&filab[3049],1);
 	      NNEW(qfn,double,3**nk);
 	      FORTRAN(extrapolate,(qfx,qfn,ipkonf,inum,konf,lakonf,
 		      &nfield,nk,nef,mi,&ndim,orab,ielorienf,co,&iorienglob,
