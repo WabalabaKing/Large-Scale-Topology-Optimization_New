@@ -30,7 +30,7 @@
      &  neb,distmin,ndesi,nodedesi,df,jqs,irows,dfl,
      &  icoordinate,dxstiff,xdesi,istartelem,ialelem,v,sigma,
      &  ieigenfrequency,design,penal,gradCompl,elCompl,elCG,
-     &  eleVol )
+     &  eleVol, fn0_out)
 !
       implicit none
 !
@@ -66,7 +66,8 @@
      &  pmastsurf(6,*),distmin,dfl(20,60),
      &  df(*),dxstiff(27,mi(1),ne,*),v(0:mi(2),*),design(*),
      &  rhoi,penal,tcompli,ecompli,sensi,elvol,gradCompl(*),
-     &  elCompl(*), elCG(3,*),eleVol(*),xcg,ycg,zcg
+     &  elCompl(*), elCG(3,*),eleVol(*),xcg,ycg,zcg,
+     &  fn0_out(0:mi(2),*)
 !
       intent(in) co,kon,ipkon,lakon,ne,ipompc,nodempc,coefmpc,nmpc,
      &  nelemload,sideload,nload,xbody,ipobody,nbody,nactdof,neq,
@@ -80,7 +81,7 @@
      &  ialset,ntie,nasym,pslavsurf,pmastsurf,mortar,clearini,
      &  ielprop,prop,ne0,nea,neb,ndesi,nodedesi,distmin,
      &  icoordinate,jqs,irows,dxstiff,xdesi,istartelem,ialelem,v,
-     &  design,penal
+     &  design,penal,fn0_out
 !
       intent(inout) xload,nmethod,cgr,springarea,xstate,df,dfl,
      &  gradCompl,elCompl,elCG,eleVol
@@ -231,8 +232,9 @@ c           ndof=ichar(lakon(i)(6:6))-48
                enddo
             endif
 !
-            call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,ff,
-     &           i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
+            if(iperturb(2).eq.1) then
+               call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
+     &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
      &           alzero,ielmat,ielorien,norien,orab,ntmat_,
      &           t0,t1,ithermal,vold,iperturb,nelemload,sideload,xload,
      &           nload,idist,sti,stx,iexpl,plicon,
@@ -246,7 +248,25 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
      &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
      &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &           ecompli,elvol,xcg,ycg,zcg)
+     &           ecompli,elvol,xcg,ycg,zcg, fn0_out)
+            else
+               call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
+     &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
+     &           alzero,ielmat,ielorien,norien,orab,ntmat_,
+     &           t0,t1,ithermal,vold,iperturb,nelemload,sideload,xload,
+     &           nload,idist,sti,stx,iexpl,plicon,
+     &           nplicon,plkcon,nplkcon,xstiff,npmat_,
+     &           dtime,matname,mi(1),ncmat_,mass(1),stiffness,buckling,
+     &           rhsi,intscheme,ttime,time,istep,iinc,coriolis,xloadold,
+     &           reltime,ipompc,nodempc,coefmpc,nmpc,ikmpc,ilmpc,veold,
+     &           springarea,nstate_,xstateini,xstate,ne0,ipkon,thicke,
+     &           integerglob,doubleglob,tieset,istartset,
+     &           iendset,ialset,ntie,nasym,pslavsurf,pmastsurf,mortar,
+     &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
+     &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
+     &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
+     &           ecompli,elvol,xcg,ycg,zcg, fn0_out)
+            endif
 !
             elCompl(i)=ecompli
             eleVol(i)=elvol

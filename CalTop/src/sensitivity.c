@@ -70,7 +70,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	        ITG *nobject,char **objectsetp,ITG *istat,char *orname,
 	        ITG *nzsprevstep,ITG *nlabel,double *physcon,char *jobnamef,double *design,
             double *penal,double *gradCompl,double *elCompl,double *elCG,
-		    double *eleVol)
+		    double *eleVol, int *eval_PNORM)
            
         {
   
@@ -108,7 +108,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             *energy=NULL,*ener=NULL,*dxstiff=NULL,*d=NULL,*z=NULL,
             distmin,*df=NULL,*g0=NULL,*dgdx=NULL,sigma=0,*xinterpol=NULL,
             *dgdxglob=NULL,*extnor=NULL,*veold=NULL,*accold=NULL,bet,gam,
-            dtime,time,reltime=1.,*weightformgrad=NULL,*fint=NULL,*xnor=NULL,
+            dtime,time,reltime=1.,*weightformgrad=NULL,*fint=NULL,*fn0_out=NULL,*xnor=NULL,
             *dgdxdy=NULL;
 
             FILE *f1;
@@ -763,7 +763,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             else
             {
                 nev=1;
-                if((idisplacement==1)||((ishapeenergy==1)&&(iperturb[1]==1)))
+                if((idisplacement==1)||((ishapeenergy==1)&&(iperturb[1]==1))||(iperturb[1]==1))
                 {
 	
 	                /* reading the stiffness matrix from previous step for sensitivity analysis */
@@ -885,9 +885,11 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       
                 /* needed for nonlinear strain energy */
 
-                if((iperturb[1]==1)&&(ishapeenergy==1))
+                if((iperturb[1]==1))
                 {
                     NNEW(fint,double,*neq);
+                    NNEW(fn0_out,double,mt**nkon);
+                    ishapeenergy=1;
                 }
       
                 /* allocating a field for the stiffness matrix 
@@ -932,7 +934,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 islavsurf,ielprop,prop,energyini,energy,df,&distmin,
 	            &ndesi,nodedesi,sti,nkon,jqs,irows,nactdofinv,
 	            &icoordinate,dxstiff,istartdesi,ialdesi,xdesi,
-	            &ieigenfrequency,fint,&ishapeenergy,typeboun);
+	            &ieigenfrequency,fint,&ishapeenergy,typeboun,fn0_out);
 	            
                 iout=1;
                 SFREE(v);
@@ -988,7 +990,6 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 }
 
                 /* determining the system matrix and the external forces */
-      
                 mafillsmmain_se(co,nk,kon,ipkon,lakon,ne,nodeboun,
                     ndirboun,xbounact,nboun,
                     ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
@@ -1009,7 +1010,8 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	                &distmin,&ndesi,nodedesi,df,&nzss,jqs,irows,
 	                &icoordinate,dxstiff,xdesi,istartelem,ialelem,v,&sigma,
 	                &cyclicsymmetry,labmpc,ics,cs,mcs,&ieigenfrequency,design,penal,
-                    gradCompl,elCompl,elCG,eleVol);
+                    gradCompl,elCompl,elCG,eleVol,fn0_out);
+                
 
                 /* second order derivative */
 
@@ -1064,9 +1066,12 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 if(iorientation==1) SFREE(dxstiff);
       
                 /* determining the values and the derivatives of the objective functions */
-            
+                if(fint!=NULL) SFREE(fint);
+                if(fn0_out!=NULL) SFREE(fn0_out);
                 iout=-1; 
             }
+            
+
             SFREE(g0);
             SFREE(dgdx);
 

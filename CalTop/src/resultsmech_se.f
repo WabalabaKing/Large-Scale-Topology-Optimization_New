@@ -1017,6 +1017,7 @@ c                 emec0(m1)=emeini(m1,jj,i)
             skl(1,2)=skl(2,1)
             skl(1,3)=skl(3,1)
             skl(2,3)=skl(3,2)
+            
 !
 !                 calculation of the nodal forces
 !
@@ -1037,7 +1038,7 @@ c                 emec0(m1)=emeini(m1,jj,i)
 !     
 !                       nonlinear geometric part
 !     
-                        if((iperturb(2).eq.1).and.(nlgeom_undo.eq.0)) 
+                        if((iperturb(2).eq.1)) 
      &                     then
                            do m3=1,3
                               do m4=1,3

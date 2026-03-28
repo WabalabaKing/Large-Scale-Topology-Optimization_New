@@ -30,7 +30,7 @@
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,distmin,
      &  ndesi,nodedesi,dfl,icoordinate,dxstiff,ne,xdesi,
      &  istartelem,ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &  ecompli,elvol,xcg,ycg,zcg)
+     &  ecompli,elvol,xcg,ycg,zcg,fn0_out)
 !
 !     computation of the sensitivity of the element matrix multiplied by the
 !     displacements for the element with the topology in konl
@@ -89,7 +89,8 @@
      &  pslavsurf(3,*),pmastsurf(6,*),distmin,s0(60,60),xdesi(3,*),
      &  ds1(60,60),ff0(60),dfl(20,60),dxstiff(27,mi(1),ne,*),
      &  vl(0:mi(2),26),v(0:mi(2),*),sensi,ecompli,ku(60),uelem(60),
-     &  uku,penal,rhoi,elvol,xcg,ycg,zcg
+     &  uku,penal,rhoi,elvol,xcg,ycg,zcg,
+     &  dotu,fn0_out(0:mi(2),*)
 !
       intent(in) co,kon,lakonl,p1,p2,omx,bodyfx,nbody,
      &  nelem,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -104,7 +105,7 @@
      &  integerglob,doubleglob,tieset,istartset,iendset,ialset,ntie,
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,
      &  distmin,ndesi,nodedesi,icoordinate,xdesi,istartelem,ialelem,
-     &  v,penal,rhoi
+     &  v,penal,rhoi, fn0_out
 !
       intent(inout) sm,xload,nmethod,springarea,xstate,dfl,sensi,
      &  ecompli,elvol,xcg,ycg,zcg
@@ -1900,9 +1901,17 @@ c            alp=.2215d0
 !
          if((ieigenfrequency.ne.1).and.(iperturb(2).eq.1)) then
 !
-!           nonlinear geometric calculation: dK/ds does not have
-!           to be calculated (except for eigenfrequency calculations)
-!
+            dotu=0.d0
+            l=0
+            do j=1,nope
+               do k=1,3
+                  l=l+1
+                  dotu=dotu+uelem(l)*fn0_out(k,indexe+j)
+               enddo
+            enddo
+            sensi=-(penal/rhoi)*dotu
+            ecompli=dotu/(rhoi**penal)
+               
 !!!            if(idesvar.eq.0) then
 !     load vector
 !!               if((rhsi.eq.1).and.(idist.eq.1)) then
@@ -2041,23 +2050,22 @@ c            alp=.2215d0
 !
 
 !         Evaluate k*u
-!
-         do i=1,3*nope
-            do j=1,3*nope
-
-              ku(i)=ku(i)+s0(i,j)*uelem(j)
+         if(iperturb(2).ne.1) then
+            do i=1,3*nope
+               do j=1,3*nope
+                  ku(i)=ku(i)+s0(i,j)*uelem(j)
 !            write(10,*) uelem(c2), s0(c1,c2)
+               enddo
             enddo
-         enddo
 
 !         Evaluate u*k*u
-         do i=1,3*nope
-          uku=uku+ku(i)*uelem(i)
-         enddo
+            do i=1,3*nope
+               uku=uku+ku(i)*uelem(i)
+            enddo
 
-         sensi=(-penal)*(rhoi**(penal-1))*uku
-         ecompli=(rhoi**penal)*uku
-         
+            sensi=(-penal)*(rhoi**(penal-1))*uku
+            ecompli=(rhoi**penal)*uku
+         endif
          
 !         if((lakonl(7:7)).eq.'E')then
 !            elvol=dabs(elvol)*2
@@ -2070,3 +2078,5 @@ c        close(200)
  !        close(300)
       return
       end
+
+
