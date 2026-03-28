@@ -1,0 +1,4403 @@
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.038553 s
+Time spent in additional calculations                            : 0.084741 s
+Total time spent                                                 : 0.123294 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 29.329656
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.619232e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808412 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.034965 s
+Time spent in additional calculations                            : 0.063915 s
+Total time spent                                                 : 0.098880 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 29.505864
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  5.976574e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.039657 s
+Time spent in additional calculations                            : 0.069931 s
+Total time spent                                                 : 0.109588 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 26.654553
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.562382e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976676e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.037611 s
+Time spent in additional calculations                            : 0.074719 s
+Total time spent                                                 : 0.112330 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 28.012747
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  5.693829e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808412 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.033961 s
+Time spent in additional calculations                            : 0.064500 s
+Total time spent                                                 : 0.098461 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 30.982270
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  7.205045e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.033385 s
+Time spent in additional calculations                            : 0.082053 s
+Total time spent                                                 : 0.115438 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 29.353001
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.183858e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976676e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.038133 s
+Time spent in additional calculations                            : 0.072992 s
+Total time spent                                                 : 0.111125 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 27.177283
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.322394e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808415 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.031510 s
+Time spent in additional calculations                            : 0.068461 s
+Total time spent                                                 : 0.099971 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 31.421705
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  8.444017e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.033358 s
+Time spent in additional calculations                            : 0.071108 s
+Total time spent                                                 : 0.104466 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 31.091596
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  7.978011e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976675e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.034674 s
+Time spent in additional calculations                            : 0.077710 s
+Total time spent                                                 : 0.112384 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 31.400952
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.693309e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808413 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.034484 s
+Time spent in additional calculations                            : 0.068475 s
+Total time spent                                                 : 0.102959 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 32.745904
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.757267e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.031493 s
+Time spent in additional calculations                            : 0.066849 s
+Total time spent                                                 : 0.098342 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 28.889803
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.775883e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976676e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.029143 s
+Time spent in additional calculations                            : 0.069508 s
+Total time spent                                                 : 0.098651 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 29.264863
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.368077e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808415 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.039739 s
+Time spent in additional calculations                            : 0.062827 s
+Total time spent                                                 : 0.102566 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 30.155869
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.831898e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.033906 s
+Time spent in additional calculations                            : 0.069488 s
+Total time spent                                                 : 0.103394 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 27.400298
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  5.801283e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976675e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.044699 s
+Time spent in additional calculations                            : 0.073641 s
+Total time spent                                                 : 0.118340 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 28.232626
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.223144e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808413 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.032906 s
+Time spent in additional calculations                            : 0.075839 s
+Total time spent                                                 : 0.108745 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 28.207408
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  7.097563e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.028104 s
+Time spent in additional calculations                            : 0.065020 s
+Total time spent                                                 : 0.093124 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 31.355698
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  5.819457e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976676e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.033465 s
+Time spent in additional calculations                            : 0.071190 s
+Total time spent                                                 : 0.104655 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 31.900209
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  5.974658e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808413 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.036126 s
+Time spent in additional calculations                            : 0.074285 s
+Total time spent                                                 : 0.110411 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 32.072696
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.752857e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.037494 s
+Time spent in additional calculations                            : 0.061975 s
+Total time spent                                                 : 0.099469 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 27.803917
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.123856e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976676e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.034735 s
+Time spent in additional calculations                            : 0.069958 s
+Total time spent                                                 : 0.104693 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 29.149282
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  5.910884e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808414 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.027831 s
+Time spent in additional calculations                            : 0.067661 s
+Total time spent                                                 : 0.095492 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 31.181901
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.309426e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.038777 s
+Time spent in additional calculations                            : 0.074049 s
+Total time spent                                                 : 0.112826 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 30.636859
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.667268e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976676e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.038260 s
+Time spent in additional calculations                            : 0.076941 s
+Total time spent                                                 : 0.115201 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 30.585375
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  7.092678e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808413 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.032303 s
+Time spent in additional calculations                            : 0.065973 s
+Total time spent                                                 : 0.098276 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 28.364296
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  7.355368e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.038397 s
+Time spent in additional calculations                            : 0.070454 s
+Total time spent                                                 : 0.108851 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 26.661564
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.192114e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976676e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.034802 s
+Time spent in additional calculations                            : 0.079326 s
+Total time spent                                                 : 0.114128 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 28.699098
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.750322e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808417 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.036209 s
+Time spent in additional calculations                            : 0.068960 s
+Total time spent                                                 : 0.105169 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 29.297448
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.685710e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.037711 s
+Time spent in additional calculations                            : 0.054088 s
+Total time spent                                                 : 0.091799 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 31.912241
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.247320e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976675e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.034512 s
+Time spent in additional calculations                            : 0.068956 s
+Total time spent                                                 : 0.103468 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 31.125595
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  5.894375e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808416 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.034550 s
+Time spent in additional calculations                            : 0.061247 s
+Total time spent                                                 : 0.095797 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 30.585059
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.335498e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.035705 s
+Time spent in additional calculations                            : 0.065409 s
+Total time spent                                                 : 0.101114 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 27.970271
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.667271e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976675e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+
+  #####    #####   ##        #######  #####   ######  
+ ##       ##   ##  ##           ##   ##   ##  ##   ## 
+ ##       #######  ##           ##   ##   ##  ######  
+ ##       ##   ##  ##           ##   ##   ##  ##      
+  #####   ##   ##  #######      ##    #####   ##      
+
+* Contributors:
+* Prateek Ranjan, Dept. of Aeronautics & Astronautics,
+* Massachusetts Institute of Technology 
+* Wanzheng Zheng, Dept. of Aerospace Engineering,
+* University of Illinois at Urbana Champaign 
+* Ghanendra Kumar Das, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+* Kai A. James, Dept. of Aerospace Engineering,
+* Georgia Institute of Technology
+************************************************************
+
+Original FEA source code: CalculiX by Guido Dhondt
+************************************************************
+
+CG flag before allocation: 0
+PNROM flag before allocation 0
+CG flag after allocation: 0
+PNROM flag ater allocation 0
+File 'skinElementList.nam' not found -> skin surface will not be defined 
+
+density.dat found, populating design array for linear elastic analysis 
+Identifying slave surfaces as nodal or facial surfaces...done!
+Detemining number of triangles needed for triangulation...done! 
+Storing uncascaded MPCs...done! 
+Decascading the MPC's...done 
+Analyzing matrix structure...done!
+Number of equations: 50805
+Non-zero lower triangular matrix elements: 1964835
+Static aeroelastic analysis
+Setting static MDO flag to 1
+Filtering element densities...Filternnz total: 891660
+Using 8 thread(s) to filter vector
+done
+
+TOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|
+MDO 
+  Static aeroelasticity            YES
+SIMP 
+  Penalty parameter                 3.00
+
+FILTER MATRIX 
+  Density filter radius             0.03
+  Non zeros in Filtermatrix         100
+
+STRESS AGGREGATION 
+  P-norm exponent                   1.00
+  Stress relaxation                 0.00
+  Stress threshold                  1.00
+
+SENSITIVITY FLAGS 
+  Compliance:                       YES (NLgeom adjoint - WIP)
+  Volume fraction:                  YES
+  PNORM                             NO (NLgeom adjoint - WIP)
+|------------------------------------------------------------|
+
+
+
+SOLVING NONLINEAR SYSTEM-------------------------------------|
+
+ increment 1 attempt 1 
+ increment size= 1.000000e+00
+ sum of previous increments=0.000000e+00
+ actual step time=1.000000e+00
+ actual total time=1.000000e+00
+
+ iteration 1
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.033851 s
+Time spent in additional calculations                            : 0.072997 s
+Total time spent                                                 : 0.106848 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 28.584892
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.531148e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 726.384732
+ time avg. forc= 726.384732
+ largest residual force= 8601.808415 in node 8223 and dof 1
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 5.327628e-02 in node 213 and dof 3
+
+ no convergence
+
+ iteration 2
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.034500 s
+Time spent in additional calculations                            : 0.068553 s
+Total time spent                                                 : 0.103053 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 29.384739
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  5.804313e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.817409
+ time avg. forc= 229.817409
+ largest residual force= 36.059108 in node 214 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 1.686160e-03 in node 8 and dof 1
+
+ no convergence
+
+ iteration 3
+
+ Using up to 8 cpu(s) for the symmetric stiffness/mass contributions.
+
+ Factoring the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+ Solving the system of equations using the symmetric pardiso solver
+ number of threads = 8
+
+
+=== PARDISO: solving a symmetric indefinite system ===
+
+
+Summary: ( solution phase )
+================
+
+Times:
+======
+Time spent in direct solver at solve step (solve)                : 0.036295 s
+Time spent in additional calculations                            : 0.065351 s
+Total time spent                                                 : 0.101646 s
+
+Statistics:
+===========
+Parallel Direct Factorization is running on 4 OpenMP
+
+< Linear system Ax = b >
+             number of equations:           50805
+             number of non-zeros in A:      2015640
+             number of non-zeros in A (%): 0.078091
+
+             number of right-hand sides:    1
+
+< Factors L and U >
+             number of columns for each panel: 80
+             number of independent subgraphs:  0
+< Preprocessing with state of the art partitioning metis>
+             number of supernodes:                    5756
+             size of largest supernode:               1371
+             number of non-zeros in L:                24314294
+             number of non-zeros in U:                1
+             number of non-zeros in L+U:              24314295
+             gflop   for the numerical factorization: 20.494741
+
+             gflop/s for the numerical factorization: 29.513887
+
+Number of iterative refinement steps performed         2
+Tolerance level in the iterative refinement process    0.000000e+00
+Backward error after the iterative refinement process  6.162926e-16
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+ average force= 229.649506
+ time avg. forc= 229.649506
+ largest residual force= 0.256335 in node 11973 and dof 3
+ largest increment of disp= 5.327628e-02
+ largest correction to disp= 2.976675e-05 in node 16425 and dof 3
+
+ convergence
+
+ the increment size exceeds the remainder of the step and is decreased to 0.000000e+00
+
+    Displacement state eq. space -> nodal space
+done!
+ Initializing fields...done!
+SENSITIVITY ANALYSIS-----------------------------------------|
+
+  Allocating memory for sensitivities...done! 
+  Evaluating compliance sensitivities... Using up to 8 cpu(s) for the sensitivity of the internal forces.
+
+ Using up to 8 cpu(s) for the calculation of the sensitivity of the external forces 
+ and/or the element stiffness matrices.
+
+done
+  Evaluate CG..done 
+  Filter compliance gradient using 8 thread(s) done! 
+  Writing compliance sensitivities...done!
+  Filter element volume gradient using 8 thread(s) done! 
+  Writing volume sensitivities...done!
+
+
+OUTPUT FILEDS--------------------------------------------------------------|
+
+  Writing objectives...done!
+
+ Compliance:                 3184.847 
+ Mass:                       0.025 
+ Aggregated stress (P-norm): 0.000 
+
+ Writing rhos.dat...
+Estimated upper bounds
+
+Number of nodes:                            17124
+Number of elements:                         10975
+Integration points / element:                   4
+Degrees of freedom / node:                      3
+Layers per element:                             1
+Distributed facial loads:                       0
+Distributed volumetric loads:                   0
+Concentrated loads:                             9
+Single point constraints:                    1134
+Multiple point constraints:                     1
+Sets:                                           4
+Terms in all sets:                          45413
+Materials:                                      1
+Constants per material and temperature:
+Temperature points per materi                   1
+Orientations:                                   0
+Amplitudes:                                     2
+Data points in all amplitudes                   2
+Print requests:                                 0
+Transformations:                                0
+Property cards:                                 0
+ *INFO reading *STEP: nonlinear geometric
+       effects are turned on
+
+ *WARNING reading *STEP: parameter not recognized:
+          STABILIZE=0.0002
+ *WARNING reading *STEP. Card image:
+          *STEP,NLGEOM,INC=200,STABILIZE=0.0002
+
+ *INFO: field control parameters set to:
+        ran =    5.0000000000000001E-003
+        can =    5.0000000000000001E-003
+        qa0 =    0.0000000000000000     
+        qau =    0.0000000000000000     
+        rap =    2.0000000000000000E-002
+         ea =    1.0000000000000001E-005
+        cae =    1.0000000000000000E-003
+        ral =    1.0000000000000000E-008
+ *INFO: line search control parameters set to:
+        nls =    10.000000000000000     
+        smaxls =   0.25000000000000000     
+        sminls =    1.0100000000000000     
+        fls =    1.0000000000000000     
+        etls =    1.0000000000000000     
+ *WARNING reading *STATIC: a nonlinear analysis is requested
+          but no time increment nor step is specified
+          the defaults (1,1) are used
+
+
+ STEP            1
+
+ Static analysis was selected
+
+ Newton-Raphson iterative procedure is active
+
+ Nonlinear geometric effects are taken into account
+
+ *INFO in getdesiinfo:
+       rejected design nodes (if any) are stored in
+       file WarnNodeDesignReject.nam
+       This file can be loaded into
+       an active cgx-session by typing
+       read WarnNodeDesignReject.nam inp
+
+
+Writing output fields...done!
+
+========================================
+DISPLACEMENT SUMMARY
+  Max Z displacement: +5.314566e-02  (node 213)
+  Min X displacement: -1.110633e-02  (node 75)
+========================================
+
+done!
+Linear analysis complete!
+De-allocate memory...done! 
+[0] rho=1.000000  CFD=-6.097312e-01  adj=-6.104129e-01  rel_err=1.118e-03 ratio = 1.001118
+[1] rho=1.000000  CFD=-3.563855e-01  adj=-3.577562e-01  rel_err=3.846e-03 ratio = 1.003846
+[2] rho=1.000000  CFD=-5.824973e-01  adj=-5.832834e-01  rel_err=1.350e-03 ratio = 1.001350
+[3] rho=1.000000  CFD=-3.547098e-01  adj=-3.565633e-01  rel_err=5.226e-03 ratio = 1.005226
+[4] rho=1.000000  CFD=-3.525897e-01  adj=-3.546853e-01  rel_err=5.943e-03 ratio = 1.005943
+[5] rho=1.000000  CFD=-4.932876e-01  adj=-4.947084e-01  rel_err=2.880e-03 ratio = 1.002880
+[6] rho=1.000000  CFD=-3.077589e-01  adj=-3.101458e-01  rel_err=7.756e-03 ratio = 1.007756
+[7] rho=1.000000  CFD=-1.116215e+00  adj=-1.112129e+00  rel_err=-3.660e-03 ratio = 0.996340
+[8] rho=1.000000  CFD=-8.497195e-01  adj=-8.470929e-01  rel_err=-3.091e-03 ratio = 0.996909
+[9] rho=1.000000  CFD=-6.795926e-01  adj=-6.779286e-01  rel_err=-2.449e-03 ratio = 0.997551
+Wrote result_stress_cfd.csv
