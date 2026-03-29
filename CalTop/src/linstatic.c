@@ -569,6 +569,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     			NNEW(v,double,mt**nk);
     			NNEW(fn,double,mt**nk);
 				NNEW(brhs,double,mt**nk);
+				DMEMSET(brhs,0,mt**nk,0.0);
     			NNEW(stn,double,6**nk);
     			NNEW(inum,ITG,*nk);
 				NNEW(djdrho_expl, double, *ne);
@@ -719,7 +720,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
    				- adjoint nodal field: lam (just expanded)
 				*/
 				FORTRAN(pnorm_implicit,(co,kon,ipkon,lakon,ne,mi,
-        		xstiff, vold, lam, design, penal,
+        		xstiff, vold, lam, design, penal, pexp, eps, sigma0,
         		&nea_loc, &neb_loc, &list_loc, ilist_loc, djdrho_impl));
 
 

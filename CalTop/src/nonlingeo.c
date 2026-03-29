@@ -98,7 +98,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *network,char *orname,double *vel,ITG *nef,
 	     double *velo,double *veloo, double *design,double *penal,
 		 double *sigma0, double *eps_relax, double *rhomin,
-         double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM){
+         double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM, double *mat_dens){
 
   char description[13]="            ",*lakon=NULL,jobnamef[396]="",
       *sideface=NULL,*labmpc=NULL,*lakonf=NULL,
@@ -830,7 +830,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                   xstateini,xstate,thicke,integerglob,doubleglob,
 		  tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 		  pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
-		  iponoel,inoel,network,ntrans,inotr,trab,design,penal);
+		  iponoel,inoel,network,ntrans,inotr,trab,design,penal,mat_dens);
       
       if(*nmethod==0){
 	  
@@ -1913,7 +1913,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                   xstateini,xstate,thicke,integerglob,doubleglob,
 		  tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 		  pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
-		  iponoel,inoel,network,ntrans,inotr,trab, design,penal);
+		  iponoel,inoel,network,ntrans,inotr,trab, design,penal,mat_dens);
 
 	if(nasym==1){
 	    RENEW(au,double,2*nzs[1]);

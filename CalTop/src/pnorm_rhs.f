@@ -85,18 +85,23 @@
 
 !     variables for accumulating adjoint rhs
       real*8 g(6), ptv(6), invvm, fac
-      real*8 B(6,12), rhs_loc(12)
+      real*8 B(6,30), rhs_loc(30)
       real*8 rhs(0:mi(2),*)
       real*8 C(6,6)
 
 !     work arrays for Me*u_e path (C3D4 block)
       integer ia, ib
-      real*8 Bten(6,12)
+      integer ii
+      real*8 Bten(6,30)
       real*8 Vec(6,6)
-      real*8 uel(12)
+      real*8 uel(30)
       real*8 s(6), t(6)
       real*8 coeff
-! 
+      real*8 MeN (30,30)
+      real*8 MNtemp(6,30)
+      real*8 TN(6,30)
+      real*8 sige, sigeT
+!     
 
       intent(in) co,kon,ipkon,lakon,ne,v,
      &  elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -108,10 +113,11 @@
      &  springarea,reltime,calcul_fn,calcul_qa,calcul_cauchy,nener,
      &  ikin,ne0,thicke,pslavsurf,
      &  pmastsurf,mortar,clearini,nea,neb,ielprop,prop,kscale,
-     &  list,ilist,design, penal, sig0, eps_relax, rho_min, pexp, alpha
+     &  list,ilist,design, penal, sig0, eps_relax, rho_min, pexp, alpha,
+     &  nal,qa,fn,ener,eme,eei,ielmat,prestr,
+     &  emeini
 !
-      intent(inout) nal,qa,fn,xstiff,ener,eme,eei,stx,ielmat,prestr,
-     &  emeini, rhs
+      intent(inout) stx,rhs
 !
       include "gauss.f"
 !
@@ -119,14 +125,15 @@
       null=0
 !
       mt=mi(2)+1
-      nal=0
-      qa(3)=-1.d0
-      qa(4)=0.d0
+      !nal=0
+      !qa(3)=-1.d0
+      !qa(4)=0.d0
 
 !     
 ! --- Begin loop over all elements starting from nea
       do m=nea,neb
-!
+!        
+         mattyp=1
          if(list.eq.1) then
             i=ilist(m)
          else
@@ -160,14 +167,15 @@
 
          indexe=ipkon(i)
 
-!        Set number of nodes for C3D4 element
-         if(lakonl(4:4).eq.'4') then
+!        Set number of nodes and integration pts for C3D4 and C3D10 element
+         if(lakonl(4:5).eq.'10') then
+            nope=10
+            mint3d=4
+         elseif(lakonl(4:4).eq.'4') then
             nope=4
-         endif
-
-!        Set number integration points for C3D4
-         if(lakonl(4:4).eq.'4') then
-            mint3d=1  ! One integration point per each C3D4 element
+            mint3d=1
+         else
+            cycle
          endif
 
 !        Gather nodal displacements
@@ -185,7 +193,12 @@
          do jj=1,mint3d
 
             ! Get integration weight for this element
-            if(lakonl(4:4).eq.'4') then
+            if(lakonl(4:5).eq.'10') then
+               xi=gauss3d5(1,jj)
+               et=gauss3d5(2,jj)
+               ze=gauss3d5(3,jj)
+               weight=weight3d5(jj)
+            elseif(lakonl(4:4).eq.'4') then
                xi=gauss3d4(1,jj)
                et=gauss3d4(2,jj)
                ze=gauss3d4(3,jj)
@@ -195,6 +208,8 @@
             ! Compute shape func values
             if(nope.eq.4) then
                call shape4tet(xi,et,ze,xl,xsj,shp,iflag)
+            elseif(nope.eq.10) then
+               call shape10tet(xi,et,ze,xl,xsj,shp,iflag)
             endif
             
 !
@@ -286,7 +301,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 ! ---         Do not scale using rho_p anywhere since the adjoint RHS 
 !             depends on the rho_p = 1 state
 !              TODO: Remove above conditional
-              rho_p = 1.d0
+!              rho_p = 1.d0
             endif
 !           calculating the local stiffness and stress
 !           Constitutive law
@@ -298,15 +313,21 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !     &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
 !     &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
 !     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
-!
+            
+            rho_e = design(i)
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
 
 !               Build full 6X6 C (voigt, tensoral shear)
                 if (mattyp.eq.1) then
 !               Isotropic
+                  do ii=1,2
+                     elas(ii)=elconloc(ii)
+                  enddo
                   e  = elas(1)
                   un = elas(2)
+                  
+                  e = e*(rho_e**penal)
 
                   um = e/(2.d0*(1.d0+un))                  ! G
                   al = un*e/((1.d0+un)*(1.d0-2.d0*un))     ! lambda
@@ -316,77 +337,41 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !                 7:C14  8:C24  9:C34 10:C44 11:C15 12:C25
 !                 13:C35 14:C45 15:C55 16:C16 17:C26 18:C36
 !                 19:C46 20:C56 21:C66
-                  xstiff( 1,jj,i)=(al+2.d0*um)  ! C11
-                  xstiff( 2,jj,i)= al           ! C12
-                  xstiff( 3,jj,i)= (al+2.d0*um)  ! C22
-                  xstiff( 4,jj,i)= al           ! C13
-                  xstiff( 5,jj,i)= al           ! C23
-                  xstiff( 6,jj,i)= (al+2.d0*um)  ! C33
-
-                  xstiff( 7,jj,i)=0.d0                ! C14
-                  xstiff( 8,jj,i)=0.d0                ! C24
-                  xstiff( 9,jj,i)=0.d0                ! C34
-                  xstiff(10,jj,i)= um           ! C44 (τ12/ε12_tensorial)
-                  xstiff(11,jj,i)=0.d0                ! C15
-                  xstiff(12,jj,i)=0.d0                ! C25
-                  xstiff(13,jj,i)=0.d0                ! C35
-                  xstiff(14,jj,i)=0.d0                ! C45
-                  xstiff(15,jj,i)= um           ! C55 (τ13/ε13_tensorial)
-                  xstiff(16,jj,i)=0.d0                ! C16
-                  xstiff(17,jj,i)=0.d0                ! C26
-                  xstiff(18,jj,i)=0.d0                ! C36
-                  xstiff(19,jj,i)=0.d0                ! C46
-                  xstiff(20,jj,i)=0.d0                ! C56
-                  xstiff(21,jj,i)= um           ! C66 (τ23/ε23_tensorial)
+!                  xstiff( 1,jj,i)=(al+2.d0*um)  ! C11
+!                  xstiff( 2,jj,i)= al           ! C12
+!                  xstiff( 3,jj,i)= (al+2.d0*um)  ! C22
+!                  xstiff( 4,jj,i)= al           ! C13
+!                  xstiff( 5,jj,i)= al           ! C23
+!                  xstiff( 6,jj,i)= (al+2.d0*um)  ! C33!
+!
+!                  xstiff( 7,jj,i)=0.d0                ! C14
+!                  xstiff( 8,jj,i)=0.d0                ! C24
+!                  xstiff( 9,jj,i)=0.d0                ! C34
+!                  xstiff(10,jj,i)= um           ! C44 (τ12/ε12_tensorial)
+!                  xstiff(11,jj,i)=0.d0                ! C15
+!                  xstiff(12,jj,i)=0.d0                ! C25
+!                  xstiff(13,jj,i)=0.d0                ! C35
+!                  xstiff(14,jj,i)=0.d0                ! C45
+!                  xstiff(15,jj,i)= um           ! C55 (τ13/ε13_tensorial)
+!                  xstiff(16,jj,i)=0.d0                ! C16
+!                  xstiff(17,jj,i)=0.d0                ! C26
+!                  xstiff(18,jj,i)=0.d0                ! C36
+!                  xstiff(19,jj,i)=0.d0                ! C46
+!                  xstiff(20,jj,i)=0.d0                ! C56
+!                  xstiff(21,jj,i)= um           ! C66 (τ23/ε23_tensorial)
                endif
             endif
-
-!           Write stress into stx (integration-point storage)
-            skl(1,1)=stre(1)
-            skl(2,2)=stre(2)
-            skl(3,3)=stre(3)
-            skl(2,1)=stre(4)
-            skl(3,1)=stre(5)
-            skl(3,2)=stre(6)
-!
-            stx(1,jj,i)=skl(1,1)
-            stx(2,jj,i)=skl(2,2)
-            stx(3,jj,i)=skl(3,3)
-            stx(4,jj,i)=skl(2,1)
-            stx(5,jj,i)=skl(3,1)
-            stx(6,jj,i)=skl(3,2)
-!
-            skl(1,2)=skl(2,1)
-            skl(1,3)=skl(3,1)
-            skl(2,3)=skl(3,2)
-!
-
 !           calculation of the Cauchy stresses (skip for linear CalTop)
-            if((calcul_cauchy.eq.1).and.(nlgeom_undo.eq.0)) then
+            !if((calcul_cauchy.eq.1).and.(nlgeom_undo.eq.0)) then
             
-               write(*,*), "Skipping Cauchy stress eval"
-            endif
+            !   write(*,*), "Skipping Cauchy stress eval"
+            !endif
 !--------------------------------------------------------------!
 !                       BEGIN P-NORM RHS EVAL                          
 !--------------------------------------------------------------!
-! --- Read element stress values
-            sx  = stx(1,jj,i)
-            sy  = stx(2,jj,i)
-            sz  = stx(3,jj,i)
-            txy = stx(4,jj,i)
-            txz = stx(5,jj,i)
-            tyz = stx(6,jj,i)
-
-            !print *, 'sx = ', sx
-            !print *, 'sy = ', sy
-
-!  --- von Mises 
-            vm2 = (sx-sy)*(sx-sy) + (sy-sz)*(sy-sz) + (sz-sx)*(sz-sx)
-            vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
-            vm  = dsqrt(vm2)
 
 !  --- filtered design alread in [0,1] (clamp defenseively)  ---
-            rho_e = design(i)
+            
             ! (optional clamp, safe if design may drift)
             if (rho_e .lt. 0.d0) rho_e = 0.d0
             if (rho_e .gt. 1.d0) rho_e = 1.d0
@@ -394,76 +379,79 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             rho_eff = max(rho_e, rho_min)
             rho_p = rho_eff**penal
 
-! --- Duysinx-Sigmund effective von Misses stress measure for this element
-            phi = vm/ (sig0) + eps_relax - eps_relax/rho_eff
-            if (phi .lt. 0.d0) phi = 0.d0
-
-! --- With effective von Misses stress calculated, raise to pexp
-! --- and sum over all elements
-!            g_sump = g_sump + (phi**pexp)
-            !g_vol  = g_vol  + wgt  <-- valid only for p-mean
-
-
 c----- RHS accumulation (minimal: C3D4 only) --------------------------
-            if (nope.eq.4) then
+            if (nope.eq.4 .or. nope.eq.10) then
 
 c           skip if vm or phi yields zero gradient
-              if (vm.gt.0.d0) then
+!              if (vm.gt.0.d0) then
 
 !  ---        evaluate 
-                invvm = 1.d0/(sig0 * vm)
-                coeff   = (phi**(pexp-1)) * invvm
+!                invvm = 1.d0/(sig0 * vm)
+!                coeff   = (phi**(pexp-1)) 
 
 ! ---- unpack xstiff(:,jj,i) -> full symmetric C(6,6) in tensorial Voigt ----
                
                C = 0.d0
-               C(1,1)=xstiff( 1,jj,i);
-               C(2,1)=xstiff( 2,jj,i); 
-               C(2,2)=xstiff( 3,jj,i);
-               C(3,1)=xstiff( 4,jj,i); 
-               C(3,2)=xstiff( 5,jj,i); 
-               C(3,3)=xstiff( 6,jj,i);
-               C(4,1)=xstiff( 7,jj,i); 
-               C(4,2)=xstiff( 8,jj,i); 
-               C(4,3)=xstiff( 9,jj,i); 
-               C(4,4)=xstiff(10,jj,i);
-               C(5,1)=xstiff(11,jj,i);
-               C(5,2)=xstiff(12,jj,i); 
-               C(5,3)=xstiff(13,jj,i); 
-               C(5,4)=xstiff(14,jj,i); 
-               C(5,5)=xstiff(15,jj,i);
-               C(6,1)=xstiff(16,jj,i); 
-               C(6,2)=xstiff(17,jj,i); 
-               C(6,3)=xstiff(18,jj,i); 
-               C(6,4)=xstiff(19,jj,i); 
-               C(6,5)=xstiff(20,jj,i); 
-               C(6,6)=xstiff(21,jj,i);
+               C(1,1) = (al+2.d0*um)  ! C11
+               C(2,1) = al            ! C12  
+               C(2,2) = (al+2.d0*um)  ! C22
+               C(3,1) = al            ! C13
+               C(3,2) = al            ! C23
+               C(3,3) = (al+2.d0*um)  ! C33
+               C(4,4) = um            ! C44
+               C(5,5) = um            ! C55
+               C(6,6) = um            ! C66
+               ! Mirror to make symmetric
+               C(1,2) = C(2,1)
+               C(1,3) = C(3,1)
+               C(2,3) = C(3,2)
+               !C(1,1)=xstiff( 1,jj,i);
+               !C(2,1)=xstiff( 2,jj,i); 
+               !C(2,2)=xstiff( 3,jj,i);
+               !C(3,1)=xstiff( 4,jj,i); 
+               !C(3,2)=xstiff( 5,jj,i); 
+               !C(3,3)=xstiff( 6,jj,i);
+               !C(4,1)=xstiff( 7,jj,i); 
+               !C(4,2)=xstiff( 8,jj,i); 
+               !C(4,3)=xstiff( 9,jj,i); 
+               !C(4,4)=xstiff(10,jj,i);
+               !C(5,1)=xstiff(11,jj,i);
+               !C(5,2)=xstiff(12,jj,i); 
+               !C(5,3)=xstiff(13,jj,i); 
+               !C(5,4)=xstiff(14,jj,i); 
+               !C(5,5)=xstiff(15,jj,i);
+               !C(6,1)=xstiff(16,jj,i); 
+               !C(6,2)=xstiff(17,jj,i); 
+               !C(6,3)=xstiff(18,jj,i); 
+               !C(6,4)=xstiff(19,jj,i); 
+               !C(6,5)=xstiff(20,jj,i); 
+               !C(6,6)=xstiff(21,jj,i);
 ! mirror upper triangle
-               C(1,2)=C(2,1); 
-               C(1,3)=C(3,1); 
-               C(1,4)=C(4,1); 
-               C(1,5)=C(5,1); 
-               C(1,6)=C(6,1);
-               C(2,3)=C(3,2);
-               C(2,4)=C(4,2); 
-               C(2,5)=C(5,2); 
-               C(2,6)=C(6,2);
-               C(3,4)=C(4,3);
-               C(3,5)=C(5,3);
-               C(3,6)=C(6,3);
-               C(4,5)=C(5,4);
-               C(4,6)=C(6,4);
-               C(5,6)=C(6,5);
+               !C(1,2)=C(2,1); 
+               !C(1,3)=C(3,1); 
+               !C(1,4)=C(4,1); 
+               !C(1,5)=C(5,1); 
+               !C(1,6)=C(6,1);
+               !C(2,3)=C(3,2);
+               !C(2,4)=C(4,2); 
+               !C(2,5)=C(5,2); 
+               !C(2,6)=C(6,2);
+               !C(3,4)=C(4,3);
+               !C(3,5)=C(5,3);
+               !C(3,6)=C(6,3);
+               !C(4,5)=C(5,4);
+               !C(4,6)=C(6,4);
+               !C(5,6)=C(6,5);
 
 
 c             Build B for C3D4 (engineering shear), from shp(derivs)
 c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
-               do m1=1,12
+               do m1=1,3*nope
                   B(1,m1)=0.d0; B(2,m1)=0.d0; B(3,m1)=0.d0
                   B(4,m1)=0.d0; B(5,m1)=0.d0; B(6,m1)=0.d0
                enddo
 
-               do m1=1,4
+               do m1=1,nope
                   m2 = 3*(m1-1)
                   B(1,m2+1) = shp(1,m1)
                   B(2,m2+2) = shp(2,m1)
@@ -475,17 +463,15 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                   B(5,m2+2) = shp(3,m1)   ! eyz engineering
                   B(5,m2+3) = shp(2,m1)
                enddo
-
 ! ---          Convert to tensorial shear: Bten = R * Beng, R=diag(1,1,1,1/2,1/2,1/2)
-               do m1=1,12
+               do m1=1,3*nope
                   Bten(1,m1)=B(1,m1)
                   Bten(2,m1)=B(2,m1)
                   Bten(3,m1)=B(3,m1)
-                  Bten(4,m1)=0.5d0*B(4,m1)
-                  Bten(5,m1)=0.5d0*B(5,m1)
-                  Bten(6,m1)=0.5d0*B(6,m1)
+                  Bten(4,m1)=B(4,m1)
+                  Bten(5,m1)=B(5,m1)
+                  Bten(6,m1)=B(6,m1)
                enddo
-               
 !  ---         von-Misses selecter Vec in tensorial Voigt (3D)
                Vec = 0.d0
                Vec(1,1)=1.d0
@@ -502,71 +488,115 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                Vec(6,6)=3.d0
 
 ! ---          Gather u_e (12 X1) from vl(:,:)
-               do m1=1,4
+               do m1=1,nope
                   uel(3*(m1-1)+1) = vl(1,m1)
                   uel(3*(m1-1)+2) = vl(2,m1)
                   uel(3*(m1-1)+3) = vl(3,m1)
+                  
                enddo
+
 ! ---         s = C * (Bten * u_e) (tensorial stress)
+! ---         TN=C*B (6x12)
                do ia=1,6
-                  s(ia)=0.d0
-                  do ib=1,12
-                     s(ia)=s(ia)+C(ia,1)*Bten(1,ib)*uel(ib)
-     &               +C(ia,2)*Bten(2,ib)*uel(ib)
-     &               +C(ia,3)*Bten(3,ib)*uel(ib)
-     &               +C(ia,4)*Bten(4,ib)*uel(ib)
-     &               +C(ia,5)*Bten(5,ib)*uel(ib)
-     &               +C(ia,6)*Bten(6,ib)*uel(ib)
+                  do ib=1,3*nope
+                     TN(ia,ib)=C(ia,1)*Bten(1,ib)
+     &                        +C(ia,2)*Bten(2,ib)
+     &                        +C(ia,3)*Bten(3,ib)
+     &                        +C(ia,4)*Bten(4,ib)
+     &                        +C(ia,5)*Bten(5,ib)
+     &                        +C(ia,6)*Bten(6,ib)
                   enddo
                enddo
 
-! ---          t = V * s
+! ---          M0temp=V*TN
                do ia=1,6
-                  t(ia)=0.d0
-                  do ib=1,6
-                     t(ia)=t(ia)+Vec(ia,ib)*s(ib)
+                  do ib=1,3*nope
+                     MNtemp(ia,ib)=Vec(ia,1)*TN(1,ib)
+     &                        +Vec(ia,2)*TN(2,ib)
+     &                        +Vec(ia,3)*TN(3,ib)
+     &                        +Vec(ia,4)*TN(4,ib)
+     &                        +Vec(ia,5)*TN(5,ib)
+     &                        +Vec(ia,6)*TN(6,ib)
+                  enddo
+               enddo
+!  ---         Me0=T^T*M0temp
+               do ia=1,3*nope
+                  do ib=1,3*nope
+                     MeN(ia,ib)=TN(1,ia)*MNtemp(1,ib)
+     &                         +TN(2,ia)*MNtemp(2,ib)
+     &                         +TN(3,ia)*MNtemp(3,ib)
+     &                         +TN(4,ia)*MNtemp(4,ib)
+     &                         +TN(5,ia)*MNtemp(5,ib)
+     &                         +TN(6,ia)*MNtemp(6,ib)             
                   enddo
                enddo
 
-!  ---         p  = C * t 
-               do ia=1,6
-                  ptv(ia)=0.d0
-                  do ib=1,6
-                     ptv(ia)=ptv(ia)+C(ia,ib)*t(ib)
-                  enddo
-               enddo
-
-! ---          Build Me0 u_e
-               do m1=1,12
+! ---          Build Me0*u_e
+               do m1=1,3*nope
                   rhs_loc(m1)=0.d0
-                  do ia = 1,6
-                     rhs_loc(m1)=rhs_loc(m1) + Bten(ia,m1)*ptv(ia)
+                  do ia = 1,3*nope
+                  !TESTMARK
+                     rhs_loc(m1)=rhs_loc(m1)+MeN(m1,ia)*uel(ia)
+
                   enddo
                enddo
+! ---          Build ||sigma_e||
+               sigeT=0.d0
+               do m1=1,3*nope
+                  do ia=1,3*nope
+                     sigeT = sigeT+uel(m1)*MeN(m1,ia)*uel(ia)
+                  enddo
+               enddo
+               !write(*,*),"vm from ENERGY:",dsqrt(sigeT)
+               !if (m .le. 10) then
+               !   write(*,*) 'After M calc: sigeT=', sigeT
+               !endif
+               !sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
+               !write(*,*), 'Currrent vmRHS:', dsqrt(sigeT)
+               !if (m .le. 10) then
+               !   write(*,*) 'Before clamp: sige=', sige, 'sigeT=', sigeT
+               !endif
+               !if (m .le. 10) then
+               !   write(*,*) 'eps_relax=', eps_relax,'rho_eff=',rho_eff
+               !endif
+               if (sige .lt. 0.d0) sige=0.d0
 
-! ---          Multiply with scalar coefficient
-               do m1=1,12
+! ---          Construct the coeff
+               !TESTMARK
+               if (sigeT .lt. 0.0 ) then
+                  coeff = 0
+               else
+                  coeff = (sige**(pexp-1))/(sig0*dsqrt(sigeT))
+               endif
+               !if (m .le. 5) then
+               !   write(*,*) 'Elem', i,'rho=',rho_e,'vol=',xsj*weight,
+     &         !              'sigeT=',sigeT,'sige=',sige,'coeff=',coeff
+               !endif             
+               do m1=1,3*nope
                   rhs_loc(m1) = coeff * rhs_loc(m1)
-!                  rhs_loc(m1) = coeff 
                enddo
 
 ! ---          Scatter to global rhs(1..3, node)
-                do m1=1,4   ! Loop over all DOFs.
+                do m1=1,nope   ! Loop over all DOFs.
                   rhs(1,konl(m1)) = rhs(1,konl(m1))
-     &                             + rhs_loc(3*(m1-1)+1)
+     &            + rhs_loc(3*(m1-1)+1)
                   rhs(2,konl(m1)) = rhs(2,konl(m1)) 
-     &                             + rhs_loc(3*(m1-1)+2)
+     &            + rhs_loc(3*(m1-1)+2)
                   rhs(3,konl(m1)) = rhs(3,konl(m1)) 
-     &                             + rhs_loc(3*(m1-1)+3)
+     &            + rhs_loc(3*(m1-1)+3)
                 enddo
-              endif
+              !endif
             endif ! End if nope .eq. 4 condition
 c----------------------------------------------------------------------
 
 !
          enddo  ! <--- end of integration over element Gauss points
+         !do m1=1,12
+         !   write(*,'(ES10.2)'),uel(m1)
+         !enddo
       enddo ! <--- end of loop over all elements
-
+      !write(*,*), 'Gsump:', g_sump
 ! ------------------------
+      
       return
       end
