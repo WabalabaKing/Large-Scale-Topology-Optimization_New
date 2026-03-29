@@ -3,15 +3,15 @@
 # ============================================================
 # Paths for external dependencies
 # ============================================================
-SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/Spooles/src
-ARPACK_PATH  = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/ARPACK
-YAML_PREFIX  = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/yaml-cpp-yaml-cpp-0.6.2/
+SPOOLES_PATH = /home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization/Deps/Spooles/src
+ARPACK_PATH  = /home/prateek/Documents/GitHub/ARPACK
+YAML_PREFIX  = /home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization/Deps/yaml-cpp-yaml-cpp-0.6.2/
 
 # Intel MKL
-MKL_LIB     = /home/prateek/intel/oneapi/mkl/2025.3/lib
-MKL_INCLUDE = /home/prateek/intel/oneapi/mkl/2025.3/include
+MKL_LIB     = /opt/intel/oneapi/mkl/2025.1/lib/intel64
+MKL_INCLUDE = /opt/intel/oneapi/mkl/2025.1/include
 
-CMPLR_PATH  = /home/prateek/intel/oneapi/compiler/2025.3/bin
+CMPLR_PATH  = /opt/intel/oneapi/compiler/2025.1/bin
 
 # ============================================================
 # Directories
@@ -58,7 +58,7 @@ FC = gfortran
 CFLAGS = -Wall $(OPT) -fopenmp -pthread \
          -DARCH="Linux" -DARPACK -DPARDISO -DMATRIXSTORAGE -DUSE_MT=1 -DMKL_LP64 \
          -I$(MKL_INCLUDE) -I$(INCLUDE_DIR) \
-         -I$(YAML_PREFIX)/include
+         #-I$(YAML_PREFIX)/include
 
 # Fortran flags
 FFLAGS = -Wall -O3 -fallow-argument-mismatch -std=gnu
@@ -109,7 +109,7 @@ LIBS = \
   -lpthread -lm -ldl -lstdc++
 
 # YAML-cpp is always linked
-LIBS += -L$(YAML_PREFIX)/build -lyaml-cpp
+#LIBS += -L$(YAML_PREFIX)/build -lyaml-cpp
 
 # preCICE libs only when MDO=1
 ifeq ($(MDO),1)
