@@ -269,6 +269,10 @@ c           ndof=ichar(lakon(i)(6:6))-48
             endif
 !
             elCompl(i)=ecompli
+            if(ecompli.ne.ecompli .or. ecompli.gt.1.d30) then
+               write(*,*) 'INF/NaN ecompli at elem',i,'rhoi=',
+     &            rhoi,'sensi=',sensi
+            endif
             eleVol(i)=elvol
             elCG(1,i)=xcg
             elCG(2,i)=ycg

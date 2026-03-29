@@ -1791,6 +1791,10 @@ while(istat>=0)
     printf("Filtering element densities...");
     filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems,
                                   &ne, &fnnzassumed, &qfilter, filternnz);
+    /* Enforce rhomin floor to prevent division by zero */
+    for(i=0; i<ne_; i++){
+        if(designFiltered[i] < rhomin) designFiltered[i] = rhomin;
+    }
     rhoPhys = designFiltered;
     printf("done\n");
   }
@@ -1906,8 +1910,6 @@ while(istat>=0)
       SFREE(dPnorm_drho);
 
       printf("|------------------------------------------------------------|\n");
-
-	    SFREE(dPnorm_drho);
 
       printf("|------------------------------------------------------------|\\n");
 
