@@ -273,7 +273,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 	  	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	  	islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, Pnorm, 0);
+    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, &Pnorm, 0);
 
 		// NOTE: At this point xstiff is not penalized
 		
@@ -676,6 +676,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         				}
     				}
 				}
+
+
       		#ifdef PARDISO
 			printf("PARSIDO: adjoint solve \n");
       			pardiso_main(ad,au,adb,aub,&sigma,b_adj,icol,irow,neq,nzs,
@@ -715,9 +717,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         		ipobody,xbodyact,ibody,typeboun,design,penal, sigma0, eps, rhomin, pexp, NULL,NULL,Pnorm, 2);
 				*/
 
-				adjoint_eq_2_node(nk, nactdof, nboun, nodeboun,ndirboun,mi,lam, b_adj);
-
-
+				adjoint_eq_2_node(nk, nactdof, nboun, nodeboun, ndirboun, typeboun, mi, lam, b_adj);	
 				/* Allocate memory for implicit derivative*/
 				NNEW(djdrho_impl, double, *ne);
 				
@@ -732,7 +732,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
    				- adjoint nodal field: lam (just expanded)
 				*/
 				FORTRAN(pnorm_implicit,(co,kon,ipkon,lakon,ne,mi,
-        		xstiff, vold, lam, design, penal, pexp, eps, sigma0,
+        		xstiff, v, lam, design, penal, pexp, eps, sigma0,
         		&nea_loc, &neb_loc, &list_loc, ilist_loc, djdrho_impl));
 
 

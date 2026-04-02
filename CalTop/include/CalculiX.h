@@ -862,7 +862,7 @@ void checkconvergence(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
           double *energy,double *allwk,double *energyref,
           double *emax,double *enres,double *enetoll,double *energyini,
           double *allwkini,double *temax,double *reswk,ITG *ne0,
-          ITG *neini,double *dampwk,double *dampwkini,double *energystartstep);
+          ITG *neini,double *dampwk,double *dampwkini,double *energystartstep, ITG *neq, double *fext);
 
 void checkconvnet(ITG *icutb,ITG *iin,
 		  double *cam1t,double *cam1f,double *cam1p,
@@ -4102,6 +4102,7 @@ void adjoint_eq_2_node(
     ITG *nboun,
     ITG *nodeboun,    /* length *nboun, 1-based nodes */
     ITG *ndirboun,    /* length *nboun, values 1..mi[2] */
+    char *typeboun,
     ITG *mi,          /* mi[2] = #mech DOFs per node */
     double *lambda,   /* ladj, size (mi[2]+1)*(*nk) in Fortran layout */
     double *B_adj     /* adjoint solution vector (length = neq) */

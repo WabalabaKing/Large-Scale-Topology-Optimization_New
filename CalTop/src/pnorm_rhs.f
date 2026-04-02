@@ -551,14 +551,7 @@ c             shp(1,j)=dNj/dx, shp(2,j)=dNj/dy, shp(3,j)=dNj/dz
                !if (m .le. 10) then
                !   write(*,*) 'After M calc: sigeT=', sigeT
                !endif
-               !sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
-               !write(*,*), 'Currrent vmRHS:', dsqrt(sigeT)
-               !if (m .le. 10) then
-               !   write(*,*) 'Before clamp: sige=', sige, 'sigeT=', sigeT
-               !endif
-               !if (m .le. 10) then
-               !   write(*,*) 'eps_relax=', eps_relax,'rho_eff=',rho_eff
-               !endif
+               sige = dsqrt(sigeT)/(sig0)+ eps_relax - eps_relax/rho_eff
                if (sige .lt. 0.d0) sige=0.d0
 
 ! ---          Construct the coeff
