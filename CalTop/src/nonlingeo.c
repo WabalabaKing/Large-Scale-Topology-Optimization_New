@@ -185,7 +185,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   emax=0.0;
   // MPADD end
 
-  delcon=ctrl[52];alea=ctrl[53];
+  delcon=ctrl[53];alea=ctrl[54];
 
 #ifdef SGI
   ITG token;
@@ -1887,8 +1887,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       }
       
       if(*iexpl<=1){
-	iperturb[0]=iperturb_sav[0];
-	iperturb[1]=iperturb_sav[1];
+	
 
 	/* calculating the local stiffness matrix and external loading */
 
@@ -1914,7 +1913,8 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		  tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 		  pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
 		  iponoel,inoel,network,ntrans,inotr,trab, design,penal,mat_dens);
-
+	iperturb[0]=iperturb_sav[0];
+	iperturb[1]=iperturb_sav[1];
 	if(nasym==1){
 	    RENEW(au,double,2*nzs[1]);
 	    if(*nmethod==4) RENEW(aub,double,2*nzs[1]);
@@ -2554,7 +2554,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     mortar,nmat,ielprop,prop,&ialeatoric,&kscale,
              energy,&allwk,&energyref,&emax,&r_abs,&enetoll,energyini,
 	     &allwkini,&temax,&sizemaxinc,&ne0,&neini,&dampwk,
-	     &dampwkini,energystartstep);
+	     &dampwkini,energystartstep,neq,fext);
 	  
       }else{
 
@@ -2588,7 +2588,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       }
       
     }
-
+	
     if(*nmethod!=4)SFREE(resold);
 
     /*********************************************************/
@@ -2600,7 +2600,32 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 another increment size (dtheta) */
    
     /* printing the energies (only for dynamic calculations) */
+	if(icutb==0){
 
+    ITG mt = mi[1] + 1;
+
+    double maxUx = 0.0, maxUy = 0.0, maxUz = 0.0;
+
+    for (ITG i = 0; i < *nk; ++i) {
+        ITG base = mt * i;
+
+        double ux = fabs(vold[base + 1]);
+        double uy = fabs(vold[base + 2]);
+        double uz = fabs(vold[base + 3]);
+
+        if (ux > maxUx) maxUx = ux;
+        if (uy > maxUy) maxUy = uy;
+        if (uz > maxUz) maxUz = uz;
+    }
+
+    printf("\n=== Increment converged ===\n");
+    printf("Max |Ux| = %e\n", maxUx);
+    printf("Max |Uy| = %e\n", maxUy);
+    printf("Max |Uz| = %e\n", maxUz);
+    printf("================================\n\n");
+
+    fflush(stdout);
+}
     if((icutb==0)&&(*nmethod==4)&&(*ithermal<2)){
 	printf(" initial energy (at start of step) = %e\n\n",energyref);
 
