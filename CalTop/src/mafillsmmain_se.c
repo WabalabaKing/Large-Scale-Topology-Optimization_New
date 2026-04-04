@@ -45,7 +45,7 @@ static double *co1,*xboun1,*coefmpc1,*xforc1,*xload1,*xbody1,*cgr1,
     *ttime1,*time1,*xloadold1,*reltime1,*veold1,*springarea1,
     *xstateini1,*xstate1,*thicke1,*doubleglob1,*pslavsurf1,*pmastsurf1,
     *clearini1,*prop1,*distmin1,*df1,*dfl1,*dxstiff1,*design1,*penal1,
-    *gradCompl1,*elCompl1,*elCG1,*eleVol1, *fn0_out1;
+    *gradCompl1,*elCompl1,*elCG1,*eleVol1, *fn0_out1,*lambda1;
 
 void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *nodeboun,ITG *ndirboun,double *xboun,
@@ -84,7 +84,7 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *cyclicsymmetry,char *labmpc,ITG *ics,double *cs,
 	       ITG *mcs,ITG *ieigenfrequency,double *design,
            double *penal, double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol, double *fn0_out){
+		   double *eleVol, double *fn0_out,double *lambda){
 
     ITG i,j;
 
@@ -220,8 +220,7 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
     sigma1=sigma;cyclicsymmetry1=cyclicsymmetry;labmpc1=labmpc;
     ics1=ics;cs1=cs;mcs1=mcs;ieigenfrequency1=ieigenfrequency;design1=design;
     penal1=penal,gradCompl1=gradCompl,elCompl1=elCompl,elCG1=elCG,
-	eleVol1=eleVol, fn0_out1=fn0_out;
-
+	eleVol1=eleVol, fn0_out1=fn0_out,lambda1=lambda; nactdof1=nactdof; neq1=neq;
     /* calculating the stiffness/mass sensitivity */
 
     printf(" Using up to %" ITGFORMAT " cpu(s) for the calculation of the sensitivity of the external forces \n and/or the element stiffness matrices.\n\n", num_cpus);
@@ -352,7 +351,7 @@ void *mafillsmsemt(ITG *i)
 	    &df1[indexdf],jqs1,irows1,&dfl1[indexdfl],
 	    icoordinate1,dxstiff1,xdesi1,istartelem1,ialelem1,v1,sigma1,
             ieigenfrequency1,design1,penal1,gradCompl1,elCompl1,
-            elCG1,eleVol1, fn0_out1));
+            elCG1,eleVol1, fn0_out1,lambda1));
     }
     else
     {

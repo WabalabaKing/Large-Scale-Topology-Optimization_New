@@ -30,7 +30,8 @@
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,distmin,
      &  ndesi,nodedesi,dfl,icoordinate,dxstiff,ne,xdesi,
      &  istartelem,ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &  ecompli,elvol,xcg,ycg,zcg,fn0_out)
+     &  ecompli,elvol,xcg,ycg,zcg,fn0_out,
+     &  lambda,nactdof,neq)
 !
 !     computation of the sensitivity of the element matrix multiplied by the
 !     displacements for the element with the topology in konl
@@ -90,7 +91,9 @@
      &  ds1(60,60),ff0(60),dfl(20,60),dxstiff(27,mi(1),ne,*),
      &  vl(0:mi(2),26),v(0:mi(2),*),sensi,ecompli,ku(60),uelem(60),
      &  uku,penal,rhoi,elvol,xcg,ycg,zcg,
-     &  dotu,fn0_out(0:mi(2),*)
+     &  dotu,fn0_out(0:mi(2),*),lambda(*)
+
+      integer nactdof(0:mi(2),*),neq(*),idof
 !
       intent(in) co,kon,lakonl,p1,p2,omx,bodyfx,nbody,
      &  nelem,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -105,7 +108,7 @@
      &  integerglob,doubleglob,tieset,istartset,iendset,ialset,ntie,
      &  nasym,pslavsurf,pmastsurf,mortar,clearini,ielprop,prop,
      &  distmin,ndesi,nodedesi,icoordinate,xdesi,istartelem,ialelem,
-     &  v,penal,rhoi, fn0_out
+     &  v,penal,rhoi, fn0_out,lambda,nactdof,neq
 !
       intent(inout) sm,xload,nmethod,springarea,xstate,dfl,sensi,
      &  ecompli,elvol,xcg,ycg,zcg
@@ -1901,16 +1904,48 @@ c            alp=.2215d0
 !
          if((ieigenfrequency.ne.1).and.(iperturb(2).eq.1)) then
 !
+!
+!           Buhl (2000) adjoint: dC/drho_e = -lambda^T * dR/drho_e
+!           R = rho^p * f_int_0 - f_ext
+!           dR/drho_e = p*rho^(p-1) * f_int_0^e
+!           lambda = K_T^{-1} * f_int_0  (from objectivemain_se.c)
+!           dotu = lambda^T * f_int_0^e
+            if(nelem.eq.1) then
+               write(*,*) 'DEBUG e1: nope=',nope,' indexe=',indexe
+               write(*,*) 'DEBUG e1: rhoi=',rhoi,' penal=',penal
+               write(*,*) 'DEBUG e1: lambda(1:3)=',
+     &            lambda(1),lambda(2),lambda(3)
+               write(*,*) 'DEBUG e1: fn0_out(1:3,indexe+1)=',
+     &            fn0_out(1,indexe+1),fn0_out(2,indexe+1),
+     &            fn0_out(3,indexe+1)
+               write(*,*) 'DEBUG e1: nactdof(1:3,konl(1))=',
+     &            nactdof(1,konl(1)),nactdof(2,konl(1)),
+     &            nactdof(3,konl(1))
+            endif
             dotu=0.d0
-            l=0
             do j=1,nope
                do k=1,3
-                  l=l+1
-                  dotu=dotu+uelem(l)*fn0_out(k,indexe+j)
+                  idof=nactdof(k,konl(j))
+                  if(idof.gt.0) then
+                     dotu=dotu+lambda(idof)*fn0_out(k,indexe+j)
+                  endif
                enddo
             enddo
-            sensi=-(penal/rhoi)*dotu
-            ecompli=dotu/(rhoi**penal)
+            if(nelem.eq.1) then
+               write(*,*) 'DEBUG e1: dotu=',dotu
+               write(*,*) 'DEBUG e1: sensi(before)=',
+     &            -penal*(rhoi**(penal-1))*dotu
+            endif
+            !sensi=-penal*(rhoi**(penal-1))*dotu
+            sensi = -penal*(rhoi**(2*penal-1))*dotu
+            ecompli=0.d0
+            do j=1,nope
+               do k=1,3
+                  l=(j-1)*3+k
+                  ecompli=ecompli+uelem(l)*fn0_out(k,indexe+j)
+               enddo
+            enddo
+            ecompli=(rhoi**penal)*ecompli
                
 !!!            if(idesvar.eq.0) then
 !     load vector

@@ -30,7 +30,7 @@
      &  neb,distmin,ndesi,nodedesi,df,jqs,irows,dfl,
      &  icoordinate,dxstiff,xdesi,istartelem,ialelem,v,sigma,
      &  ieigenfrequency,design,penal,gradCompl,elCompl,elCG,
-     &  eleVol, fn0_out)
+     &  eleVol, fn0_out, lambda)
 !
       implicit none
 !
@@ -67,7 +67,7 @@
      &  df(*),dxstiff(27,mi(1),ne,*),v(0:mi(2),*),design(*),
      &  rhoi,penal,tcompli,ecompli,sensi,elvol,gradCompl(*),
      &  elCompl(*), elCG(3,*),eleVol(*),xcg,ycg,zcg,
-     &  fn0_out(0:mi(2),*)
+     &  fn0_out(0:mi(2),*), lambda(*)
 !
       intent(in) co,kon,ipkon,lakon,ne,ipompc,nodempc,coefmpc,nmpc,
      &  nelemload,sideload,nload,xbody,ipobody,nbody,nactdof,neq,
@@ -81,7 +81,7 @@
      &  ialset,ntie,nasym,pslavsurf,pmastsurf,mortar,clearini,
      &  ielprop,prop,ne0,nea,neb,ndesi,nodedesi,distmin,
      &  icoordinate,jqs,irows,dxstiff,xdesi,istartelem,ialelem,v,
-     &  design,penal,fn0_out
+     &  design,penal,fn0_out,lambda
 !
       intent(inout) xload,nmethod,cgr,springarea,xstate,df,dfl,
      &  gradCompl,elCompl,elCG,eleVol
@@ -248,7 +248,8 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
      &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
      &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &           ecompli,elvol,xcg,ycg,zcg, fn0_out)
+     &           ecompli,elvol,xcg,ycg,zcg, fn0_out,
+     &           lambda, nactdof, neq)  
             else
                call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
      &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
@@ -265,7 +266,8 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
      &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
      &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &           ecompli,elvol,xcg,ycg,zcg, fn0_out)
+     &           ecompli,elvol,xcg,ycg,zcg, fn0_out,
+     &           lambda, nactdof, neq) 
             endif
 !
             elCompl(i)=ecompli

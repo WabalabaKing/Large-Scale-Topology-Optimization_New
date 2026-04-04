@@ -95,7 +95,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             *iponor=NULL,*iponoelfa=NULL,*inoelfa=NULL,ithickness,iscaleflag,
             ifreemax,nconstraint,*jqs2=NULL,*irows2=NULL,nzss2,i2ndorder=0,
             *iponexp=NULL,*ipretinfo=NULL;
-      
+            ITG symmetryflag=0,inputformat=0,nrhs=1;
             double *stn=NULL,*v=NULL,*een=NULL,cam[5],*xstiff=NULL,*stiini=NULL,*tper,
             *f=NULL,*fn=NULL,qa[4],*epn=NULL,*xstateini=NULL,*xdesi=NULL,
             *vini=NULL,*stx=NULL,*enern=NULL,*xbounact=NULL,*xforcact=NULL,
@@ -935,7 +935,27 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	            &ndesi,nodedesi,sti,nkon,jqs,irows,nactdofinv,
 	            &icoordinate,dxstiff,istartdesi,ialdesi,xdesi,
 	            &ieigenfrequency,fint,&ishapeenergy,typeboun,fn0_out);
-	            
+	            /* Compute lambda = K_T^{-1} * f_int_0 for Buhl adjoint */
+                if((iperturb[1]==1)&&(fint!=NULL)){
+                    
+                    if(nasym!=0){symmetryflag=2;inputformat=1;}
+                    if(*isolver==7){
+                        #ifdef PARDISO
+                        pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,
+                            &neq[1],&nzs[1],&symmetryflag,&inputformat,
+                            jq,&nzs[2]);
+                        pardiso_solve(fint,&neq[1],&symmetryflag,&nrhs);
+                        pardiso_cleanup(&neq[1],&symmetryflag);
+                        #endif
+                    }else if(*isolver==0){
+                        #ifdef SPOOLES
+                        spooles_factor(ad,au,adb,aub,&sigma,icol,irow,
+                            &neq[1],&nzs[2],&symmetryflag,&inputformat,
+                            &nzs[2]);
+                        spooles_solve(fint,&neq[1]);
+                        #endif
+                    }
+                }
                 iout=1;
                 SFREE(v);
                 SFREE(fn);
@@ -1010,7 +1030,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	                &distmin,&ndesi,nodedesi,df,&nzss,jqs,irows,
 	                &icoordinate,dxstiff,xdesi,istartelem,ialelem,v,&sigma,
 	                &cyclicsymmetry,labmpc,ics,cs,mcs,&ieigenfrequency,design,penal,
-                    gradCompl,elCompl,elCG,eleVol,fn0_out);
+                    gradCompl,elCompl,elCG,eleVol,fn0_out,fint);
                 
 
                 /* second order derivative */
