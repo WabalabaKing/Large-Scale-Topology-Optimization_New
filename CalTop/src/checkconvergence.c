@@ -145,7 +145,7 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
 //         number of iterations exceeding 1
 	if((*iit>1)&&
 //         force residual criterion satisfied (0.5 %)
-//           (ram[0]<=c1[0]*qam[0])&&
+           (ram[0]<=c1[0]*qam[0])&&
 //         no significant change in contact elements
            (*iflagact==0)&&
 //         cetol criterion satisfied if *visco
