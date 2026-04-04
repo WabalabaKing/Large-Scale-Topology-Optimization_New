@@ -26,7 +26,7 @@
      &  springarea,reltime,calcul_fn,calcul_qa,calcul_cauchy,nener,
      &  ikin,nal,ne0,thicke,emeini,pslavsurf,
      &  pmastsurf,mortar,clearini,nea,neb,ielprop,prop,kscale,
-     &  list,ilist,design,penal,rhomin)
+     &  list,ilist)
 !
 !     calculates stresses and the material tangent at the integration
 !     points and the internal forces at the nodes
@@ -67,8 +67,7 @@
      &  vokl(3,3),xstateini(nstate_,mi(1),*),vikl(3,3),
      &  gs(8,4),a,reltime,tlayer(4),dlayer(4),xlayer(mi(3),4),
      &  thicke(mi(3),*),emeini(6,mi(1),*),clearini(3,9,*),
-     &  pslavsurf(3,*),pmastsurf(6,*), design(*),
-     &  rho_e_rm, rho_eff_rm, simp_rm,penal,rhomin,skl_unpen(3,3)
+     &  pslavsurf(3,*),pmastsurf(6,*)
 !     
 ! 
 
@@ -82,7 +81,7 @@
      &  springarea,reltime,calcul_fn,calcul_qa,calcul_cauchy,nener,
      &  ikin,ne0,thicke,pslavsurf,
      &  pmastsurf,mortar,clearini,nea,neb,ielprop,prop,kscale,
-     &  list,ilist,design,penal,rhomin
+     &  list,ilist
 !
       intent(inout) nal,qa,fn,xstiff,ener,eme,eei,stx,ielmat,prestr,
      &  emeini
@@ -1078,36 +1077,9 @@ c     Bernhardi end
             stx(5,jj,i)=skl(3,1)
             stx(6,jj,i)=skl(3,2)
 !
-            !           save unpenalized skl for Cauchy push-forward below
-            skl_unpen(1,1)=skl(1,1)
-            skl_unpen(2,2)=skl(2,2)
-            skl_unpen(3,3)=skl(3,3)
-            skl_unpen(2,1)=skl(2,1)
-            skl_unpen(3,1)=skl(3,1)
-            skl_unpen(3,2)=skl(3,2)
-            skl_unpen(1,2)=skl(2,1)
-            skl_unpen(1,3)=skl(3,1)
-            skl_unpen(2,3)=skl(3,2)
-
-
             skl(1,2)=skl(2,1)
             skl(1,3)=skl(3,1)
             skl(2,3)=skl(3,2)
-
-            rho_e_rm   = design(i)
-            if(rho_e_rm .lt. 0.d0) rho_e_rm = 0.d0
-            if(rho_e_rm .gt. 1.d0) rho_e_rm = 1.d0
-            rho_eff_rm = max(rho_e_rm, rhomin)
-            simp_rm    = rho_eff_rm**penal
-            skl(1,1)=skl(1,1)*simp_rm
-            skl(2,2)=skl(2,2)*simp_rm
-            skl(3,3)=skl(3,3)*simp_rm
-            skl(1,2)=skl(1,2)*simp_rm
-            skl(2,1)=skl(2,1)*simp_rm
-            skl(1,3)=skl(1,3)*simp_rm
-            skl(3,1)=skl(3,1)*simp_rm
-            skl(2,3)=skl(2,3)*simp_rm
-            skl(3,2)=skl(3,2)*simp_rm
 !
 !                 calculation of the nodal forces
 !
@@ -1181,7 +1153,7 @@ c     Bernhardi end
                      do m3=1,3
                         do m4=1,3
                            ckl(m1,m2)=ckl(m1,m2)+
-     &                     skl_unpen(m3,m4)*xkl(m1,m3)*xkl(m2,m4)
+     &                          skl(m3,m4)*xkl(m1,m3)*xkl(m2,m4)
                         enddo
                      enddo
                      ckl(m1,m2)=ckl(m1,m2)/vj
