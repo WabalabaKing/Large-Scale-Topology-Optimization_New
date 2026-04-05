@@ -19,12 +19,12 @@ import subprocess
 # Design variables of the problem
 # this defines initial value and how they are written to an arbitrary file
 NCPU = 8
-penalty = 1
+penalty = 0.5
 rmin = 0.03
 volfrac=0.5
 InputFileName="NLCB"
 nDV = 10975
-nnz = 80
+nnz = 200
 sigmax = 1
 pexp = 10
 sigrelax = 0.001
@@ -32,7 +32,7 @@ counter = 0
 ComplianceStar = 11780
 while penalty <=3.0:
    counter = counter + 1
-   penalty = penalty+0.5
+   penalty = penalty+0.2
    cpucmd = "export OMP_NUM_THREADS="+str(int(NCPU))
    os.system(cpucmd)
 
@@ -40,7 +40,7 @@ while penalty <=3.0:
    with open('density.dat', 'w') as file:
       file.write("__X__")
    if counter==1:
-      x0= volfrac*np.ones(nDV,dtype=float)
+      x0= volfrac * np.ones(nDV,dtype=float)
    else:
       x0 = x
 
@@ -72,10 +72,10 @@ while penalty <=3.0:
    #strcon.addValueEvalStep(evalFun1)
 
    driver = IpoptDriver()
-   driver.addObjective("min", fun1, 1e-4)
+   driver.addObjective("min", fun1, 1)
    driver.addUpperBound(con,volfrac,1)
    #driver.addUpperBound(strcon,1.0,1e-10)
-   optIter = 100
+   optIter = 30
 
    driver.setEvaluationMode(False,2.0)
    driver.setStorageMode(True, "DSN_")
@@ -90,7 +90,7 @@ while penalty <=3.0:
 
    nlp.set(warm_start_init_point = 'no' ,
                nlp_scaling_method = "none",    
-               #nlp_scaling_max_gradient=,
+               #nlp_scaling_max_gradient=1e-2,
                accept_every_trial_step = "no",
                limited_memory_max_history = 50,
                max_iter = optIter,

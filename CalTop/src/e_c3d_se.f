@@ -1910,18 +1910,6 @@ c            alp=.2215d0
 !           dR/drho_e = p*rho^(p-1) * f_int_0^e
 !           lambda = K_T^{-1} * f_int_0  (from objectivemain_se.c)
 !           dotu = lambda^T * f_int_0^e
-            if(nelem.eq.1) then
-               write(*,*) 'DEBUG e1: nope=',nope,' indexe=',indexe
-               write(*,*) 'DEBUG e1: rhoi=',rhoi,' penal=',penal
-               write(*,*) 'DEBUG e1: lambda(1:3)=',
-     &            lambda(1),lambda(2),lambda(3)
-               write(*,*) 'DEBUG e1: fn0_out(1:3,indexe+1)=',
-     &            fn0_out(1,indexe+1),fn0_out(2,indexe+1),
-     &            fn0_out(3,indexe+1)
-               write(*,*) 'DEBUG e1: nactdof(1:3,konl(1))=',
-     &            nactdof(1,konl(1)),nactdof(2,konl(1)),
-     &            nactdof(3,konl(1))
-            endif
             dotu=0.d0
             do j=1,nope
                do k=1,3
@@ -1931,11 +1919,6 @@ c            alp=.2215d0
                   endif
                enddo
             enddo
-            if(nelem.eq.1) then
-               write(*,*) 'DEBUG e1: dotu=',dotu
-               write(*,*) 'DEBUG e1: sensi(before)=',
-     &            -penal*(rhoi**(penal-1))*dotu
-            endif
             !sensi=-penal*(rhoi**(penal-1))*dotu
             sensi = -penal*(rhoi**(2*penal-1))*dotu
             ecompli=0.d0
