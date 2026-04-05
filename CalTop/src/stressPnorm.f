@@ -79,7 +79,7 @@
 
 !     p-norm variables 
       real*8 sx, sy, sz, txy, txz, tyz, vm, vm2, wgt
-      real*8 g_sump, g_vol, pexp
+      real*8 g_sump, g_vol, pexp, vm_sum
       real*8 rho_e, rho_min, rho_eff, rho_p, eps_relax, sig0, phi
 ! 
 
@@ -172,6 +172,7 @@
 !
 
 !     Begin loop over all integrations points per element
+         vm_sum = 0.d0
          do jj=1,mint3d
 
             ! Get integration weight for this element
@@ -276,8 +277,7 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !              stress in Duysinx and Sigmnd, the penalized
 !              rho cancels out in the stress term with
 !              relaxation. Pass rho_p = 1 below
-!             rho_p   = rho_eff**penal
-               rho_p = 1.d0
+              rho_p   = rho_eff**penal
 !              Note: Since we are not penalizing the stress here
 !              von Misses must be penalized in ccx_2.15.c 
 !              when writing to .vtu file
@@ -288,12 +288,12 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
 !           calculating the local stiffness and stress
 !           Constitutive law
             nlgeom_undo=0
-            call mechmodel(elconloc,elas,emec,kode,emec0,ithermal,
+            call mechmodel_simp(elconloc,elas,emec,kode,emec0,ithermal,
      &           icmd,beta,stre,xkl,ckl,vj,xikl,vij,
      &           plconloc,xstate,xstateini,ielas,
      &           amat,t1l,dtime,time,ttime,i,jj,nstate_,mi(1),
      &           iorien,pgauss,orab,eloc,mattyp,qa(3),istep,iinc,
-     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo)
+     &           ipkon,nmethod,iperturb,qa(4),nlgeom_undo, rho_p)
 !
             if(((nmethod.ne.4).or.(iperturb(1).ne.0)).and.
      &         (nmethod.ne.5).and.(icmd.ne.3)) then
@@ -343,36 +343,25 @@ c                  write(*,*) 'vnoeie',i,konl(m1),(vkl(m2,k),k=1,3)
             !print *, 'sx = ', sx
             !print *, 'sy = ', sy
 
+
 !  --- von Mises (without penalization)
             vm2 = (sx-sy)*(sx-sy) + (sy-sz)*(sy-sz) + (sz-sx)*(sz-sx)
             vm2 = 0.5d0*vm2 + 3.d0*(txy*txy + txz*txz + tyz*tyz)
             vm  = dsqrt(vm2)
-
-!            write(*,*), 'Currrent vm:', vm
-
-!  --- filtered design alread in [0,1] (clamp defenseively)  ---
-            rho_e = design(i)
-            ! (optional clamp, safe if design may drift)
-            if (rho_e .lt. 0.d0) rho_e = 0.d0
-            if (rho_e .gt. 1.d0) rho_e = 1.d0
-
-            rho_eff = max(rho_e, rho_min)
-            rho_p = rho_eff**penal
-
-! --- Duysinx-Sigmund effective von Misses stress measure for an element
-            phi = (vm/ (sig0)) + eps_relax - (eps_relax/rho_eff)
-! --- Consider effective von Misses stress (phi) > 0 only
-            if (phi .lt. 0.d0) phi = 0.d0
-
-!           write(*,*), 'Phi: ', phi
-
-! --- With effective von Misses stress calculated, raise to pexp
-! --- and sum over all elements
-! --- P-norm aggregation for this element
-            g_sump = g_sump + (phi**pexp)
+            vm_sum = vm_sum + vm
 !
          enddo  ! <--- end of integration over element Gauss points
 
+!  --- Average vm over Gauss points (handles both C3D4 and C3D10)
+         vm = vm_sum/dble(mint3d)
+         rho_e = design(i)
+         if (rho_e .lt. 0.d0) rho_e = 0.d0
+         if (rho_e .gt. 1.d0) rho_e = 1.d0
+         rho_eff = max(rho_e, rho_min)
+         rho_p = rho_eff**penal
+         phi = (vm / sig0) + eps_relax - (eps_relax / rho_eff)
+         if (phi .lt. 0.d0) phi = 0.d0
+         g_sump = g_sump + (phi**pexp)
       enddo   ! <--- end of loop over all elements
 !
 

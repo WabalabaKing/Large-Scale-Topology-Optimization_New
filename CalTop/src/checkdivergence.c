@@ -63,7 +63,7 @@ void checkdivergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
         *fn=NULL,*eenmax=NULL,*fnr=NULL,*fni=NULL,*qfx=NULL,*cdn=NULL,
         *cdnr=NULL,*cdni=NULL;
 
-    ia=ctrl[7];kscalemax=ctrl[54];
+    ia=ctrl[7];kscalemax=ctrl[55];
 
     /* check whether divergence was signaled in radflowload.c
        => repeat the increment with a smaller size */

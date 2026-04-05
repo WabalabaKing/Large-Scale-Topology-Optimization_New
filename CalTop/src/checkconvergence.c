@@ -56,16 +56,16 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
 	  double *energy, double *allwk, double *energyref, double *emax,
 	  double *r_abs, double *enetoll, double *energyini, double *allwkini,
 	  double *temax, double *sizemaxinc, ITG* ne0, ITG* neini,
-	  double *dampwk, double *dampwkini, double *energystartstep) {
+	  double *dampwk, double *dampwkini, double *energystartstep,ITG *neq, double *fext) {
 
     ITG i0,ir,ip,ic,il,ig,ia,iest,iest1=0,iest2=0,iconvergence,idivergence,
 	ngraph=1,k,*ipneigh=NULL,*neigh=NULL,*inum=NULL,id,istart,iend,inew,
-        i,j,mt=mi[1]+1,iexceed,iforceincsize=0,kscalemax,itf2f;
+        i,j,mt=mi[1]+1,iexceed,iforceincsize=0,kscalemax,itf2f,kk;
 
     double df,dc,db,dd,ran,can,rap,ea,cae,ral,da,*vr=NULL,*vi=NULL,*stnr=NULL,
 	*stni=NULL,*vmax=NULL,*stnmax=NULL,*cs=NULL,c1[2],c2[2],reftime,
         *fn=NULL,*eenmax=NULL,*fnr=NULL,*fni=NULL,*qfx=NULL,*cdn=NULL,
-        *cdnr=NULL,*cdni=NULL,tmp, maxdecay=0.0, r_rel,cetol;
+        *cdnr=NULL,*cdni=NULL,tmp, maxdecay=0.0, r_rel,cetol,l2_res,l2_fext,l2_ratio;
 
     /* reset ialeatoric to zero */
 
@@ -132,6 +132,16 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
     /* mechanical */
 
     if(*ithermal<2){
+        /* L2 relative residual norm */
+        l2_res=0.0; l2_fext=0.0; l2_ratio=2.0;
+        for(kk=0;kk<neq[0];kk++){
+            l2_res  += b[kk]*b[kk];
+			l2_fext += fext[kk]*fext[kk];
+        }
+		l2_res = sqrt(l2_res)/neq[0];
+		l2_fext = sqrt(l2_fext)/neq[0];
+		l2_ratio = l2_res/l2_fext;
+        printf(" L2 ratio= %e\n",l2_ratio);
 //         number of iterations exceeding 1
 	if((*iit>1)&&
 //         force residual criterion satisfied (0.5 %)
@@ -140,11 +150,12 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
            (*iflagact==0)&&
 //         cetol criterion satisfied if *visco
            ((*nmethod!=-1)||(qa[3]<=cetol))&&
-//         solution change criterion satisfied (1 %)
-	   ((cam[0]<=c2[0]*uam[0])||
+//         L2 relative residual OR classic displacement correction
+	   ((l2_ratio<1.e-4))) iconvergence=1;
+/*	    ((cam[0]<=c2[0]*uam[0])||
 	    (((ram[0]*cam[0]<c2[0]*uam[0]*ram2[0])||(ram[0]<=ral*qam[0])||
 	      (qa[0]<=ea*qam[0]))&&(*ntg==0))||
-	    (cam[0]<1.e-8))) iconvergence=1;
+	    (cam[0]<1.e-8))) iconvergence=1;*/
     }
 
     /* thermal */

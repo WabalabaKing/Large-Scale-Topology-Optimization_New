@@ -338,8 +338,7 @@ int main(int argc,char *argv[])
   int eval_PNORM = 0; /** < PNORM evaluation flag */
 
 
-  double ctrl[56]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5};
-
+  double ctrl[60]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5,1.1,0.,1.0,0.};
   double fei[3];
   double *xmodal=NULL;
   double timepar[5];
@@ -360,7 +359,6 @@ int main(int argc,char *argv[])
   double eps_relax = 1e-03;
   double rhomin = 1e-06;
   double pexp = 1.0;
-  int stress_adjoint = 1; // Set this to 1 for now.
 
   ITG itertop= 1; /**<iteration counter in topology optimization */
   ITG fnnzassumed = 500; /**< assume 500 non zeros in each row of filtermatrix */ 
@@ -458,7 +456,6 @@ else
     {
       pexp=atof(argv[i+1]);
       /* With P-norm exponent passed, set eval_stress = 1*/
-      stress_adjoint = 1;
       break;
     }
   }  
@@ -1172,7 +1169,9 @@ while(istat>=0)
 
 
   if((abs(nmethod)!=1)||(iperturb[0]<2))icascade=0;
-
+  if (pexp > 1.0) {
+    eval_PNORM = (iperturb[0] >= 2) ? 2 : 1;
+  }
   //	FORTRAN(writeboun,(nodeboun,ndirboun,xboun,typeboun,&nboun));
 
   if(istat<0) break;
@@ -1777,6 +1776,33 @@ while(istat>=0)
   /* if solving static analysis or green function calculation */
   if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
   {
+  NNEW(dPnorm_drho, double, ne);
+
+  /*----------------------------------------------------------------------
+   * Filter densities and set rhoPhys - runs for both linear and nlgeom.
+   * With a filter radius > 0 (pSupplied != 0), apply the density filter.
+   * Otherwise use raw design densities directly.
+   *--------------------------------------------------------------------*/
+  if(pSupplied != 0)
+  {
+    NNEW(filternnzElems, ITG, ne_);
+    NNEW(designFiltered, double, ne_);
+    printf("Filtering element densities...");
+    filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems,
+                                  &ne, &fnnzassumed, &qfilter, filternnz);
+    /* Enforce rhomin floor to prevent division by zero */
+    for(i=0; i<ne_; i++){
+        if(designFiltered[i] < rhomin) designFiltered[i] = rhomin;
+    }
+    rhoPhys = designFiltered;
+    printf("done\n");
+  }
+  else
+  {
+    /* design initialised to 1.0 in rho.c - use directly */
+    rhoPhys = design;
+  }
+
 	  if(iperturb[0]<2)
     {
 	    mpcinfo[0]=memmpc_;
@@ -1793,7 +1819,7 @@ while(istat>=0)
 	      FORTRAN(stop,());
 	    }
 
-      printf("\nTOPOLOGY OPTIMIZATION PARAMTERS----------------------------|\n");
+      printf("\nTOPOLOGY OPTIMIZATION PARAMTERS (Linear Statics)----------------------------|\n");
       printf("SIMP \n");
       printf("  Penalty parameter                 %.2f\n", pstiff);
       printf("\n");
@@ -1813,23 +1839,9 @@ while(istat>=0)
       printf("  Compliance:                       YES\n");
       printf("  Volume fraction:                  YES\n");
 
-      if (eval_CG == 1)
-      {
-        printf("  Center of mass                    YES\n");
-      }
-      else
-      {
-        printf("  Center of mass                    NO\n");
-      }
-
-      if (eval_PNORM == 1)
-      {
-        printf("  PNORM                             YES\n");
-      }
-      else
-      {
-        printf("  PNORM                             NO\n");
-      }
+      printf("  Center of mass                    %s\n", eval_CG    ? "YES" : "NO");
+      printf("  PNORM                             %s\n", eval_PNORM ? "YES" : "NO");
+   
       printf("MATERIAL PROPERTY \n");
       printf("  Material density                  %.1f\n", mat_dens);
 
@@ -1840,73 +1852,11 @@ while(istat>=0)
       fflush(stdout);
 
       printf("\n");
-      if(pSupplied!=0)
-      {
-        printf("Penalization parameter found --> will evaluate senitivities\n");
       
-      }
-
-      if(pSupplied!=0)
-      {
-        printf("Checking if filter matrix needs to be built \n");
-    
-        NNEW(filternnzElems,ITG,ne_);
-        NNEW(designFiltered,double,ne_);
-
-        printf("Element density for the 10th element: %.4f \n", design[9]);
-        /* apply the filter matrix on rho to get rhoPhys */ 
-        printf("Filtering element densities...\n");
-        filterDensity_buffered_bin_mt(design, designFiltered, filternnzElems, &ne, &fnnzassumed, &qfilter, filternnz);
-        printf("Done!");
-
-        // DEBUG: Print first five and last five values of designFiltered
-        /*
-        printf("First five designFiltered values:\n");
-        for (int i = 0; i < 5 && i < ne_; ++i) 
-        {
-            printf("  designFiltered[%d] = %g\n", i, designFiltered[i]);
-        }
-
-        printf("Last five designFiltered values:\n");
-        for (int i = (ne_ > 5 ? ne_ - 5 : 0); i < ne_; ++i) 
-        {
-            printf("  designFiltered[%d] = %g\n", i, designFiltered[i]);
-        }
-
-        */
-        /* Set physical element densities to */
-        rhoPhys=designFiltered;
-      }
-      else
-      {
-        printf("No penalization parameter found, initializing all densities to one \n");
-        /* design was initialized to 1.0 in rho.c */
-        rhoPhys=design;
-
-        // DEBUG only
-
-        /*printf("First five rhoPhys values:\n");
-
-        for (int i = 0; i < 5 && i < ne_; ++i) {
-            printf("  rhoPhys[%d] = %g\n", i, rhoPhys[i]);
-        }
-
-        printf("Last five rhoPhys values:\n");
-        for (int i = (ne_ > 5 ? ne_ - 5 : 0); i < ne_; ++i) 
-        {
-            printf(" rhoPhys[%d] = %g\n", i, rhoPhys[i]);
-        }
-        */
-
-      }
-
-    
       time_t startl, endl; 
 	    startl = time(NULL);
 
       printf("\n\nSOLVING LINEAR SYSTEM----------------------------------------|\n\n");
-
-       NNEW(dPnorm_drho, double, ne);
       
   
 	    linstatic(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
@@ -1925,12 +1875,12 @@ while(istat>=0)
              prset,&nener,trab,inotr,&ntrans,fmpc,cbody,ibody,xbody,&nbody,
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
-	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho, &mat_dens);
+	     orname,rhoPhys,&pstiff, stx, &sigma0, &eps_relax, &rhomin, &pexp, &Pnorm, dPnorm_drho, &mat_dens,&eval_PNORM);
 
       endl = time(NULL);
 
 	    printf("\n Time taken for linstatic.c is %.8f seconds \n", 
-		  difftime(endl, startl)); 
+		      difftime(endl, startl)); 
       
 
       // NOTE: Filter, write and free stress array here to reduce memory signature
@@ -1960,60 +1910,75 @@ while(istat>=0)
 
       printf("|------------------------------------------------------------|\n");
 
-	    for(i=0;i<3;i++)
-      {
-        nzsprevstep[i]=nzs[i];
-      }
+      printf("|------------------------------------------------------------|\\n");
 
-	    memmpc_=mpcinfo[0];
-      mpcfree=mpcinfo[1];
-      icascade=mpcinfo[2];
-      maxlenmpc=mpcinfo[3];
+      for(i=0;i<3;i++) nzsprevstep[i]=nzs[i];
+      memmpc_=mpcinfo[0]; mpcfree=mpcinfo[1];
+      icascade=mpcinfo[2]; maxlenmpc=mpcinfo[3];
 
     } // end if(iperturb[0]<2)
 
-    else /* non-linear analysis from here */
+    else
     {
-	    mpcinfo[0]=memmpc_;
-      mpcinfo[1]=mpcfree;
-      mpcinfo[2]=icascade;
-	    mpcinfo[3]=maxlenmpc;
+      /* ---- Nonlinear geometric (nlgeom) ---- */
+      mpcinfo[0]=memmpc_; mpcinfo[1]=mpcfree;
+      mpcinfo[2]=icascade; mpcinfo[3]=maxlenmpc;
 
-	    nonlingeo(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
-	     &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
-             &nforc,&nelemload,&sideload,xload,&nload,
-	     nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,&ikmpc,
-	     &ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr,
-	     &vold,iperturb,sti,nzs,&kode,filab,&idrct,jmax,
-	     jout,timepar,eme,xbounold,xforcold,xloadold,
-	     veold,accold,amname,amta,namta,
-	     &nam,iamforc,&iamload,iamt1,&alpha,
-             &iexpl,iamboun,plicon,nplicon,plkcon,nplkcon,
-	     &xstate,&npmat_,&istep,&ttime,matname,qaold,mi,
-	     &isolver,&ncmat_,&nstate_,&iumat,cs,&mcs,&nkon,&ener,
-	     mpcinfo,output,
-             shcon,nshcon,cocon,ncocon,physcon,&nflow,ctrl,
-             set,&nset,istartset,iendset,ialset,&nprint,prlab,
-             prset,&nener,ikforc,ilforc,trab,inotr,&ntrans,&fmpc,
-             cbody,ibody,xbody,&nbody,xbodyold,ielprop,prop,
-	     &ntie,tieset,&itpamp,&iviewfile,jobnamec,tietol,&nslavs,thicke,
-	     ics,&nintpoint,&mortar,
-	     &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
-	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
-	     velo,veloo, rhoPhys,&pstiff);
+      printf("\nTOPOLOGY OPTIMIZATION PARAMETERS (Nonlinear / NLgeom)------|\\n");
+      printf("SIMP \n");
+      printf("  Penalty parameter                 %.2f\n", pstiff);
+      printf("\n");
+      printf("FILTER MATRIX \n");
+      printf("  Density filter radius             %.2f\n", rmin);
+      printf("  Non zeros in Filtermatrix         %d\n", fnnzassumed);
+      printf("\n");
+      printf("STRESS AGGREGATION \n");
+      printf("  P-norm exponent                   %.2f\n", pexp);
+      printf("  Stress relaxation                 %.2f\n", eps_relax);
+      printf("  Stress threshold                  %.2f\n", sigma0);
+      printf("\n");
+      printf("SENSITIVITY FLAGS \n");
+      printf("  Compliance:                       YES (NLgeom adjoint - WIP)\n");
+      printf("  Volume fraction:                  YES\n");
+      printf("  PNORM                             %s (NLgeom adjoint - WIP)\n",
+             eval_PNORM ? "YES" : "NO");
+      printf("|------------------------------------------------------------|\\n\n");
+      fflush(stdout);
 
-	      memmpc_=mpcinfo[0];
-        mpcfree=mpcinfo[1];
-        icascade=mpcinfo[2];
-        maxlenmpc=mpcinfo[3];
+      printf("\n\nSOLVING NONLINEAR SYSTEM-------------------------------------|\\n\n");
 
-	    for(i=0;i<3;i++)
-      {
-        nzsprevstep[i]=nzs[i];
-      }
-    } // end else
+      nonlingeo(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
+           &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
+           &nforc,&nelemload,&sideload,xload,&nload,
+           nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,&ikmpc,
+           &ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
+           alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
+           t0,t1,t1old,ithermal,prestr,&iprestr,
+           &vold,iperturb,sti,nzs,&kode,filab,&idrct,jmax,
+           jout,timepar,eme,xbounold,xforcold,xloadold,
+           veold,accold,amname,amta,namta,
+           &nam,iamforc,&iamload,iamt1,&alpha,
+           &iexpl,iamboun,plicon,nplicon,plkcon,nplkcon,
+           &xstate,&npmat_,&istep,&ttime,matname,qaold,mi,
+           &isolver,&ncmat_,&nstate_,&iumat,cs,&mcs,&nkon,&ener,
+           mpcinfo,output,
+           shcon,nshcon,cocon,ncocon,physcon,&nflow,ctrl,
+           set,&nset,istartset,iendset,ialset,&nprint,prlab,
+           prset,&nener,ikforc,ilforc,trab,inotr,&ntrans,&fmpc,
+           cbody,ibody,xbody,&nbody,xbodyold,ielprop,prop,
+           &ntie,tieset,&itpamp,&iviewfile,jobnamec,tietol,&nslavs,thicke,
+           ics,&nintpoint,&mortar,
+           &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
+           xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
+           velo,veloo,rhoPhys,&pstiff,
+           &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho, &eval_PNORM,&mat_dens);
+
+      memmpc_=mpcinfo[0]; mpcfree=mpcinfo[1];
+      icascade=mpcinfo[2]; maxlenmpc=mpcinfo[3];
+
+      for(i=0;i<3;i++) nzsprevstep[i]=nzs[i];
+
+    } // end else (nlgeom)
   } //end if((nmethod<=1)||(nmethod==11)||((iperturb[0]>1)&&(nmethod<8)))
   
   
@@ -2136,7 +2101,7 @@ while(istat>=0)
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
 	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
-             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
+             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
 
       compute_mass(ne_, eleVol, rhoPhys, mat_dens);
@@ -2198,7 +2163,7 @@ while(istat>=0)
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
 	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
-             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
+             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
       printf("done\n");
 
@@ -2397,15 +2362,15 @@ while(istat>=0)
     {
       /* write output fields for passive elements */
       printf("  \nWriting output fields for active and passive elements ...");
-      tecplot_vtu_passive(nk, ne, co, kon, ipkon, vold, stx, rhoPhys, passiveIDs, numPassive);
-      tecplot_vtu_active(nk, ne, co, kon, ipkon, vold, stx, rhoPhys, passiveIDs, numPassive);
+      tecplot_vtu_passive(nk, ne, co, kon, ipkon, lakon, mi[0], vold, stx, rhoPhys, passiveIDs, numPassive);
+      tecplot_vtu_active(nk, ne, co, kon, ipkon, lakon, mi[0], vold, stx, rhoPhys, passiveIDs, numPassive);
       printf("done\n");
     }
     else
     {
       /* Write elastic fields to a vtu file */
       printf("\nWriting output fields...");
-      tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
+      tecplot_vtu(nk, ne, co, kon, ipkon, lakon, mi[0], vold, stx, rhoPhys);
       printf("done!\n\n");
     }
 

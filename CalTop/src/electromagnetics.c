@@ -1389,7 +1389,7 @@ void electromagnetics(double **cop, ITG *nk, ITG **konp, ITG **ipkonp,
 	    &mortar,nmat,ielprop,prop,&ialeatoric,&kscale,
 	    energy, &allwk, &energyref,&emax, &enres, &enetoll,        //MPADD
 	    energyini, &allwkini ,&allwk, &reswk, &ne0, &ne0, &dampwk, //MPADD
-	    &dampwk, energy);                                          //MPADD
+	    &dampwk, energy,NULL,NULL);                                          //MPADD
       }
       
       /*********************************************************/

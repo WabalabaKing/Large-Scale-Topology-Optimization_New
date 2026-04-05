@@ -198,8 +198,8 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 	}
 	else if(*isolver==7){
 #ifdef PARDISO
-	//    pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[1],&nzs[1],
-	//		   &symmetryflag,&inputformat,jq,&nzs[2]);
+	    pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[1],&nzs[1],
+			   &symmetryflag,&inputformat,jq,&nzs[2]);
 #else
 	    printf("*ERROR in objectivemain_se: the PARDISO library is not linked\n\n");
 	    FORTRAN(stop,());
@@ -412,7 +412,8 @@ void objectivemain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne
 		    }
 		    else if(*isolver==7){
 #ifdef PARDISO
-		//	pardiso_solve(fint,&neq[1],&symmetryflag,&nrhs);
+			pardiso_solve(fint,&neq[1],&symmetryflag,&nrhs);
+			pardiso_cleanup(&neq[1],&symmetryflag);
 #endif
 }	      
 	      

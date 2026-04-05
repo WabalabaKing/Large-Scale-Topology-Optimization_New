@@ -44,8 +44,7 @@
  * ```
  */
 
-void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy) 
-    
+void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, char *lakon, int mi0, double *v, double *stx, double *rhoPhy)    
     {
     FILE *fp = fopen("elastic_Field.vtu", "w");
     if (fp == NULL) {
@@ -72,7 +71,10 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
     fprintf(fp, "      <Cells>\n");
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
     for (int ielem = 0; ielem < ne; ielem++) {
-        for (int j = 0; j < 4; j++) {  // Always tetrahedral elements
+        char *lk= &lakon[8*ielem];
+        int nope = 4;
+        if (lk[3]=='1' && lk[4]=='0') nope = 10;
+        for (int j = 0; j < nope; j++) {  // Node # based on nope (C3D4or C3D10)
             fprintf(fp, " %d", kon[ipkon[ielem] + j]-1);
         }
         fprintf(fp, "\n");
@@ -81,15 +83,21 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
 
     // Write offsets
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n");
+    
+    int offset = 0;
     for (int ielem = 0; ielem < ne; ielem++) {
-        fprintf(fp, " %d\n", (ielem + 1) * 4);
+        char *lk = &lakon[8*ielem];
+        offset += (lk[3]=='1' && lk[4]=='0') ? 10 : 4;
+        fprintf(fp, " %d\n", offset);
     }
     fprintf(fp, "        </DataArray>\n");
 
     // Write cell types
     fprintf(fp, "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n");
     for (int ielem = 0; ielem < ne; ielem++) {
-        fprintf(fp, " 10\n");  //  VTU type 10 for 4-node tetrahedra
+        char *lk = &lakon[8*ielem];
+        int vtktype = (lk[3]=='1' && lk[4]=='0') ? 24 : 10;
+        fprintf(fp, " %d\n", vtktype);
     }
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </Cells>\n");
@@ -110,12 +118,18 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
     // --- Von Mises scalar per cell ---
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"VonMises\" NumberOfComponents=\"1\" format=\"ascii\">\n");
     for (int cell = 0; cell < ne; cell++) {
-        double sxx = stx[6*cell    ];
-        double syy = stx[6*cell + 1];
-        double szz = stx[6*cell + 2];
-        double sxy = stx[6*cell + 3];
-        double syz = stx[6*cell + 4];
-        double szx = stx[6*cell + 5];
+        char *lk = &lakon[8*cell];
+        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+        double sxx=0, syy=0, szz=0, sxy=0, syz=0, szx=0;
+        for (int gp = 0; gp < ngp; gp++) {
+            sxx += stx[6*mi0*cell + 6*gp    ];
+            syy += stx[6*mi0*cell + 6*gp + 1];
+            szz += stx[6*mi0*cell + 6*gp + 2];
+            sxy += stx[6*mi0*cell + 6*gp + 3];
+            syz += stx[6*mi0*cell + 6*gp + 4];
+            szx += stx[6*mi0*cell + 6*gp + 5];
+        }
+        sxx/=ngp; syy/=ngp; szz/=ngp; sxy/=ngp; syz/=ngp; szx/=ngp;
 
         double vm = sqrt(
             0.5 * ( (sxx - syy)*(sxx - syy)
@@ -132,9 +146,16 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
     for (int cell = 0; cell < ne; cell++) 
     {
+        char *lk = &lakon[8*cell];
+        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+        double s[6] = {0,0,0,0,0,0};
+        for (int gp = 0; gp < ngp; gp++) {
+            for (int c = 0; c < 6; c++)
+                s[c] += stx[6*mi0*cell + 6*gp + c];
+        }
+        for (int c = 0; c < 6; c++) s[c] /= ngp;
         fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n",
-                stx[6*cell    ], stx[6*cell + 1], stx[6*cell + 2],
-                stx[6*cell + 3], stx[6*cell + 4], stx[6*cell + 5]);
+                s[0], s[1], s[2], s[3], s[4], s[5]);
     }
     fprintf(fp, "        </DataArray>\n");
 
@@ -161,6 +182,7 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, do
 
 void tecplot_vtu_passive(int nk, int ne,
                          double *co, int *kon, int *ipkon,
+                         char *lakon, int mi0,
                          double *v, double *stx, double *rhoPhy,
                          int *passiveIDs, int numPassive)
 {
@@ -196,8 +218,10 @@ void tecplot_vtu_passive(int nk, int ne,
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
     for (int k = 0; k < numPassive; k++) {
         int e = passiveIDs[k] - 1;  // convert 1-based element ID to 0-based index
-        for (int j = 0; j < 4; j++) {  // Q4 elements
-            fprintf(fp, " %d", kon[ipkon[e] + j] - 1); // nodes are 1-based → 0-based
+        char *lk = &lakon[8*e];
+        int nope = (lk[3]=='1' && lk[4]=='0') ? 10 : 4;
+        for (int j = 0; j < nope; j++) {  // C3D4 or C3D10
+            fprintf(fp, " %d", kon[ipkon[e] + j] - 1);
         }
         fprintf(fp, "\n");
     }
@@ -205,15 +229,22 @@ void tecplot_vtu_passive(int nk, int ne,
 
     // Offsets (still 4 nodes per cell)
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n");
+    int offset = 0;
     for (int k = 0; k < numPassive; k++) {
-        fprintf(fp, " %d\n", (k + 1) * 4);
+        int e = passiveIDs[k] - 1;
+        char *lk = &lakon[8*e];
+        offset += (lk[3]=='1' && lk[4]=='0') ? 10 : 4;
+        fprintf(fp, " %d\n", offset);
     }
     fprintf(fp, "        </DataArray>\n");
 
     // Types (VTK_TETRA = 10 for 4-node tets)
     fprintf(fp, "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n");
     for (int k = 0; k < numPassive; k++) {
-        fprintf(fp, " 10\n");
+        int e = passiveIDs[k] - 1;
+        char *lk = &lakon[8*e];
+        int vtktype = (lk[3]=='1' && lk[4]=='0') ? 24 : 10;
+        fprintf(fp, " %d\n", vtktype);
     }
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </Cells>\n");
@@ -237,22 +268,25 @@ void tecplot_vtu_passive(int nk, int ne,
     // Von Mises per passive cell
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"VonMises\" NumberOfComponents=\"1\" format=\"ascii\">\n");
     for (int k = 0; k < numPassive; k++) {
-        int e = passiveIDs[k] - 1;  // 0-based element index
-
-        double sxx = stx[6*e    ];
-        double syy = stx[6*e + 1];
-        double szz = stx[6*e + 2];
-        double sxy = stx[6*e + 3];
-        double syz = stx[6*e + 4];
-        double szx = stx[6*e + 5];
-
+        int e = passiveIDs[k] - 1;
+        char *lk = &lakon[8*e];
+        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+        double sxx=0, syy=0, szz=0, sxy=0, syz=0, szx=0;
+        for (int gp = 0; gp < ngp; gp++) {
+            sxx += stx[6*mi0*e + 6*gp    ];
+            syy += stx[6*mi0*e + 6*gp + 1];
+            szz += stx[6*mi0*e + 6*gp + 2];
+            sxy += stx[6*mi0*e + 6*gp + 3];
+            syz += stx[6*mi0*e + 6*gp + 4];
+            szx += stx[6*mi0*e + 6*gp + 5];
+        }
+        sxx/=ngp; syy/=ngp; szz/=ngp; sxy/=ngp; syz/=ngp; szx/=ngp;
         double vm = sqrt(
             0.5 * ( (sxx - syy)*(sxx - syy)
                   + (syy - szz)*(syy - szz)
                   + (szz - sxx)*(szz - sxx) )
           + 3.0 * ( sxy*sxy + syz*syz + szx*szx )
         );
-
         fprintf(fp, "      %.8f\n", vm);
     }
     fprintf(fp, "        </DataArray>\n");
@@ -261,9 +295,15 @@ void tecplot_vtu_passive(int nk, int ne,
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
     for (int k = 0; k < numPassive; k++) {
         int e = passiveIDs[k] - 1;
+        char *lk = &lakon[8*e];
+        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+        double s[6] = {0,0,0,0,0,0};
+        for (int gp = 0; gp < ngp; gp++)
+            for (int c = 0; c < 6; c++)
+                s[c] += stx[6*mi0*e + 6*gp + c];
+        for (int c = 0; c < 6; c++) s[c] /= ngp;
         fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n",
-                stx[6*e    ], stx[6*e + 1], stx[6*e + 2],
-                stx[6*e + 3], stx[6*e + 4], stx[6*e + 5]);
+                s[0], s[1], s[2], s[3], s[4], s[5]);
     }
     fprintf(fp, "        </DataArray>\n");
 
@@ -288,6 +328,7 @@ void tecplot_vtu_passive(int nk, int ne,
 
 void tecplot_vtu_active(int nk, int ne,
                         double *co, int *kon, int *ipkon,
+                        char *lakon, int mi0,
                         double *v, double *stx, double *rhoPhy,
                         int *passiveIDs, int numPassive)
 {
@@ -351,8 +392,10 @@ void tecplot_vtu_active(int nk, int ne,
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
     for (int e = 0; e < ne; e++) {
         if (isPassive[e]) continue;
-        for (int j = 0; j < 4; j++) {  // Q4 elements
-            fprintf(fp, " %d", kon[ipkon[e] + j] - 1); // nodes 1-based → 0-based
+        char *lk = &lakon[8*e];
+        int nope = (lk[3]=='1' && lk[4]=='0') ? 10 : 4;
+        for (int j = 0; j < nope; j++) {  // C3D4 or C3D10
+            fprintf(fp, " %d", kon[ipkon[e] + j] - 1);
         }
         fprintf(fp, "\n");
     }
@@ -360,17 +403,22 @@ void tecplot_vtu_active(int nk, int ne,
 
     // Offsets: 4 nodes per active cell
     fprintf(fp, "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n");
-    int offset = 4;
-    for (int i = 0; i < numActive; i++) {
+    int offset = 0;
+    for (int e = 0; e < ne; e++) {
+        if (isPassive[e]) continue;
+        char *lk = &lakon[8*e];
+        offset += (lk[3]=='1' && lk[4]=='0') ? 10 : 4;
         fprintf(fp, " %d\n", offset);
-        offset += 4;
     }
     fprintf(fp, "        </DataArray>\n");
 
     // Types: VTK_TET = 10
     fprintf(fp, "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n");
-    for (int i = 0; i < numActive; i++) {
-        fprintf(fp, " 10\n");
+    for (int e = 0; e < ne; e++) {
+        if (isPassive[e]) continue;
+        char *lk = &lakon[8*e];
+        int vtktype = (lk[3]=='1' && lk[4]=='0') ? 24 : 10;
+        fprintf(fp, " %d\n", vtktype);
     }
     fprintf(fp, "        </DataArray>\n");
     fprintf(fp, "      </Cells>\n");
@@ -396,20 +444,24 @@ void tecplot_vtu_active(int nk, int ne,
     for (int e = 0; e < ne; e++) {
         if (isPassive[e]) continue;
 
-        double sxx = stx[6*e    ];
-        double syy = stx[6*e + 1];
-        double szz = stx[6*e + 2];
-        double sxy = stx[6*e + 3];
-        double syz = stx[6*e + 4];
-        double szx = stx[6*e + 5];
-
+        char *lk = &lakon[8*e];
+        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+        double sxx=0, syy=0, szz=0, sxy=0, syz=0, szx=0;
+        for (int gp = 0; gp < ngp; gp++) {
+            sxx += stx[6*mi0*e + 6*gp    ];
+            syy += stx[6*mi0*e + 6*gp + 1];
+            szz += stx[6*mi0*e + 6*gp + 2];
+            sxy += stx[6*mi0*e + 6*gp + 3];
+            syz += stx[6*mi0*e + 6*gp + 4];
+            szx += stx[6*mi0*e + 6*gp + 5];
+        }
+        sxx/=ngp; syy/=ngp; szz/=ngp; sxy/=ngp; syz/=ngp; szx/=ngp;
         double vm = sqrt(
             0.5 * ( (sxx - syy)*(sxx - syy)
                   + (syy - szz)*(syy - szz)
                   + (szz - sxx)*(szz - sxx) )
           + 3.0 * ( sxy*sxy + syz*syz + szx*szx )
         );
-
         fprintf(fp, "      %.8f\n", vm);
     }
     fprintf(fp, "        </DataArray>\n");
@@ -418,9 +470,15 @@ void tecplot_vtu_active(int nk, int ne,
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
     for (int e = 0; e < ne; e++) {
         if (isPassive[e]) continue;
+        char *lk = &lakon[8*e];
+        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+        double s[6] = {0,0,0,0,0,0};
+        for (int gp = 0; gp < ngp; gp++)
+            for (int c = 0; c < 6; c++)
+                s[c] += stx[6*mi0*e + 6*gp + c];
+        for (int c = 0; c < 6; c++) s[c] /= ngp;
         fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n",
-                stx[6*e    ], stx[6*e + 1], stx[6*e + 2],
-                stx[6*e + 3], stx[6*e + 4], stx[6*e + 5]);
+                s[0], s[1], s[2], s[3], s[4], s[5]);
     }
     fprintf(fp, "        </DataArray>\n");
 

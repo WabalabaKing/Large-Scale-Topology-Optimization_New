@@ -73,7 +73,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
              char *orname,double *design, double *penal, double *stx, double *sigma0, double *eps,
-			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, double *mat_dens)
+			double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, double *mat_dens, int *eval_PNORM)
 	{
 
   		char description[13]="            ",*lakon=NULL,stiffmatrix[132]="",
@@ -273,7 +273,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 	  	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	  	islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, Pnorm, 0);
+    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, &Pnorm, 0);
 
 		// NOTE: At this point xstiff is not penalized
 		
@@ -569,6 +569,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     			NNEW(v,double,mt**nk);
     			NNEW(fn,double,mt**nk);
 				NNEW(brhs,double,mt**nk);
+				DMEMSET(brhs,0,mt**nk,0.0);
     			NNEW(stn,double,6**nk);
     			NNEW(inum,ITG,*nk);
 				NNEW(djdrho_expl, double, *ne);
@@ -607,7 +608,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
             	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	    		islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-            	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl,Pnorm, 1);
+            	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl,Pnorm, (*eval_PNORM == 1) ? 1 : 0);
 
 
 				/* ------------------------------------------------------------
@@ -666,10 +667,24 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				FORTRAN(resultsforc,(nk,b_adj,brhs,nactdof,ipompc,nodempc,
                        		coefmpc,labmpc,nmpc,mi,fmpc,&calc_fn,&calc_f));
 				*/
-				FORTRAN(adjrhs_scatter_linstatic_nompc,(nk, neq, mi, nactdof,brhs,b_adj,nboun, nodeboun, ndirboun));
-					
+				//FORTRAN(adjrhs_scatter_linstatic_nompc,(nk, neq, mi, nactdof,brhs,b_adj,nboun, nodeboun, ndirboun));
+				for (i = 0; i < *nk; ++i) {
+    				for (ITG idir = 1; idir <= 3; ++idir) {
+        				ITG idof = nactdof[idir + i*mt] - 1;
+        				if (idof >= 0) {
+            				b_adj[idof] = brhs[idir + i*mt];
+        				}
+    				}
+				}
 
-				printf(" SKIPPING PARSIDO: adjoint solve \n");
+
+      		#ifdef PARDISO
+			printf("PARSIDO: adjoint solve \n");
+      			pardiso_main(ad,au,adb,aub,&sigma,b_adj,icol,irow,neq,nzs,
+		   			&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+			#endif
+
+				//printf(" SKIPPING PARSIDO: adjoint solve \n");
       			//pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
 	
 				// At this point we have the explicit and adjoint variables.
@@ -702,9 +717,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         		ipobody,xbodyact,ibody,typeboun,design,penal, sigma0, eps, rhomin, pexp, NULL,NULL,Pnorm, 2);
 				*/
 
-				adjoint_eq_2_node(nk, nactdof, nboun, nodeboun,ndirboun,mi,lam, b_adj);
-
-
+				adjoint_eq_2_node(nk, nactdof, nboun, nodeboun, ndirboun, typeboun, mi, lam, b_adj);	
 				/* Allocate memory for implicit derivative*/
 				NNEW(djdrho_impl, double, *ne);
 				
@@ -718,16 +731,18 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
    				- primal nodal field: use vold (current solution in CCX)
    				- adjoint nodal field: lam (just expanded)
 				*/
-				FORTRAN(pnorm_implicit_c3d4,(co,kon,ipkon,lakon,ne,mi,
-        		xstiff, vold, lam, design, penal,
+				FORTRAN(pnorm_implicit,(co,kon,ipkon,lakon,ne,mi,
+        		xstiff, v, lam, design, penal, pexp, eps, sigma0,
         		&nea_loc, &neb_loc, &list_loc, ilist_loc, djdrho_impl));
 
 
 				/* Assemble the global P-norm sensitivity */
 
+				double PnormMult;
+				PnormMult = *Pnorm/pow(*Pnorm,*pexp);
 				for (int i = 0; i < *ne; ++i)
 				{
-					dPnorm_drho[i] = djdrho_expl[i] + djdrho_impl[i];
+					dPnorm_drho[i] = PnormMult* djdrho_impl[i];
 				}
 
 				

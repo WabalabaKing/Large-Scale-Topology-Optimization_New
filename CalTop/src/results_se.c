@@ -75,7 +75,7 @@ void results_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        double *sti,ITG *nkon,ITG *jqs,ITG *irows,
        ITG *nactdofinv,ITG *icoordinate,double *dxstiff,ITG *istartdesi,
        ITG *ialdesi,double *xdesi,ITG *ieigenfrequency,double *fint,
-       ITG *ishapeenergy,char *typeboun){
+       ITG *ishapeenergy,char *typeboun,double *fn0_out){
 
     ITG intpointvarm,calcul_fn,calcul_f,calcul_qa,calcul_cauchy,nener,ikin,
         intpointvart,mt=mi[1]+1,i,j,idesvar,iorien,idir,im,
@@ -220,8 +220,11 @@ void results_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     
     /* in case of nonlinear geometry calculate vector fint */
     
-    if((iperturb[1]==1)&&(*ishapeenergy==1)){
-       FORTRAN(createfint,(ne,ipkon,lakon,kon,nactdof,mi,fn0,fint));
+    if((iperturb[1]==1)){
+       if(*ishapeenergy==1){
+           FORTRAN(createfint,(ne,ipkon,lakon,kon,nactdof,mi,fn0,fint));
+       }
+       memcpy(fn0_out,fn0,sizeof(double)*mt**nkon);
     }
     
     /* loop over the design variables (perturbation) */
