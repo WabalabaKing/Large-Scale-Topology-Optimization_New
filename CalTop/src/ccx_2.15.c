@@ -579,10 +579,6 @@ NNEW(meminset,ITG,nset_);
 NNEW(rmeminset,ITG,nset_);
 NNEW(iuel,ITG,4*nuel_);
 
-
-printf("CG flag before allocation: %d\n", eval_CG);
-printf("PNROM flag before allocation %d\n", eval_PNORM);
-
 FORTRAN(allocation,(&nload_,&nforc_,&nboun_,&nk_,&ne_,&nmpc_,&nset_,&nalset_,
    &nmat_,&ntmat_,&npmat_,&norien_,&nam_,&nprint_,mi,&ntrans_,
    set,meminset,rmeminset,&ncs_,&namtot_,&ncmat_,&memmpc_,&ne1d,
@@ -1169,7 +1165,10 @@ while(istat>=0)
 
 
   if((abs(nmethod)!=1)||(iperturb[0]<2))icascade=0;
-  if (pexp > 1.0) {
+
+
+  if (pexp > 1.0) 
+  {
     eval_PNORM = (iperturb[0] >= 2) ? 2 : 1;
   }
   //	FORTRAN(writeboun,(nodeboun,ndirboun,xboun,typeboun,&nboun));
