@@ -2160,10 +2160,10 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		  NNEW(rgwk,double,lrgw);
 		  NNEW(igwk,ITG,20);
 		  for(i=0;i<neq[1];i++){rwork[i]=1./ad[i];}
-		  FORTRAN(predgmres_struct,(&neq[1],b,sol,&nelt,irow,jq,au,
-				     &isym,&itol,&tol,&itmax,&iter,
-				     &err,&ierr,&iunit,sb,sx,rgwk,&lrgw,igwk,
-				     &ligw,rwork,iwork));
+	//	  FORTRAN(predgmres_struct,(&neq[1],b,sol,&nelt,irow,jq,au,
+//				     &isym,&itol,&tol,&itmax,&iter,
+//				     &err,&ierr,&iunit,sb,sx,rgwk,&lrgw,igwk,
+//				     &ligw,rwork,iwork));
 		  memcpy(b,sol,sizeof(double)*neq[1]);
 		  SFREE(rgwk);SFREE(igwk);SFREE(rwork);SFREE(sol);
 	      }else{
@@ -2207,9 +2207,9 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  }
 	  else if(*isolver==6){
 #ifdef MATRIXSTORAGE
-	      matrixstorage(ad,&au,adb,aub,&sigma,icol,&irow,&neq[1],&nzs[1],
-			    ntrans,inotr,trab,co,nk,nactdof,jobnamec,mi,ipkon,
-			    lakon,kon,ne,mei,nboun,nmpc,cs,mcs,ithermal,nmethod);
+	     // matrixstorage(ad,&au,adb,aub,&sigma,icol,&irow,&neq[1],&nzs[1],
+		//	    ntrans,inotr,trab,co,nk,nactdof,jobnamec,mi,ipkon,
+		//	    lakon,kon,ne,mei,nboun,nmpc,cs,mcs,ithermal,nmethod);
 #else
 	      printf("*ERROR in arpack: the MATRIXSTORAGE library is not linked\n\n");
 	      FORTRAN(stop,());

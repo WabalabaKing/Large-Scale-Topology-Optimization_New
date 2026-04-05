@@ -3,15 +3,15 @@
 # ============================================================
 # Paths for external dependencies
 # ============================================================
-SPOOLES_PATH = /home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization/Deps/Spooles/src
-ARPACK_PATH  = /home/prateek/Documents/GitHub/ARPACK
-YAML_PREFIX  = /home/prateek/Documents/GitHub/Large-Scale-Topology-Optimization/Deps/yaml-cpp-yaml-cpp-0.6.2/
+SPOOLES_PATH = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/Spooles/src
+ARPACK_PATH  = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/ARPACK
+YAML_PREFIX  = /home/prateek/Documents/Github/Large-Scale-Topology-Optimization/Deps/yaml-cpp-yaml-cpp-0.6.2/
 
 # Intel MKL
-MKL_LIB     = /opt/intel/oneapi/mkl/2025.1/lib/intel64
-MKL_INCLUDE = /opt/intel/oneapi/mkl/2025.1/include
+MKL_LIB     = /home/prateek/intel/oneapi/mkl/2025.3/lib
+MKL_INCLUDE = /home/prateek/intel/oneapi/mkl/2025.3/include
 
-CMPLR_PATH  = /opt/intel/oneapi/compiler/2025.1/bin
+CMPLR_PATH  = /home/prateek/intel/oneapi/compiler/2025.3/bin
 
 # ============================================================
 # Directories

@@ -273,7 +273,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
 	  	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
 	  	islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, &Pnorm, 0);
+    	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, Pnorm, 0);
 
 		// NOTE: At this point xstiff is not penalized
 		

@@ -117,7 +117,7 @@ void filterOutPassiveElems_sens(double *sens, int ne, int *passiveIDs, int numPa
 
 void rho(double *design,int ne);
 
-void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, double *v, double *stx, double *rhoPhy);
+void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, char *lakon, int mi0, double *v, double *stx, double *rhoPhy);
 
 void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum, double *Mass, double *cgx, double *cgy, double *cgz, int *passiveIDs, int numPassive, double* pnorm);
 
@@ -842,7 +842,7 @@ void checkconvergence(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
           double *energy,double *allwk,double *energyref,
           double *emax,double *enres,double *enetoll,double *energyini,
           double *allwkini,double *temax,double *reswk,ITG *ne0,
-          ITG *neini,double *dampwk,double *dampwkini,double *energystartstep);
+          ITG *neini,double *dampwk,double *dampwkini,double *energystartstep, ITG *neq, double *fext);
 
 void checkconvnet(ITG *icutb,ITG *iin,
 		  double *cam1t,double *cam1f,double *cam1p,
@@ -2285,7 +2285,7 @@ void linstatic(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     double *thicke,char *jobnamec,char *tieset,ITG *ntie,
 	     ITG *istep,ITG *nmat,ITG *ielprop,double *prop,char *typeboun,
 	     ITG *mortar,ITG *mpcinfo,double *tietol,ITG *ics,ITG *icontact,
-             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, double *mat_dens);
+             char *orname,double *design,double *penal, double *stx, double *sigma0, double *eps, double *rhomin, double *pexp, double *Pnorm, double *dPnorm_drho, double *mat_dens, int *eval_PNORM);
 
 void linstatic_MDO(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     ITG *ne,
@@ -2842,7 +2842,7 @@ void FORTRAN(mafillsmse,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 	       double *dxstiff,double *xdesi,ITG *istartelem,ITG *ialelem,
 	       double *v,double *sigma,ITG *ieigenfrequency,double *design,
 		   double *penal,double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol));
+		   double *eleVol,double *fn0_out,double *lambda));
 
 void FORTRAN(mafillsmse2,(double *co,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *ipompc,ITG *nodempc,double *coefmpc,
@@ -2960,7 +2960,7 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *cyclicsymmetry,char *labmpc,ITG *ics,double *cs,
 	       ITG *mcs,ITG *ieigenfrequency, double *design,
 		   double *penal,double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol);
+		   double *eleVol, double *fn0_out,double *lambda);
 
 void mafillsmmain_se2(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	       ITG *ne,ITG *nodeboun,ITG *ndirboun,double *xboun,
@@ -3533,7 +3533,9 @@ void nonlingeo(double **co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     ITG **islavsurfp,double **pslavsurfp,double **clearinip,
 	     ITG *nmat,double *xmodal,ITG *iaxial,ITG *inext,ITG *nprop,
 	     ITG *network,char *orname,double *vel,ITG *nef,
-	     double *velo,double *veloo, double *design,double *penal);
+	     double *velo,double *veloo, double *design,double *penal,
+            double *sigma0, double *eps_relax, double *rhomin,
+            double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM, double *mat_dens);
 
 void FORTRAN(nonlinmpc,(double *co,double *vold,ITG *ipompc,ITG *nodempc,
 		   double *coefmpc,char *labmpc,ITG *nmpc,ITG *ikboun,
@@ -4111,6 +4113,7 @@ void adjoint_eq_2_node(
     ITG *nboun,
     ITG *nodeboun,    /* length *nboun, 1-based nodes */
     ITG *ndirboun,    /* length *nboun, values 1..mi[2] */
+    char *typeboun,
     ITG *mi,          /* mi[2] = #mech DOFs per node */
     double *lambda,   /* ladj, size (mi[2]+1)*(*nk) in Fortran layout */
     double *B_adj     /* adjoint solution vector (length = neq) */
@@ -4175,7 +4178,8 @@ void FORTRAN(resultsmech,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	  ITG *iener,ITG *ikin,ITG *nal,ITG *ne0,double *thicke,
 	  double *emeini,double *pslavsurf,double *pmastsurf,ITG *mortar,
 	  double *clearini,ITG *nea,ITG *neb,ITG *ielprop,double *prop,
-	  ITG *kscale,ITG *list,ITG *ilist));
+	  ITG *kscale,ITG *list,ITG *ilist,double *design,double *penal,
+	  double *rhomin));
 
 void FORTRAN(stresspnorm,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
           double *v,double *stx,double *elcon,ITG *nelcon,double *rhcon,
@@ -4408,7 +4412,7 @@ void results_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	     ITG *nkon,ITG *jqs,ITG *irows,ITG *nactdofinv,
 	     ITG *icoordinate,double *dxstiff,ITG *istartdesi,
 	     ITG *ialdesi,double *xdesi,ITG *ieigenfrequency,
-	     double *fint,ITG *ishapeenergy,char *typeboun);
+	     double *fint,ITG *ishapeenergy,char *typeboun,double *fn0_out);
 
 void FORTRAN(resultstherm,(double *co,ITG *kon,ITG *ipkon,
        char *lakon,double *v,
@@ -4587,7 +4591,7 @@ void sensitivity(double *co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     char *orname,ITG *nzsfreq,ITG *nlabel,double *physcon,
              char *jobnamef, double *design,double *penal,
 			 double *gradCompl,double *elCompl,double *elCG,
-		   double *eleVol);
+		   double *eleVol, int *eval_PNORM);
 
 void FORTRAN(sensitivity_glob,(double *dgdxtot,double *dgdxtotglob,ITG *nobject,
 	     ITG *ndesi,ITG *nodedesi,ITG *nk));

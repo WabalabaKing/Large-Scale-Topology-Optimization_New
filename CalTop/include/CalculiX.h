@@ -189,7 +189,7 @@ int write_Stress_sens(const char *path,
                       const double *dPnorm_drho);
 
 
-
+void FORTRAN(resultsini_adjoint_linstatic_nompc,(ITG *nk, double *ladj, ITG *nacdof, double *b_adj, ITG *nodeboun, ITG *ndirboun, char *typeboun, ITG *nboun, ITG *mi));
 
 void FORTRAN(mafillsm_filter2_full,(ITG *ne, double *ttime, double *time,
                       ITG *ne0, ITG *nea, ITG *neb,
