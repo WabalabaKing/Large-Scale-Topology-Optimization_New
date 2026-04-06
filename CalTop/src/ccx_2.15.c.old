@@ -579,10 +579,6 @@ NNEW(meminset,ITG,nset_);
 NNEW(rmeminset,ITG,nset_);
 NNEW(iuel,ITG,4*nuel_);
 
-
-printf("CG flag before allocation: %d\n", eval_CG);
-printf("PNROM flag before allocation %d\n", eval_PNORM);
-
 FORTRAN(allocation,(&nload_,&nforc_,&nboun_,&nk_,&ne_,&nmpc_,&nset_,&nalset_,
    &nmat_,&ntmat_,&npmat_,&norien_,&nam_,&nprint_,mi,&ntrans_,
    set,meminset,rmeminset,&ncs_,&namtot_,&ncmat_,&memmpc_,&ne1d,
@@ -1169,7 +1165,10 @@ while(istat>=0)
 
 
   if((abs(nmethod)!=1)||(iperturb[0]<2))icascade=0;
-  if (pexp > 1.0) {
+
+
+  if (pexp > 1.0) 
+  {
     eval_PNORM = (iperturb[0] >= 2) ? 2 : 1;
   }
   //	FORTRAN(writeboun,(nodeboun,ndirboun,xboun,typeboun,&nboun));
@@ -1819,39 +1818,43 @@ while(istat>=0)
 	      FORTRAN(stop,());
 	    }
 
-      printf("\nTOPOLOGY OPTIMIZATION PARAMTERS (Linear Statics)----------------------------|\n");
-      printf("SIMP \n");
-      printf("  Penalty parameter                 %.2f\n", pstiff);
-      printf("\n");
-      printf("FILTER MATRIX \n");
-      printf("  Density filter radius             %.2f\n", rmin);
-      printf("  Non zeros in Filtermatrix         %d\n", fnnzassumed);
-      printf("\n");
-      printf("SKIN DEFINITION \n");
-      printf("  Number of skin elements           %d\n", numPassive);
-      printf("\n");
-      printf("STRESS AGGREGATION \n");
-      printf("  P-norm exponent                   %.2f\n", pexp);
-      printf("  Stress relaxation                 %.2f\n", eps_relax);
-      printf("  Stress threshold                  %.2f\n", sigma0);
-      printf("\n");
-      printf("SENSITIVITY FLAGS \n");
-      printf("  Compliance:                       YES\n");
-      printf("  Volume fraction:                  YES\n");
+printf("\n|---------------- TOPOLOGY OPTIMIZATION PARAMETERS ----------------|\n");
 
-      printf("  Center of mass                    %s\n", eval_CG    ? "YES" : "NO");
-      printf("  PNORM                             %s\n", eval_PNORM ? "YES" : "NO");
-   
-      printf("MATERIAL PROPERTY \n");
-      printf("  Material density                  %.1f\n", mat_dens);
+/* SIMP */
+printf("| %-62s |\n", "SIMP");
+printf("| %-40s %18.2f |\n", "Penalty parameter", pstiff);
+printf("|------------------------------------------------------------------|\n");
 
-      
-    
-      printf("|------------------------------------------------------------|\n");
-     
-      fflush(stdout);
+/* FILTER MATRIX */
+printf("| %-62s |\n", "FILTER MATRIX");
+printf("| %-40s %18.2f |\n", "Density filter radius", rmin);
+printf("| %-40s %18d |\n",  "Nonzeros in filter matrix", fnnzassumed);
+printf("|------------------------------------------------------------------|\n");
 
-      printf("\n");
+/* SKIN DEFINITION */
+printf("| %-62s |\n", "SKIN DEFINITION");
+printf("| %-40s %18d |\n", "Number of skin elements", numPassive);
+printf("|------------------------------------------------------------------|\n");
+
+/* STRESS AGGREGATION */
+printf("| %-62s |\n", "STRESS AGGREGATION");
+printf("| %-40s %18.2f |\n", "P-norm exponent", pexp);
+printf("| %-40s %18.2f |\n", "Stress relaxation", eps_relax);
+printf("| %-40s %18.2f |\n", "Stress threshold", sigma0);
+printf("|------------------------------------------------------------------|\n");
+
+/* SENSITIVITY FLAGS */
+printf("| %-62s |\n", "SENSITIVITY FLAGS");
+printf("| %-40s %18s |\n", "Compliance", "YES");
+printf("| %-40s %18s |\n", "Volume fraction", "YES");
+printf("| %-40s %18s |\n", "Center of mass", eval_CG ? "YES" : "NO");
+printf("| %-40s %18s |\n", "PNORM", eval_PNORM ? "YES" : "NO");
+printf("|------------------------------------------------------------------|\n");
+
+/* MATERIAL */
+printf("| %-62s |\n", "MATERIAL PROPERTY");
+printf("| %-40s %18.1f |\n", "Material density", mat_dens);
+printf("|------------------------------------------------------------------|\n\n");
       
       time_t startl, endl; 
 	    startl = time(NULL);

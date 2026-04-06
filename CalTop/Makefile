@@ -76,11 +76,14 @@ endif
 # ============================================================
 # Source files and objects for main programs
 # ============================================================
-SCCXMAIN      = $(SRC_DIR)/ccx_2.15.c
-SCCXCMAINFILT = $(SRC_DIR)/calFilt.c
 
-OCCXMAIN      = $(OBJ_DIR)/ccx_2.15.o
-OCCXMAINFILT  = $(OBJ_DIR)/calFilt.o
+DRIVER_DIR 	  = $(SRC_DIR)/drivers
+
+SCCXMAIN      = $(DRIVER_DIR)/ccx_2.15.c
+SCCXCMAINFILT = $(DRIVER_DIR)/calFilt.c
+
+OCCXMAIN      = $(OBJ_DIR)/drivers/ccx_2.15.o
+OCCXMAINFILT  = $(OBJ_DIR)/drivers/calFilt.o
 
 # FSI coupling main (only defined/used when MDO=1)
 ifeq ($(MDO),1)
@@ -163,13 +166,13 @@ ccx_2.15.a: $(OCCXF) $(OCCXC) $(OCCXCXX) | $(OBJ_DIR)
 # calTop
 $(BIN_DIR)/calTop.exe: $(OCCXMAIN) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
 	./date.pl
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ccx_2.15.c -o $(OBJ_DIR)/ccx_2.15.o
+	$(CC) $(CFLAGS) -c $(DRIVER_DIR)/ccx_2.15.c -o $(OBJ_DIR)/drivers/ccx_2.15.o
 	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAIN) ccx_2.15.a $(LIBS)
 	@echo "Build calTop.exe successfully!"
 
 # calFilt
 $(BIN_DIR)/calFilt.exe: $(OCCXMAINFILT) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/calFilt.c -o $(OBJ_DIR)/calFilt.o
+	$(CC) $(CFLAGS) -c $(DRIVER_DIR)/calFilt.c -o $(OBJ_DIR)/calFilt.o
 	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAINFILT) ccx_2.15.a $(LIBS)
 	@echo "Build calFilt.exe successfully!"
 
