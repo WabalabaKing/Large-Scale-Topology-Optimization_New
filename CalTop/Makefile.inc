@@ -875,7 +875,7 @@ $(SRC_DIR)/wye.f \
 $(SRC_DIR)/zeta_calc.f \
 $(SRC_DIR)/zienzhu.f  \
 $(SRC_DIR)/tecplot.f \
-$(SRC_DIR)/tecplot_vtu.f \
+$(SRC_DIR)/output/tecplot_vtu.f \
 $(SRC_DIR)/build_filter.f \
 $(SRC_DIR)/stressPnorm.f \
 $(SRC_DIR)/stress_SIMP.f \
@@ -966,7 +966,7 @@ $(SRC_DIR)/insert.c \
 $(SRC_DIR)/insertfreq.c \
 $(SRC_DIR)/insertrad.c \
 $(SRC_DIR)/linstatic.c \
-$(SRC_DIR)/densityfilter.c\
+$(SRC_DIR)/filter/densityfilter.c\
 $(SRC_DIR)/filterVector.c\
 $(SRC_DIR)/mafilldmssmain.c \
 $(SRC_DIR)/mafillkcompmain.c \
@@ -1051,27 +1051,27 @@ $(SRC_DIR)/v_betrag.c \
 $(SRC_DIR)/v_prod.c \
 $(SRC_DIR)/v_result.c \
 $(SRC_DIR)/writeheading.c \
-$(SRC_DIR)/tecplot_vtu.c \
-$(SRC_DIR)/write_complianceSens.c \
-$(SRC_DIR)/write_volumeSens.c \
-$(SRC_DIR)/write_objectives.c \
+$(SRC_DIR)/output/tecplot_vtu.c \
+$(SRC_DIR)/output/write_complianceSens.c \
+$(SRC_DIR)/output/write_volumeSens.c \
+$(SRC_DIR)/output/write_objectives.c \
 $(SRC_DIR)/passive.c \
 $(SRC_DIR)/filterPassiveElements.c \
-$(SRC_DIR)/filter_matrix.c \
-$(SRC_DIR)/makeDistanceMatrix.c \
-$(SRC_DIR)/expand_filter.c \
+$(SRC_DIR)/filter/filter_matrix.c \
+$(SRC_DIR)/filter/makeDistanceMatrix.c \
+$(SRC_DIR)/filter/expand_filter.c \
 $(SRC_DIR)/utils.c \
-$(SRC_DIR)/filterDensity_bin_mt.c \
-$(SRC_DIR)/densityfilterFast.c \
-$(SRC_DIR)/assembleDensityFilter_txt_mt.c \
-$(SRC_DIR)/assembleDensityFilter_bin_mt.c \
-$(SRC_DIR)/filterSens_mt.c \
-$(SRC_DIR)/filterSens_dat_mt_s.c \
-$(SRC_DIR)/filterSens_bin_mt_s.c \
-$(SRC_DIR)/massCG.c \
-$(SRC_DIR)/write_CGSens.c \
-$(SRC_DIR)/filterSens_bin_mt_s_group.c \
-$(SRC_DIR)/write_StressSens.c \
+$(SRC_DIR)/filter/filterDensity_bin_mt.c \
+$(SRC_DIR)/filter/densityfilterFast.c \
+$(SRC_DIR)/filter/assembleDensityFilter_txt_mt.c \
+$(SRC_DIR)/filter/assembleDensityFilter_bin_mt.c \
+$(SRC_DIR)/filter/filterSens_mt.c \
+$(SRC_DIR)/filter/filterSens_dat_mt_s.c \
+$(SRC_DIR)/filter/filterSens_bin_mt_s.c \
+$(SRC_DIR)/objectives/massCG.c \
+$(SRC_DIR)/output/write_CGSens.c \
+$(SRC_DIR)/filter/filterSens_bin_mt_s_group.c \
+$(SRC_DIR)/output/write_StressSens.c \
 $(SRC_DIR)/adjoint_eq_2_node.c \
 $(SRC_DIR)/Coupling/linstatic_MDO.c \
 $(SRC_DIR)/Coupling/calFSI.c \
