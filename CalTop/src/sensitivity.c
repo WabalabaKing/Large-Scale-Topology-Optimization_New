@@ -934,7 +934,8 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 islavsurf,ielprop,prop,energyini,energy,df,&distmin,
 	            &ndesi,nodedesi,sti,nkon,jqs,irows,nactdofinv,
 	            &icoordinate,dxstiff,istartdesi,ialdesi,xdesi,
-	            &ieigenfrequency,fint,&ishapeenergy,typeboun,fn0_out);
+	            &ieigenfrequency,fint,&ishapeenergy,typeboun,fn0_out,
+                design,penal);
 	            /* Compute lambda = K_T^{-1} * f_int_0 for Buhl adjoint */
                 if((iperturb[1]==1)&&(fint!=NULL)){
                     
