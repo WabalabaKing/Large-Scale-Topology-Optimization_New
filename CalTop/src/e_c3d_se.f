@@ -1919,8 +1919,8 @@ c            alp=.2215d0
                   endif
                enddo
             enddo
-            !sensi=-penal*(rhoi**(penal-1))*dotu
-            sensi = dotu
+            sensi=-penal*(rhoi**(-1))*dotu
+            !sensi =-dotu
             ecompli=0.d0
             do j=1,nope
                do k=1,3
