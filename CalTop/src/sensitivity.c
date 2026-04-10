@@ -938,7 +938,15 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 design,penal);
 	            /* Compute lambda = K_T^{-1} * f_int_0 for Buhl adjoint */
                 if((iperturb[1]==1)&&(fint!=NULL)){
-                    
+
+                    /* assemble P into fint */
+                    for(ITG i=0;i<neq[1];i++) fint[i]=0.;
+                    FORTRAN(mafillsmforc,(nforc,ndirforc,nodeforc,xforcact,
+                                         nactdof,fint,ipompc,nodempc,coefmpc,
+                                         mi,&rhsi,NULL,nmethod,ntrans,inotr,
+                                         trab,co));
+
+                    /* solve K_T * lambda = P */
                     if(nasym!=0){symmetryflag=2;inputformat=1;}
                     if(*isolver==7){
                         #ifdef PARDISO
@@ -957,6 +965,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                         #endif
                     }
                 }
+
                 iout=1;
                 SFREE(v);
                 SFREE(fn);
