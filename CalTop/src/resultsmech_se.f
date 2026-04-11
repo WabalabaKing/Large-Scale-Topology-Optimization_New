@@ -27,7 +27,7 @@
      &  ikin,ne0,thicke,emeini,pslavsurf,
      &  pmastsurf,mortar,clearini,nea,neb,ielprop,prop,dfn,
      &  idesvar,nodedesi,fn0,sti,icoordinate,dxstiff,
-     &  ialdesi,xdesi)
+     &  ialdesi,xdesi, design, penal)
 !
 !     calculates stresses and the material tangent at the integration
 !     points and the internal forces at the nodes
@@ -71,7 +71,8 @@
      &  thicke(mi(3),*),emeini(6,mi(1),*),clearini(3,9,*),
      &  pslavsurf(3,*),pmastsurf(6,*),sti(6,mi(1),*),
      &  fn0(0:mi(2),*),dfn(0:mi(2),*),hglf(3,4),ahr,
-     &  dxstiff(27,mi(1),ne,*),xdesi(3,*)
+     &  dxstiff(27,mi(1),ne,*),xdesi(3,*),
+     &  design(*),penal, rho_e, rho_eff, simp_se
 !
       intent(in) co,kon,ipkon,lakon,ne,v,
      &  stx,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
@@ -83,7 +84,8 @@
      &  springarea,reltime,calcul_fn,calcul_cauchy,nener,
      &  ikin,ne0,thicke,emeini,pslavsurf,
      &  pmastsurf,mortar,clearini,nea,neb,ielprop,prop,
-     &  idesvar,nodedesi,sti,icoordinate,ialdesi,xdesi
+     &  idesvar,nodedesi,sti,icoordinate,ialdesi,xdesi,
+     &  design,penal
 !
       intent(inout) dfn,fn0,dxstiff,xstiff
 !
@@ -1014,6 +1016,17 @@ c                 emec0(m1)=emeini(m1,jj,i)
             skl(3,1)=stre(5)
             skl(3,2)=stre(6)
 !
+            rho_e = design(i)
+            if(rho_e .lt. 1e-3) rho_e = 1e-3
+            if(rho_e .gt. 1.0) rho_e = 1.0
+            rho_eff  =max(rho_e,1e-3)
+            simp_se = rho_eff**penal
+            skl(1,1)=skl(1,1)*simp_se
+            skl(2,2)=skl(2,2)*simp_se
+            skl(3,3)=skl(3,3)*simp_se
+            skl(2,1)=skl(2,1)*simp_se
+            skl(3,1)=skl(3,1)*simp_se
+            skl(3,2)=skl(3,2)*simp_se
             skl(1,2)=skl(2,1)
             skl(1,3)=skl(3,1)
             skl(2,3)=skl(3,2)
