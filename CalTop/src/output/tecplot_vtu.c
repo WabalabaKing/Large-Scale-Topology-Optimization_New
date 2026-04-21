@@ -15,7 +15,11 @@
  * @param co     Array of nodal coordinates (size: 3 * nk).
  * @param kon    Element connectivity array, storing node indices per element.
  * @param ipkon  Index array mapping elements to the connectivity array.
+ * @param lakon  Element Type
+ * @param mi0    Element Index
  * @param v      Nodal displacement array (size: 3 * nk).
+ * @param stx    Stress vector of elements
+ * @param rhoPhy  Physical density of elements
  *
  * @details
  * The function writes the data in VTK Unstructured Grid (.vtu) format, including:
@@ -38,9 +42,13 @@
  * double co[300];  // Node coordinates (3 per node)
  * int kon[200];  // Connectivity array (4 nodes per element)
  * int ipkon[50]; // Index mapping elements to connectivity array
+ * char lakon = 'C3D4'; // Index mapping elements to connectivity array
+ * int mi0[50];			// Element Index Array
  * double v[300];  // Nodal displacements (3 per node)
+ * double stx[300];		// Stress per element, 6 stress for each element
+ * double rhoPhys[50];  // Element Density, 1 per element
  * 
- * tecplot_vtu(nk, ne, co, kon, ipkon, v);
+ * tecplot_vtu(nk, ne, co, kon, ipkon, lakon, mi0, v, stx, rhoPhys);
  * ```
  */
 

@@ -1920,7 +1920,8 @@ c            alp=.2215d0
                enddo
             enddo
             !sensi=-penal*(rhoi**(penal-1))*dotu
-            sensi = -penal*(rhoi**(2*penal-1))*dotu
+            !sensi = -penal*(rhoi**(2*penal-1))*dotu
+            sensi=-penal*(rhoi**(-1))*dotu
             ecompli=0.d0
             do j=1,nope
                do k=1,3
@@ -1928,7 +1929,7 @@ c            alp=.2215d0
                   ecompli=ecompli+uelem(l)*fn0_out(k,indexe+j)
                enddo
             enddo
-            ecompli=(rhoi**penal)*ecompli
+            !ecompli=(rhoi**penal)*ecompli
                
 !!!            if(idesvar.eq.0) then
 !     load vector

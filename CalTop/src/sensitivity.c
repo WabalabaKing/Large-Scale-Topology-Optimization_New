@@ -934,10 +934,18 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 islavsurf,ielprop,prop,energyini,energy,df,&distmin,
 	            &ndesi,nodedesi,sti,nkon,jqs,irows,nactdofinv,
 	            &icoordinate,dxstiff,istartdesi,ialdesi,xdesi,
-	            &ieigenfrequency,fint,&ishapeenergy,typeboun,fn0_out);
-	            /* Compute lambda = K_T^{-1} * f_int_0 for Buhl adjoint */
+	            &ieigenfrequency,fint,&ishapeenergy,typeboun,fn0_out,
+                design,penal);
+	            /* Compute lambda = K_T^{-1} * f_ext for Buhl adjoint */
                 if((iperturb[1]==1)&&(fint!=NULL)){
-                    
+                    /* assemble P into fint */
+                    for(ITG i=0;i<neq[1];i++) fint[i]=0.;
+                    FORTRAN(mafillsmforc,(nforc,ndirforc,nodeforc,xforcact,
+                                         nactdof,fint,ipompc,nodempc,coefmpc,
+                                         mi,&rhsi,NULL,nmethod,ntrans,inotr,
+                                         trab,co));
+
+                    /* solve K_T * lambda = P */
                     if(nasym!=0){symmetryflag=2;inputformat=1;}
                     if(*isolver==7){
                         #ifdef PARDISO

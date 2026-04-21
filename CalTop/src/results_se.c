@@ -38,7 +38,7 @@ static double *co1,*v1,*stx1,*elcon1,*rhcon1,*alcon1,*alzero1,*orab1,*t01,*t11,
     *vini1,*ener1,*eei1,*enerini1,*springarea1,*reltime1,
     *thicke1,*emeini1,*prop1,*dxstiff1,
     *pslavsurf1,*pmastsurf1,*clearini1,*dfn1,*fn01,
-    *sti1,*xdesi1;
+    *sti1,*xdesi1,*design1, penal1;
 
 void results_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        double *v,double *stn,ITG *inum,double *stx,double *elcon,ITG *nelcon,
@@ -75,7 +75,8 @@ void results_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        double *sti,ITG *nkon,ITG *jqs,ITG *irows,
        ITG *nactdofinv,ITG *icoordinate,double *dxstiff,ITG *istartdesi,
        ITG *ialdesi,double *xdesi,ITG *ieigenfrequency,double *fint,
-       ITG *ishapeenergy,char *typeboun,double *fn0_out){
+       ITG *ishapeenergy,char *typeboun,double *fn0_out,
+       double *design, double *penal){
 
     ITG intpointvarm,calcul_fn,calcul_f,calcul_qa,calcul_cauchy,nener,ikin,
         intpointvart,mt=mi[1]+1,i,j,idesvar,iorien,idir,im,
@@ -193,7 +194,7 @@ void results_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 	pmastsurf1=pmastsurf;mortar1=mortar;ielprop1=ielprop;prop1=prop;
 	idesvar1=idesvar;nodedesi1=nodedesi;
 	sti1=sti;nkon1=nkon;icoordinate1=icoordinate;
-	dxstiff1=dxstiff;ialdesi1=ialdesi;xdesi1=xdesi;
+	dxstiff1=dxstiff;ialdesi1=ialdesi;xdesi1=xdesi;design1=design;penal1=*penal;
 	
 	/* create threads and wait */
 	
@@ -283,7 +284,7 @@ void results_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
                 &ikin,ne0,thicke,emeini,
                 pslavsurf,pmastsurf,mortar,clearini,&nea,&neb,ielprop,prop,
                 dfn,&idesvar,nodedesi,
-	        fn0,sti,icoordinate,dxstiff,ialdesi,xdesi));
+	        fn0,sti,icoordinate,dxstiff,ialdesi,xdesi,design1,&penal1));
 	}
 	
 	/* calculating the matrix system internal force vector
@@ -348,7 +349,7 @@ void *resultsmechmt_se(ITG *i){
           &ikin1,ne01,thicke1,emeini1,
           pslavsurf1,pmastsurf1,mortar1,clearini1,&nea,&neb,ielprop1,prop1,
           &dfn1[indexdfn],&idesvar1,nodedesi1,
-	  &fn01[indexfn0],sti1,icoordinate1,dxstiff1,ialdesi1,xdesi1));
+	  &fn01[indexfn0],sti1,icoordinate1,dxstiff1,ialdesi1,xdesi1,design1,&penal1));
 
     return NULL;
 }
