@@ -3314,363 +3314,491 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	      			NNEW(ipneigh,ITG,*nk);
 	  			}
 
-	  ptime=*ttime+time;
-	  frd(co,nk,kon,ipkon,lakon,&ne0,v,stn,inum,nmethod,
-	    kode,filab,een,t1act,fn,&ptime,epn,ielmat,matname,enern,xstaten,
-	    nstate_,istep,&iinc,ithermal,qfn,&mode,&noddiam,trab,inotr,
-	    ntrans,orab,ielorien,norien,description,ipneigh,neigh,
-	    mi,stx,vr,vi,stnr,stni,vmax,stnmax,&ngraph,veold,ener,ne,
-	    cs,set,nset,istartset,iendset,ialset,eenmax,fnr,fni,emn,
-	    thicke,jobnamec,output,qfx,cdn,mortar,cdnr,cdni,nmat,ielprop,prop);
+	  			ptime=*ttime+time;
 
-	  if(strcmp1(&filab[1044],"ZZS")==0){SFREE(ipneigh);SFREE(neigh);}
-#ifdef COMPANY
-	  FORTRAN(uout,(v,mi,ithermal,filab,kode));
-#endif
-      }
+	  			frd(co,nk,kon,ipkon,lakon,&ne0,v,stn,inum,nmethod,
+	    			kode,filab,een,t1act,fn,&ptime,epn,ielmat,matname,enern,xstaten,
+	    			nstate_,istep,&iinc,ithermal,qfn,&mode,&noddiam,trab,inotr,
+	    			ntrans,orab,ielorien,norien,description,ipneigh,neigh,
+	    			mi,stx,vr,vi,stnr,stni,vmax,stnmax,&ngraph,veold,ener,ne,
+	    			cs,set,nset,istartset,iendset,ialset,eenmax,fnr,fni,emn,
+	    			thicke,jobnamec,output,qfx,cdn,mortar,cdnr,cdni,nmat,ielprop,prop);
+
+	  			if(strcmp1(&filab[1044],"ZZS")==0)
+				{
+					SFREE(ipneigh);SFREE(neigh);
+				}
+
+				#ifdef COMPANY
+	  			FORTRAN(uout,(v,mi,ithermal,filab,kode));
+				#endif
+      		}
       
-      SFREE(v);SFREE(fn);SFREE(stn);SFREE(inum);SFREE(stx);
-      if(*ithermal>1){SFREE(qfn);}
+      		SFREE(v);SFREE(fn);SFREE(stn);SFREE(inum);SFREE(stx);
       
-      if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
-      if(strcmp1(&filab[435],"PEEQ")==0) SFREE(epn);
-      if(strcmp1(&filab[522],"ENER")==0) SFREE(enern);
-      if(strcmp1(&filab[609],"SDV ")==0) SFREE(xstaten);
-      if(strcmp1(&filab[2175],"CONT")==0) SFREE(cdn);
-      if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
-   }
-    
-  }
+			if(*ithermal>1)
+			{
+				SFREE(qfn);
+			}
+      
+      		if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
+      		if(strcmp1(&filab[435],"PEEQ")==0) SFREE(epn);
+      		if(strcmp1(&filab[522],"ENER")==0) SFREE(enern);
+      		if(strcmp1(&filab[609],"SDV ")==0) SFREE(xstaten);
+      		if(strcmp1(&filab[2175],"CONT")==0) SFREE(cdn);
+     	 	if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
+   		} 
+  	}
 
-  /*********************************************************/
-  /*   end of the increment loop                          */
-  /*********************************************************/
+  	/*********************************************************/
+  	/*   end of the increment loop                          */
+  	/*********************************************************/
 
-  if(jprint!=0){
+  	if(jprint!=0)
+	{
 
-  /* calculating the displacements and the stresses and storing  
-     the results in frd format */
+  		/* calculating the displacements and the stresses and storing  
+     		the results in frd format */
   
-    NNEW(v,double,mt**nk);
-    NNEW(fn,double,mt**nk);
-    NNEW(stn,double,6**nk);
-    if(*ithermal>1) NNEW(qfn,double,3**nk);
-    NNEW(inum,ITG,*nk);
-    NNEW(stx,double,6*mi[0]**ne);
-  
-    if(strcmp1(&filab[261],"E   ")==0) NNEW(een,double,6**nk);
-    if(strcmp1(&filab[435],"PEEQ")==0) NNEW(epn,double,*nk);
-    if(strcmp1(&filab[522],"ENER")==0) NNEW(enern,double,*nk);
-    if(strcmp1(&filab[609],"SDV ")==0) NNEW(xstaten,double,*nstate_**nk);
-    if(strcmp1(&filab[2175],"CONT")==0) NNEW(cdn,double,6**nk);
-    if(strcmp1(&filab[2697],"ME  ")==0) NNEW(emn,double,6**nk);
-    
-    memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
-    iout=2;
-    icmd=3;
+    	NNEW(v,double,mt**nk);
+    	NNEW(fn,double,mt**nk);
+    	NNEW(stn,double,6**nk);
 
-#ifdef COMPANY
-    FORTRAN(uinit,());
-#endif
-    results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
-	    elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
-	    ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
-	    prestr,iprestr,filab,eme,emn,een,iperturb,
-	    f,fn,nactdof,&iout,qa,vold,b,nodeboun,
-	    ndirboun,xbounact,nboun,ipompc,
-	    nodempc,coefmpc,labmpc,nmpc,nmethod,cam,&neq[1],veold,accold,
+    	if(*ithermal>1) NNEW(qfn,double,3**nk);
+
+    	NNEW(inum,ITG,*nk);
+    	NNEW(stx,double,6*mi[0]**ne);
+  
+    	if(strcmp1(&filab[261],"E   ")==0) NNEW(een,double,6**nk);
+    	if(strcmp1(&filab[435],"PEEQ")==0) NNEW(epn,double,*nk);
+    	if(strcmp1(&filab[522],"ENER")==0) NNEW(enern,double,*nk);
+    	if(strcmp1(&filab[609],"SDV ")==0) NNEW(xstaten,double,*nstate_**nk);
+    	if(strcmp1(&filab[2175],"CONT")==0) NNEW(cdn,double,6**nk);
+    	if(strcmp1(&filab[2697],"ME  ")==0) NNEW(emn,double,6**nk);
+    
+    	memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
+    	iout=2;
+    	icmd=3;
+
+		#ifdef COMPANY
+    	FORTRAN(uinit,());
+		#endif
+    	results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
+	    	elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
+	    	ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
+	    	prestr,iprestr,filab,eme,emn,een,iperturb,
+	    	f,fn,nactdof,&iout,qa,vold,b,nodeboun,
+	    	ndirboun,xbounact,nboun,ipompc,
+	    	nodempc,coefmpc,labmpc,nmpc,nmethod,cam,&neq[1],veold,accold,
             &bet,&gam,&dtime,&time,ttime,plicon,nplicon,plkcon,nplkcon,
-	    xstateini,xstiff,xstate,npmat_,epn,matname,mi,&ielas,&icmd,
+	    	xstateini,xstiff,xstate,npmat_,epn,matname,mi,&ielas,&icmd,
             ncmat_,nstate_,stiini,vini,ikboun,ilboun,ener,enern,emeini,
             xstaten,eei,enerini,cocon,ncocon,set,nset,istartset,iendset,
             ialset,nprint,prlab,prset,qfx,qfn,trab,inotr,ntrans,fmpc,
-	    nelemload,nload,ikmpc,ilmpc,istep,&iinc,springarea,
+	    	nelemload,nload,ikmpc,ilmpc,istep,&iinc,springarea,
             &reltime,&ne0,thicke,shcon,nshcon,
             sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
             mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
-	    islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
+	    	islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
             inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
 			design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm, (*eval_PNORM== 2) ? 1 : 0); 
     
-    memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
+    		memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
 
-    iout=0;
-    if(*iexpl<=1) icmd=0;
+    		iout=0;
+    	if(*iexpl<=1) icmd=0;
 //    FORTRAN(networkinum,(ipkon,inum,kon,lakon,ne,itg,&ntg));
 //    for(k=0;k<ntg;k++)if(inum[itg[k]-1]>0){inum[itg[k]-1]*=-1;}
     
-    ++*kode;
-    if(*mcs>0){
-	ptime=*ttime+time;
-      frdcyc(co,nk,kon,ipkon,lakon,ne,v,stn,inum,nmethod,kode,filab,een,
-	     t1act,fn,&ptime,epn,ielmat,matname,cs,mcs,nkon,enern,xstaten,
-             nstate_,istep,&iinc,iperturb,ener,mi,output,ithermal,qfn,
-             ialset,istartset,iendset,trab,inotr,ntrans,orab,ielorien,
-	     norien,stx,veold,&noddiam,set,nset,emn,thicke,jobnamec,&ne0,
-             cdn,mortar,nmat,qfx,ielprop,prop);
-#ifdef COMPANY
-      FORTRAN(uout,(v,mi,ithermal,filab,kode));
-#endif
+    	++*kode;
+    	if(*mcs>0)
+		{
+			ptime=*ttime+time;
+      
+			frdcyc(co,nk,kon,ipkon,lakon,ne,v,stn,inum,nmethod,kode,filab,een,
+	     		t1act,fn,&ptime,epn,ielmat,matname,cs,mcs,nkon,enern,xstaten,
+             	nstate_,istep,&iinc,iperturb,ener,mi,output,ithermal,qfn,
+             	ialset,istartset,iendset,trab,inotr,ntrans,orab,ielorien,
+	     		norien,stx,veold,&noddiam,set,nset,emn,thicke,jobnamec,&ne0,
+             	cdn,mortar,nmat,qfx,ielprop,prop);
 
-    }
-    else{
-	if(strcmp1(&filab[1044],"ZZS")==0){
-	    NNEW(neigh,ITG,40**ne);
-	    NNEW(ipneigh,ITG,*nk);
-	}
+			#ifdef COMPANY
+      			FORTRAN(uout,(v,mi,ithermal,filab,kode));
+			#endif
+		}
+		else
+		{
+			if(strcmp1(&filab[1044],"ZZS")==0)
+			{
+	    		NNEW(neigh,ITG,40**ne);
+	    		NNEW(ipneigh,ITG,*nk);
+			}
 
-	ptime=*ttime+time;
-	frd(co,nk,kon,ipkon,lakon,&ne0,v,stn,inum,nmethod,
-	    kode,filab,een,t1act,fn,&ptime,epn,ielmat,matname,enern,xstaten,
-	    nstate_,istep,&iinc,ithermal,qfn,&mode,&noddiam,trab,inotr,
-	    ntrans,orab,ielorien,norien,description,ipneigh,neigh,
-	    mi,stx,vr,vi,stnr,stni,vmax,stnmax,&ngraph,veold,ener,ne,
-	    cs,set,nset,istartset,iendset,ialset,eenmax,fnr,fni,emn,
-	    thicke,jobnamec,output,qfx,cdn,mortar,cdnr,cdni,nmat,ielprop,prop);
+			ptime=*ttime+time;
+	
+			frd(co,nk,kon,ipkon,lakon,&ne0,v,stn,inum,nmethod,
+	    	kode,filab,een,t1act,fn,&ptime,epn,ielmat,matname,enern,xstaten,
+	    	nstate_,istep,&iinc,ithermal,qfn,&mode,&noddiam,trab,inotr,
+	    	ntrans,orab,ielorien,norien,description,ipneigh,neigh,
+	    	mi,stx,vr,vi,stnr,stni,vmax,stnmax,&ngraph,veold,ener,ne,
+	    	cs,set,nset,istartset,iendset,ialset,eenmax,fnr,fni,emn,
+	    	thicke,jobnamec,output,qfx,cdn,mortar,cdnr,cdni,nmat,ielprop,prop);
 
-	if(strcmp1(&filab[1044],"ZZS")==0){SFREE(ipneigh);SFREE(neigh);}
-#ifdef COMPANY
-	FORTRAN(uout,(v,mi,ithermal,filab,kode));
-#endif
-    }
+			if(strcmp1(&filab[1044],"ZZS")==0)
+			{
+				SFREE(ipneigh);SFREE(neigh);
+			}
 
-    SFREE(v);SFREE(fn);SFREE(stn);SFREE(inum);SFREE(stx);
-    if(*ithermal>1){SFREE(qfn);}
+			#ifdef COMPANY
+			FORTRAN(uout,(v,mi,ithermal,filab,kode));
+			#endif
+    	}
+
+    	SFREE(v);SFREE(fn);SFREE(stn);SFREE(inum);SFREE(stx);
     
-    if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
-    if(strcmp1(&filab[435],"PEEQ")==0) SFREE(epn);
-    if(strcmp1(&filab[522],"ENER")==0) SFREE(enern);
-    if(strcmp1(&filab[609],"SDV ")==0) SFREE(xstaten);
-    if(strcmp1(&filab[2175],"CONT")==0) SFREE(cdn);
-    if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
-
-  }
+		if(*ithermal>1)
+		{
+			SFREE(qfn);
+		}
     
-  /* writing out the latest stiffness matrix for a subsequent
-     sensitivity analysis */
+    	if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
+    	if(strcmp1(&filab[435],"PEEQ")==0) SFREE(epn);
+    	if(strcmp1(&filab[522],"ENER")==0) SFREE(enern);
+    	if(strcmp1(&filab[609],"SDV ")==0) SFREE(xstaten);
+    	if(strcmp1(&filab[2175],"CONT")==0) SFREE(cdn);
+    	if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
+  	}
+    
+  	/* writing out the latest stiffness matrix for a subsequent
+    	sensitivity analysis */
 
-  if(isensitivity){
+  	if(isensitivity)
+	{
       
-      strcpy(stiffmatrix,jobnamec);
-      strcat(stiffmatrix,".stm");
+    	strcpy(stiffmatrix,jobnamec);
+    	strcat(stiffmatrix,".stm");
       
-      if((f1=fopen(stiffmatrix,"wb"))==NULL){
-	  printf("*ERROR in linstatic: cannot open stiffness matrix file for writing...");
-	  exit(0);
-      }
+    	if((f1=fopen(stiffmatrix,"wb"))==NULL)
+		{
+	  		printf("*ERROR in linstatic: cannot open stiffness matrix file for writing...");
+	  		exit(0);
+      	}
       
-      /* storing the stiffness matrix */
+      	/* storing the stiffness matrix */
 
-      /* nzs,irow,jq and icol have to be stored too, since the static analysis
-	 can involve contact, whereas in the sensitivity analysis contact is not
-	 taken into account while determining the structure of the stiffness
-	 matrix (in mastruct.c)
-      */
+      	/* nzs,irow,jq and icol have to be stored too, since the static analysis
+	 	can involve contact, whereas in the sensitivity analysis contact is not
+	 	taken into account while determining the structure of the stiffness
+	 	matrix (in mastruct.c)
+      	*/
       
-      if(fwrite(&nasym,sizeof(ITG),1,f1)!=1){
-	  printf("*ERROR saving the symmetry flag to the stiffness matrix file...");
-	  exit(0);
-      }
-      if(fwrite(nzs,sizeof(ITG),3,f1)!=3){
-	  printf("*ERROR saving the number of subdiagonal nonzeros to the stiffness matrix file...");
-	  exit(0);
-      }
-      if(fwrite(irow,sizeof(ITG),nzs[2],f1)!=nzs[2]){
-	  printf("*ERROR saving irow to the stiffness matrix file...");
-	  exit(0);
-      }
-      if(fwrite(jq,sizeof(ITG),neq[1]+1,f1)!=neq[1]+1){
-	  printf("*ERROR saving jq to the stiffness matrix file...");
-	  exit(0);
-      }
-      if(fwrite(icol,sizeof(ITG),neq[1],f1)!=neq[1]){
-	  printf("*ERROR saving icol to the stiffness matrix file...");
-	  exit(0);
-      }
-      if(fwrite(adcpy,sizeof(double),neq[1],f1)!=neq[1]){
-	  printf("*ERROR saving the diagonal of the stiffness matrix to the stiffness matrix file...");
-	  exit(0);
-      }
-      if(fwrite(aucpy,sizeof(double),(nasym+1)*nzs[2],f1)!=(nasym+1)*nzs[2]){
-	  printf("*ERROR saving the off-diagonal terms of the stiffness matrix to the stiffness matrix file...");
-	  exit(0);
-      }
-      fclose(f1);
-      SFREE(adcpy);SFREE(aucpy);
-  }
+      	if(fwrite(&nasym,sizeof(ITG),1,f1)!=1)
+		{
+	  		printf("*ERROR saving the symmetry flag to the stiffness matrix file...");
+	  		exit(0);
+      	}
+
+      	if(fwrite(nzs,sizeof(ITG),3,f1)!=3)
+		{
+	  		printf("*ERROR saving the number of subdiagonal nonzeros to the stiffness matrix file...");
+	  		exit(0);
+      	}
+
+      	if(fwrite(irow,sizeof(ITG),nzs[2],f1)!=nzs[2])
+		{
+	  		printf("*ERROR saving irow to the stiffness matrix file...");
+	  		exit(0);
+      	}
+
+      	if(fwrite(jq,sizeof(ITG),neq[1]+1,f1)!=neq[1]+1)
+		{
+	  		printf("*ERROR saving jq to the stiffness matrix file...");
+	  		exit(0);
+      	}
+      
+		if(fwrite(icol,sizeof(ITG),neq[1],f1)!=neq[1])
+		{
+	  		printf("*ERROR saving icol to the stiffness matrix file...");
+	  		exit(0);
+      	}
+
+      	if(fwrite(adcpy,sizeof(double),neq[1],f1)!=neq[1])
+		{
+	  		printf("*ERROR saving the diagonal of the stiffness matrix to the stiffness matrix file...");
+	  		exit(0);
+      	}
+
+      	if(fwrite(aucpy,sizeof(double),(nasym+1)*nzs[2],f1)!=(nasym+1)*nzs[2])
+		{
+	  		printf("*ERROR saving the off-diagonal terms of the stiffness matrix to the stiffness matrix file...");
+	  		exit(0);
+      	}
+      	fclose(f1);
+      	SFREE(adcpy);SFREE(aucpy);
+  	}
   
-  /* restoring the distributed loading  */
+  	/* restoring the distributed loading  */
+  	if((*ithermal==3)&&(ncont!=0)&&(*mortar==1)&&(*ncmat_>=11))
+	{
+    	*nload=nloadref;
+    	RENEW(nelemload,ITG,2**nload);memcpy(&nelemload[0],&nelemloadref[0],sizeof(ITG)*2**nload);
+      
+		if(*nam>0)
+		{
+	  		RENEW(iamload,ITG,2**nload);
+	  		memcpy(&iamload[0],&iamloadref[0],sizeof(ITG)*2**nload);
+      	}
 
-  if((*ithermal==3)&&(ncont!=0)&&(*mortar==1)&&(*ncmat_>=11)){
-      *nload=nloadref;
-      RENEW(nelemload,ITG,2**nload);memcpy(&nelemload[0],&nelemloadref[0],sizeof(ITG)*2**nload);
-      if(*nam>0){
-	  RENEW(iamload,ITG,2**nload);
-	  memcpy(&iamload[0],&iamloadref[0],sizeof(ITG)*2**nload);
-      }
-      RENEW(sideload,char,20**nload);memcpy(&sideload[0],&sideloadref[0],sizeof(char)*20**nload);
+      	RENEW(sideload,char,20**nload);memcpy(&sideload[0],&sideloadref[0],sizeof(char)*20**nload);
       
       /* freeing the temporary fields */
-      
-      SFREE(nelemloadref);if(*nam>0){SFREE(iamloadref);};
-      SFREE(sideloadref);
-  }
+      	SFREE(nelemloadref);if(*nam>0){SFREE(iamloadref);};
+      	SFREE(sideloadref);
+  	}
 
-  /* setting the velocity to zero at the end of a quasistatic or stationary
-     step */
+  	/* setting the velocity to zero at the end of a quasistatic or stationary
+    	step */
+  	if(abs(*nmethod)==1)
+	{
+    	for(k=0;k<mt**nk;++k)
+		{
+			veold[k]=0.;
+		}
+  	}
 
-  if(abs(*nmethod)==1){
-    for(k=0;k<mt**nk;++k){veold[k]=0.;}
-  }
+  	/* updating the loading at the end of the step; 
+     	important in case the amplitude at the end of the step
+     	is not equal to one */
 
-  /* updating the loading at the end of the step; 
-     important in case the amplitude at the end of the step
-     is not equal to one */
-
-  for(k=0;k<*nboun;++k){
-
+  	for(k=0;k<*nboun;++k)
+	{
       /* thermal boundary conditions are updated only if the
          step was thermal or thermomechanical */
+      if(ndirboun[k]==0)
+	  {
+	  	if(*ithermal<2) continue;
 
-      if(ndirboun[k]==0){
-	  if(*ithermal<2) continue;
-
-	  /* mechanical boundary conditions are updated only
+	  	/* mechanical boundary conditions are updated only
              if the step was not thermal or the node is a
              network node */
 
-      }else if((ndirboun[k]>0)&&(ndirboun[k]<4)){
-	  node=nodeboun[k];
-	  FORTRAN(nident,(itg,&node,&ntg,&id));
-	  networknode=0;
-	  if(id>0){
-	      if(itg[id-1]==node) networknode=1;
-	  }
-	  if((*ithermal==2)&&(networknode==0)) continue;
+      }
+	  else if((ndirboun[k]>0)&&(ndirboun[k]<4))
+	  {
+	  	node=nodeboun[k];
+	  	FORTRAN(nident,(itg,&node,&ntg,&id));
+	  	networknode=0;
+	  
+		if(id>0)
+		{
+	    	if(itg[id-1]==node) networknode=1;
+	  	}
+
+	  	if((*ithermal==2)&&(networknode==0)) continue;
       }
       xbounold[k]=xbounact[k];
-  }
-  for(k=0;k<*nforc;++k){xforcold[k]=xforcact[k];}
-  for(k=0;k<2**nload;++k){xloadold[k]=xloadact[k];}
-  for(k=0;k<7**nbody;k=k+7){xbodyold[k]=xbodyact[k];}
-  if(*ithermal==1){
-    for(k=0;k<*nk;++k){t1old[k]=t1act[k];}
-    for(k=0;k<*nk;++k){vold[mt*k]=t1act[k];}
-  }
-  else if(*ithermal>1){
-    for(k=0;k<*nk;++k){t1[k]=vold[mt*k];}
-    if(*ithermal>=3){
-	for(k=0;k<*nk;++k){t1old[k]=t1act[k];}
-    }
-  }
+  	}
 
-  qaold[0]=qa[0];
-  qaold[1]=qa[1];
-
-  SFREE(f);SFREE(b);
-  SFREE(xbounact);SFREE(xforcact);SFREE(xloadact);SFREE(xbodyact);
-  if(*nbody>0) SFREE(ipobody);if(inewton==1){SFREE(cgr);}
-  SFREE(fext);SFREE(ampli);SFREE(xbounini);SFREE(xstiff); SFREE(brhs); SFREE(djdrho_explicit);
-  if((*ithermal==1)||(*ithermal>=3)){SFREE(t1act);SFREE(t1ini);}
-
-  if(*ithermal>1){
-      SFREE(itg);SFREE(ieg);SFREE(kontri);SFREE(nloadtr);
-      SFREE(nactdog);SFREE(nacteq);SFREE(ineighe);
-      SFREE(tarea);SFREE(tenv);SFREE(fenv);SFREE(qfx);
-      SFREE(erad);SFREE(ac);SFREE(bc);SFREE(ipiv);
-      SFREE(bcr);SFREE(ipivr);SFREE(adview);SFREE(auview);SFREE(adrad);
-      SFREE(aurad);SFREE(irowrad);SFREE(jqrad);SFREE(icolrad);
-      if((*mcs>0)&&(ntr>0)){SFREE(inocs);}
-      if((*network>0)||(ntg>0)){SFREE(iponoel);SFREE(inoel);}
-  }
-
-  if(icfd==1){
-      SFREE(neifa);SFREE(neiel);SFREE(neij);SFREE(ielfa);SFREE(ifaext);
-      SFREE(vfa);SFREE(nactdoh);SFREE(nactdohinv);SFREE(konf);
-      SFREE(ipkonf);SFREE(lakonf);SFREE(ielmatf);free(ifatie);
-      SFREE(ipnei);SFREE(isolidsurf);
-      if(*norien>0) SFREE(ielorienf);
-/*      if(nblk!=0){SFREE(istartblk);SFREE(iendblk);
-	SFREE(nblket);SFREE(nblkze);SFREE(ielblk);}*/
-  }
-
-  SFREE(fini);
-  if(*nmethod==4){
-    SFREE(aux2);SFREE(fextini);SFREE(veini);SFREE(accini);
-    SFREE(adb);SFREE(aub);SFREE(cvini);SFREE(cv);SFREE(fnext);
-    SFREE(fnextini);
-  }
-  SFREE(eei);SFREE(stiini);SFREE(emeini);
-  if(*nener==1)SFREE(enerini);
-  if(*nstate_!=0){SFREE(xstateini);}
-
-  SFREE(aux);SFREE(iaux);SFREE(vini);
-
-  if(icascade==2){
-      memmpc_=memmpcref_;mpcfree=mpcfreeref;maxlenmpc=maxlenmpcref;
-      RENEW(nodempc,ITG,3*memmpcref_);
-      for(k=0;k<3*memmpcref_;k++){nodempc[k]=nodempcref[k];}
-      RENEW(coefmpc,double,memmpcref_);
-      for(k=0;k<memmpcref_;k++){coefmpc[k]=coefmpcref[k];}
-      SFREE(nodempcref);SFREE(coefmpcref);
-  }
-
-  if(ncont!=0){
-      *ne=ne0;*nkon=nkon0;
-      if(*nener==1){
-	RENEW(ener,double,mi[0]**ne*2);
-      }
-      RENEW(ipkon,ITG,*ne);
-      RENEW(lakon,char,8**ne);
-      RENEW(kon,ITG,*nkon);
-      if(*norien>0){
-	  RENEW(ielorien,ITG,mi[2]**ne);
-      }
-      RENEW(ielmat,ITG,mi[2]**ne);
-
-      SFREE(cg);SFREE(straight);
-      SFREE(imastop);SFREE(itiefac);SFREE(islavnode);
-      SFREE(nslavnode);SFREE(iponoels);SFREE(inoels);SFREE(imastnode);
-      SFREE(nmastnode);SFREE(itietri);SFREE(koncont);SFREE(xnoels);
-      SFREE(springarea);SFREE(xmastnor);
-
-      if(*mortar==0){
-	  SFREE(areaslav);
-      }else if(*mortar==1){
-	  SFREE(pmastsurf);SFREE(ipe);SFREE(ime);
-          SFREE(islavact);
-      }
-  }
-
-  /* reset icascade */
-
-  if(icascade==1){icascade=0;}
-
-  mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
-  mpcinfo[3]=maxlenmpc;
-
-  if(iglob==1){SFREE(integerglob);SFREE(doubleglob);}
-
-  *icolp=icol;*irowp=irow;*cop=co;*voldp=vold;
-
-  *ipompcp=ipompc;*labmpcp=labmpc;*ikmpcp=ikmpc;*ilmpcp=ilmpc;
-  *fmpcp=fmpc;*nodempcp=nodempc;*coefmpcp=coefmpc;*nelemloadp=nelemload;
-  *iamloadp=iamload;*sideloadp=sideload;
-
-  *ipkonp=ipkon;*lakonp=lakon;*konp=kon;*ielorienp=ielorien;
-  *ielmatp=ielmat;*enerp=ener;*xstatep=xstate;
-
-  *islavsurfp=islavsurf;*pslavsurfp=pslavsurf;*clearinip=clearini;
-
-  (*tmin)*=(*tper);
-  (*tmax)*=(*tper);
-
-  SFREE(nactdofinv);
-  // MPADD start
-  if((*nmethod==4)&&(*ithermal!=2)&&(*iexpl<=1)&&(icfd!=1)){ SFREE(adblump);}
-  // MPADD end
   
-  (*ttime)+=(*tper);
+	for(k=0;k<*nforc;++k)
+	{
+		xforcold[k]=xforcact[k];
+	}
+
+  	for(k=0;k<2**nload;++k)
+	{
+		xloadold[k]=xloadact[k];
+	}
+
+  	for(k=0;k<7**nbody;k=k+7)
+	{
+		xbodyold[k]=xbodyact[k];
+	}
+
+  	if(*ithermal==1)
+	{
+    	for(k=0;k<*nk;++k)
+		{
+			t1old[k]=t1act[k];
+		}
+
+    	for(k=0;k<*nk;++k)
+		{
+			vold[mt*k]=t1act[k];
+		}
+  	}
+
+  	else if(*ithermal>1)
+	{
+    	for(k=0;k<*nk;++k)
+		{
+			t1[k]=vold[mt*k];
+		}
+
+    	if(*ithermal>=3)
+		{
+			for(k=0;k<*nk;++k)
+			{
+				t1old[k]=t1act[k];
+			}
+    	}
+  	}
+
+  	qaold[0]=qa[0];
+  	qaold[1]=qa[1];
+
+  	SFREE(f);SFREE(b);
+  	SFREE(xbounact);SFREE(xforcact);SFREE(xloadact);SFREE(xbodyact);
   
-  return;
+	if(*nbody>0) SFREE(ipobody);if(inewton==1){SFREE(cgr);}
+  	SFREE(fext);SFREE(ampli);SFREE(xbounini);SFREE(xstiff); SFREE(brhs); SFREE(djdrho_explicit);
+  
+	if((*ithermal==1)||(*ithermal>=3))
+	{
+		SFREE(t1act);SFREE(t1ini);
+	}
+
+  	if(*ithermal>1)
+	{
+    	SFREE(itg);SFREE(ieg);SFREE(kontri);SFREE(nloadtr);
+    	SFREE(nactdog);SFREE(nacteq);SFREE(ineighe);
+    	SFREE(tarea);SFREE(tenv);SFREE(fenv);SFREE(qfx);
+    	SFREE(erad);SFREE(ac);SFREE(bc);SFREE(ipiv);
+    	SFREE(bcr);SFREE(ipivr);SFREE(adview);SFREE(auview);SFREE(adrad);
+    	SFREE(aurad);SFREE(irowrad);SFREE(jqrad);SFREE(icolrad);
+      
+		if((*mcs>0)&&(ntr>0))
+		{
+			SFREE(inocs);
+		}
+      	if((*network>0)||(ntg>0))
+		{
+			SFREE(iponoel);SFREE(inoel);
+		}
+  	}
+
+  	if(icfd==1)
+	{
+    	SFREE(neifa);SFREE(neiel);SFREE(neij);SFREE(ielfa);SFREE(ifaext);
+    	SFREE(vfa);SFREE(nactdoh);SFREE(nactdohinv);SFREE(konf);
+    	SFREE(ipkonf);SFREE(lakonf);SFREE(ielmatf);free(ifatie);
+    	SFREE(ipnei);SFREE(isolidsurf);
+      
+		if(*norien>0) SFREE(ielorienf);
+		/*      if(nblk!=0){SFREE(istartblk);SFREE(iendblk);
+		SFREE(nblket);SFREE(nblkze);SFREE(ielblk);}*/
+  	}
+
+  	SFREE(fini);
+  
+	if(*nmethod==4)
+	{
+    	SFREE(aux2);SFREE(fextini);SFREE(veini);SFREE(accini);
+    	SFREE(adb);SFREE(aub);SFREE(cvini);SFREE(cv);SFREE(fnext);
+    	SFREE(fnextini);
+  	}
+
+  	SFREE(eei);SFREE(stiini);SFREE(emeini);
+  	if(*nener==1)SFREE(enerini);
+  	
+	if(*nstate_!=0)
+	{
+		SFREE(xstateini);
+	}
+
+  	SFREE(aux);SFREE(iaux);SFREE(vini);
+
+  	if(icascade==2)
+	{
+    	memmpc_=memmpcref_;mpcfree=mpcfreeref;maxlenmpc=maxlenmpcref;
+    	RENEW(nodempc,ITG,3*memmpcref_);
+    	
+		for(k=0;k<3*memmpcref_;k++)
+		{
+			nodempc[k]=nodempcref[k];
+		}
+
+      	RENEW(coefmpc,double,memmpcref_);
+
+      	for(k=0;k<memmpcref_;k++)
+		{
+			coefmpc[k]=coefmpcref[k];
+		}
+      	SFREE(nodempcref);SFREE(coefmpcref);
+  	}
+
+  	if(ncont!=0)
+	{
+    	*ne=ne0;*nkon=nkon0;
+      	if(*nener==1)
+		{
+			RENEW(ener,double,mi[0]**ne*2);
+      	}
+
+      	RENEW(ipkon,ITG,*ne);
+      	RENEW(lakon,char,8**ne);
+      	RENEW(kon,ITG,*nkon);
+      	
+		if(*norien>0)
+		{
+	  		RENEW(ielorien,ITG,mi[2]**ne);
+      	}
+
+      	RENEW(ielmat,ITG,mi[2]**ne);
+
+      	SFREE(cg);SFREE(straight);
+      	SFREE(imastop);SFREE(itiefac);SFREE(islavnode);
+      	SFREE(nslavnode);SFREE(iponoels);SFREE(inoels);SFREE(imastnode);
+      	SFREE(nmastnode);SFREE(itietri);SFREE(koncont);SFREE(xnoels);
+      	SFREE(springarea);SFREE(xmastnor);
+
+      	if(*mortar==0)
+		{
+	  		SFREE(areaslav);
+      	}
+		else if(*mortar==1)
+		{
+	  		SFREE(pmastsurf);SFREE(ipe);SFREE(ime);
+          	SFREE(islavact);
+      	}
+  	}
+
+  	/* reset icascade */
+  	if(icascade==1)
+  	{
+		icascade=0;
+	}
+
+  	mpcinfo[0]=memmpc_;mpcinfo[1]=mpcfree;mpcinfo[2]=icascade;
+  	mpcinfo[3]=maxlenmpc;
+
+  	if(iglob==1)
+	{
+		SFREE(integerglob);
+		SFREE(doubleglob);
+	}
+
+  	*icolp=icol;*irowp=irow;*cop=co;*voldp=vold;
+
+  	*ipompcp=ipompc;*labmpcp=labmpc;*ikmpcp=ikmpc;*ilmpcp=ilmpc;
+  	*fmpcp=fmpc;*nodempcp=nodempc;*coefmpcp=coefmpc;*nelemloadp=nelemload;
+  	*iamloadp=iamload;*sideloadp=sideload;
+
+  	*ipkonp=ipkon;*lakonp=lakon;*konp=kon;*ielorienp=ielorien;
+  	*ielmatp=ielmat;*enerp=ener;*xstatep=xstate;
+
+  	*islavsurfp=islavsurf;*pslavsurfp=pslavsurf;*clearinip=clearini;
+
+  	(*tmin)*=(*tper);
+  	(*tmax)*=(*tper);
+
+  	SFREE(nactdofinv);
+  	
+	// MPADD start
+  	if((*nmethod==4)&&(*ithermal!=2)&&(*iexpl<=1)&&(icfd!=1)){ SFREE(adblump);}
+  	// MPADD end
+  
+  	(*ttime)+=(*tper);
+  
+  	return;
 }
