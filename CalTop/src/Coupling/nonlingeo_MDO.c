@@ -2457,702 +2457,862 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				{
 		  			n1=neq[1]-neq[0];
 		  			n2=nzs[1]-nzs[0];
-		  spooles(&ad[neq[0]],&au[nzs[0]],&adb[neq[0]],&aub[nzs[0]],
-			  &sigma,&b[neq[0]],&icol[neq[0]],iruc,
-			  &n1,&n2,&symmetryflag,&inputformat,&nzs[2]);
-	      }else{
-		  spooles(ad,au,adb,aub,&sigma,b,icol,irow,&neq[1],&nzs[1],
-			  &symmetryflag,&inputformat,&nzs[2]);
-	      }
-#else
-	      printf(" *ERROR in nonlingeo: the SPOOLES library is not linked\n\n");
-	      FORTRAN(stop,());
-#endif
-	  }
-	  else if((*isolver==2)||(*isolver==3)){
-	      if(nasym>0){
-		  if(*isolver==3){
-		      printf(" *WARNING in nonlingeo: the iterative Cholesky solver cannot be used for asymmetric matrices.\nThe iterative scaling solver will be used instead\n\n");
-		  }
-		  NNEW(rwork,double,neq[1]);
-		  NNEW(sol,double,neq[1]);
-		  RENEW(au,double,2*nzs[1]+neq[1]);
-		  memcpy(&au[2*nzs[1]],ad,sizeof(double)*neq[1]);
-		  nelt=2*nzs[1]+neq[1];
-		  lrgw=131+16*neq[1];
-		  isym=0;
-		  NNEW(rgwk,double,lrgw);
-		  NNEW(igwk,ITG,20);
-		  for(i=0;i<neq[1];i++){rwork[i]=1./ad[i];}
-	//	  FORTRAN(predgmres_struct,(&neq[1],b,sol,&nelt,irow,jq,au,
-//				     &isym,&itol,&tol,&itmax,&iter,
-//				     &err,&ierr,&iunit,sb,sx,rgwk,&lrgw,igwk,
-//				     &ligw,rwork,iwork));
-		  memcpy(b,sol,sizeof(double)*neq[1]);
-		  SFREE(rgwk);SFREE(igwk);SFREE(rwork);SFREE(sol);
-	      }else{
-		  preiter(ad,&au,b,&icol,&irow,&neq[1],&nzs[1],isolver,iperturb);
-	      }
-	  }
-	  else if(*isolver==4){
-#ifdef SGI
-	      if(nasym>0){
-		  printf(" *ERROR in nonlingeo: the SGI solver cannot be used for asymmetric matrices\n\n");
-		  FORTRAN(stop,());
-	      }
-	      token=1;
-	      if(*ithermal<2){
-		  sgi_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[0],&nzs[0],token);
-	      }else if((*ithermal==2)&&(uncoupled)){
-		  n1=neq[1]-neq[0];
-		  n2=nzs[1]-nzs[0];
-		  sgi_main(&ad[neq[0]],&au[nzs[0]],&adb[neq[0]],&aub[nzs[0]],
-			   &sigma,&b[neq[0]],&icol[neq[0]],iruc,
-			   &n1,&n2,token);
-	      }else{
-		  sgi_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[1],&nzs[1],token);
-	      }
-#else
-	      printf(" *ERROR in nonlingeo: the SGI library is not linked\n\n");
-	      FORTRAN(stop,());
-#endif
-	  }
-	  else if(*isolver==5){
-#ifdef TAUCS
-	      if(nasym>0){
-		  printf(" *ERROR in nonlingeo: the TAUCS solver cannot be used for asymmetric matrices\n\n");
-		  FORTRAN(stop,());
-	      }
-	      tau(ad,&au,adb,aub,&sigma,b,icol,&irow,&neq[1],&nzs[1]);
-#else
-	      printf(" *ERROR in nonlingeo: the TAUCS library is not linked\n\n");
-	      FORTRAN(stop,());
-#endif
-	  }
-	  else if(*isolver==6){
-#ifdef MATRIXSTORAGE
-	     // matrixstorage(ad,&au,adb,aub,&sigma,icol,&irow,&neq[1],&nzs[1],
-		//	    ntrans,inotr,trab,co,nk,nactdof,jobnamec,mi,ipkon,
-		//	    lakon,kon,ne,mei,nboun,nmpc,cs,mcs,ithermal,nmethod);
-#else
-	      printf("*ERROR in arpack: the MATRIXSTORAGE library is not linked\n\n");
-	      FORTRAN(stop,());
-#endif
-	  }
-	  else if(*isolver==7){
-#ifdef PARDISO
-	      if(*ithermal<2){
-		  pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[0],&nzs[0],
-			       &symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
-	      }else if((*ithermal==2)&&(uncoupled)){
-		  n1=neq[1]-neq[0];
-		  n2=nzs[1]-nzs[0];
-		  pardiso_main(&ad[neq[0]],&au[nzs[0]],&adb[neq[0]],&aub[nzs[0]],
-			       &sigma,&b[neq[0]],&icol[neq[0]],iruc,
-			       &n1,&n2,&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
-	      }else{
-		  pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[1],&nzs[1],
-			       &symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
-	      }
-#else
-	      printf(" *ERROR in nonlingeo: the PARDISO library is not linked\n\n");
-	      FORTRAN(stop,());
-#endif
-	  }
+		  			spooles(&ad[neq[0]],&au[nzs[0]],&adb[neq[0]],&aub[nzs[0]],
+			  		&sigma,&b[neq[0]],&icol[neq[0]],iruc,
+			  		&n1,&n2,&symmetryflag,&inputformat,&nzs[2]);
+	      		}
+				else
+				{
+		  			spooles(ad,au,adb,aub,&sigma,b,icol,irow,&neq[1],&nzs[1],
+			  		&symmetryflag,&inputformat,&nzs[2]);
+	      		}
+				#else
+	      			printf(" *ERROR in nonlingeo: the SPOOLES library is not linked\n\n");
+	      			FORTRAN(stop,());
+				#endif
+	  		}
+	  		else if((*isolver==2)||(*isolver==3))
+			{
+	      		if(nasym>0)
+				{
+		  			if(*isolver==3)
+					{
+		      			printf(" *WARNING in nonlingeo: the iterative Cholesky solver cannot be used for asymmetric matrices.\nThe iterative scaling solver will be used instead\n\n");
+		  			}
+
+		  			NNEW(rwork,double,neq[1]);
+		  			NNEW(sol,double,neq[1]);
+		  			RENEW(au,double,2*nzs[1]+neq[1]);
+		  			memcpy(&au[2*nzs[1]],ad,sizeof(double)*neq[1]);
+		  			nelt=2*nzs[1]+neq[1];
+		  			lrgw=131+16*neq[1];
+		  			isym=0;
+
+		  			NNEW(rgwk,double,lrgw);
+		  			NNEW(igwk,ITG,20);
+		  			for(i=0;i<neq[1];i++)
+					{
+						rwork[i]=1./ad[i];
+					}
+
+		  			memcpy(b,sol,sizeof(double)*neq[1]);
+		  			SFREE(rgwk);SFREE(igwk);SFREE(rwork);SFREE(sol);
+	      		}
+				else
+				{
+		  			preiter(ad,&au,b,&icol,&irow,&neq[1],&nzs[1],isolver,iperturb);
+	      		}
+	  		}
+	  		else if(*isolver==4)
+			{
+				#ifdef SGI
+	      		if(nasym>0)
+				{
+		  			printf(" *ERROR in nonlingeo: the SGI solver cannot be used for asymmetric matrices\n\n");
+		  			FORTRAN(stop,());
+	      		}
+	      		token=1;
+	      		if(*ithermal<2)
+				{
+		  			sgi_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[0],&nzs[0],token);
+	      		}
+				else if((*ithermal==2)&&(uncoupled))
+				{
+		  			n1=neq[1]-neq[0];
+		  			n2=nzs[1]-nzs[0];
+		  			sgi_main(&ad[neq[0]],&au[nzs[0]],&adb[neq[0]],&aub[nzs[0]],
+			   		&sigma,&b[neq[0]],&icol[neq[0]],iruc,
+			   		&n1,&n2,token);
+	      		}
+				else
+				{
+		  			sgi_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[1],&nzs[1],token);
+	      		}
+				#else
+	      		printf(" *ERROR in nonlingeo: the SGI library is not linked\n\n");
+	      		FORTRAN(stop,());
+				#endif
+	  		}
+	  		else if(*isolver==5)
+			{
+				#ifdef TAUCS
+	      		if(nasym>0)
+				{
+		  			printf(" *ERROR in nonlingeo: the TAUCS solver cannot be used for asymmetric matrices\n\n");
+		  			FORTRAN(stop,());
+	      		}
+	      		tau(ad,&au,adb,aub,&sigma,b,icol,&irow,&neq[1],&nzs[1]);
+				#else
+	      		printf(" *ERROR in nonlingeo: the TAUCS library is not linked\n\n");
+	      		FORTRAN(stop,());
+				#endif
+	  		}
+	  		else if(*isolver==6)
+			{
+				#ifdef MATRIXSTORAGE
+	     		// matrixstorage(ad,&au,adb,aub,&sigma,icol,&irow,&neq[1],&nzs[1],
+				//	    ntrans,inotr,trab,co,nk,nactdof,jobnamec,mi,ipkon,
+				//	    lakon,kon,ne,mei,nboun,nmpc,cs,mcs,ithermal,nmethod);
+				#else
+	      		printf("*ERROR in arpack: the MATRIXSTORAGE library is not linked\n\n");
+	      		FORTRAN(stop,());
+				#endif
+	  		}
+	  		else if(*isolver==7)
+			{
+				#ifdef PARDISO
+	      		if(*ithermal<2)
+				{
+		  			pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[0],&nzs[0],
+			       	&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+	      		}
+				else if((*ithermal==2)&&(uncoupled))
+				{
+		  			n1=neq[1]-neq[0];
+		 			n2=nzs[1]-nzs[0];
+
+		  			pardiso_main(&ad[neq[0]],&au[nzs[0]],&adb[neq[0]],&aub[nzs[0]],
+			      		&sigma,&b[neq[0]],&icol[neq[0]],iruc,
+			    		&n1,&n2,&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+	      		}
+				else
+				{
+		  			pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[1],&nzs[1],
+			       		&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+	      		}	
+				#else
+	      			printf(" *ERROR in nonlingeo: the PARDISO library is not linked\n\n");
+	      			FORTRAN(stop,());
+				#endif
+	  		}
 	  
-	  if(*mortar<=1){
-	      if(isensitivity){
-/*		  if(nasym!=0){
-		      printf("*ERROR in nonlingeo: a sensitivity analysis \n is not allowed in combination with frictional contact \n\n");
-		      FORTRAN(stop,());
-		      }*/
-		  //SFREE(adcpy);NNEW(adcpy,double,neq[1]);
-		  //SFREE(aucpy);NNEW(aucpy,double,(nasym+1)*nzs[1]);
-		  //memcpy(&adcpy[0],&ad[0],sizeof(double)*neq[1]);
-		  //memcpy(&aucpy[0],&au[0],sizeof(double)*(nasym+1)*nzs[1]);
-	      }
-	      SFREE(ad);SFREE(au);
-	  } 
-      }
-      
-      /* explicit dynamic step */
-      
-      else{
-	  if(*ithermal!=2){
-	      for(k=0;k<neq[0];++k){
-		  b[k]=b[k]/adb[k];
-	      }
-	  }
-	  if(*ithermal>1){
-	      for(k=neq[0];k<neq[1];++k){
-		  b[k]=b[k]*dtime/adb[k];
-	      }
-	  }
-      }
+	  		if(*mortar<=1)
+			{
+	      		if(isensitivity)
+				{
 
-      /* calculating the displacements, stresses and forces */
+		        }
+	      		SFREE(ad);SFREE(au);
+	  		} 
+      	}
       
-      NNEW(v,double,mt**nk);
-      memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
+      	/* explicit dynamic step */
       
-      NNEW(stx,double,6*mi[0]**ne);
-      NNEW(fn,double,mt**nk);
-      
-      NNEW(inum,ITG,*nk);
-      results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
-	      elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
-	      ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
-	      prestr,iprestr,filab,eme,emn,een,iperturb,
-	      f,fn,nactdof,&iout,qa,vold,b,nodeboun,
-	      ndirboun,xbounact,nboun,ipompc,
-	      nodempc,coefmpc,labmpc,nmpc,nmethod,cam,&neq[1],veold,accold,
-	      &bet,&gam,&dtime,&time,ttime,plicon,nplicon,plkcon,nplkcon,
-	      xstateini,xstiff,xstate,npmat_,epn,matname,mi,&ielas,
-	      &icmd,ncmat_,nstate_,stiini,vini,ikboun,ilboun,ener,enern,
-	      emeini,xstaten,eei,enerini,cocon,ncocon,set,nset,istartset,
-	      iendset,ialset,nprint,prlab,prset,qfx,qfn,trab,inotr,ntrans,
-	      fmpc,nelemload,nload,ikmpc,ilmpc,istep,&iinc,springarea,
-	      &reltime,&ne0,thicke,shcon,nshcon,
-	      sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
-	      mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
-              islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-              inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
-			  design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm,0);
-      SFREE(inum);
+      	else
+		{
+	  		if(*ithermal!=2)
+			{
+	      		for(k=0;k<neq[0];++k)
+				{
+		  			b[k]=b[k]/adb[k];
+	      		}
+	  		}
 
-      /* implicit dynamics (Matteo Pacher) */
+	  		if(*ithermal>1)
+			{
+	      		for(k=neq[0];k<neq[1];++k)
+				{
+		  			b[k]=b[k]*dtime/adb[k];
+	      		}
+	  		}
+      	}
 
-      if((*ne!=ne0)&&(*nmethod==4)&&(*ithermal<2)&&(*iexpl<=1)){
-         FORTRAN(storecontactprop,(ne,&ne0,lakon,kon,ipkon,mi,
+      	/* calculating the displacements, stresses and forces */
+      
+      	NNEW(v,double,mt**nk);
+      	memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
+      
+      	NNEW(stx,double,6*mi[0]**ne);
+      	NNEW(fn,double,mt**nk);
+      
+      	NNEW(inum,ITG,*nk);
+      	results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
+	    	elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
+	    	ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
+	    	prestr,iprestr,filab,eme,emn,een,iperturb,
+	    	f,fn,nactdof,&iout,qa,vold,b,nodeboun,
+	    	ndirboun,xbounact,nboun,ipompc,
+	    	nodempc,coefmpc,labmpc,nmpc,nmethod,cam,&neq[1],veold,accold,
+	    	&bet,&gam,&dtime,&time,ttime,plicon,nplicon,plkcon,nplkcon,
+	    	xstateini,xstiff,xstate,npmat_,epn,matname,mi,&ielas,
+	    	&icmd,ncmat_,nstate_,stiini,vini,ikboun,ilboun,ener,enern,
+	    	emeini,xstaten,eei,enerini,cocon,ncocon,set,nset,istartset,
+	    	iendset,ialset,nprint,prlab,prset,qfx,qfn,trab,inotr,ntrans,
+	    	fmpc,nelemload,nload,ikmpc,ilmpc,istep,&iinc,springarea,
+	    	&reltime,&ne0,thicke,shcon,nshcon,
+	    	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
+	    	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
+            islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
+            inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
+			design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm,0);
+      	SFREE(inum);
+
+      	/* implicit dynamics (Matteo Pacher) */
+      	if((*ne!=ne0)&&(*nmethod==4)&&(*ithermal<2)&&(*iexpl<=1))
+		{
+        	FORTRAN(storecontactprop,(ne,&ne0,lakon,kon,ipkon,mi,
                          ielmat,elcon,mortar,adblump,nactdof,springarea,
                          ncmat_,ntmat_,stx,&temax));
-      }
+      	}
 
-      /* updating the external work (only for dynamic calculations) */
+      	/* updating the external work (only for dynamic calculations) */
+      	if((*nmethod==4)&&(*ithermal<2))
+		{
+	  		allwk=allwkini;
 
-      if((*nmethod==4)&&(*ithermal<2)){
-	  allwk=allwkini;
-	  for(i=0;i<*nk;i++){
-	      for(k=1;k<4;k++){
-		  allwk+=(fnext[i*mt+k]+fnextini[i*mt+k])*
-		      (v[i*mt+k]-vini[i*mt+k])/2.;
-	      }
-	  }
+	  		for(i=0;i<*nk;i++)
+			{
+	      		for(k=1;k<4;k++)
+				{
+		  			allwk+=(fnext[i*mt+k]+fnextini[i*mt+k])*
+		      		(v[i*mt+k]-vini[i*mt+k])/2.;
+	      		}
+	  		}
 
-        /* Work due to damping forces (cv and cvini) --> MPADD */
+        	/* Work due to damping forces (cv and cvini) --> MPADD */
+	  		if(idamping==1)
+			{
+	      		dampwk=dampwkini;
 
-	  if(idamping==1){
-	      dampwk=dampwkini;
-	      for(k=0;k<*nk;++k){
-		  for(j=1;j<mt;++j){
-		      if(nactdof[mt*k+j]>0){
-			  aux2[nactdof[mt*k+j]-1]=v[mt*k+j]-vini[mt*k+j];
-		      }
-		  }
-	      }
-	      for(k=0;k<neq[0];k++){
-		  dampwk+=-(cv[k]+cvini[k])*aux2[k]/2.;
-	      }
-	  }
-        /* Damping forces --> MPADD */
-      }
+	      		for(k=0;k<*nk;++k)
+				{
+		  			for(j=1;j<mt;++j)
+					{
+		      			if(nactdof[mt*k+j]>0)
+						{
+			  				aux2[nactdof[mt*k+j]-1]=v[mt*k+j]-vini[mt*k+j];
+		      			}
+		  			}
+	      		}
 
-      /* line search (only for static surface-to-surface penalty contact)
-         and not in the first iteration */
+	      		for(k=0;k<neq[0];k++)
+				{
+		  			dampwk+=-(cv[k]+cvini[k])*aux2[k]/2.;
+	      		}
+	  		}
+        	/* Damping forces --> MPADD */
+      	}
 
-      if((*mortar==1)&&(iit!=1)&&(*ne-ne0>0)&&(*nmethod!=4)){
+      	/* line search (only for static surface-to-surface penalty contact)
+        	and not in the first iteration */
 
-	  SFREE(v);SFREE(stx);SFREE(fn);
+      	if((*mortar==1)&&(iit!=1)&&(*ne-ne0>0)&&(*nmethod!=4))
+		{
+
+	  		SFREE(v);SFREE(stx);SFREE(fn);
       
-	  /* calculating the residual */
+	  		/* calculating the residual */
       
-	  NNEW(res,double,neq[1]);
-	  calcresidual(nmethod,neq,res,fext,f,iexpl,nactdof,aux2,vold,
-	     vini,&dtime,accold,nk,adb,aub,jq,irow,nzl,alpha,fextini,fini,
-	     islavnode,nslavnode,mortar,ntie,f_cm,f_cs,mi,
-	     nzs,&nasym,&idamping,veold,adc,auc,cvini,cv);
+	  		NNEW(res,double,neq[1]);
 
-          /* calculating the line search factor */
+	  		calcresidual(nmethod,neq,res,fext,f,iexpl,nactdof,aux2,vold,
+	     		vini,&dtime,accold,nk,adb,aub,jq,irow,nzl,alpha,fextini,fini,
+	     		islavnode,nslavnode,mortar,ntie,f_cm,f_cs,mi,
+	     		nzs,&nasym,&idamping,veold,adc,auc,cvini,cv);
 
-	  sum1=0.;sum2=0.;
-	  for(i=0;i<neq[1];i++){
-	      sum1+=b[i]*resold[i];
-	      sum2+=b[i]*res[i];
-	  }
-	  SFREE(res);
+        	/* calculating the line search factor */
+	  		sum1=0.;sum2=0.;
 
-	  if(fabs(sum1-sum2)<1.e-30){
-	      flinesearch=1.;
-	  }else{
-	      flinesearch=sum1/(sum1-sum2);
-	      if(flinesearch>smaxls){
-		  flinesearch=smaxls;
-	      }else if(flinesearch<sminls){
-		  flinesearch=sminls;
-	      }
-	  }
-	  printf("line search factor=%f\n\n",flinesearch);
+	  		for(i=0;i<neq[1];i++)
+			{
+	      		sum1+=b[i]*resold[i];
+	      		sum2+=b[i]*res[i];
+	  		}
+	  		SFREE(res);
 
-          /* update the solution */
+	  		if(fabs(sum1-sum2)<1.e-30)
+			{
+	      		flinesearch=1.;
+	  		}
+			else
+			{
+	      		flinesearch=sum1/(sum1-sum2);
 
-	  for(i=0;i<neq[1];i++){b[i]*=flinesearch;}
+	      		if(flinesearch>smaxls)
+				{
+		  			flinesearch=smaxls;
+	      		}
+				else if(flinesearch<sminls)
+				{
+		  			flinesearch=sminls;
+	      		}
+	  		}
+	  		printf("line search factor=%f\n\n",flinesearch);
+
+          	/* update the solution */
+	  		for(i=0;i<neq[1];i++)
+			{
+				b[i]*=flinesearch;
+			}
       
-	  NNEW(v,double,mt**nk);
-	  memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
+	 		 NNEW(v,double,mt**nk);
+	  		memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
 	  
-	  NNEW(stx,double,6*mi[0]**ne);
-	  NNEW(fn,double,mt**nk);
+	  		NNEW(stx,double,6*mi[0]**ne);
+	  		NNEW(fn,double,mt**nk);
 	  
-	  NNEW(inum,ITG,*nk);
-	   results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
-	      elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
-	      ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
-	      prestr,iprestr,filab,eme,emn,een,iperturb,
-	      f,fn,nactdof,&iout,qa,vold,b,nodeboun,
-	      ndirboun,xbounact,nboun,ipompc,
-	      nodempc,coefmpc,labmpc,nmpc,nmethod,cam,&neq[1],veold,accold,
-	      &bet,&gam,&dtime,&time,ttime,plicon,nplicon,plkcon,nplkcon,
-	      xstateini,xstiff,xstate,npmat_,epn,matname,mi,&ielas,
-	      &icmd,ncmat_,nstate_,stiini,vini,ikboun,ilboun,ener,enern,
-	      emeini,xstaten,eei,enerini,cocon,ncocon,set,nset,istartset,
-	      iendset,ialset,nprint,prlab,prset,qfx,qfn,trab,inotr,ntrans,
-	      fmpc,nelemload,nload,ikmpc,ilmpc,istep,&iinc,springarea,
-	      &reltime,&ne0,thicke,shcon,nshcon,
-	      sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
-	      mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
-	      islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-	      inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
-		  design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm,0); 
-	  SFREE(inum);
-      }
+	  		NNEW(inum,ITG,*nk);
+	   		results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
+	      		elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
+	      		ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
+	      		prestr,iprestr,filab,eme,emn,een,iperturb,
+	      		f,fn,nactdof,&iout,qa,vold,b,nodeboun,
+	      		ndirboun,xbounact,nboun,ipompc,
+	      		nodempc,coefmpc,labmpc,nmpc,nmethod,cam,&neq[1],veold,accold,
+	      		&bet,&gam,&dtime,&time,ttime,plicon,nplicon,plkcon,nplkcon,
+	      		xstateini,xstiff,xstate,npmat_,epn,matname,mi,&ielas,
+	      		&icmd,ncmat_,nstate_,stiini,vini,ikboun,ilboun,ener,enern,
+	      		emeini,xstaten,eei,enerini,cocon,ncocon,set,nset,istartset,
+	      		iendset,ialset,nprint,prlab,prset,qfx,qfn,trab,inotr,ntrans,
+	      		fmpc,nelemload,nload,ikmpc,ilmpc,istep,&iinc,springarea,
+	      		&reltime,&ne0,thicke,shcon,nshcon,
+	      		sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
+	      		mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
+	      		islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
+	      		inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
+		  		design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm,0); 
+	  		SFREE(inum);
+      	}
       
-      /* calculating the residual */
+      	/* calculating the residual */
+      	calcresidual(nmethod,neq,b,fext,f,iexpl,nactdof,aux2,vold,
+	 		vini,&dtime,accold,nk,adb,aub,jq,irow,nzl,alpha,fextini,fini,
+	 		islavnode,nslavnode,mortar,ntie,f_cm,f_cs,mi,
+	 		nzs,&nasym,&idamping,veold,adc,auc,cvini,cv);
+
+      	memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
       
-      calcresidual(nmethod,neq,b,fext,f,iexpl,nactdof,aux2,vold,
-	 vini,&dtime,accold,nk,adb,aub,jq,irow,nzl,alpha,fextini,fini,
-	 islavnode,nslavnode,mortar,ntie,f_cm,f_cs,mi,
-	 nzs,&nasym,&idamping,veold,adc,auc,cvini,cv);
-
-      memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
-      if(*ithermal!=2){
-	  for(k=0;k<6*mi[0]*ne0;++k){
-	      sti[k]=stx[k];
-	  }
-      }
+		if(*ithermal!=2)
+		{
+	  		for(k=0;k<6*mi[0]*ne0;++k)
+			{
+	      		sti[k]=stx[k];
+	  		}
+      	}
       
-      /* calculating the ratio of the smallest to largest pressure
-         for face-to-face contact
-         only done at the end of a step */
+      	/* calculating the ratio of the smallest to largest pressure
+        	 for face-to-face contact
+         	only done at the end of a step */
 
-      if((*mortar==1)&&(1.-theta-dtheta<=1.e-6)){
-	  FORTRAN(negativepressure,(&ne0,ne,mi,stx,&pressureratio));
-      }else{pressureratio=0.;}
+      	if((*mortar==1)&&(1.-theta-dtheta<=1.e-6))
+		{
+	  		FORTRAN(negativepressure,(&ne0,ne,mi,stx,&pressureratio));
+      	}
+		else
+		{
+			pressureratio=0.;
+		}
 
-      SFREE(v);SFREE(stx);SFREE(fn);
+     	 SFREE(v);SFREE(stx);SFREE(fn);
 
-      if(idamping==1){SFREE(adc);SFREE(auc);}
+      	if(idamping==1)
+		{
+			SFREE(adc);SFREE(auc);
+		}
 
-      if(*iexpl<=1){
+      	if(*iexpl<=1)
+		{
 	  
-	  /* store the residual forces for the next iteration */
+	  		/* store the residual forces for the next iteration */
+	  		if(*ithermal!=2)
+			{
+	      		if(cam[0]>uam[0])
+				{
+					uam[0]=cam[0];
+				}      
+	      		if(qau<1.e-10)
+				{
+		  			if(qa[0]>ea*qam[0])
+					{
+						qam[0]=(qamold[0]*jnz+qa[0])/(jnz+1);
+					}
+		  			else 
+					{
+						qam[0]=qamold[0];
+					}
+	      		}
+	  		}
 
-	  if(*ithermal!=2){
-	      if(cam[0]>uam[0]){uam[0]=cam[0];}      
-	      if(qau<1.e-10){
-		  if(qa[0]>ea*qam[0]){qam[0]=(qamold[0]*jnz+qa[0])/(jnz+1);}
-		  else {qam[0]=qamold[0];}
-	      }
-	  }
-	  if(*ithermal>1){
-	      if(cam[1]>uam[1]){uam[1]=cam[1];}      
-	      if(qau<1.e-10){
-		  if(qa[1]>ea*qam[1]){qam[1]=(qamold[1]*jnz+qa[1])/(jnz+1);}
-		  else {qam[1]=qamold[1];}
-	      }
-	  }
+	  		if(*ithermal>1)
+			{
+	      		if(cam[1]>uam[1])
+				{
+					uam[1]=cam[1];
+				}
+
+	      		if(qau<1.e-10)
+				{
+		  			if(qa[1]>ea*qam[1])
+					{
+						qam[1]=(qamold[1]*jnz+qa[1])/(jnz+1);
+					}
+		  			else 
+					{
+						qam[1]=qamold[1];
+					}
+	      		}
+	 	 	}
       
-	  /* calculating the maximum residual */
+	  		/* calculating the maximum residual */
+	  		for(k=0;k<2;++k)
+			{
+	      		ram2[k]=ram1[k];
+	      		ram1[k]=ram[k];
+	      		ram[k]=0.;
+	  		}
 
-	  for(k=0;k<2;++k){
-	      ram2[k]=ram1[k];
-	      ram1[k]=ram[k];
-	      ram[k]=0.;
-	  }
-	  if(*ithermal!=2){
-	      for(k=0;k<neq[0];++k){
-		  err=fabs(b[k]);
-		  if(err>ram[0]){ram[0]=err;ram[2]=k+0.5;}
-	      }
-	  }
-	  if(*ithermal>1){
-	      for(k=neq[0];k<neq[1];++k){
-		  err=fabs(b[k]);
-		  if(err>ram[1]){ram[1]=err;ram[3]=k+0.5;}
-	      }
-	  }
+	  		if(*ithermal!=2)
+			{
+	      		for(k=0;k<neq[0];++k)
+				{
+		  			err=fabs(b[k]);
+
+		  			if(err>ram[0])
+					{
+						ram[0]=err;ram[2]=k+0.5;
+					}
+	      		}
+	  		}
+
+	  		if(*ithermal>1)
+			{
+	      		for(k=neq[0];k<neq[1];++k)
+				{
+		  			err=fabs(b[k]);
+		  			if(err>ram[1])
+					{
+						ram[1]=err;ram[3]=k+0.5;
+					}
+	      		}
+	  		}
 	  
-	  /*   Divergence criteria for face-to-face penalty is different */
+	  		/*   Divergence criteria for face-to-face penalty is different */
+	  		if(*mortar==1)
+			{
+	      		for(k=4;k<6;++k)
+				{
+		  			ram2[k]=ram1[k];
+		  			ram1[k]=ram[k];
+	      		}
+
+	      		ram[4]=ram[0]+ram1[0];
+
+	      		ram[5]=(*ne-ne0)-(neold-ne0)+0.5;    
+	  		}
 	  
-	  if(*mortar==1){
-	      for(k=4;k<6;++k){
-		  ram2[k]=ram1[k];
-		  ram1[k]=ram[k];
-	      } 
-	      ram[4]=ram[0]+ram1[0];
-/*	      if((iflagact==0)&&(iit>1)){
-		  ram[5]=1.5;
-		  }else{ram[5]=0.5;}*/
-	      ram[5]=(*ne-ne0)-(neold-ne0)+0.5;
-/*	      if(iit>3){
-		  if((fabs(ram[6])>=fabs(ram1[6]))&&(fabs(ram[6])>=fabs(ram2[6]))){
-		      ram[7]=1.5;
-		  }else{ram[7]=0.5;}
-		  }*/
-	      
-	  }
+	  		/* next line is inserted to cope with stress-less
+	     		temperature calculations */
 	  
-	  /* next line is inserted to cope with stress-less
-	     temperature calculations */
+	  		if(*ithermal!=2)
+			{
+	      		if(ram[0]<1.e-6) ram[0]=0.;      
+	      		printf(" average force= %f\n",qa[0]);
+	      		printf(" time avg. forc= %f\n",qam[0]);
+
+	      		if((ITG)((double)nactdofinv[(ITG)ram[2]]/mt)+1==0)
+				{
+		  			printf(" largest residual force= %f\n",
+			 		ram[0]);
+	      		}
+				else
+				{
+		  			inode=(ITG)((double)nactdofinv[(ITG)ram[2]]/mt)+1;
+		  			idir=nactdofinv[(ITG)ram[2]]-mt*(inode-1);
+
+		  			printf(" largest residual force= %f in node %" ITGFORMAT " and dof %" ITGFORMAT "\n",
+			 		ram[0],inode,idir);
+	      		}
+
+	      		printf(" largest increment of disp= %e\n",uam[0]);
+	     	 	
+				if((ITG)cam[3]==0)
+				{
+		 	 		printf(" largest correction to disp= %e\n\n",
+			 		cam[0]);
+	      		}
+				else
+				{
+		  			inode=(ITG)((double)nactdofinv[(ITG)cam[3]]/mt)+1;
+		  			idir=nactdofinv[(ITG)cam[3]]-mt*(inode-1);
+		  			printf(" largest correction to disp= %e in node %" ITGFORMAT " and dof %" ITGFORMAT "\n\n",cam[0],inode,idir);
+	      		}
+	  		}
+
+	  		if(*ithermal>1)
+			{
+	      		if(ram[1]<1.e-6) ram[1]=0.;      
+	      		printf(" average flux= %f\n",qa[1]);
+	      		printf(" time avg. flux= %f\n",qam[1]);
+	      		
+				if((ITG)((double)nactdofinv[(ITG)ram[3]]/mt)+1==0)
+				{
+		  			printf(" largest residual flux= %f\n",
+			 		ram[1]);
+	      		}
+				else
+				{
+		  			inode=(ITG)((double)nactdofinv[(ITG)ram[3]]/mt)+1;
+		  			idir=nactdofinv[(ITG)ram[3]]-mt*(inode-1);
+		  			printf(" largest residual flux= %f in node %" ITGFORMAT " and dof %" ITGFORMAT "\n",ram[1],inode,idir);
+	      		}
+
+	      		printf(" largest increment of temp= %e\n",uam[1]);
+	      		
+				if((ITG)cam[4]==0)
+				{
+		  			printf(" largest correction to temp= %e\n\n",
+			 		cam[1]);
+	      		}
+				else
+				{
+		  			inode=(ITG)((double)nactdofinv[(ITG)cam[4]]/mt)+1;
+		  			idir=nactdofinv[(ITG)cam[4]]-mt*(inode-1);
+		  			printf(" largest correction to temp= %e in node %" ITGFORMAT " and dof %" ITGFORMAT "\n\n",cam[1],inode,idir);
+	      		}
+	  		}
+	  		fflush(stdout);
 	  
-	  if(*ithermal!=2){
-	      if(ram[0]<1.e-6) ram[0]=0.;      
-	      printf(" average force= %f\n",qa[0]);
-	      printf(" time avg. forc= %f\n",qam[0]);
-	      if((ITG)((double)nactdofinv[(ITG)ram[2]]/mt)+1==0){
-		  printf(" largest residual force= %f\n",
-			 ram[0]);
-	      }else{
-		  inode=(ITG)((double)nactdofinv[(ITG)ram[2]]/mt)+1;
-		  idir=nactdofinv[(ITG)ram[2]]-mt*(inode-1);
-		  printf(" largest residual force= %f in node %" ITGFORMAT " and dof %" ITGFORMAT "\n",
-			 ram[0],inode,idir);
-	      }
-	      printf(" largest increment of disp= %e\n",uam[0]);
-	      if((ITG)cam[3]==0){
-		  printf(" largest correction to disp= %e\n\n",
-			 cam[0]);
-	      }else{
-		  inode=(ITG)((double)nactdofinv[(ITG)cam[3]]/mt)+1;
-		  idir=nactdofinv[(ITG)cam[3]]-mt*(inode-1);
-		  printf(" largest correction to disp= %e in node %" ITGFORMAT " and dof %" ITGFORMAT "\n\n",cam[0],inode,idir);
-	      }
-	  }
-	  if(*ithermal>1){
-	      if(ram[1]<1.e-6) ram[1]=0.;      
-	      printf(" average flux= %f\n",qa[1]);
-	      printf(" time avg. flux= %f\n",qam[1]);
-	      if((ITG)((double)nactdofinv[(ITG)ram[3]]/mt)+1==0){
-		  printf(" largest residual flux= %f\n",
-			 ram[1]);
-	      }else{
-		  inode=(ITG)((double)nactdofinv[(ITG)ram[3]]/mt)+1;
-		  idir=nactdofinv[(ITG)ram[3]]-mt*(inode-1);
-		  printf(" largest residual flux= %f in node %" ITGFORMAT " and dof %" ITGFORMAT "\n",ram[1],inode,idir);
-	      }
-	      printf(" largest increment of temp= %e\n",uam[1]);
-	      if((ITG)cam[4]==0){
-		  printf(" largest correction to temp= %e\n\n",
-			 cam[1]);
-	      }else{
-		  inode=(ITG)((double)nactdofinv[(ITG)cam[4]]/mt)+1;
-		  idir=nactdofinv[(ITG)cam[4]]-mt*(inode-1);
-		  printf(" largest correction to temp= %e in node %" ITGFORMAT " and dof %" ITGFORMAT "\n\n",cam[1],inode,idir);
-	      }
-	  }
-	  fflush(stdout);
-	  
-	  FORTRAN(writecvg,(istep,&iinc,&icutb,&iit,ne,&ne0,ram,qam,cam,uam,
+	  		FORTRAN(writecvg,(istep,&iinc,&icutb,&iit,ne,&ne0,ram,qam,cam,uam,
 			ithermal));
 
-	  checkconvergence(co,nk,kon,ipkon,lakon,ne,stn,nmethod, 
-   	     kode,filab,een,t1act,&time,epn,ielmat,matname,enern, 
-	     xstaten,nstate_,istep,&iinc,iperturb,ener,mi,output,
-             ithermal,qfn,&mode,&noddiam,trab,inotr,ntrans,orab,
-	     ielorien,norien,description,sti,&icutb,&iit,&dtime,qa,
-	     vold,qam,ram1,ram2,ram,cam,uam,&ntg,ttime,&icntrl,
-	     &theta,&dtheta,veold,vini,idrct,tper,&istab,tmax, 
-	     nactdof,b,tmin,ctrl,amta,namta,itpamp,inext,&dthetaref,
-             &itp,&jprint,jout,&uncoupled,t1,&iitterm,nelemload,
-             nload,nodeboun,nboun,itg,ndirboun,&deltmx,&iflagact,
-	     set,nset,istartset,iendset,ialset,emn,thicke,jobnamec,
-	     mortar,nmat,ielprop,prop,&ialeatoric,&kscale,
-             energy,&allwk,&energyref,&emax,&r_abs,&enetoll,energyini,
-	     &allwkini,&temax,&sizemaxinc,&ne0,&neini,&dampwk,
-	     &dampwkini,energystartstep,neq,fext);
+	  		checkconvergence(co,nk,kon,ipkon,lakon,ne,stn,nmethod, 
+   	     		kode,filab,een,t1act,&time,epn,ielmat,matname,enern, 
+	     		xstaten,nstate_,istep,&iinc,iperturb,ener,mi,output,
+             	ithermal,qfn,&mode,&noddiam,trab,inotr,ntrans,orab,
+	     		ielorien,norien,description,sti,&icutb,&iit,&dtime,qa,
+	     		vold,qam,ram1,ram2,ram,cam,uam,&ntg,ttime,&icntrl,
+	     		&theta,&dtheta,veold,vini,idrct,tper,&istab,tmax, 
+	     		nactdof,b,tmin,ctrl,amta,namta,itpamp,inext,&dthetaref,
+            	&itp,&jprint,jout,&uncoupled,t1,&iitterm,nelemload,
+             	nload,nodeboun,nboun,itg,ndirboun,&deltmx,&iflagact,
+	     		set,nset,istartset,iendset,ialset,emn,thicke,jobnamec,
+	     		mortar,nmat,ielprop,prop,&ialeatoric,&kscale,
+            	energy,&allwk,&energyref,&emax,&r_abs,&enetoll,energyini,
+	     		&allwkini,&temax,&sizemaxinc,&ne0,&neini,&dampwk,
+	     		&dampwkini,energystartstep,neq,fext);
 	  
-      }else{
+      		}
+			else
+			{
 
-          /* explicit dynamics */
+          		/* explicit dynamics */
+	  			icntrl=1;
+	  			icutb=0;   
 
-	  icntrl=1;
-	  icutb=0;   
+          		/* recalculation of the time increment every 500 icrements
+             	(may have changed due to deformation) */
 
-          /* recalculation of the time increment every 500 icrements
-             (may have changed due to deformation) */
+	  			if((iinc/500)*500==iinc)
+				{
+	      			FORTRAN(calcstabletimeincvol,(&ne0,lakon,co,kon,ipkon,mi,
+			      	ielmat,&dtvol,alpha,wavespeed));
 
-	  if((iinc/500)*500==iinc){
-	      FORTRAN(calcstabletimeincvol,(&ne0,lakon,co,kon,ipkon,mi,
-			      ielmat,&dtvol,alpha,wavespeed));
+	      			if(dtvol<*tinc)*tinc=dtvol;
+	      			dtheta=(*tinc)/(*tper);
+	      			dthetaref=dtheta;
+	  			}
 
-	      if(dtvol<*tinc)*tinc=dtvol;
-	      dtheta=(*tinc)/(*tper);
-	      dthetaref=dtheta;
-	  }
-
-	  theta=theta+dtheta;  
-	  if(dtheta>=1.-theta){
-	      if(dtheta>1.-theta){
-		  printf(" the increment size exceeds the remainder of the step and is decreased to %e\n\n",
-		      dtheta**tper);
-	      }
-	      dtheta=1.-theta;
-	      dthetaref=dtheta;
-	  }
-	  iflagact=0;
-      }
-      
-    }
+	  			theta=theta+dtheta;  
+	  			if(dtheta>=1.-theta)
+				{
+	      			if(dtheta>1.-theta)
+					{
+		  				printf(" the increment size exceeds the remainder of the step and is decreased to %e\n\n",
+		      			dtheta**tper);
+	      			}
+	      			dtheta=1.-theta;
+	      			dthetaref=dtheta;
+	  			}
+	  			iflagact=0;
+      		}   
+    	}
 	
-    if(*nmethod!=4)SFREE(resold);
+    	if(*nmethod!=4)SFREE(resold);
 
-    /*********************************************************/
-    /*   end of the iteration loop                          */
-    /*********************************************************/
+    	/*********************************************************/
+    	/*   end of the iteration loop                          */
+    	/*********************************************************/
 
-    /* icutb=0 means that the iterations in the increment converged,
-       icutb!=0 indicates that the increment has to be reiterated with
+    	/* icutb=0 means that the iterations in the increment converged,
+       	icutb!=0 indicates that the increment has to be reiterated with
                 another increment size (dtheta) */
    
-    /* printing the energies (only for dynamic calculations) */
-	if(icutb==0){
+    	/* printing the energies (only for dynamic calculations) */
+		if(icutb==0)
+		{
 
-    ITG mt = mi[1] + 1;
+    		ITG mt = mi[1] + 1;
 
-    double maxUx = 0.0, maxUy = 0.0, maxUz = 0.0;
+    		double maxUx = 0.0, maxUy = 0.0, maxUz = 0.0;
 
-    for (ITG i = 0; i < *nk; ++i) {
-        ITG base = mt * i;
+    		for (ITG i = 0; i < *nk; ++i) 
+			{
+        		ITG base = mt * i;
 
-        double ux = fabs(vold[base + 1]);
-        double uy = fabs(vold[base + 2]);
-        double uz = fabs(vold[base + 3]);
+        		double ux = fabs(vold[base + 1]);
+        		double uy = fabs(vold[base + 2]);
+        		double uz = fabs(vold[base + 3]);
 
-        if (ux > maxUx) maxUx = ux;
-        if (uy > maxUy) maxUy = uy;
-        if (uz > maxUz) maxUz = uz;
-    }
+        		if (ux > maxUx) maxUx = ux;
+        		if (uy > maxUy) maxUy = uy;
+        		if (uz > maxUz) maxUz = uz;
+    		}
 
-    printf("\n=== Increment converged ===\n");
-    printf("Max |Ux| = %e\n", maxUx);
-    printf("Max |Uy| = %e\n", maxUy);
-    printf("Max |Uz| = %e\n", maxUz);
-    printf("================================\n\n");
+    		printf("\n=== Increment converged ===\n");
+    		printf("Max |Ux| = %e\n", maxUx);
+    		printf("Max |Uy| = %e\n", maxUy);
+    		printf("Max |Uz| = %e\n", maxUz);
+    		printf("================================\n\n");
 
-    fflush(stdout);
-}
-    if((icutb==0)&&(*nmethod==4)&&(*ithermal<2)){
-	printf(" initial energy (at start of step) = %e\n\n",energyref);
-
-	printf(" since start of the step: \n");
-	printf(" external work = %e\n",allwk);
-	printf(" work performed by the damping forces = %e\n",dampwk);
-	printf(" netto work = %e\n\n",allwk+dampwk);
-
-        printf(" actual energy: \n");
-	printf(" internal energy = %e\n",energy[0]);
-	printf(" kinetic energy = %e\n",energy[1]);
-	printf(" elastic contact energy = %e\n",energy[2]);
-	printf(" energy lost due to friction = %e\n",energy[3]);
-	printf(" total energy  = %e\n\n",energy[0]+energy[1]+energy[2]+energy[3]);
-
-	printf(" energy increase = %e\n\n",energy[0]+energy[1]+energy[2]+energy[3]-energyref);
-
-	printf(" energy balance (absolute) = %e \n",energy[0]+energy[1]+energy[2]+energy[3]-energyref-allwk-dampwk);
-
-	/* Belytschko criterion */
-
-	denergymax=energy[0];
-	if(denergymax<energy[1]) denergymax=energy[1];
-	if(denergymax<fabs(allwk)) denergymax=fabs(allwk);
-
-	if(denergymax>1.e-30){
-	    printf(" energy balance (relative) = %f %% \n\n",
-            fabs((energy[0]+energy[1]+energy[2]+energy[3]-energyref-allwk-dampwk)/
-            denergymax*100.));
-	}else{
-	    printf(" energy balance (relative) =0 %% \n\n");
-	}
-// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-//    MPADD start
-//	printf(" work done by the damping forces = %e\n", dampwk);
-//	neini=*ne; 
-//	printf(" contact elements end of increment = %"ITGFORMAT"\n\n", *ne - ne0);
-//    MPADD end
-// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-    }
-
-    if(uncoupled){
-	SFREE(iruc);
-    }
-
-    if(((qa[0]>ea*qam[0])||(qa[1]>ea*qam[1]))&&(icutb==0)){jnz++;}
-    iit=0;
-
-    if(icutb!=0){
-      memcpy(&vold[0],&vini[0],sizeof(double)*mt**nk);
-
-      for(k=0;k<*nboun;++k){xbounact[k]=xbounini[k];}
-      if((*ithermal==1)||(*ithermal>=3)){
-	for(k=0;k<*nk;++k){t1act[k]=t1ini[k];}
-      }
-      for(k=0;k<neq[1];++k){
-	  f[k]=fini[k];
-      }
-      if(*nmethod==4){
-	for(k=0;k<mt**nk;++k){
-	  veold[k]=veini[k];
-	  accold[k]=accini[k];
-	}
-	for(k=0;k<neq[1];++k){
-//	  f[k]=fini[k];
-	  fext[k]=fextini[k];
-	  cv[k]=cvini[k];
-	}
-      }
-      if(*ithermal!=2){
-	  for(k=0;k<6*mi[0]*ne0;++k){
-	      sti[k]=stiini[k];
-	      eme[k]=emeini[k];
-	  }
-      }
-      if(*nener==1)
-	  for(k=0;k<mi[0]*ne0;++k){ener[k]=enerini[k];}
-
-      for(k=0;k<*nstate_*mi[0]*(ne0+maxprevcontel);++k){
-	  xstate[k]=xstateini[k];
-      }	  
-
-      qam[0]=qamold[0];
-      qam[1]=qamold[1];
-    }
-    
-    /* face-to-face penalty */
-
-    if((*mortar==1)&&(icutb==0)){
-	
-	ntrimax=0;
-	for(i=0;i<*ntie;i++){	    
-	    if(itietri[2*i+1]-itietri[2*i]+1>ntrimax)		
-		ntrimax=itietri[2*i+1]-itietri[2*i]+1;  	
-	}
-	NNEW(xo,double,ntrimax);	    
-	NNEW(yo,double,ntrimax);	    
-	NNEW(zo,double,ntrimax);	    
-	NNEW(x,double,ntrimax);	    
-	NNEW(y,double,ntrimax);	    
-	NNEW(z,double,ntrimax);	   
-	NNEW(nx,ITG,ntrimax);	   
-	NNEW(ny,ITG,ntrimax);	    
-	NNEW(nz,ITG,ntrimax);
-      
-	/*  Determination of active nodes (islavact) */
-      
-	FORTRAN(islavactive,(tieset,ntie,itietri,cg,straight,
-		   co,vold,xo,yo,zo,x,y,z,nx,ny,nz,mi,
-		   imastop,nslavnode,islavnode,islavact));
-
-	SFREE(xo);SFREE(yo);SFREE(zo);SFREE(x);SFREE(y);SFREE(z);SFREE(nx);	    
-	SFREE(ny);SFREE(nz);
-
-	if(negpres==0){
-	    if((*mortar==1)&&(1.-theta-dtheta<=1.e-6)&&(itruecontact==1)){
-		printf(" pressure ratio (smallest/largest pressure over all contact areas) =%e\n\n",pressureratio);
-		if(pressureratio<-0.05){
-		    printf(" zero-size increment is appended\n\n");
-		    negpres=1;theta=1.-1.e-6;dtheta=1.e-6;
+    		fflush(stdout);
 		}
-	    }
-	}else{negpres=0;}
 
-    }
+    	if((icutb==0)&&(*nmethod==4)&&(*ithermal<2))
+		{
+			printf(" initial energy (at start of step) = %e\n\n",energyref);
 
-    /* output */
+			printf(" since start of the step: \n");
+			printf(" external work = %e\n",allwk);
+			printf(" work performed by the damping forces = %e\n",dampwk);
+			printf(" netto work = %e\n\n",allwk+dampwk);
 
-    if((jout[0]==jprint)&&(icutb==0)){
+        	printf(" actual energy: \n");
+			printf(" internal energy = %e\n",energy[0]);
+			printf(" kinetic energy = %e\n",energy[1]);
+			printf(" elastic contact energy = %e\n",energy[2]);
+			printf(" energy lost due to friction = %e\n",energy[3]);
+			printf(" total energy  = %e\n\n",energy[0]+energy[1]+energy[2]+energy[3]);
 
-      jprint=0;
+			printf(" energy increase = %e\n\n",energy[0]+energy[1]+energy[2]+energy[3]-energyref);
 
-      /* calculating the displacements and the stresses and storing */
-      /* the results in frd format  */
+			printf(" energy balance (absolute) = %e \n",energy[0]+energy[1]+energy[2]+energy[3]-energyref-allwk-dampwk);
+
+			/* Belytschko criterion */
+
+			denergymax=energy[0];
+			if(denergymax<energy[1]) denergymax=energy[1];
+			if(denergymax<fabs(allwk)) denergymax=fabs(allwk);
+
+			if(denergymax>1.e-30)
+			{
+	    		printf(" energy balance (relative) = %f %% \n\n",
+            	fabs((energy[0]+energy[1]+energy[2]+energy[3]-energyref-allwk-dampwk)/
+            	denergymax*100.));
+			}
+			else
+			{
+	    		printf(" energy balance (relative) =0 %% \n\n");
+			}
+			// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+			//    MPADD start
+			//	printf(" work done by the damping forces = %e\n", dampwk);
+			//	neini=*ne; 
+			//	printf(" contact elements end of increment = %"ITGFORMAT"\n\n", *ne - ne0);
+			//    MPADD end
+			// # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    	}
+
+    	if(uncoupled)
+		{
+			SFREE(iruc);
+    	}
+
+    	if(((qa[0]>ea*qam[0])||(qa[1]>ea*qam[1]))&&(icutb==0))
+		{
+			jnz++;
+		}
+   	 	iit=0;
+
+    	if(icutb!=0)
+		{
+      		memcpy(&vold[0],&vini[0],sizeof(double)*mt**nk);
+
+      		for(k=0;k<*nboun;++k)
+			{
+				xbounact[k]=xbounini[k];
+			}
+
+      		if((*ithermal==1)||(*ithermal>=3))
+			{
+				for(k=0;k<*nk;++k)
+				{
+					t1act[k]=t1ini[k];
+				}
+      		}
+
+      		for(k=0;k<neq[1];++k)
+			{
+	  			f[k]=fini[k];
+      		}
+
+      		if(*nmethod==4)
+			{
+				for(k=0;k<mt**nk;++k)
+				{
+	  				veold[k]=veini[k];
+	  				accold[k]=accini[k];
+				}
+
+				for(k=0;k<neq[1];++k)
+				{
+				//	  f[k]=fini[k];
+	  				fext[k]=fextini[k];
+	  				cv[k]=cvini[k];
+				}
+      		}
+
+      		if(*ithermal!=2)
+			{
+	  			for(k=0;k<6*mi[0]*ne0;++k)
+				{
+	      			sti[k]=stiini[k];
+	      			eme[k]=emeini[k];
+	  			}
+      		}
+      		if(*nener==1)
+	  		for(k=0;k<mi[0]*ne0;++k)
+			{
+				ener[k]=enerini[k];
+			}
+
+      		for(k=0;k<*nstate_*mi[0]*(ne0+maxprevcontel);++k)
+			{
+	  			xstate[k]=xstateini[k];
+      		}	  
+
+      		qam[0]=qamold[0];
+      		qam[1]=qamold[1];
+    	}
+    
+    	/* face-to-face penalty */
+
+    	if((*mortar==1)&&(icutb==0))
+		{
+			ntrimax=0;
+			for(i=0;i<*ntie;i++)
+			{	    
+	    		if(itietri[2*i+1]-itietri[2*i]+1>ntrimax)		
+				ntrimax=itietri[2*i+1]-itietri[2*i]+1;  	
+			}
+
+			NNEW(xo,double,ntrimax);	    
+			NNEW(yo,double,ntrimax);	    
+			NNEW(zo,double,ntrimax);	    
+			NNEW(x,double,ntrimax);	    
+			NNEW(y,double,ntrimax);	    
+			NNEW(z,double,ntrimax);	   
+			NNEW(nx,ITG,ntrimax);	   
+			NNEW(ny,ITG,ntrimax);	    
+			NNEW(nz,ITG,ntrimax);
+      
+			/*  Determination of active nodes (islavact) */
+			FORTRAN(islavactive,(tieset,ntie,itietri,cg,straight,
+		   		co,vold,xo,yo,zo,x,y,z,nx,ny,nz,mi,
+		   		imastop,nslavnode,islavnode,islavact));
+
+			SFREE(xo);SFREE(yo);SFREE(zo);SFREE(x);SFREE(y);SFREE(z);SFREE(nx);	    
+			SFREE(ny);SFREE(nz);
+
+			if(negpres==0)
+			{
+	    		if((*mortar==1)&&(1.-theta-dtheta<=1.e-6)&&(itruecontact==1))
+				{
+					printf(" pressure ratio (smallest/largest pressure over all contact areas) =%e\n\n",pressureratio);
+					if(pressureratio<-0.05)
+					{
+		    			printf(" zero-size increment is appended\n\n");
+		    			negpres=1;theta=1.-1.e-6;dtheta=1.e-6;
+					}
+	    		}
+			}
+			else
+			{
+				negpres=0;
+			}
+    	}
+
+    	/* output */
+
+    	if((jout[0]==jprint)&&(icutb==0))
+		{
+
+      		jprint=0;
+
+      		/* calculating the displacements and the stresses and storing */
+      		/* the results in frd format  */
 	
-      NNEW(v,double,mt**nk);
-      NNEW(fn,double,mt**nk);
-      NNEW(stn,double,6**nk);
-      if(*ithermal>1) NNEW(qfn,double,3**nk);
-      NNEW(inum,ITG,*nk);
-      NNEW(stx,double,6*mi[0]**ne);
-      
-      if(strcmp1(&filab[261],"E   ")==0) NNEW(een,double,6**nk);
-      if(strcmp1(&filab[435],"PEEQ")==0) NNEW(epn,double,*nk);
-      if(strcmp1(&filab[522],"ENER")==0) NNEW(enern,double,*nk);
-      if(strcmp1(&filab[609],"SDV ")==0) NNEW(xstaten,double,*nstate_**nk);
-      if(strcmp1(&filab[2175],"CONT")==0) NNEW(cdn,double,6**nk);
-      if(strcmp1(&filab[2697],"ME  ")==0) NNEW(emn,double,6**nk);
+      		NNEW(v,double,mt**nk);
+      		NNEW(fn,double,mt**nk);
+      		NNEW(stn,double,6**nk);
 
-      memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
+      		if(*ithermal>1) NNEW(qfn,double,3**nk);
+      		NNEW(inum,ITG,*nk);
+      		NNEW(stx,double,6*mi[0]**ne);
+      
+      		if(strcmp1(&filab[261],"E   ")==0) NNEW(een,double,6**nk);
+      		if(strcmp1(&filab[435],"PEEQ")==0) NNEW(epn,double,*nk);
+      		if(strcmp1(&filab[522],"ENER")==0) NNEW(enern,double,*nk);
+      		if(strcmp1(&filab[609],"SDV ")==0) NNEW(xstaten,double,*nstate_**nk);
+      		if(strcmp1(&filab[2175],"CONT")==0) NNEW(cdn,double,6**nk);
+      		if(strcmp1(&filab[2697],"ME  ")==0) NNEW(emn,double,6**nk);
 
-      iout=2;
-      icmd=3;
-      
-#ifdef COMPANY
-      FORTRAN(uinit,());
-#endif
-     results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
-	      elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
-	      ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
-	      prestr,iprestr,filab,eme,emn,een,iperturb,
-	      f,fn,nactdof,&iout,qa,vold,b,nodeboun,
-	      ndirboun,xbounact,nboun,ipompc,
-	      nodempc,coefmpc,labmpc,nmpc,nmethod,cam,&neq[1],veold,accold,
-              &bet,&gam,&dtime,&time,ttime,plicon,nplicon,plkcon,nplkcon,
-	      xstateini,xstiff,xstate,npmat_,epn,matname,mi,&ielas,&icmd,
-	      ncmat_,nstate_,stiini,vini,ikboun,ilboun,ener,enern,emeini,
-              xstaten,eei,enerini,cocon,ncocon,set,nset,istartset,iendset,
-              ialset,nprint,prlab,prset,qfx,qfn,trab,inotr,ntrans,fmpc,
-	      nelemload,nload,ikmpc,ilmpc,istep,&iinc,springarea,
-              &reltime,&ne0,thicke,shcon,nshcon,
-              sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
-              mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
-	      islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
-              inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
-			  design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm, (*eval_PNORM == 2) ? 1 : 0); 
-      
-      memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
+      		memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
 
-      iout=0;
-      if(*iexpl<=1) icmd=0;
-//      FORTRAN(networkinum,(ipkon,inum,kon,lakon,ne,itg,&ntg));
-//      for(k=0;k<ntg;k++)if(inum[itg[k]-1]>0){inum[itg[k]-1]*=-1;}
+      		iout=2;
+      		icmd=3;
       
-      ++*kode;
-      if(*mcs!=0){
-	ptime=*ttime+time;
-	frdcyc(co,nk,kon,ipkon,lakon,ne,v,stn,inum,nmethod,kode,filab,een,
-	       t1act,fn,&ptime,epn,ielmat,matname,cs,mcs,nkon,enern,xstaten,
-               nstate_,istep,&iinc,iperturb,ener,mi,output,ithermal,qfn,
-               ialset,istartset,iendset,trab,inotr,ntrans,orab,ielorien,
-	       norien,stx,veold,&noddiam,set,nset,emn,thicke,jobnamec,&ne0,
-               cdn,mortar,nmat,qfx,ielprop,prop);
-#ifdef COMPANY
-	FORTRAN(uout,(v,mi,ithermal,filab,kode));
-#endif
-      }
-      else{
-	  if(strcmp1(&filab[1044],"ZZS")==0){
-	      NNEW(neigh,ITG,40**ne);
-	      NNEW(ipneigh,ITG,*nk);
-	  }
+			#ifdef COMPANY
+      		FORTRAN(uinit,());
+			#endif
+     		results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
+	      		elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
+	      		ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
+	      		prestr,iprestr,filab,eme,emn,een,iperturb,
+	      		f,fn,nactdof,&iout,qa,vold,b,nodeboun,
+	      		ndirboun,xbounact,nboun,ipompc,
+	      		nodempc,coefmpc,labmpc,nmpc,nmethod,cam,&neq[1],veold,accold,
+              	&bet,&gam,&dtime,&time,ttime,plicon,nplicon,plkcon,nplkcon,
+	      		xstateini,xstiff,xstate,npmat_,epn,matname,mi,&ielas,&icmd,
+	      		ncmat_,nstate_,stiini,vini,ikboun,ilboun,ener,enern,emeini,
+              	xstaten,eei,enerini,cocon,ncocon,set,nset,istartset,iendset,
+              	ialset,nprint,prlab,prset,qfx,qfn,trab,inotr,ntrans,fmpc,
+	      		nelemload,nload,ikmpc,ilmpc,istep,&iinc,springarea,
+             	&reltime,&ne0,thicke,shcon,nshcon,
+              	sideload,xloadact,xloadold,&icfd,inomat,pslavsurf,pmastsurf,
+              	mortar,islavact,cdn,islavnode,nslavnode,ntie,clearini,
+	      		islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
+              	inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
+			  	design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm, (*eval_PNORM == 2) ? 1 : 0); 
+      
+      		memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
+
+      		iout=0;
+      		if(*iexpl<=1) icmd=0;
+		//      FORTRAN(networkinum,(ipkon,inum,kon,lakon,ne,itg,&ntg));
+		//      for(k=0;k<ntg;k++)if(inum[itg[k]-1]>0){inum[itg[k]-1]*=-1;}
+      
+			++*kode;
+      		if(*mcs!=0)
+			{
+				ptime=*ttime+time;
+				frdcyc(co,nk,kon,ipkon,lakon,ne,v,stn,inum,nmethod,kode,filab,een,
+	       			t1act,fn,&ptime,epn,ielmat,matname,cs,mcs,nkon,enern,xstaten,
+              		nstate_,istep,&iinc,iperturb,ener,mi,output,ithermal,qfn,
+               		ialset,istartset,iendset,trab,inotr,ntrans,orab,ielorien,
+	       			norien,stx,veold,&noddiam,set,nset,emn,thicke,jobnamec,&ne0,
+               		cdn,mortar,nmat,qfx,ielprop,prop);
+				#ifdef COMPANY
+					FORTRAN(uout,(v,mi,ithermal,filab,kode));
+				#endif
+      		}
+
+      		else
+			{
+	  			if(strcmp1(&filab[1044],"ZZS")==0)
+				{
+	     			 NNEW(neigh,ITG,40**ne);
+	      			NNEW(ipneigh,ITG,*nk);
+	  			}
 
 	  ptime=*ttime+time;
 	  frd(co,nk,kon,ipkon,lakon,&ne0,v,stn,inum,nmethod,
