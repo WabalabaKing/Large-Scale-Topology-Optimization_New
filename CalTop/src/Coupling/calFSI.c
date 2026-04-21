@@ -27,7 +27,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "CalFSI.h"
 #include "CalculiX.h"
+
 #include <time.h>
 #include <unistd.h>
 #include <sys/stat.h> 
@@ -2023,31 +2025,31 @@ while(istat>=0)
       mpcinfo[1]=mpcfree;
       mpcinfo[2]=icascade;
 	    mpcinfo[3]=maxlenmpc;
-
-	    nonlingeo(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
-	     &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
-             &nforc,&nelemload,&sideload,xload,&nload,
-	     nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,&ikmpc,
-	     &ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
-	     alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
-             t0,t1,t1old,ithermal,prestr,&iprestr,
-	     &vold,iperturb,sti,nzs,&kode,filab,&idrct,jmax,
-	     jout,timepar,eme,xbounold,xforcold,xloadold,
-	     veold,accold,amname,amta,namta,
-	     &nam,iamforc,&iamload,iamt1,&alpha,
-             &iexpl,iamboun,plicon,nplicon,plkcon,nplkcon,
-	     &xstate,&npmat_,&istep,&ttime,matname,qaold,mi,
-	     &isolver,&ncmat_,&nstate_,&iumat,cs,&mcs,&nkon,&ener,
-	     mpcinfo,output,
-             shcon,nshcon,cocon,ncocon,physcon,&nflow,ctrl,
-             set,&nset,istartset,iendset,ialset,&nprint,prlab,
-             prset,&nener,ikforc,ilforc,trab,inotr,&ntrans,&fmpc,
-             cbody,ibody,xbody,&nbody,xbodyold,ielprop,prop,
-	     &ntie,tieset,&itpamp,&iviewfile,jobnamec,tietol,&nslavs,thicke,
-	     ics,&nintpoint,&mortar,
-	     &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
-	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
-	     velo,veloo, rhoPhys,&pstiff);
+      nonlingeo(&co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,xboun,&nboun,
+           &ipompc,&nodempc,&coefmpc,&labmpc,&nmpc,nodeforc,ndirforc,xforc,
+           &nforc,&nelemload,&sideload,xload,&nload,
+           nactdof,&icol,jq,&irow,neq,&nzl,&nmethod,&ikmpc,
+           &ilmpc,ikboun,ilboun,elcon,nelcon,rhcon,nrhcon,
+           alcon,nalcon,alzero,&ielmat,&ielorien,&norien,orab,&ntmat_,
+           t0,t1,t1old,ithermal,prestr,&iprestr,
+           &vold,iperturb,sti,nzs,&kode,filab,&idrct,jmax,
+           jout,timepar,eme,xbounold,xforcold,xloadold,
+           veold,accold,amname,amta,namta,
+           &nam,iamforc,&iamload,iamt1,&alpha,
+           &iexpl,iamboun,plicon,nplicon,plkcon,nplkcon,
+           &xstate,&npmat_,&istep,&ttime,matname,qaold,mi,
+           &isolver,&ncmat_,&nstate_,&iumat,cs,&mcs,&nkon,&ener,
+           mpcinfo,output,
+           shcon,nshcon,cocon,ncocon,physcon,&nflow,ctrl,
+           set,&nset,istartset,iendset,ialset,&nprint,prlab,
+           prset,&nener,ikforc,ilforc,trab,inotr,&ntrans,&fmpc,
+           cbody,ibody,xbody,&nbody,xbodyold,ielprop,prop,
+           &ntie,tieset,&itpamp,&iviewfile,jobnamec,tietol,&nslavs,thicke,
+           ics,&nintpoint,&mortar,
+           &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
+           xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
+           velo,veloo,rhoPhys,&pstiff,
+           &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho, &eval_PNORM,&mat_dens);
 
 	      memmpc_=mpcinfo[0];
         mpcfree=mpcinfo[1];
@@ -2163,7 +2165,7 @@ while(istat>=0)
       /* allocate memory for element complaince and initialize to zero */
       NNEW(elCompl,double,ne_);
 
-      	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
+      sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
 	     nactdof,icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
@@ -2180,7 +2182,7 @@ while(istat>=0)
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
 	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
-             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
+             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
 
       compute_mass(ne_, eleVol, rhoPhys, mat_dens);
@@ -2226,7 +2228,7 @@ while(istat>=0)
 
       /* Evaluate sensitivities */
       printf("  Evaluating compliance sensitivities...");
-	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
+      sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
 	     nactdof,icol,jq,&irow,neq,&nzl,&nmethod,ikmpc,
@@ -2243,7 +2245,7 @@ while(istat>=0)
 	     xbodyold,timepar,thicke,jobnamec,tieset,&ntie,&istep,&nmat,
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
 	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
-             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol);
+             jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
       printf("done\n");
 
@@ -2440,15 +2442,15 @@ while(istat>=0)
     {
       /* write output fields for passive elements */
       printf("  \nWriting output fields for active and passive elements ...");
-      tecplot_vtu_passive(nk, ne, co, kon, ipkon, vold, stx, rhoPhys, passiveIDs, numPassive);
-      tecplot_vtu_active(nk, ne, co, kon, ipkon, vold, stx, rhoPhys, passiveIDs, numPassive);
+      tecplot_vtu_passive(nk, ne, co, kon, ipkon, lakon, mi[0], vold, stx, rhoPhys, passiveIDs, numPassive);
+      tecplot_vtu_active(nk, ne, co, kon, ipkon, lakon, mi[0], vold, stx, rhoPhys, passiveIDs, numPassive);
       printf("done\n");
     }
     else
     {
       /* Write elastic fields to a vtu file */
       printf("\nWriting output fields...");
-      tecplot_vtu(nk, ne, co, kon, ipkon, vold, stx, rhoPhys);
+      tecplot_vtu(nk, ne, co, kon, ipkon, lakon, mi[0], vold, stx, rhoPhys);
       printf("done!\n\n");
     }
 

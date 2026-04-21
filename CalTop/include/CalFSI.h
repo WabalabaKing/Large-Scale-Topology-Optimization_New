@@ -119,6 +119,10 @@ void rho(double *design,int ne);
 
 void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, char *lakon, int mi0, double *v, double *stx, double *rhoPhy);
 
+void tecplot_vtu_passive(int nk, int ne, double *co, int *kon, int *ipkon, char *lakon, int mi0, double *v, double *stx, double *rhoPhy, int *passiveIDS, int numPassive);
+
+void tecplot_vtu_active(int nk, int ne, double *co, int *kon, int *ipkon, char *lakon, int mi0, double *v, double *stx, double *rhoPhy, int *passiveIDS, int numPassive);
+
 void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum, double *Mass, double *cgx, double *cgy, double *cgz, int *passiveIDs, int numPassive, double* pnorm);
 
 void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,
@@ -4310,7 +4314,8 @@ void FORTRAN(resultsmech_se,(double *co,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
           double *clearini,ITG *nea,ITG *neb,ITG *ielprop,double *prop,
 	  double *dfn,ITG *idesvar,ITG *nodedesi,
 	  double *fn0,double *sti,ITG *icoordinate,
-	  double *dxstiff,ITG *ialdesi,double *xdesi));
+	  double *dxstiff,ITG *ialdesi,double *xdesi,
+        double *design, double *penal));
 
 void FORTRAN(resultsnoddir,(ITG *nk,double *v,ITG *nactdof,double *b,
        ITG *ipompc,ITG *nodempc,double *coefmpc,ITG *nmpc,ITG *mi));
@@ -4412,7 +4417,8 @@ void results_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	     ITG *nkon,ITG *jqs,ITG *irows,ITG *nactdofinv,
 	     ITG *icoordinate,double *dxstiff,ITG *istartdesi,
 	     ITG *ialdesi,double *xdesi,ITG *ieigenfrequency,
-	     double *fint,ITG *ishapeenergy,char *typeboun,double *fn0_out);
+	     double *fint,ITG *ishapeenergy,char *typeboun,double *fn0_out,
+             double *design,double *penal);
 
 void FORTRAN(resultstherm,(double *co,ITG *kon,ITG *ipkon,
        char *lakon,double *v,

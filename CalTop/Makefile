@@ -112,7 +112,7 @@ LIBS = \
   -lpthread -lm -ldl -lstdc++
 
 # YAML-cpp is always linked
-#LIBS += -L$(YAML_PREFIX)/build -lyaml-cpp
+LIBS += -L$(YAML_PREFIX)/build -lyaml-cpp
 
 # preCICE libs only when MDO=1
 ifeq ($(MDO),1)
