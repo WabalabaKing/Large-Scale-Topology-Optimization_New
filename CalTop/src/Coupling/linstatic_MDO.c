@@ -740,7 +740,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 			
 			    if(Precice_IsReadCheckpointRequired())
 			    {
-    			    Precice_ReadIterationCheckpoint(&simulationData, v );
+    			    Precice_ReadIterationCheckpoint(&simulationData, vold );
         		    Precice_FulfilledReadCheckpoint();
     		    }
     			    
