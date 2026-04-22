@@ -53,11 +53,7 @@ void Precice_Setup( char * configFilename, char * participantName, SimulationDat
 		
 		sim->preciceInterfaces[i] = malloc( sizeof( PreciceInterface ) );
 		
-		
-		PreciceInterface_Create( sim->preciceInterfaces[i], sim, config );
-
-		printf("checkdone!\n");
-		
+		PreciceInterface_Create( sim->preciceInterfaces[i], sim, config );		
 	}
 
 	printf("done!\n");
@@ -76,7 +72,9 @@ void Precice_Setup( char * configFilename, char * participantName, SimulationDat
 	printf("Initialize preCICE...");
 	// Initialize preCICE
 	sim->precice_dt = precicec_initialize();
+	printf("Done setting precice dt\n");
 
+	printf("Initializing coupling data\n");
 	// Initialize coupling data
 	Precice_InitializeData( sim );
 	printf("done!\n");

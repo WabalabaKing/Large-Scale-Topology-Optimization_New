@@ -242,7 +242,7 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
         	.mt = mt, 									/*---Not sure---*/
         	.nk = *nk,									/*---Highest node number---*/
         	.theta = &theta,  							/*---Normalized (by tper) size of all previous increments and not including present increment---*/
-        //	.dtheta = &dtheta,						/*---Normalized (by tper) increment size---*/
+     //   	.dtheta = &dtheta,						/*---Normalized (by tper) increment size---*/
         	.tper = tper,								/*---Use given step size---*/
         	.nmethod = nmethod,  						/*---Flag that deifnes numerical method: 1: static linear or nonlinear, 2: frequency (linear), 3: buckling, 4: dynamic linear or non-linear, etc---*/
         	.xload = xload,								/*---Concentrated load in direction of idof of node "node" (global coordinates)---*/
@@ -270,10 +270,7 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 		printf("simulationData.sideload     = %p\n", (void*)simulationData.sideload);
 		printf("simulationData.vold         = %p\n", (void*)simulationData.vold);
 
-				/*---Adapter: Create the interfaces and initialize the coupling---*/
-        printf("Initializing static aeroelastic interface with %s and %s \n", preciceParticipantName, configFilename);
 
-        Precice_Setup( configFilename, preciceParticipantName, &simulationData );
 		fflush(stdout);
 
   		if(*ithermal==4)
@@ -1290,6 +1287,11 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 
 
 	// Main PreCICE loop
+
+					/*---Adapter: Create the interfaces and initialize the coupling---*/
+        printf("Initializing static aeroelastic interface with %s and %s \n", preciceParticipantName, configFilename);
+
+        Precice_Setup( configFilename, preciceParticipantName, &simulationData );
 
 	while (Precice_IsCouplingOngoing())
 	{
