@@ -16,6 +16,7 @@ pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
 typedef struct {
     int thread_id;
     int ne0;
+    int *isPassive;
     int ne_start, ne_end;
     double *elCentroid;
     double rmin_local;
@@ -87,9 +88,22 @@ void *filter_thread_bin(void *args_ptr)
 
     // Loop over this thread's assigned element block
     for (int i = args->ne_start; i < args->ne_end; ++i) 
-    {
-        int count = 0;
+    {   
+// remove effect of passive elements
+        if (args->isPassive[i]) {
+        int64_t row = (int64_t)i + 1;
+        fwrite(&row, sizeof(int64_t), 1, frow);
+        fwrite(&row, sizeof(int64_t), 1, fcol);
+        double w = 1.0;
+        fwrite(&w, sizeof(double), 1, fval);
+        row_sum_local[i] = 1.0;
+        int self_count = 1;
+        fwrite(&self_count, sizeof(int), 1, fdnnz);
+        args->filternnzElems[i] = 1;
+        continue;
+        }
 
+        int count = 0;
         // Get centroid of element i
         double xi = args->elCentroid[3 * i + 0];
         double yi = args->elCentroid[3 * i + 1];
@@ -97,7 +111,8 @@ void *filter_thread_bin(void *args_ptr)
 
         for (int j = 0; j < args->ne0; ++j) 
         {
-            if (i == j) continue;
+            if (args->isPassive[j]) continue;  //remove passive elements in filters
+            //if (i == j) continue;
             double xj = args->elCentroid[3 * j + 0];
             double yj = args->elCentroid[3 * j + 1];
             double zj = args->elCentroid[3 * j + 2];
@@ -210,7 +225,7 @@ void *filter_thread_bin(void *args_ptr)
 void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                           ITG *ne, double *ttime, double *timepar,
                           ITG *mortar, double *rmin, ITG *filternnz,
-                          ITG *filternnzElems, ITG itertop, ITG *fnnzassumed) 
+                          ITG *filternnzElems, ITG itertop, ITG *fnnzassumed,int *passiveIDs, int numPassive) 
 {
     int num_threads = 1;
     char *env = getenv("OMP_NUM_THREADS");
@@ -221,6 +236,14 @@ void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, cha
     printf("Using %d threads to build the filter matrix.\n", num_threads);
 
     ITG ne0 = *ne;
+    // remove passive element effects
+    int *isPassive = (int*)calloc((size_t)ne0, sizeof(int));
+    for (int p = 0; p < numPassive; ++p) {
+        int pid = passiveIDs[p] - 1;   // passiveIDs are 1-based
+        if (pid >= 0 && pid < ne0)
+            isPassive[pid] = 1;
+    }
+    // remove passive element effects
     double time = timepar[1];
 
     double *elCentroid = NULL;
@@ -251,6 +274,7 @@ void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, cha
             .thread_id = t,
             .ne0 = ne0,
             .ne_start = start,
+            .isPassive = isPassive,
             .ne_end = end,
             .elCentroid = elCentroid,
             .rmin_local = *rmin,
@@ -263,7 +287,7 @@ void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, cha
 
     for (int t = 0; t < num_threads; ++t)
         pthread_join(threads[t], NULL);
-
+    free(isPassive); 
     // Move below progress bar region before printing
     printf("\033[%d;1H", num_threads + 5);
     fflush(stdout);
