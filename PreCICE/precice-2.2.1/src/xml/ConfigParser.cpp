@@ -82,7 +82,7 @@ void OnCharacters(void *ctx, const xmlChar *ch, int len)
   pParser->OnTextSection(std::string(reinterpret_cast<const char *>(ch), len));
 }
 
-void OnStructuredErrorFunc(void *userData, xmlError *error)
+void OnStructuredErrorFunc(void *userData, const xmlError *error)
 {
   const std::string message{error->message};
 
