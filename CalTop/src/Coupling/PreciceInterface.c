@@ -15,30 +15,37 @@
 
 void Precice_Setup( char * configFilename, char * participantName, SimulationData * sim )
 {
-  assert(sim != NULL);
-  assert(configFilename != NULL);
-  assert(participantName != NULL);
+	assert(sim != NULL);
+	assert(configFilename != NULL);
+	assert(participantName != NULL);
 
-	//printf( "Setting up preCICE participant %s, using config file: %s\n", participantName, configFilename );
 	fflush( stdout );
 
 	// Read the YAML config file
-	
-  AdapterConfig adapterConfig;
+	printf("Reading configuration file...\n");
+  	AdapterConfig adapterConfig;
 	ConfigReader_Read( configFilename, participantName, &adapterConfig);
+	printf("done!\n");
+
 	
+  	assert(adapterConfig.interfaces != NULL);
+  	assert(adapterConfig.preciceConfigFilename != NULL);
+  	assert(adapterConfig.numInterfaces > 0);
 
-  assert(adapterConfig.interfaces != NULL);
-  assert(adapterConfig.preciceConfigFilename != NULL);
-  assert(adapterConfig.numInterfaces > 0);
+	printf("Determining required number of interfaces...\n");
+  	sim->numPreciceInterfaces = adapterConfig.numInterfaces;
+	printf("done!\n");
 
-  sim->numPreciceInterfaces = adapterConfig.numInterfaces;
-
+	printf("Building solver interface...");
 	// Create the solver interface and configure it - Alex: Calculix is always a serial participant (MPI size 1, rank 0)
 	precicec_createSolverInterface( participantName, adapterConfig.preciceConfigFilename, 0, 1 );
 
+	
+
 	// Create interfaces as specified in the config file
 	sim->preciceInterfaces = (struct PreciceInterface**) calloc( adapterConfig.numInterfaces, sizeof( PreciceInterface* ) );
+
+	
 
 	for(int i = 0 ; i < adapterConfig.numInterfaces; i++ )
 	{
@@ -46,23 +53,33 @@ void Precice_Setup( char * configFilename, char * participantName, SimulationDat
 		
 		sim->preciceInterfaces[i] = malloc( sizeof( PreciceInterface ) );
 		
+		
 		PreciceInterface_Create( sim->preciceInterfaces[i], sim, config );
+
+		printf("checkdone!\n");
 		
 	}
 
-  // At this point we are done with the configuration
-  AdapterConfig_Free(&adapterConfig);
+	printf("done!\n");
+
+
+	printf("Interface setup complete! \n");
+  	// At this point we are done with the configuration
+  	AdapterConfig_Free(&adapterConfig);
 
   
-
+	printf("Initializing coupling-specific variables...");
 	// Initialize variables needed for the coupling
 	NNEW( sim->coupling_init_v, double, sim->mt * sim->nk );
+	printf("done\n");
 
+	printf("Initialize preCICE...");
 	// Initialize preCICE
 	sim->precice_dt = precicec_initialize();
 
 	// Initialize coupling data
 	Precice_InitializeData( sim );
+	printf("done!\n");
 }
 
 void Precice_InitializeData( SimulationData * sim )

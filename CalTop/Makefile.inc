@@ -1076,7 +1076,9 @@ $(SRC_DIR)/adjoint_eq_2_node.c \
 $(SRC_DIR)/Coupling/linstatic_MDO.c \
 $(SRC_DIR)/Coupling/calFSI.c \
 $(SRC_DIR)/Coupling/CCXHelpers.c \
-$(SRC_DIR)/Coupling/PreciceInterface.c
+$(SRC_DIR)/Coupling/PreciceInterface.c \
+$(SRC_DIR)/Coupling/nonlingeo_MDO.c 
+
 
 SCCXCXX = \
 $(SRC_DIR)/Coupling/ConfigReader.cpp \

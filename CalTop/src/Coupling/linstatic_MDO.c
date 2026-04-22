@@ -238,6 +238,20 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         .mi = mi   									/*---Not sure---*/
     };
 
+			printf("simulationData address      = %p\n", (void*)&simulationData);
+printf("simulationData.ialset       = %p\n", (void*)simulationData.ialset);
+printf("simulationData.istartset    = %p\n", (void*)simulationData.istartset);
+printf("simulationData.iendset      = %p\n", (void*)simulationData.iendset);
+printf("simulationData.ielmat       = %p\n", (void*)simulationData.ielmat);
+printf("simulationData.kon          = %p\n", (void*)simulationData.kon);
+printf("simulationData.ipkon        = %p\n", (void*)simulationData.ipkon);
+printf("simulationData.lakon        = %p\n", (void*)simulationData.lakon);
+printf("simulationData.co           = %p\n", (void*)simulationData.co);
+printf("simulationData.nelemload    = %p\n", (void*)simulationData.nelemload);
+printf("simulationData.sideload     = %p\n", (void*)simulationData.sideload);
+printf("simulationData.vold         = %p\n", (void*)simulationData.vold);
+fflush(stdout);
+
 
 
   		/* determining the global values to be used as boundary conditions

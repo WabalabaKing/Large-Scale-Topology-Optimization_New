@@ -53,7 +53,7 @@
 !               12:sensitivity
 
 */
-void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
+void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	     ITG *ne, 
 	     ITG *nodeboun, ITG *ndirboun, double *xboun, ITG *nboun, 
 	     ITG **ipompcp, ITG **nodempcp, double **coefmpcp, char **labmpcp,
@@ -184,7 +184,40 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   		FILE *f1;
 
-		/*---Asign values to CCX structure to hold coupling variables---*/
+
+
+	 
+  		// MPADD: initialize rmin to the tolerance
+  		enetoll=0.02;
+  		r_abs=0.0;
+  		emax=0.0;
+  		// MPADD end
+
+
+
+  		delcon=ctrl[53];alea=ctrl[54];
+
+		#ifdef SGI
+  		ITG token;
+		#endif
+  
+  		icol=*icolp;irow=*irowp;co=*cop;vold=*voldp;
+  		ipkon=*ipkonp;lakon=*lakonp;kon=*konp;ielorien=*ielorienp;
+  		ielmat=*ielmatp;ener=*enerp;xstate=*xstatep;
+  
+  		ipompc=*ipompcp;labmpc=*labmpcp;ikmpc=*ikmpcp;ilmpc=*ilmpcp;
+  		fmpc=*fmpcp;nodempc=*nodempcp;coefmpc=*coefmpcp;nelemload=*nelemloadp;
+  		iamload=*iamloadp;sideload=*sideloadp;
+
+  		islavsurf=*islavsurfp;pslavsurf=*pslavsurfp;clearini=*clearinip;
+
+  		tinc=&timepar[0];
+  		tper=&timepar[1];
+  		tmin=&timepar[2];
+  		tmax=&timepar[3];
+  		tincf=&timepar[4];
+
+				/*---Asign values to CCX structure to hold coupling variables---*/
     	struct SimulationData simulationData = 
     	{
         	.ialset = ialset,    				/*---Member of a set or surface. This is a node for node set, an element for element set---*/
@@ -209,7 +242,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         	.mt = mt, 									/*---Not sure---*/
         	.nk = *nk,									/*---Highest node number---*/
         	.theta = &theta,  							/*---Normalized (by tper) size of all previous increments and not including present increment---*/
-        	.dtheta = &dtheta,						/*---Normalized (by tper) increment size---*/
+        //	.dtheta = &dtheta,						/*---Normalized (by tper) increment size---*/
         	.tper = tper,								/*---Use given step size---*/
         	.nmethod = nmethod,  						/*---Flag that deifnes numerical method: 1: static linear or nonlinear, 2: frequency (linear), 3: buckling, 4: dynamic linear or non-linear, etc---*/
         	.xload = xload,								/*---Concentrated load in direction of idof of node "node" (global coordinates)---*/
@@ -223,39 +256,25 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         	.ncocon = ncocon,							/*---Number of conductivity constants---*/
         	.mi = mi   									/*---Not sure---*/
     	};
-	 
-  		// MPADD: initialize rmin to the tolerance
-  		enetoll=0.02;
-  		r_abs=0.0;
-  		emax=0.0;
-  		// MPADD end
 
-		*---Adapter: Create the interfaces and initialize the coupling---*/
+		printf("simulationData address      = %p\n", (void*)&simulationData);
+		printf("simulationData.ialset       = %p\n", (void*)simulationData.ialset);
+		printf("simulationData.istartset    = %p\n", (void*)simulationData.istartset);
+		printf("simulationData.iendset      = %p\n", (void*)simulationData.iendset);
+		printf("simulationData.ielmat       = %p\n", (void*)simulationData.ielmat);
+		printf("simulationData.kon          = %p\n", (void*)simulationData.kon);
+		printf("simulationData.ipkon        = %p\n", (void*)simulationData.ipkon);
+		printf("simulationData.lakon        = %p\n", (void*)simulationData.lakon);
+		printf("simulationData.co           = %p\n", (void*)simulationData.co);
+		printf("simulationData.nelemload    = %p\n", (void*)simulationData.nelemload);
+		printf("simulationData.sideload     = %p\n", (void*)simulationData.sideload);
+		printf("simulationData.vold         = %p\n", (void*)simulationData.vold);
+
+				/*---Adapter: Create the interfaces and initialize the coupling---*/
         printf("Initializing static aeroelastic interface with %s and %s \n", preciceParticipantName, configFilename);
 
         Precice_Setup( configFilename, preciceParticipantName, &simulationData );
-
-  		delcon=ctrl[53];alea=ctrl[54];
-
-		#ifdef SGI
-  		ITG token;
-		#endif
-  
-  		icol=*icolp;irow=*irowp;co=*cop;vold=*voldp;
-  		ipkon=*ipkonp;lakon=*lakonp;kon=*konp;ielorien=*ielorienp;
-  		ielmat=*ielmatp;ener=*enerp;xstate=*xstatep;
-  
-  		ipompc=*ipompcp;labmpc=*labmpcp;ikmpc=*ikmpcp;ilmpc=*ilmpcp;
-  		fmpc=*fmpcp;nodempc=*nodempcp;coefmpc=*coefmpcp;nelemload=*nelemloadp;
-  		iamload=*iamloadp;sideload=*sideloadp;
-
-  		islavsurf=*islavsurfp;pslavsurf=*pslavsurfp;clearini=*clearinip;
-
-  		tinc=&timepar[0];
-  		tper=&timepar[1];
-  		tmin=&timepar[2];
-  		tmax=&timepar[3];
-  		tincf=&timepar[4];
+		fflush(stdout);
 
   		if(*ithermal==4)
 		{
@@ -1577,7 +1596,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		  				precontact(&ncont,ntie,tieset,nset,set,istartset,
                     		iendset,ialset,itietri,lakon,ipkon,kon,koncont,ne,
                     		cg,straight,co,vold,istep,&iinc,&iit,itiefac,
-                     		slavsurf,islavnode,imastnode,nslavnode,nmastnode,
+                     		islavsurf,islavnode,imastnode,nslavnode,nmastnode,
                     		imastop,mi,ipe,ime,tietol,&iflagact,
 		     				nintpoint,&pslavsurf,xmastnor,cs,mcs,ics,clearini,nslavs);
 		  
