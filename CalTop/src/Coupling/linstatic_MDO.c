@@ -138,6 +138,8 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         *fnext=NULL,*energyini=NULL,*energy=NULL,*d=NULL,alea=0.1, *brhs=NULL,
 		*djdrho_expl = NULL, *djdrho_impl = NULL;
 
+		double dtheta = 0.0;
+
 
 
 		/* p-norm / stress aggregation parameters */
@@ -223,7 +225,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         .mt = mt, 									/*---Not sure---*/
         .nk = *nk,									/*---Highest node number---*/
         .theta = &theta,  							/*---Normalized (by tper) size of all previous increments and not including present increment---*/
-        //.dtheta = &dtheta,						/*---Normalized (by tper) increment size---*/
+        .dtheta = &dtheta,						/*---Dummy variable for linear static analysis---*/
         .tper = tper,								/*---Use given step size---*/
         .nmethod = nmethod,  						/*---Flag that deifnes numerical method: 1: static linear or nonlinear, 2: frequency (linear), 3: buckling, 4: dynamic linear or non-linear, etc---*/
         .xload = xload,								/*---Concentrated load in direction of idof of node "node" (global coordinates)---*/
