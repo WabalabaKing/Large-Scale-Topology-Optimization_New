@@ -2330,7 +2330,7 @@ void densityfilterFast_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **
 void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                           ITG *ne, double *ttime, double *timepar,
                           ITG *mortar, double *rmin, ITG *filternnz,
-                          ITG *filternnzElems, ITG itertop, ITG *fnnzassumed, ITG *passiveIDs, ITG numPassive); 
+                          ITG *filternnzElems, ITG itertop, ITG *fnnzassumed, ITG *passiveIDs, ITG numPassive, ITG excludePassive); 
 
 void filterVector(ITG **ipkonp,double *Vector, double *VectorFiltered,double *FilterMatrix,ITG *filternnzElem,ITG *rowFilter, ITG *colFilter,ITG *ne,double *ttime, double *timepar, ITG *fnnzassumed, double *q, ITG filternnz);
 

@@ -331,6 +331,7 @@ int main(int argc,char *argv[])
   double pSupplied=0.0;   /**< user-defined penalty paramter */
   double pstiff=0.0;      /**< some penalty paramter */
   double  rmin=0.000000000001; /**< minimum radius */
+  int     excludePassive = 0;   // ← ADD: default = include passive in filter
   double  volfrac=1.00; /**< volume fraction */
   double  qfilter = 3; /**< q-filter value */
 
@@ -429,6 +430,15 @@ int main(int argc,char *argv[])
         {
             fnnzassumed=atoi(argv[i+1]);
             break; 
+        }
+    }
+
+    for(i=1; i<argc; i++)
+    {
+        if(strcmp1(argv[i],"-Passive")==0)
+        {
+            excludePassive = atoi(argv[i+1]);
+            break;
         }
     }
   } // Done reading all input flags
@@ -1652,6 +1662,7 @@ while(istat>=0)
       printf("\n#------------------------------FILTER MATRIX PARAMTERS----------------------------#\n");
       printf("Filter radius                      %.2f\n", rmin);
       printf("Non zeros in Filtermatrix         %d\n", fnnzassumed);
+      printf("Passive element exclusion         %s\n",   excludePassive ? "YES" : "NO"); 
       printf("#------------------------------------------------------------------------------------#\n");
      
       fflush(stdout);
@@ -1687,7 +1698,7 @@ while(istat>=0)
       //            &rmin,&filternnz,filternnzElems,itertop,&fnnzassumed);
 
       densityfilterFast_bin_mt(co,&nk,&kon,&ipkon,&lakon,&ne,&ttime,timepar,&mortar,
-                  &rmin,&filternnz,filternnzElems,itertop,&fnnzassumed,passiveIDs, numPassive);
+                  &rmin,&filternnz,filternnzElems,itertop,&fnnzassumed,passiveIDs, numPassive, excludePassive);
 
       for(i=0;i<3;i++)
       {

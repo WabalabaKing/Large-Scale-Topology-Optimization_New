@@ -17,6 +17,7 @@ typedef struct {
     int thread_id;
     int ne0;
     int *isPassive;
+    int excludePassive;
     int ne_start, ne_end;
     double *elCentroid;
     double rmin_local;
@@ -90,7 +91,7 @@ void *filter_thread_bin(void *args_ptr)
     for (int i = args->ne_start; i < args->ne_end; ++i) 
     {   
 // remove effect of passive elements
-        if (args->isPassive[i]) {
+        if (args->isPassive[i] && args->excludePassive) {
         int64_t row = (int64_t)i + 1;
         fwrite(&row, sizeof(int64_t), 1, frow);
         fwrite(&row, sizeof(int64_t), 1, fcol);
@@ -111,7 +112,7 @@ void *filter_thread_bin(void *args_ptr)
 
         for (int j = 0; j < args->ne0; ++j) 
         {
-            if (args->isPassive[j]) continue;  //remove passive elements in filters
+            if (args->isPassive[j] && args->excludePassive) continue;  //remove passive elements in filters
             //if (i == j) continue;
             double xj = args->elCentroid[3 * j + 0];
             double yj = args->elCentroid[3 * j + 1];
@@ -225,7 +226,7 @@ void *filter_thread_bin(void *args_ptr)
 void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                           ITG *ne, double *ttime, double *timepar,
                           ITG *mortar, double *rmin, ITG *filternnz,
-                          ITG *filternnzElems, ITG itertop, ITG *fnnzassumed,int *passiveIDs, int numPassive) 
+                          ITG *filternnzElems, ITG itertop, ITG *fnnzassumed,int *passiveIDs, int numPassive, int excludePassive) 
 {
     int num_threads = 1;
     char *env = getenv("OMP_NUM_THREADS");
@@ -275,6 +276,7 @@ void densityfilterFast_bin_mt(double *co, ITG *nk, ITG **konp, ITG **ipkonp, cha
             .ne0 = ne0,
             .ne_start = start,
             .isPassive = isPassive,
+            .excludePassive = excludePassive,
             .ne_end = end,
             .elCentroid = elCentroid,
             .rmin_local = *rmin,
