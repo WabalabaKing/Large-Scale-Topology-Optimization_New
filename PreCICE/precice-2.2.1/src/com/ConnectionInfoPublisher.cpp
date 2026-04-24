@@ -7,6 +7,7 @@
 #include <chrono>
 #include <istream>
 #include <thread>
+#include <fstream>
 #include "logging/LogMacros.hpp"
 
 namespace precice {

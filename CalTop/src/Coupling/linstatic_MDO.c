@@ -138,6 +138,8 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         *fnext=NULL,*energyini=NULL,*energy=NULL,*d=NULL,alea=0.1, *brhs=NULL,
 		*djdrho_expl = NULL, *djdrho_impl = NULL;
 
+		double dtheta = 0.0;
+
 
 
 		/* p-norm / stress aggregation parameters */
@@ -223,7 +225,7 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         .mt = mt, 									/*---Not sure---*/
         .nk = *nk,									/*---Highest node number---*/
         .theta = &theta,  							/*---Normalized (by tper) size of all previous increments and not including present increment---*/
-        //.dtheta = &dtheta,						/*---Normalized (by tper) increment size---*/
+        .dtheta = &dtheta,						/*---Dummy variable for linear static analysis---*/
         .tper = tper,								/*---Use given step size---*/
         .nmethod = nmethod,  						/*---Flag that deifnes numerical method: 1: static linear or nonlinear, 2: frequency (linear), 3: buckling, 4: dynamic linear or non-linear, etc---*/
         .xload = xload,								/*---Concentrated load in direction of idof of node "node" (global coordinates)---*/
@@ -237,6 +239,20 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         .ncocon = ncocon,							/*---Number of conductivity constants---*/
         .mi = mi   									/*---Not sure---*/
     };
+
+			printf("simulationData address      = %p\n", (void*)&simulationData);
+printf("simulationData.ialset       = %p\n", (void*)simulationData.ialset);
+printf("simulationData.istartset    = %p\n", (void*)simulationData.istartset);
+printf("simulationData.iendset      = %p\n", (void*)simulationData.iendset);
+printf("simulationData.ielmat       = %p\n", (void*)simulationData.ielmat);
+printf("simulationData.kon          = %p\n", (void*)simulationData.kon);
+printf("simulationData.ipkon        = %p\n", (void*)simulationData.ipkon);
+printf("simulationData.lakon        = %p\n", (void*)simulationData.lakon);
+printf("simulationData.co           = %p\n", (void*)simulationData.co);
+printf("simulationData.nelemload    = %p\n", (void*)simulationData.nelemload);
+printf("simulationData.sideload     = %p\n", (void*)simulationData.sideload);
+printf("simulationData.vold         = %p\n", (void*)simulationData.vold);
+fflush(stdout);
 
 
 
