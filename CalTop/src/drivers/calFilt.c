@@ -361,7 +361,7 @@ int main(int argc,char *argv[])
   {
     /* Inadequate input arguments */
 
-    printf("Usage: Flags: -i jobname -r FILTER RADIUS -f FILTERNNZ \n");
+    printf("Usage: Flags: -i jobname -r FILTER RADIUS -f FILTERNNZ -Passive 0/1 \n");
     FORTRAN(stop,());
   }
 
@@ -433,6 +433,7 @@ int main(int argc,char *argv[])
         }
     }
 
+    /* Read passive elements inclusion/exclusion flag */
     for(i=1; i<argc; i++)
     {
         if(strcmp1(argv[i],"-Passive")==0)
