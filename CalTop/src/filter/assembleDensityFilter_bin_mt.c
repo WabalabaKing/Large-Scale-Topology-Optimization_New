@@ -90,18 +90,19 @@ void *filter_thread_bin(void *args_ptr)
     // Loop over this thread's assigned element block
     for (int i = args->ne_start; i < args->ne_end; ++i) 
     {   
-// remove effect of passive elements
-        if (args->isPassive[i] && args->excludePassive) {
-        int64_t row = (int64_t)i + 1;
-        fwrite(&row, sizeof(int64_t), 1, frow);
-        fwrite(&row, sizeof(int64_t), 1, fcol);
-        double w = 1.0;
-        fwrite(&w, sizeof(double), 1, fval);
-        row_sum_local[i] = 1.0;
-        int self_count = 1;
-        fwrite(&self_count, sizeof(int), 1, fdnnz);
-        args->filternnzElems[i] = 1;
-        continue;
+        // remove effect of passive elements
+        if (args->isPassive[i] && args->excludePassive) 
+        {
+            int64_t row = (int64_t)i + 1;
+            fwrite(&row, sizeof(int64_t), 1, frow);
+            fwrite(&row, sizeof(int64_t), 1, fcol);
+            double w = 1.0;
+            fwrite(&w, sizeof(double), 1, fval);
+            row_sum_local[i] = 1.0;
+            int self_count = 1;
+            fwrite(&self_count, sizeof(int), 1, fdnnz);
+            args->filternnzElems[i] = 1;
+            continue;
         }
 
         int count = 0;
