@@ -1288,10 +1288,10 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 
 	// Main PreCICE loop
 
-					/*---Adapter: Create the interfaces and initialize the coupling---*/
-        printf("Initializing static aeroelastic interface with %s and %s \n", preciceParticipantName, configFilename);
+	/*---Adapter: Create the interfaces and initialize the coupling---*/
+    printf("Initializing static aeroelastic interface with %s and %s \n", preciceParticipantName, configFilename);
 
-        Precice_Setup( configFilename, preciceParticipantName, &simulationData );
+    Precice_Setup( configFilename, preciceParticipantName, &simulationData );
 
 	while (Precice_IsCouplingOngoing())
 	{
@@ -1299,20 +1299,8 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 		/* Adapter: adjust solver time step */
 		Precice_AdjustSolverTimestep(&simulationData);
 
-	
-
-
 		/* Retrieve nodal forces and apply to CCX simulation data struct (sim ->xforc)*/
 		Precice_ReadCouplingData(&simulationData);
-
-		/* reset increment state before one full nonlinear structural solve */
-    //	theta   = 0.0;
-   // 	negpres = 0;
-  //  	icutb   = 0;
-  //  	iinc    = 0;
-  //  	jprint  = 0;
-  //  	newstep = 1;
-
 
 		/* Main nonlinear (increment loop)*/
 		/* General loop structure: assemble -> solve -> update -> check -> repeat */
@@ -1890,7 +1878,8 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
         			islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
         			inoel,nener,orname,network,ipobody,xbodyact,ibody,typeboun,
 					design, penal,sigma0,eps_relax,rhomin,pexp,brhs,djdrho_explicit,Pnorm,0);
-	  				iperturb[0]=0;SFREE(inum);
+	  				
+					iperturb[0]=0;SFREE(inum);
 	  
 	  				/* check whether any displacements or temperatures are changed
 	    			in the new increment */
@@ -1899,7 +1888,6 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 				{
 					f[k]=f[k]+b[k];
 				}
-	  
       		}
       		else
 	  		{	 

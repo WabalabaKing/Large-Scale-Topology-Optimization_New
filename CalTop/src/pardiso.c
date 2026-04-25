@@ -94,14 +94,14 @@ void pardiso_factor(double *ad, double *au, double *adb, double *aub,
 
   		double *b=NULL,*x=NULL;
 
-  		if(*symmetryflag==0)
-		{
-      		printf(" Factoring the system of equations using the symmetric pardiso solver\n");
-  		}
-		else
-		{
-      		printf(" Factoring the system of equations using the unsymmetric pardiso solver\n");
-  		}
+  //		if(*symmetryflag==0)
+//		{
+ //     		printf(" Factoring the system of equations using the symmetric pardiso solver\n");
+//  		}
+//		else
+//		{
+ //     		printf(" Factoring the system of equations using the unsymmetric pardiso solver\n");
+//  		}
 
   		iparm[0]=0;
 		/* set MKL_NUM_THREADS to min(CCX_NPROC_EQUATION_SOLVER,OMP_NUM_THREADS)
@@ -140,7 +140,7 @@ void pardiso_factor(double *ad, double *au, double *adb, double *aub,
     		nthread_mkl=nthread;
   		}
     
-  		printf(" number of threads =% d\n\n",nthread_mkl);
+//  		printf(" number of threads =% d\n\n",nthread_mkl);
 
   		for(i=0;i<64;i++)
 		{
@@ -436,17 +436,17 @@ void pardiso_solve(double *b, ITG *neq,ITG *symmetryflag,ITG *nrhs)
 {
 
   ITG maxfct=1,mnum=1,phase=33,*perm=NULL,mtype,
-    	msglvl=1,i,error=0;
+    	msglvl=0,i,error=0;
   double *x=NULL;
 
-  if(*symmetryflag==0)
-  {
-    printf(" Solving the system of equations using the symmetric pardiso solver\n");
-  }
-  else
-  {
-    printf(" Solving the system of equations using the unsymmetric pardiso solver\n");
-  }
+  //if(*symmetryflag==0)
+ // {
+ //   printf(" Solving the system of equations using the symmetric pardiso solver\n");
+ // }
+ // else
+ // {
+ //   printf(" Solving the system of equations using the unsymmetric pardiso solver\n");
+ // }
 
   if(*symmetryflag==0)
   {
@@ -461,7 +461,7 @@ void pardiso_solve(double *b, ITG *neq,ITG *symmetryflag,ITG *nrhs)
 
 	/* pardiso_factor has been called befor, MKL_NUM_THREADS=nthread_mkl is set*/
 
-  printf(" number of threads =% d\n\n",nthread_mkl);
+  //printf(" number of threads =% d\n\n",nthread_mkl);
 
   NNEW(x,double,*nrhs**neq);
 

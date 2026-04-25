@@ -1096,8 +1096,8 @@ while(istat>=0)
 	    idefbody,&mortar,&ifacecount,islavsurf,pslavsurf,clearini,
 	    heading,&iaxial,&nobject,objectset,&nprint_,iuel,&nuel_,
 	    nodempcref,coefmpcref,ikmpcref,&memmpcref_,&mpcfreeref,
-	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
-	    velo,veloo));
+	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,	    velo,veloo));
+
 
     /* Define material density for gravity loads */
     double mat_dens;  // Material density

@@ -151,7 +151,7 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
 //         cetol criterion satisfied if *visco
            ((*nmethod!=-1)||(qa[3]<=cetol))&&
 //         L2 relative residual OR classic displacement correction
-	   ((l2_ratio<1.e-6))&&
+//	   ((l2_ratio<1.e-6))&&
 	    ((cam[0]<=c2[0]*uam[0])||
 	    (((ram[0]*cam[0]<c2[0]*uam[0]*ram2[0])||(ram[0]<=ral*qam[0])||
 	      (qa[0]<=ea*qam[0]))&&(*ntg==0))||
@@ -490,9 +490,13 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
 	
 	/* check for the amount of iterations */
 	
-	if(((*iit>ic)&&(*mortar==0))||((*mortar>1)&&(*iit>200))){
+	if(((*iit>ic)&&(*mortar==0))||((*mortar>1)&&(*iit>200)))
+	{
 	    printf("\n *ERROR: too many iterations needed\n");
 	    printf(" best solution and residuals are in the frd file\n\n");
+		printf(" increment = %" ITGFORMAT ", iteration = %" ITGFORMAT "\n", *iinc, *iit);
+    	printf(" theta = %e, dtheta = %e, L2 ratio = %e\n\n", *theta, *dtheta, l2_ratio);
+    	fflush(stdout);
 
 	    FORTRAN(writestadiv,(istep,iinc,icutb,iit,ttime,time,dtime));
 
@@ -594,6 +598,9 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
 			printf("\n *ERROR: solution seems to diverge; please try \n");
 			printf(" automatic incrementation; program stops\n");
 			printf(" best solution and residuals are in the frd file\n\n");
+			printf(" increment = %" ITGFORMAT ", iteration = %" ITGFORMAT "\n", *iinc, *iit);
+			printf(" theta = %e, dtheta = %e, L2 ratio = %e\n\n", *theta, *dtheta, l2_ratio);
+			fflush(stdout);
 			
 			FORTRAN(writestadiv,(istep,iinc,icutb,iit,ttime,time,
 						 dtime));
