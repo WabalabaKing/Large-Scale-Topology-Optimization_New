@@ -145,14 +145,14 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
 //         number of iterations exceeding 1
 	if((*iit>1)&&
 //         force residual criterion satisfied (0.5 %)
-//           (ram[0]<=c1[0]*qam[0])&&
+           (ram[0]<=c1[0]*qam[0])&&
 //         no significant change in contact elements
            (*iflagact==0)&&
 //         cetol criterion satisfied if *visco
            ((*nmethod!=-1)||(qa[3]<=cetol))&&
 //         L2 relative residual OR classic displacement correction
-//	   ((l2_ratio<1.e-6))&&
-	    ((cam[0]<=c2[0]*uam[0])||
+	   (((l2_ratio<1.e-6))||
+	    (cam[0]<=c2[0]*uam[0])||
 	    (((ram[0]*cam[0]<c2[0]*uam[0]*ram2[0])||(ram[0]<=ral*qam[0])||
 	      (qa[0]<=ea*qam[0]))&&(*ntg==0))||
 	    (cam[0]<1.e-8))) iconvergence=1;
