@@ -11,6 +11,114 @@
 
 #define PROGRESS_WIDTH 40
 
+/**
+ * -------------------------------------------------------------------------
+ * densityfilterFast_bin_mt.c
+ * -------------------------------------------------------------------------
+ *
+ * Parallel construction of a symmetric density filter matrix for large-scale
+ * topology optimization problems (CalTOP framework).
+ *
+ * This module builds a distance-based filter matrix H in triplet format
+ * (row, column, value) using multi-threading. The filter enforces spatial
+ * regularization of element densities by averaging neighboring elements
+ * within a prescribed radius.
+ *
+ * -------------------------------------------------------------------------
+ * Key Features
+ * -------------------------------------------------------------------------
+ *
+ * 1. Parallel Construction:
+ *    - Domain is partitioned across threads.
+ *    - Each thread computes contributions for a subset of elements.
+ *    - Thread-local binary shards are written to disk and merged later.
+ *
+ * 2. Distance-Based Filtering:
+ *    - Weight function:
+ *
+ *          w_ij = rmin - ||x_i - x_j||   if ||x_i - x_j|| <= rmin
+ *               = 0                      otherwise
+ *
+ *    - Produces a symmetric filter matrix H.
+ *
+ * 3. Passive Element Handling:
+ *    - Passive elements are specified via `passiveIDs`.
+ *    - If `excludePassive == 1`:
+ *         • Passive elements are excluded from all filtering operations.
+ *         • Each passive element receives only a self-weight:
+ *
+ *               H_ii = 1
+ *
+ *         • Passive elements do not influence active elements.
+ *         • Active elements do not average over passive elements.
+ *
+ *    - If `excludePassive == 0`:
+ *         • Passive elements are treated like standard elements.
+ *
+ * 4. Memory-Efficient Design:
+ *    - Uses binary streaming to avoid large in-memory sparse matrices.
+ *    - Outputs:
+ *
+ *         drow.bin   → row indices (int64)
+ *         dcol.bin   → column indices (int64)
+ *         dval.bin   → filter weights (double)
+ *         dnnz.bin   → per-row neighbor counts
+ *         dsum.bin   → row-wise normalization factors
+ *
+ * 5. Symmetry:
+ *    - For each (i,j), both (i,j) and (j,i) entries are written.
+ *    - Ensures consistent normalization for density filtering.
+ *
+ * -------------------------------------------------------------------------
+ * Inputs
+ * -------------------------------------------------------------------------
+ *
+ * co             : Node coordinates
+ * nk             : Number of nodes
+ * kon/ipkon/lakon: Element connectivity (CalculiX format)
+ * ne             : Number of elements
+ * rmin           : Filter radius
+ * fnnzassumed    : Expected maximum number of neighbors per element
+ * passiveIDs     : List of passive element IDs (1-based indexing)
+ * numPassive     : Number of passive elements
+ * excludePassive : Flag controlling passive treatment (0 or 1)
+ *
+ * -------------------------------------------------------------------------
+ * Outputs
+ * -------------------------------------------------------------------------
+ *
+ * filternnz        : Total number of nonzeros (symmetric)
+ * filternnzElems   : Number of neighbors per element
+ * drow.bin, dcol.bin, dval.bin, dnnz.bin, dsum.bin
+ *
+ * -------------------------------------------------------------------------
+ * Notes
+ * -------------------------------------------------------------------------
+ *
+ * - The filter matrix is not assembled in memory; instead, it is written
+ *   in triplet binary format for scalability.
+ *
+ * - Row sums (dsum) are computed separately and used for normalization:
+ *
+ *        rho_filtered_i = (Σ_j H_ij * rho_j) / (Σ_j H_ij)
+ *
+ * - Passive elements remain fixed (rho = constant) when excluded.
+ *
+ * - Thread-safe progress bars are implemented for runtime monitoring.
+ *
+ * -------------------------------------------------------------------------
+ * Authors
+ * -------------------------------------------------------------------------
+ *
+ * Prateek Ranjan
+ *   Massachusetts Institute of Technology (MIT)
+ *
+ * Wanzheng Zheng
+ *   University of Illinois Urbana-Champaign (UIUC)
+ *
+ * -------------------------------------------------------------------------
+ */
+
 pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 typedef struct {
