@@ -151,7 +151,7 @@ void checkconvergence(double *co, ITG *nk, ITG *kon, ITG *ipkon, char *lakon,
 //         cetol criterion satisfied if *visco
            ((*nmethod!=-1)||(qa[3]<=cetol))&&
 //         L2 relative residual OR classic displacement correction
-//	   ((l2_ratio<1.e-6))&&
+	   ((l2_ratio<1.e-6))&&
 	    ((cam[0]<=c2[0]*uam[0])||
 	    (((ram[0]*cam[0]<c2[0]*uam[0]*ram2[0])||(ram[0]<=ral*qam[0])||
 	      (qa[0]<=ea*qam[0]))&&(*ntg==0))||

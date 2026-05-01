@@ -211,10 +211,10 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 
   		islavsurf=*islavsurfp;pslavsurf=*pslavsurfp;clearini=*clearinip;
 
-  		tinc=&timepar[0];
-  		tper=&timepar[1];
-  		tmin=&timepar[2];
-  		tmax=&timepar[3];
+  		tinc=&timepar[0];	// increment size from *STATIC
+  		tper=&timepar[1];	// total step time/load period
+  		tmin=&timepar[2];	// minimum increment
+  		tmax=&timepar[3];	// maximum increment
   		tincf=&timepar[4];
 
 				/*---Asign values to CCX structure to hold coupling variables---*/
@@ -784,10 +784,21 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
   
   		qa[0]=qaold[0];
   		qa[1]=qaold[1];
+
+		printf("[BEFORE checktime] tinc=%e tper=%e tmin=%e tmax=%e\n",
+       *tinc, *tper, *tmin, *tmax);
   
   		/* normalizing the time */
   		FORTRAN(checktime,(itpamp,namta,tinc,ttime,amta,tmin,inext,&itp,istep,tper));
+
+
   		dtheta=(*tinc)/(*tper);
+
+		printf("[INITIAL dtheta] dtheta=tinc/tper=%e/%e=%e\n",
+       *tinc, *tper, dtheta);
+
+		printf("[AFTER  checktime] tinc=%e tper=%e tmin=%e tmax=%e\n",
+       *tinc, *tper, *tmin, *tmax);
 
   		/* taking care of a small increment at the end of the step
      	for face-to-face penalty contact */
@@ -1323,7 +1334,7 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 				/*---Save the current displacement state (vold) for implicit calculations---*/
 				if( Precice_IsWriteCheckpointRequired() )
       	  		{
-          			Precice_WriteIterationCheckpoint( &simulationData, vini );
+          			Precice_WriteIterationCheckpoint( &simulationData, vold );
           			Precice_FulfilledWriteCheckpoint();
          		}
 
@@ -3157,15 +3168,37 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
         
 			if( Precice_IsReadCheckpointRequired() )
         	{
-            	if( *nmethod == 4 )
+            	if( *nmethod == 1 )
             	{
                 	Precice_ReadIterationCheckpoint( &simulationData, vold );
-                	icutb++;
+
+					/* Keep current soluton vector consistent with restored checkpoint */
+					memcpy(&v[0], &vold[0], sizeof(double) * mt * (*nk));
+					 
+					printf("[PRECICE READ CHECKPOINT] restored theta=%e dtheta=%e\n",theta, dtheta);
+        			fflush(stdout);
+
+					/* This was a preCICE retry, not a new structrual increment */
+					/* Undo the increment counter advance done at the beginning */
+                	//icutb++;
+
+
+					iinc--;
+					jprint--;
+
+					printf("[PRECICE RETRY] Restarting increment %d | theta=%e dtheta=%e\n",iinc, theta, dtheta);
+        			fflush(stdout);
+
+					Precice_FulfilledReadCheckpoint();
+
+					continue;
+
             	}
+
            		Precice_FulfilledReadCheckpoint();
         	}
 
-			    		ITG mt = mi[1] + 1;
+			ITG mt = mi[1] + 1;
 
     		double maxUx = 0.0, maxUy = 0.0, maxUz = 0.0;
 

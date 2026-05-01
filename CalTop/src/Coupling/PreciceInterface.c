@@ -99,9 +99,9 @@ void Precice_AdjustSolverTimestep( SimulationData * sim )
 
 		// For steady-state simulations, we will always compute the converged steady-state solution in one coupling step
 		
-		*sim->theta = 0;
-		*sim->tper = 1;
-		*sim->dtheta = 1;
+		//*sim->theta = 0;
+		//*sim->tper = 1;
+		//	*sim->dtheta = 1;
 		
 		// Set the solver time step to be the same as the coupling time step
 		printf("Setting solver_dt (syncronization interval) to %f \n", sim->precice_dt);
@@ -187,7 +187,7 @@ void Precice_WriteIterationCheckpoint( SimulationData * sim, double * v )
      sim->coupling_init_theta = *( sim->theta );
 
 	// Save step size
-//	sim->coupling_init_dtheta = *( sim->dtheta );
+	sim->coupling_init_dtheta = *( sim->dtheta );
 
 	// Save solution vector v (memcpy(dest, source, size))
 	memcpy( sim->coupling_init_v, v, sizeof( double ) * sim->mt * sim->nk );
