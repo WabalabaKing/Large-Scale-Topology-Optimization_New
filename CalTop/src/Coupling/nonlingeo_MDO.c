@@ -1315,8 +1315,8 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 
 		/* Main nonlinear (increment loop)*/
 		/* General loop structure: assemble -> solve -> update -> check -> repeat */
-  	//	while((1.-theta>1.e-6)||(negpres==1))
-//		{  
+  		while((1.-theta>1.e-6)||(negpres==1))
+		{  
     		if(icutb==0)
 	  		{
 	  			/* previous increment converged: update the initial values */
@@ -3115,7 +3115,7 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
       			}   
    			} // End of while icntrl ==0
 
-
+		} /* end nonlinear load-incrememnt loop*/
 	
     	if(*nmethod!=4)SFREE(resold);
 
@@ -3161,11 +3161,42 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 		    simulationData.fn = fn;
         	memcpy(&vold[0],&v[0],sizeof(double)*mt**nk);
 
-			Precice_WriteCouplingData( &simulationData );
-        	/* Adapter: Advance the coupling */
-        	Precice_Advance( &simulationData );
-        	/* Adapter: If the coupling does not converge, read the checkpoint */
-        
+			/* -------------------------------------------------- */
+			/* DEBUG: Max displacement check                      */
+			/* -------------------------------------------------- */
+			double maxUx1 = 0.0, maxUy1 = 0.0, maxUz1 = 0.0;
+
+			for (int i = 0; i < *nk; i++) 
+			{
+
+    			double ux = vold[mt*i + 0];
+    			double uy = vold[mt*i + 1];
+    			double uz = vold[mt*i + 2];
+
+    			if (fabs(ux) > maxUx1) maxUx1 = fabs(ux);
+    			if (fabs(uy) > maxUy1) maxUy1 = fabs(uy);
+    			if (fabs(uz) > maxUz1) maxUz1 = fabs(uz);
+			}
+
+			printf("\n--- MAX DISPLACEMENTS (before preCICE write) ---\n");
+			printf("Max |Ux| = %e\n", maxUx1);
+			printf("Max |Uy| = %e\n", maxUy1);
+			printf("Max |Uz| = %e\n", maxUz1);
+			printf("------------------------------------------------\n\n");
+
+			/* -------------------------------------------------- */
+
+			if( icutb == 0 && (1.0 - theta <= 1.e-6) )
+			{
+				printf("[PRECICE WRITE] Full nonlinear load applied: theta = %e\n", theta);
+    			fflush(stdout);
+
+				Precice_WriteCouplingData( &simulationData );
+        		/* Adapter: Advance the coupling */
+        		Precice_Advance( &simulationData );
+        		/* Adapter: If the coupling does not converge, read the checkpoint */
+			}
+
 			if( Precice_IsReadCheckpointRequired() )
         	{
             	if( *nmethod == 1 )
