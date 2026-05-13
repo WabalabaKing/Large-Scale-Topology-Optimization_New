@@ -2241,7 +2241,7 @@ while(istat>=0)
 
         compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
-                            dCGx, dCGy, dCGz);
+                            dCGx, dCGy, dCGz, mat_dens);
       
         
 
@@ -2296,7 +2296,7 @@ while(istat>=0)
          printf("  Evaluate CG..");
         compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
-                            NULL, NULL, NULL);
+                            NULL, NULL, NULL, mat_dens);
       
         printf("done \n");
         SFREE(elCG);

@@ -813,6 +813,23 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
   		*tmin=*tmin/(*tper);
   		*tmax=*tmax/(*tper);
   		theta=0.;
+
+		/* -------------------------------------------------- */
+		/* Save original nonlinear static increment settings  */
+		/* Used whenever preCICE requests a coupling restart  */
+		/* -------------------------------------------------- */
+		double theta_precice0     = 0.0;
+		double dtheta_precice0    = dtheta;
+		double dthetaref_precice0 = dthetaref;
+		double tmin_precice0      = *tmin;
+		double tmax_precice0      = *tmax;
+
+		ITG iinc_precice0   = iinc;
+		ITG jprint_precice0 = jprint;
+
+		printf("[PRECICE INIT] theta0=%e dtheta0=%e dthetaref0=%e\n",
+       			theta_precice0, dtheta_precice0, dthetaref_precice0);
+		fflush(stdout);
   
   		/* calculating an initial flux norm */
   		if(*ithermal!=2)
@@ -1419,6 +1436,15 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 			}
       		printf(" increment %" ITGFORMAT " attempt %" ITGFORMAT " \n",iinc,icutb+1);
       		printf(" increment size= %e\n",dtheta**tper);
+
+			if (dtheta <= 1.e-14) 
+			{
+    			printf("[ERROR] Invalid nonlinear increment after preCICE restart: theta=%e dtheta=%e\n",theta, dtheta);
+    			fflush(stdout);
+    			FORTRAN(stop,());
+			}
+
+
       		printf(" sum of previous increments=%e\n",theta**tper);
       		printf(" actual step time=%e\n",(theta+dtheta)**tper);
       		printf(" actual total time=%e\n\n",*ttime+(theta+dtheta)**tper);
@@ -3205,22 +3231,40 @@ void nonlingeo_MDO(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakon
 
 					/* Keep current soluton vector consistent with restored checkpoint */
 					memcpy(&v[0], &vold[0], sizeof(double) * mt * (*nk));
+
+					/* -------------------------------------------------- */
+					/* Reset nonlinear static load increment state        */
+					/* -------------------------------------------------- */
+					theta     = theta_precice0;
+					dtheta    = dtheta_precice0;
+					dthetaref = dthetaref_precice0;
+
+					*tmin = tmin_precice0;
+					*tmax = tmax_precice0;
+
+					icutb   = 0;
+					negpres = 0;
+
+					iinc   = iinc_precice0;
+					jprint = jprint_precice0;
+
 					 
-					printf("[PRECICE READ CHECKPOINT] restored theta=%e dtheta=%e\n",theta, dtheta);
-        			fflush(stdout);
-
-					/* This was a preCICE retry, not a new structrual increment */
-					/* Undo the increment counter advance done at the beginning */
-                	//icutb++;
-
-
-					iinc--;
-					jprint--;
-
-					printf("[PRECICE RETRY] Restarting increment %d | theta=%e dtheta=%e\n",iinc, theta, dtheta);
-        			fflush(stdout);
+					printf("[PRECICE READ CHECKPOINT] Restarting nonlinear solve from original increment state\n");
+					printf("    theta     = %e\n", theta);
+					printf("    dtheta    = %e\n", dtheta);
+					printf("    dthetaref = %e\n", dthetaref);
+					printf("    tmin      = %e\n", *tmin);
+					printf("    tmax      = %e\n", *tmax);
+					fflush(stdout);
 
 					Precice_FulfilledReadCheckpoint();
+
+					/* Clean up before restarting loop */
+					SFREE(v);
+					SFREE(stn);
+					SFREE(stx);
+					SFREE(fn);
+					SFREE(inum);
 
 					continue;
 

@@ -2106,7 +2106,8 @@ printf("|------------------------------------------------------------------|\n\n
 	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
-
+      
+      /* Call this function to only compute mass in the case of un-penalized FEA */
       compute_mass(ne_, eleVol, rhoPhys, mat_dens);
 
       SFREE(eleVol);
@@ -2126,8 +2127,6 @@ printf("|------------------------------------------------------------------|\n\n
 
       /* allocate memory for element complaince and initialize to zero */
       NNEW(elCompl,double,ne_);
-
-
 
       /* allocate memory for element volume and initialize to zero */
       NNEW(eleVol,double,ne_); 
@@ -2170,8 +2169,8 @@ printf("|------------------------------------------------------------------|\n\n
 
       printf("done\n");
 
-      //printf("done!\n");
-      // Mass and C.G properties
+      
+      /* Define variables for mass and center of gravity */
       double M, cgx, cgy, cgz;
       
       /*---------------------------------C.G SENSITIVITY FILTERING AND I/O ----------------------------------------*/
@@ -2193,7 +2192,7 @@ printf("|------------------------------------------------------------------|\n\n
 
         compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
-                            dCGx, dCGy, dCGz);
+                            dCGx, dCGy, dCGz, mat_dens);
       
         
 
@@ -2244,11 +2243,12 @@ printf("|------------------------------------------------------------------|\n\n
 
       else
       {
-        // Only compute the CG value for objectives.csv
-         printf("  Evaluate CG..");
+        /* Compute the CG and mass without sensitivities */
+        printf("  Evaluate CG..");
+
         compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
-                            NULL, NULL, NULL);
+                            NULL, NULL, NULL, mat_dens);
       
         printf("done \n");
         SFREE(elCG);
@@ -2321,7 +2321,7 @@ printf("|------------------------------------------------------------------|\n\n
   
      /* print output */
       
-      printf("\n Compliance:                 %.3f \n",compliance_sum);
+      printf("\n Compliance:               %.3f \n",compliance_sum);
       printf(" Mass:                       %.3f \n", M);
       printf(" Aggregated stress (P-norm): %.3f \n", Pnorm);
       //printf("Total domain volume:         %.6f \n",initialVol_sum);

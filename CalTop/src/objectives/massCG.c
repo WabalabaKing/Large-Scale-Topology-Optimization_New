@@ -19,6 +19,7 @@
     rhoPhys   - [ne] element densities rho_i
     elCG      - [3*ne] element centroids:
                 elCG[3*i+0] = x_i, elCG[3*i+1] = y_i, elCG[3*i+2] = z_i
+    mat_dens  - material density (used if rhoPhys are relative densities)
 
   Outputs:
     *M        - total mass (Σ rho_i * V_i)
@@ -40,7 +41,8 @@ void compute_mass_cg_and_cg_sens(
     double *cgx, double *cgy, double *cgz,
     double *dCGx_dRho,
     double *dCGy_dRho,
-    double *dCGz_dRho)
+    double *dCGz_dRho,
+    const double mat_dens)
 {
     // ---------- 1) Compute total mass and first moments ----------
     double mass  = 0.0;   // Σ m_i
@@ -50,7 +52,8 @@ void compute_mass_cg_and_cg_sens(
 
     for (size_t i = 0; i < ne; ++i) 
     {
-        const double mi = rhoPhys[i] * eleVol[i];   // m_i = ρ_i V_i
+      /* Mass depends on element density, material density and element volume */
+        const double mi = mat_dens * rhoPhys[i] * eleVol[i];   // m_i = ρ_i V_i
         mass += mi;
         Mx   += mi * elCG[3*i + 0];
         My   += mi * elCG[3*i + 1];
