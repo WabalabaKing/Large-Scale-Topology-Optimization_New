@@ -1017,6 +1017,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	                }
                 }
 
+                printf("Calling mafilsmmain se...");
                 /* determining the system matrix and the external forces */
                 mafillsmmain_se(co,nk,kon,ipkon,lakon,ne,nodeboun,
                     ndirboun,xbounact,nboun,
@@ -1039,7 +1040,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	                &icoordinate,dxstiff,xdesi,istartelem,ialelem,v,&sigma,
 	                &cyclicsymmetry,labmpc,ics,cs,mcs,&ieigenfrequency,design,penal,
                     gradCompl,elCompl,elCG,eleVol,fn0_out,fint);
-                
+                printf("done with mafilsmmain se...\n");
 
                 /* second order derivative */
 

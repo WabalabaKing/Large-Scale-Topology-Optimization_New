@@ -16,6 +16,55 @@
 !     along with this program; if not, write to the Free Software
 !     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !
+
+!
+!     mafillsmse
+!
+!     Driver routine for element-wise compliance and compliance-
+!     sensitivity evaluation for density-based topology optimization.
+!
+!     This routine loops over all active finite elements in the range
+!     nea:neb, determines the element type and associated degrees of
+!     freedom, computes body-force contributions, and calls e_c3d_se()
+!     to evaluate the element stiffness matrix, element compliance,
+!     element compliance sensitivity, element volume, and element
+!     centroid coordinates.
+!
+!     For each element e:
+!
+!        C_e = rho_e^p u_e^T K_0,e u_e
+!
+!     and the SIMP compliance sensitivity is evaluated as:
+!
+!        dC_e/drho_e =
+!             -p rho_e^(p-1) u_e^T K_0,e u_e
+!
+!     for linear analyses, or through an adjoint/residual-based
+!     formulation for geometrically nonlinear analyses.
+!
+!     The routine stores:
+!
+!        gradCompl(e)  : element compliance sensitivity
+!        elCompl(e)    : element compliance contribution
+!        eleVol(e)     : element volume
+!        elCG(:,e)     : element centroid coordinates
+!
+!     and accumulates the total compliance internally.
+!
+!     Main tasks:
+!
+!        - Loop over all mechanical elements
+!        - Identify element topology and active DOFs
+!        - Assemble body-force contributions
+!        - Call e_c3d_se() for element calculations
+!        - Store element compliance/sensitivity information
+!        - Support linear and geometrically nonlinear sensitivity
+!          analysis
+!
+!     This routine is part of the sensitivity-analysis infrastructure
+!     used for SIMP-based topology optimization in CalculiX.
+!
+
       subroutine mafillsmse(co,kon,ipkon,lakon,ne,ipompc,nodempc,
      &  coefmpc,nmpc,nelemload,sideload,xload,nload,xbody,ipobody,
      &  nbody,cgr,nactdof,neq,nmethod,ikmpc,ilmpc,elcon,nelcon,rhcon,
@@ -51,6 +100,10 @@
      &  neb,ndesi,nodedesi(*),idesvar,istartelem(*),ialelem(*),
      &  icoordinate,ii,ieigenfrequency,mass(2),stiffness,buckling,rhsi,
      &  stiffonly(2),coriolis,idesloc,ndof
+
+      integer percent,last_percent
+      save last_percent
+      data last_percent /-1/
 !
       real*8 co(3,*),coefmpc(*),xload(2,*),p1(3),p2(3),bodyf(3),
      &  xloadold(2,*),reltime,t0(*),t1(*),vold(0:mi(2),*),
@@ -131,6 +184,19 @@ c      open (unit=200,file="CGmafillsmse.dat")
          do i=nea,neb
          rhoi=design(i)
 !
+!
+!     Progress indicator for element sensitivity evaluation
+!         percent=5*(int(100.d0*dble(i-nea+1)/
+!     &        dble(neb-nea+1))/5)
+
+!         if(percent.ne.last_percent) then
+!            write(*,'(A,I8,A,I8,A,I3,A)')
+!     &      'Thread block ',nea,'-',neb,': ',
+!     &      percent,'% complete'
+!            call flush(6)
+!            last_percent=percent
+!         endif
+
           if((ipkon(i).lt.0).or.(lakon(i)(1:1).eq.'F')) cycle
           indexe=ipkon(i)
 c     Bernhardi start
@@ -329,6 +395,7 @@ c            write(200,*) i,elCG(1,i),elCG(2,i),elCG(3,i)
   !         enddo
           enddo
       endif
+      write(*,*)
 !
 c      write(100,*) 'Compliance=',tcompli
 c      close(10)

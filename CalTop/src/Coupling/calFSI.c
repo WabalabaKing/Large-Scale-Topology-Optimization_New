@@ -2367,15 +2367,29 @@ while(istat>=0)
       printf("done!\n");
         
   
-     /* print output */
-      
-      printf("\n Compliance:                 %.3f \n",compliance_sum);
-      printf(" Mass:                       %.3f \n", M);
-      printf(" Aggregated stress (P-norm): %.3f \n", Pnorm);
-      //printf("Total domain volume:         %.6f \n",initialVol_sum);
-      //printf("Current domain volume:       %.6f \n",designVol_sum);
-      //printf("Volume constraint violation:: %.6f \n",designVol_sum-volfrac*initialVol_sum);
-      //printf("Discreteness, mnd, percent:               %.6f \n",mnd);
+      /* -------------------------------------------------- */
+      /* Design summary                               */
+      /* -------------------------------------------------- */
+
+      printf("\n");
+      printf("====================================================\n");
+      printf("                 Optimization Summary               \n"); 
+      printf("====================================================\n");
+
+      printf("  Compliance                 : %12.6e\n", compliance_sum);
+      printf("  Mass                       : %12.6e\n", M);
+      printf("  Aggregated stress (P-norm) : %12.6e\n", Pnorm);
+
+      /* Optional outputs */
+      //printf("  Initial volume             : %12.6e\n", initialVol_sum);
+     // printf("  Current volume             : %12.6e\n", designVol_sum);
+     // printf("  Volume constraint          : %12.6e\n",
+     //  designVol_sum - volfrac * initialVol_sum);
+
+      //printf("  Discreteness metric        : %12.6e\n", mnd);
+
+      printf("====================================================\n");
+      printf("\n");
 
     } // end adjoint calculation
 

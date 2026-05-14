@@ -16,6 +16,45 @@
 !     along with this program; if not, write to the Free Software
 !     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !
+
+!
+!     e_c3d_se
+!
+!     Computes element-level stiffness, mass, load, compliance, and
+!     compliance-sensitivity quantities for three-dimensional CalculiX
+!     continuum elements with SIMP-based topology optimization.
+!
+!     The routine first identifies the element type, gathers the local
+!     nodal coordinates and displacements, evaluates shape functions at
+!     the element integration points, and assembles the local element
+!     stiffness matrix. For linear analyses, the element compliance is
+!     computed as
+!
+!        C_e = rho_e^p u_e^T K_0,e u_e
+!
+!     and the corresponding SIMP sensitivity is computed as
+!
+!        dC_e/drho_e = -p rho_e^(p-1) u_e^T K_0,e u_e .
+!
+!     For geometrically nonlinear analyses, the routine uses an
+!     adjoint/residual-based sensitivity expression involving the
+!     adjoint vector lambda and the element internal force contribution
+!     stored in fn0_out.
+!
+!     Main outputs:
+!
+!        sensi    : element compliance sensitivity
+!        ecompli  : element compliance contribution
+!        elvol    : element volume
+!        xcg,ycg,zcg : element centroid coordinates
+!        s        : element stiffness matrix
+!        sm       : element mass or geometric stiffness matrix
+!        ff       : element right-hand-side/load vector
+!
+!     This routine is a sensitivity-modified version of the standard
+!     CalculiX C3D element routine and is intended for use in
+!     density-based topology optimization.
+!
       subroutine e_c3d_se(co,kon,lakonl,p1,p2,omx,bodyfx,nbody,s,sm,
      &  ff,nelem,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,
      &  ielmat,ielorien,norien,orab,ntmat_,
