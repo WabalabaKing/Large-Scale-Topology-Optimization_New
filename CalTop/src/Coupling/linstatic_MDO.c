@@ -200,61 +200,59 @@ void linstatic_MDO(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   		ne0=*ne;
 
 
-    /*---Asign values to CCX structure to hold coupling variables---*/
-    struct SimulationData simulationData = 
-    {
-        .ialset = ialset,    				/*---Member of a set or surface. This is a node for node set, an element for element set---*/
-        .ielmat = ielmat,					/*---Contains the material number for element i ---*/
-        .istartset = istartset,				/*---Pointer to ialset containing the first set number---*/
-        .iendset = iendset,					/*---Pointer to ialset containing the last set number---*/
-        .kon = kon,							/*---Containts topology of all elements---*/
-        .ipkon = ipkon,						/*---Points to the location in field kon preceding the topology of element i---*/
-        .lakon = &lakon,					/*---Containts label for element i (C3D4, C3D8...)---*/
-        .co = co,							/*---Node coordinates---*/
-        .set = set,							/*---Name of the set: User defined name---*/
-        .nset = *nset,						/*---Number of sets, including surfaces---*/
-        .ikboun = ikboun,					/*---Containts all DOFs of the boundary conditions---*/
-        .ikforc = ikforc,					/*---Ordered array of the DOFs corresponiding to the point loads---*/
-        .ilboun = ilboun,					/*---Containts all the boundary conditions---*/
-        .ilforc = ilforc,					/*---Original SPC number for ikforc(i)---*/
-        .nboun = *nboun,   					/*---Total number of boundary conditions (Single Point Constraints)---*/	
-        .nforc = *nforc,							/*---Number of point loads---*/
-        .nelemload = nelemload,						/*---Element to which distributed load is applied----*/
-        .nload = *nload,							/*---Number of facial distributed loads---*/
-        .sideload = sideload,						/*---Load label; indicated element size to which load is applied---*/
-        .mt = mt, 									/*---Not sure---*/
-        .nk = *nk,									/*---Highest node number---*/
-        .theta = &theta,  							/*---Normalized (by tper) size of all previous increments and not including present increment---*/
-        .dtheta = &dtheta,						/*---Dummy variable for linear static analysis---*/
-        .tper = tper,								/*---Use given step size---*/
-        .nmethod = nmethod,  						/*---Flag that deifnes numerical method: 1: static linear or nonlinear, 2: frequency (linear), 3: buckling, 4: dynamic linear or non-linear, etc---*/
-        .xload = xload,								/*---Concentrated load in direction of idof of node "node" (global coordinates)---*/
-        .xforc = xforc,   							/*---Scalar value of the force in one direction---*/
-        .xboun = xboun,								/*---Magnitude of constraint at end of a step---*/
-        .ntmat_ = ntmat_,  							/*---Maximum number of temperature data points for any material property for any material---*/
-        .vold = vold,								/*---Displacement of node j in direction i at the start of an iteration---*/
-        .veold = veold,   							/*---Velocity of node j in direction i at the start of an iteration---*/
-        .fn = fn, 									/*---values of forces read from calculix---*/
-        .cocon = cocon,								/*---Conductivity coefficient k at location---*/
-        .ncocon = ncocon,							/*---Number of conductivity constants---*/
-        .mi = mi   									/*---Not sure---*/
-    };
+    	/*---Asign values to CCX structure to hold coupling variables---*/
+    	struct SimulationData simulationData = 
+    	{
+        	.ialset = ialset,    				/*---Member of a set or surface. This is a node for node set, an element for element set---*/
+        	.ielmat = ielmat,					/*---Contains the material number for element i ---*/
+        	.istartset = istartset,				/*---Pointer to ialset containing the first set number---*/
+        	.iendset = iendset,					/*---Pointer to ialset containing the last set number---*/
+        	.kon = kon,							/*---Containts topology of all elements---*/
+        	.ipkon = ipkon,						/*---Points to the location in field kon preceding the topology of element i---*/
+        	.lakon = &lakon,					/*---Containts label for element i (C3D4, C3D8...)---*/
+        	.co = co,							/*---Node coordinates---*/
+        	.set = set,							/*---Name of the set: User defined name---*/
+        	.nset = *nset,						/*---Number of sets, including surfaces---*/
+        	.ikboun = ikboun,					/*---Containts all DOFs of the boundary conditions---*/
+        	.ikforc = ikforc,					/*---Ordered array of the DOFs corresponiding to the point loads---*/
+        	.ilboun = ilboun,					/*---Containts all the boundary conditions---*/
+        	.ilforc = ilforc,					/*---Original SPC number for ikforc(i)---*/
+        	.nboun = *nboun,   					/*---Total number of boundary conditions (Single Point Constraints)---*/	
+        	.nforc = *nforc,							/*---Number of point loads---*/
+        	.nelemload = nelemload,						/*---Element to which distributed load is applied----*/
+        	.nload = *nload,							/*---Number of facial distributed loads---*/
+        	.sideload = sideload,						/*---Load label; indicated element size to which load is applied---*/
+        	.mt = mt, 									/*---Not sure---*/
+        	.nk = *nk,									/*---Highest node number---*/
+        	.theta = &theta,  							/*---Normalized (by tper) size of all previous increments and not including present increment---*/
+        	.dtheta = &dtheta,						/*---Dummy variable for linear static analysis---*/
+        	.tper = tper,								/*---Use given step size---*/
+        	.nmethod = nmethod,  						/*---Flag that deifnes numerical method: 1: static linear or nonlinear, 2: frequency (linear), 3: buckling, 4: dynamic linear or non-linear, etc---*/
+        	.xload = xload,								/*---Concentrated load in direction of idof of node "node" (global coordinates)---*/
+        	.xforc = xforc,   							/*---Scalar value of the force in one direction---*/
+        	.xboun = xboun,								/*---Magnitude of constraint at end of a step---*/
+        	.ntmat_ = ntmat_,  							/*---Maximum number of temperature data points for any material property for any material---*/
+        	.vold = vold,								/*---Displacement of node j in direction i at the start of an iteration---*/
+        	.veold = veold,   							/*---Velocity of node j in direction i at the start of an iteration---*/
+        	.fn = fn, 									/*---values of forces read from calculix---*/
+        	.cocon = cocon,								/*---Conductivity coefficient k at location---*/
+        	.ncocon = ncocon,							/*---Number of conductivity constants---*/
+        	.mi = mi   									/*---Not sure---*/
+    	};
 
-			printf("simulationData address      = %p\n", (void*)&simulationData);
-printf("simulationData.ialset       = %p\n", (void*)simulationData.ialset);
-printf("simulationData.istartset    = %p\n", (void*)simulationData.istartset);
-printf("simulationData.iendset      = %p\n", (void*)simulationData.iendset);
-printf("simulationData.ielmat       = %p\n", (void*)simulationData.ielmat);
-printf("simulationData.kon          = %p\n", (void*)simulationData.kon);
-printf("simulationData.ipkon        = %p\n", (void*)simulationData.ipkon);
-printf("simulationData.lakon        = %p\n", (void*)simulationData.lakon);
-printf("simulationData.co           = %p\n", (void*)simulationData.co);
-printf("simulationData.nelemload    = %p\n", (void*)simulationData.nelemload);
-printf("simulationData.sideload     = %p\n", (void*)simulationData.sideload);
-printf("simulationData.vold         = %p\n", (void*)simulationData.vold);
-fflush(stdout);
-
-
+		printf("simulationData address      = %p\n", (void*)&simulationData);
+		printf("simulationData.ialset       = %p\n", (void*)simulationData.ialset);
+		printf("simulationData.istartset    = %p\n", (void*)simulationData.istartset);
+		printf("simulationData.iendset      = %p\n", (void*)simulationData.iendset);
+		printf("simulationData.ielmat       = %p\n", (void*)simulationData.ielmat);
+		printf("simulationData.kon          = %p\n", (void*)simulationData.kon);
+		printf("simulationData.ipkon        = %p\n", (void*)simulationData.ipkon);
+		printf("simulationData.lakon        = %p\n", (void*)simulationData.lakon);
+		printf("simulationData.co           = %p\n", (void*)simulationData.co);
+		printf("simulationData.nelemload    = %p\n", (void*)simulationData.nelemload);
+		printf("simulationData.sideload     = %p\n", (void*)simulationData.sideload);
+		printf("simulationData.vold         = %p\n", (void*)simulationData.vold);
+		fflush(stdout);
 
   		/* determining the global values to be used as boundary conditions
      	for a submodel */
@@ -298,7 +296,6 @@ fflush(stdout);
 
   		if(*nbody>0)
   		{	  
-			printf("Assigning body force definition to elements...");
       		ifreebody=*ne+1;
       		NNEW(ipobody,ITG,2*ifreebody**nbody);
 
@@ -310,8 +307,6 @@ fflush(stdout);
       		}
 
       		RENEW(ipobody,ITG,2*(ifreebody-1));
-
-			printf(" done!\n");
   		}
 
 

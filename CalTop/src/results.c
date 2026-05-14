@@ -237,7 +237,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        2. determination which derived variables have to be calculated */
     if (get_adjoint!=2)
     {
-        printf("    Displacement state eq. space -> nodal space\n");
+
         FORTRAN(resultsini,(nk,v,ithermal,filab,iperturb,f,fn,
         nactdof,iout_ptr,qa,vold,b,nodeboun,ndirboun,
         xboun,nboun,ipompc,nodempc,coefmpc,labmpc,nmpc,nmethod,cam,neq,

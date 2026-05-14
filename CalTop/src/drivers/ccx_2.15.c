@@ -2313,7 +2313,7 @@ printf("|------------------------------------------------------------------|\n\n
       
       printf("\n\nOUTPUT FILEDS--------------------------------------------------------------|\n\n");
      
-      
+  
       printf("  Writing objectives...");
       write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, passiveIDs, numPassive, &Pnorm);
       printf("done!\n");
