@@ -334,6 +334,7 @@ void *mafillsmsemt(ITG *i)
 
     if(!*cyclicsymmetry1)
     { 
+        printf("Calling mafilsmse.f for element-wise sensitivity evaluation\n");
         /* Used for topology optimization */
 	    FORTRAN(mafillsmse,(co1,kon1,ipkon1,lakon1,ne1,ipompc1,nodempc1,
 	    coefmpc1,nmpc1,nelemload1,sideload1,xload1,nload1,xbody1,
