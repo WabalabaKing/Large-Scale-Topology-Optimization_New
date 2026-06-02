@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <omp.h>
 
 /**
  * Writes volume sensitivities to a CSV file.
@@ -30,6 +31,9 @@ void write_objectives(int ne,
 
     /* total material volume with rho = 1 */
     double initialVol_sum = 0;
+
+    /* initial design volume of active domain */
+    double initialDesignVol_sum = 0.0;
 
     /* total material volume with optimized rho */
     double  designVol_sum = 0;
@@ -78,26 +82,36 @@ void write_objectives(int ne,
         }
     }
 
+    int nthreads = omp_get_max_threads();
+
+    printf("Using %d CPU(s) for volume and discreteness evaluation\n",
+       nthreads);
+    fflush(stdout);
+
 
 
     /* Write file header */
     fprintf(obj_file, "COMPLIANCE, ORIGINAL VOLUME, DESIGN VOLUME, VOLUME_FRACTION, DISCRETENESS, MASS, CGx, CGy, CGz, PNORM\n");
 
-    /* Loop over all elements and compute the initial and current volume*/
-    // NOTE: Compute initial volume and discretness_sum for structure with skin included
+    #pragma omp parallel for reduction(+:initialVol_sum,initialDesignVol_sum,designVol_sum,discreteness_sum)
     for (int i = 0; i < ne; i++)
     {
-        initialVol_sum+= eleVol[i];
+        initialVol_sum += eleVol[i];
         discreteness_sum += rhoPhys[i] * (1.0 - rhoPhys[i]);
-        
+
         if (!is_skin[i])
-        {
+        {   initialDesignVol_sum+= eleVol[i];
             designVol_sum += eleVol[i] * rhoPhys[i];
         }
     }
 
-    /* Compute volume fraction */
-    double volume_fraction = designVol_sum / initialVol_sum;
+    /* Compute volume fraction for active domain only */
+    double volume_fraction = 0.0;
+    
+    if (initialDesignVol_sum > 0.0)
+    {
+        volume_fraction = designVol_sum / initialDesignVol_sum;
+    }
 
     /* Compute discreteness */
     double discreteness = (4.0 /ne) * discreteness_sum;
