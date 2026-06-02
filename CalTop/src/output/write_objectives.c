@@ -60,6 +60,26 @@ void write_objectives(int ne,
     */
 
 
+    /* Pre-allocate skin element indices here*/
+    int *is_skin = calloc(ne, sizeof(int));
+    if (!is_skin) 
+    {
+        perror("calloc failed for is_skin");
+        exit(EXIT_FAILURE);
+    }
+    
+    /* passiveIDs are 1-based */
+    for (int k =0; k < numPassive; k++)
+    {
+        int id = passiveIDs[k] -1;
+        if (id >= 0 && id < ne) 
+        {
+            is_skin[id] = 1;
+        }
+    }
+
+
+
     /* Write file header */
     fprintf(obj_file, "COMPLIANCE, ORIGINAL VOLUME, DESIGN VOLUME, VOLUME_FRACTION, DISCRETENESS, MASS, CGx, CGy, CGz, PNORM\n");
 
@@ -68,28 +88,15 @@ void write_objectives(int ne,
     for (int i = 0; i < ne; i++)
     {
         initialVol_sum+= eleVol[i];
-        //designVol_sum+= (eleVol[i]*rhoPhys[i]);
         discreteness_sum += rhoPhys[i] * (1.0 - rhoPhys[i]);
-
-        // Compute design volume excluding skin elements
-        int is_skin = 0;
-        for (int k = 0; k < numPassive; k++)
-        {
-            if(passiveIDs[k] == i +1)
-            {
-                // Found skin elements, break 
-                is_skin = 1;
-                break;
-            }
-        }
-
-        if(!is_skin)
+        
+        if (!is_skin[i])
         {
             designVol_sum += eleVol[i] * rhoPhys[i];
         }
     }
 
-     /* Compute volume fraction */
+    /* Compute volume fraction */
     double volume_fraction = designVol_sum / initialVol_sum;
 
     /* Compute discreteness */
@@ -99,4 +106,6 @@ void write_objectives(int ne,
     fprintf(obj_file, "%.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f, %.15f \n", *compliance_sum, initialVol_sum, designVol_sum, volume_fraction, discreteness, *Mass, *cgx, *cgy, *cgz, *pnorm);
     
     fclose(obj_file);
+
+    free(is_skin);
 }
