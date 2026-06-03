@@ -2154,7 +2154,7 @@ while(istat>=0)
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
 
-      compute_mass(ne_, eleVol, rhoPhys, mat_dens);
+      compute_mass(ne_, eleVol, rhoPhys, mat_dens, passiveIDs, numPassive);
 
       SFREE(eleVol);
       SFREE(elCompl);
@@ -2241,7 +2241,7 @@ while(istat>=0)
 
         compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
-                            dCGx, dCGy, dCGz, mat_dens);
+                            dCGx, dCGy, dCGz, mat_dens, passiveIDs, numPassive);
       
         
 
@@ -2296,7 +2296,7 @@ while(istat>=0)
          printf("  Evaluate CG..");
         compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
-                            NULL, NULL, NULL, mat_dens);
+                            NULL, NULL, NULL, mat_dens, passiveIDs, numPassive);
       
         printf("done \n");
         SFREE(elCG);

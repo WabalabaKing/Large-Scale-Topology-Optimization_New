@@ -588,8 +588,8 @@ FORTRAN(allocation,(&nload_,&nforc_,&nboun_,&nk_,&ne_,&nmpc_,&nset_,&nalset_,
    iuel,&iprestr,&nstam,&ndamp,&nef, &eval_CG, &eval_PNORM));
 
 
-printf("CG flag after allocation: %d\n", eval_CG);
-printf("PNROM flag ater allocation %d\n", eval_PNORM);
+//printf("CG flag after allocation: %d\n", eval_CG);
+//printf("PNROM flag ater allocation %d\n", eval_PNORM);
 
 SFREE(set);
 SFREE(meminset);
@@ -2108,7 +2108,7 @@ printf("|------------------------------------------------------------------|\n\n
 
       
       /* Call this function to only compute mass in the case of un-penalized FEA */
-      compute_mass(ne_, eleVol, rhoPhys, mat_dens);
+      compute_mass(ne_, eleVol, rhoPhys, mat_dens, passiveIDs, numPassive);
 
       SFREE(eleVol);
       SFREE(elCompl);
@@ -2192,7 +2192,7 @@ printf("|------------------------------------------------------------------|\n\n
 
         compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
-                            dCGx, dCGy, dCGz, mat_dens);
+                            dCGx, dCGy, dCGz, mat_dens, passiveIDs, numPassive);
       
         
 
@@ -2248,7 +2248,7 @@ printf("|------------------------------------------------------------------|\n\n
 
         compute_mass_cg_and_cg_sens(ne, eleVol, rhoPhys, elCG,
                             &M, &cgx, &cgy, &cgz,
-                            NULL, NULL, NULL, mat_dens);
+                            NULL, NULL, NULL, mat_dens, passiveIDs, numPassive);
       
         printf("done \n");
         SFREE(elCG);

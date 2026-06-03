@@ -127,9 +127,9 @@ void tecplot_vtu_active(int nk, int ne, double *co, int *kon, int *ipkon, char *
 void write_objectives(int ne,double *eleVol, double *rhoPhys, double * compliance_sum, double *Mass, double *cgx, double *cgy, double *cgz, int *passiveIDs, int numPassive, double* pnorm);
 
 
-void compute_mass_cg_and_cg_sens(size_t ne, const double *eleVol, const double *rhoPhys, const double *elCG, double *M, double *cgx, double *cgy, double *cgz, double *dCGx_dRho, double *dCGy_dRho, double *dCGz_dRho, const double mat_dens);
+void compute_mass_cg_and_cg_sens(size_t ne, const double *eleVol, const double *rhoPhys, const double *elCG, double *M, double *cgx, double *cgy, double *cgz, double *dCGx_dRho, double *dCGy_dRho, double *dCGz_dRho, const double mat_dens, int *passiveIDs, int numPassive);
 
-void compute_mass(size_t ne, const double *eleVol, const double *rhoPhys, const double mat_dens);
+void compute_mass(size_t ne, const double *eleVol, const double *rhoPhys, const double mat_dens, int *passiveIDs, int numPassive);
 
 
 void assembleFilter(double *FilterMatrixs, int *rowFilters, int *colFilters,

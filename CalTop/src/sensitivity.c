@@ -1017,7 +1017,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	                }
                 }
 
-                printf("Calling mafilsmmain se...");
+                //printf("Calling mafilsmmain se...");
                 /* determining the system matrix and the external forces */
                 mafillsmmain_se(co,nk,kon,ipkon,lakon,ne,nodeboun,
                     ndirboun,xbounact,nboun,
