@@ -2353,7 +2353,7 @@ while(istat>=0)
       write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
       printf("done!\n");
 
-      SFREE(eleVol);
+      
       SFREE(eleVolFiltered);
 
       ends = time(NULL);
@@ -2365,7 +2365,8 @@ while(istat>=0)
       printf("  Writing objectives...");
       write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, passiveIDs, numPassive, &Pnorm);
       printf("done!\n");
-        
+      
+      SFREE(eleVol);
   
       /* -------------------------------------------------- */
       /* Design summary                               */

@@ -2305,7 +2305,7 @@ printf("|------------------------------------------------------------------|\n\n
       write_volume_sensitivities(ne, eleVol, rhoPhys, eleVolFiltered);
       printf("done!\n");
 
-      SFREE(eleVol);
+      
       SFREE(eleVolFiltered);
 
       ends = time(NULL);
@@ -2317,6 +2317,8 @@ printf("|------------------------------------------------------------------|\n\n
       printf("  Writing objectives...");
       write_objectives(ne, eleVol, rhoPhys, &compliance_sum, &M, &cgx, &cgy, &cgz, passiveIDs, numPassive, &Pnorm);
       printf("done!\n");
+
+      SFREE(eleVol);
         
   
      /* print output */
