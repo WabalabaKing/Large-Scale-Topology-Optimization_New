@@ -15,6 +15,95 @@
 !     You should have received a copy of the GNU General Public License
 !     along with this program; if not, write to the Free Software
 !     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+!-----------------------------------------------------------------------
+!  linel
+!
+!  Purpose:
+!    Computes the Cauchy stress tensor for linear elastic materials
+!    at an integration (Gauss) point using the supplied mechanical
+!    strain tensor and constitutive properties.
+!
+!    Supported material models:
+!      - Isotropic elasticity      (kode = 2)
+!      - Orthotropic elasticity    (kode = 9)
+!      - Fully anisotropic elasticity (kode = 21)
+!
+!    For materials with a local material orientation, the stiffness
+!    tensor is transformed into the global coordinate system before
+!    stress evaluation.
+!
+!  Constitutive relation:
+!
+!      σ = C ε - β
+!
+!    where:
+!      σ : stress vector
+!      C : elastic stiffness matrix/tensor
+!      ε : engineering strain vector
+!      β : initial/thermal stress contribution
+!
+!  Input:
+!
+!    kode        Material constitutive model identifier
+!                  2  = isotropic
+!                  9  = orthotropic
+!                  21 = anisotropic
+!
+!    elconloc    Material property array containing elastic constants
+!
+!    emec(6)     Mechanical strain tensor components
+!                  emec(1) = εxx
+!                  emec(2) = εyy
+!                  emec(3) = εzz
+!                  emec(4) = εxy
+!                  emec(5) = εxz
+!                  emec(6) = εyz
+!
+!    beta(6)     Stress offsets (e.g. thermal or initial stresses)
+!
+!    iorien      Material orientation number
+!                  0 = global material axes
+!                 >0 = local material axes defined in orab
+!
+!    orab        Material orientation definitions
+!
+!    pgauss(3)   Global coordinates of the current Gauss point
+!
+!  Output:
+!
+!    stre(6)     Stress tensor components
+!                  stre(1) = σxx
+!                  stre(2) = σyy
+!                  stre(3) = σzz
+!                  stre(4) = σxy
+!                  stre(5) = σxz
+!                  stre(6) = σyz
+!
+!    elas(21)    Elastic coefficients after possible coordinate
+!                transformation
+!
+!    mattyp      Material type used internally
+!                  1 = isotropic
+!                  2 = orthotropic
+!                  3 = anisotropic
+!
+!  Notes:
+!
+!    - Shear strains are converted to engineering strain form:
+!
+!          γxy = 2 εxy
+!          γxz = 2 εxz
+!          γyz = 2 εyz
+!
+!    - For oriented materials, the fourth-order elasticity tensor is
+!      rotated into the global coordinate system.
+!
+!    - If the transformed anisotropic tensor reduces to an orthotropic
+!      form (within numerical tolerance), the routine automatically
+!      switches to the orthotropic formulation.
+!
+!-----------------------------------------------------------------------
 !
       subroutine linel(kode,mattyp,beta,emec,stre,elas,elconloc,
      &  iorien,orab,pgauss)

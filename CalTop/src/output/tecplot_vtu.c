@@ -133,48 +133,166 @@ void tecplot_vtu(int nk, int ne, double *co, int *kon, int *ipkon, char *lakon, 
     fprintf(fp, "      <CellData Scalars=\"VonMises\">\n");
 
     // --- Von Mises scalar per cell ---
-    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"VonMises\" NumberOfComponents=\"1\" format=\"ascii\">\n");
+    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"VonMises(Pa)\" NumberOfComponents=\"1\" format=\"ascii\">\n");
     for (int cell = 0; cell < ne; cell++) {
         char *lk = &lakon[8*cell];
         int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
-        double sxx=0, syy=0, szz=0, sxy=0, syz=0, szx=0;
+
+        double sxx=0, syy=0, szz=0;
+        double txy=0, txz=0, tyz=0;
+
         for (int gp = 0; gp < ngp; gp++) {
             sxx += stx[6*mi0*cell + 6*gp    ];
             syy += stx[6*mi0*cell + 6*gp + 1];
             szz += stx[6*mi0*cell + 6*gp + 2];
-            sxy += stx[6*mi0*cell + 6*gp + 3];
-            syz += stx[6*mi0*cell + 6*gp + 4];
-            szx += stx[6*mi0*cell + 6*gp + 5];
+            txy += stx[6*mi0*cell + 6*gp + 3];
+            txz += stx[6*mi0*cell + 6*gp + 4];
+            tyz += stx[6*mi0*cell + 6*gp + 5];
         }
-        sxx/=ngp; syy/=ngp; szz/=ngp; sxy/=ngp; syz/=ngp; szx/=ngp;
+        sxx/=ngp; syy/=ngp; szz/=ngp; txy/=ngp; tyz/=ngp; txz/=ngp;
 
         double vm = sqrt(
             0.5 * ( (sxx - syy)*(sxx - syy)
                   + (syy - szz)*(syy - szz)
                   + (szz - sxx)*(szz - sxx) )
-          + 3.0 * ( sxy*sxy + syz*syz + szx*szx )
+                + 3.0 * (txy*txy + txz*txz + tyz*tyz)
         );
 
         fprintf(fp, "      %.8f\n", vm);
     }
     fprintf(fp, "        </DataArray>\n");
 
-    // --- Full 6-component stress tensor per cell ---
-    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
-    for (int cell = 0; cell < ne; cell++) 
+    // Sigma_xx
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_xx(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
     {
-        char *lk = &lakon[8*cell];
-        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
-        double s[6] = {0,0,0,0,0,0};
-        for (int gp = 0; gp < ngp; gp++) {
-            for (int c = 0; c < 6; c++)
-                s[c] += stx[6*mi0*cell + 6*gp + c];
-        }
-        for (int c = 0; c < 6; c++) s[c] /= ngp;
-        fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n",
-                s[0], s[1], s[2], s[3], s[4], s[5]);
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double sxx=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            sxx += stx[6*mi0*cell + 6*gp];
+
+        sxx /= ngp;
+
+        fprintf(fp," %.8f\n",sxx);
     }
-    fprintf(fp, "        </DataArray>\n");
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // Sigma_yy
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_yy(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double syy=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            syy += stx[6*mi0*cell + 6*gp+1];
+
+        syy /= ngp;
+
+        fprintf(fp," %.8f\n",syy);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // Sigma_zz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_zz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double szz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            szz += stx[6*mi0*cell + 6*gp + 2];
+
+        szz /= ngp;
+
+        fprintf(fp," %.8f\n",szz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_xy
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_xy(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_xy=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_xy += stx[6*mi0*cell + 6*gp + 3];
+
+        tau_xy /= ngp;
+
+        fprintf(fp," %.8f\n",tau_xy);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_xz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_xz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_xz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_xz += stx[6*mi0*cell + 6*gp + 4];
+
+        tau_xz /= ngp;
+
+        fprintf(fp," %.8f\n",tau_xz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_yz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_yz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_yz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_yz += stx[6*mi0*cell + 6*gp + 5];
+
+        tau_yz /= ngp;
+
+        fprintf(fp," %.8f\n",tau_yz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
 
     // --- Density per cell ---
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Density\" NumberOfComponents=\"1\" format=\"ascii\">\n");
@@ -288,41 +406,169 @@ void tecplot_vtu_passive(int nk, int ne,
         int e = passiveIDs[k] - 1;
         char *lk = &lakon[8*e];
         int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
-        double sxx=0, syy=0, szz=0, sxy=0, syz=0, szx=0;
+
+        double sxx=0, syy=0, szz=0;
+        double txy=0, txz=0, tyz=0;
+
+
         for (int gp = 0; gp < ngp; gp++) {
             sxx += stx[6*mi0*e + 6*gp    ];
             syy += stx[6*mi0*e + 6*gp + 1];
             szz += stx[6*mi0*e + 6*gp + 2];
-            sxy += stx[6*mi0*e + 6*gp + 3];
-            syz += stx[6*mi0*e + 6*gp + 4];
-            szx += stx[6*mi0*e + 6*gp + 5];
+            txy += stx[6*mi0*e + 6*gp + 3];
+            txz += stx[6*mi0*e + 6*gp + 4];
+            tyz += stx[6*mi0*e + 6*gp + 5];
         }
-        sxx/=ngp; syy/=ngp; szz/=ngp; sxy/=ngp; syz/=ngp; szx/=ngp;
+        sxx/=ngp; syy/=ngp; szz/=ngp; txy/=ngp; tyz/=ngp; txz/=ngp;
         double vm = sqrt(
             0.5 * ( (sxx - syy)*(sxx - syy)
                   + (syy - szz)*(syy - szz)
                   + (szz - sxx)*(szz - sxx) )
-          + 3.0 * ( sxy*sxy + syz*syz + szx*szx )
+                + 3.0 * (txy*txy + txz*txz + tyz*tyz)
         );
         fprintf(fp, "      %.8f\n", vm);
     }
     fprintf(fp, "        </DataArray>\n");
 
-    // Full 6-component stress for passive cells
-    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
-    for (int k = 0; k < numPassive; k++) {
-        int e = passiveIDs[k] - 1;
-        char *lk = &lakon[8*e];
-        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
-        double s[6] = {0,0,0,0,0,0};
-        for (int gp = 0; gp < ngp; gp++)
-            for (int c = 0; c < 6; c++)
-                s[c] += stx[6*mi0*e + 6*gp + c];
-        for (int c = 0; c < 6; c++) s[c] /= ngp;
-        fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n",
-                s[0], s[1], s[2], s[3], s[4], s[5]);
+
+    // Sigma_xx
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_xx(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int k=0; k<numPassive; k++)
+    {
+        int cell = passiveIDs[k]-1;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double sxx=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            sxx += stx[6*mi0*cell + 6*gp];
+
+        sxx /= ngp;
+
+        fprintf(fp," %.8f\n",sxx);
     }
-    fprintf(fp, "        </DataArray>\n");
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // Sigma_yy
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_yy(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int k=0; k<numPassive; k++)
+    {
+        int cell = passiveIDs[k]-1;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double syy=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            syy += stx[6*mi0*cell + 6*gp+1];
+
+        syy /= ngp;
+
+        fprintf(fp," %.8f\n",syy);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // Sigma_zz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_zz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int k=0; k<numPassive; k++)
+    {
+        int cell = passiveIDs[k]-1;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double szz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            szz += stx[6*mi0*cell + 6*gp + 2];
+
+        szz /= ngp;
+
+        fprintf(fp," %.8f\n",szz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_xy
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_xy(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int k=0; k<numPassive; k++)
+    {
+        int cell = passiveIDs[k]-1;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_xy=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_xy += stx[6*mi0*cell + 6*gp + 3];
+
+        tau_xy /= ngp;
+
+        fprintf(fp," %.8f\n",tau_xy);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_xz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_xz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int k=0; k<numPassive; k++)
+    {
+        int cell = passiveIDs[k]-1;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_xz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_xz += stx[6*mi0*cell + 6*gp + 4];
+
+        tau_xz /= ngp;
+
+        fprintf(fp," %.8f\n",tau_xz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_yz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_yz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int k=0; k<numPassive; k++)
+    {
+        int cell = passiveIDs[k]-1;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_yz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_yz += stx[6*mi0*cell + 6*gp + 5];
+
+        tau_yz /= ngp;
+
+        fprintf(fp," %.8f\n",tau_yz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
 
     // Density for passive cells
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Density\" NumberOfComponents=\"1\" format=\"ascii\">\n");
@@ -463,41 +709,169 @@ void tecplot_vtu_active(int nk, int ne,
 
         char *lk = &lakon[8*e];
         int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
-        double sxx=0, syy=0, szz=0, sxy=0, syz=0, szx=0;
+
+        double sxx=0, syy=0, szz=0;
+        double txy=0, txz=0, tyz=0;
+
         for (int gp = 0; gp < ngp; gp++) {
             sxx += stx[6*mi0*e + 6*gp    ];
             syy += stx[6*mi0*e + 6*gp + 1];
             szz += stx[6*mi0*e + 6*gp + 2];
-            sxy += stx[6*mi0*e + 6*gp + 3];
-            syz += stx[6*mi0*e + 6*gp + 4];
-            szx += stx[6*mi0*e + 6*gp + 5];
+            txy += stx[6*mi0*e + 6*gp + 3];
+            txz += stx[6*mi0*e + 6*gp + 4];
+            tyz += stx[6*mi0*e + 6*gp + 5];
         }
-        sxx/=ngp; syy/=ngp; szz/=ngp; sxy/=ngp; syz/=ngp; szx/=ngp;
+
+        sxx/=ngp; syy/=ngp; szz/=ngp; txy/=ngp; tyz/=ngp; txz/=ngp;
         double vm = sqrt(
             0.5 * ( (sxx - syy)*(sxx - syy)
                   + (syy - szz)*(syy - szz)
                   + (szz - sxx)*(szz - sxx) )
-          + 3.0 * ( sxy*sxy + syz*syz + szx*szx )
+                + 3.0 * (txy*txy + txz*txz + tyz*tyz)
         );
         fprintf(fp, "      %.8f\n", vm);
     }
     fprintf(fp, "        </DataArray>\n");
 
-    // Full 6-component stress for active cells
-    fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Stress\" NumberOfComponents=\"6\" format=\"ascii\">\n");
-    for (int e = 0; e < ne; e++) {
-        if (isPassive[e]) continue;
-        char *lk = &lakon[8*e];
-        int ngp = (lk[3]=='1' && lk[4]=='0') ? 4 : 1;
-        double s[6] = {0,0,0,0,0,0};
-        for (int gp = 0; gp < ngp; gp++)
-            for (int c = 0; c < 6; c++)
-                s[c] += stx[6*mi0*e + 6*gp + c];
-        for (int c = 0; c < 6; c++) s[c] /= ngp;
-        fprintf(fp, "      %.8f %.8f %.8f %.8f %.8f %.8f\n",
-                s[0], s[1], s[2], s[3], s[4], s[5]);
+    // Sigma_xx
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_xx(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+   for(int cell=0; cell<ne; cell++)
+    {
+        if(isPassive[cell]) continue;
+
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double sxx=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            sxx += stx[6*mi0*cell + 6*gp];
+
+        sxx /= ngp;
+
+        fprintf(fp," %.8f\n",sxx);
     }
-    fprintf(fp, "        </DataArray>\n");
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // Sigma_yy
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_yy(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        if(isPassive[cell]) continue;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double syy=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            syy += stx[6*mi0*cell + 6*gp+1];
+
+        syy /= ngp;
+
+        fprintf(fp," %.8f\n",syy);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // Sigma_zz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Sigma_zz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        if(isPassive[cell]) continue;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double szz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            szz += stx[6*mi0*cell + 6*gp + 2];
+
+        szz /= ngp;
+
+        fprintf(fp," %.8f\n",szz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_xy
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_xy(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        if(isPassive[cell]) continue;
+
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_xy=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_xy += stx[6*mi0*cell + 6*gp + 3];
+
+        tau_xy /= ngp;
+
+        fprintf(fp," %.8f\n",tau_xy);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_xz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_xz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+      for(int cell=0; cell<ne; cell++)
+    {
+        if(isPassive[cell]) continue;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_xz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_xz += stx[6*mi0*cell + 6*gp + 4];
+
+        tau_xz /= ngp;
+
+        fprintf(fp," %.8f\n",tau_xz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
+
+    // tau_yz
+    fprintf(fp,
+    "        <DataArray type=\"Float64\" Name=\"Tau_yz(Pa)\" "
+    "NumberOfComponents=\"1\" format=\"ascii\">\n");
+
+    for(int cell=0; cell<ne; cell++)
+    {
+        if(isPassive[cell]) continue;
+        char *lk=&lakon[8*cell];
+        int ngp=(lk[3]=='1' && lk[4]=='0') ? 4 : 1;
+
+        double tau_yz=0.0;
+
+        for(int gp=0; gp<ngp; gp++)
+            tau_yz += stx[6*mi0*cell + 6*gp + 5];
+
+        tau_yz /= ngp;
+
+        fprintf(fp," %.8f\n",tau_yz);
+    }
+
+    fprintf(fp,"        </DataArray>\n");
 
     // Density for active cells
     fprintf(fp, "        <DataArray type=\"Float64\" Name=\"Density\" NumberOfComponents=\"1\" format=\"ascii\">\n");
