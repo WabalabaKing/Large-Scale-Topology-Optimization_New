@@ -602,10 +602,6 @@ NNEW(meminset,ITG,nset_);
 NNEW(rmeminset,ITG,nset_);
 NNEW(iuel,ITG,4*nuel_);
 
-
-printf("CG flag before allocation: %d\n", eval_CG);
-printf("PNROM flag before allocation %d\n", eval_PNORM);
-
 FORTRAN(allocation,(&nload_,&nforc_,&nboun_,&nk_,&ne_,&nmpc_,&nset_,&nalset_,
    &nmat_,&ntmat_,&npmat_,&norien_,&nam_,&nprint_,mi,&ntrans_,
    set,meminset,rmeminset,&ncs_,&namtot_,&ncmat_,&memmpc_,&ne1d,
@@ -613,10 +609,6 @@ FORTRAN(allocation,(&nload_,&nforc_,&nboun_,&nk_,&ne_,&nmpc_,&nset_,&nalset_,
    inpc,ipoinp,inp,&ntie_,&nbody_,&nprop_,ipoinpc,&nevdamp_,&npt_,&nslavs,
    &nkon_,&mcs,&mortar,&ifacecount,&nintpoint,infree,&nheading_,&nobject_,
    iuel,&iprestr,&nstam,&ndamp,&nef, &eval_CG, &eval_PNORM));
-
-
-printf("CG flag after allocation: %d\n", eval_CG);
-printf("PNROM flag ater allocation %d\n", eval_PNORM);
 
 SFREE(set);
 SFREE(meminset);
