@@ -89,7 +89,11 @@ OCCXMAINFILT  = $(OBJ_DIR)/drivers/calFilt.o
 ifeq ($(MDO),1)
   SCCXMAINFSI = $(SRC_DIR)/Coupling/calFSI.c
   OCCXMAINFSI = $(OBJ_DIR)/Coupling/calFSI.o
+
+  SCCXMAINFSI_ADJ = $(SRC_DIR)/Coupling/calFSI_ADJ.c
+  OCCXMAINFSI_ADJ = $(OBJ_DIR)/Coupling/calFSI_ADJ.o
 endif
+
 
 # Extra C sources (you can extend this if needed)
 SCCXC_EXTRA = $(SCCXCMAINFILT)
@@ -126,6 +130,7 @@ ALL_BINS := $(BIN_DIR)/calTop.exe $(BIN_DIR)/calFilt.exe
 
 ifeq ($(MDO),1)
   ALL_BINS += $(BIN_DIR)/calFSI.exe
+  ALL_BINS += $(BIN_DIR)/calFSI_ADJ.exe
 endif
 
 # Default target
@@ -181,6 +186,11 @@ ifeq ($(MDO),1)
 $(BIN_DIR)/calFSI.exe: $(OCCXMAINFSI) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
 	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAINFSI) ccx_2.15.a $(LIBS)
 	@echo "Build calFSI.exe successfully!"
+
+# calAdj (only meaningful when MDO=1)
+$(BIN_DIR)/calFSI_ADJ.exe: $(OCCXMAINFSI_ADJ) ccx_2.15.a | $(BIN_DIR) $(OBJ_DIR)
+	$(FC) -Wall -O3 -fopenmp -o $@ $(OCCXMAINFSI_ADJ) ccx_2.15.a $(LIBS)
+	@echo "Build calFSI_ADJ.exe successfully!"
 endif
 
 # ============================================================
@@ -192,12 +202,14 @@ install: $(ALL_BINS)
 	cp $(BIN_DIR)/calTop.exe  $(BINDIR)/
 	cp $(BIN_DIR)/calFilt.exe $(BINDIR)/
 ifeq ($(MDO),1)
-	cp $(BIN_DIR)/calFSI.exe  $(BINDIR)/
+	cp $(BIN_DIR)/calFSI.exe     $(BINDIR)/
+	cp $(BIN_DIR)/calFSI_ADJ.exe $(BINDIR)/
 endif
 	chmod +x $(BINDIR)/calTop.exe
 	chmod +x $(BINDIR)/calFilt.exe
 ifeq ($(MDO),1)
 	chmod +x $(BINDIR)/calFSI.exe
+	chmod +x $(BINDIR)/calFSI_ADJ.exe
 endif
 
 uninstall:
@@ -205,6 +217,7 @@ uninstall:
 	rm -f $(BINDIR)/calTop.exe
 	rm -f $(BINDIR)/calFilt.exe
 	rm -f $(BINDIR)/calFSI.exe
+	rm -f $(BINDIR)/calFSI_ADJ.exe
 
 # ============================================================
 # Clean

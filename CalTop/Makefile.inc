@@ -1077,7 +1077,8 @@ $(SRC_DIR)/Coupling/linstatic_MDO.c \
 $(SRC_DIR)/Coupling/calFSI.c \
 $(SRC_DIR)/Coupling/CCXHelpers.c \
 $(SRC_DIR)/Coupling/PreciceInterface.c \
-$(SRC_DIR)/Coupling/nonlingeo_MDO.c 
+$(SRC_DIR)/Coupling/nonlingeo_MDO.c \
+$(SRC_DIR)/Coupling/calFSI_ADJ.c 
 
 
 SCCXCXX = \
