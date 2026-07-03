@@ -2131,6 +2131,10 @@ printf("|------------------------------------------------------------------|\n\n
       /* allocate memory for element volume and initialize to zero */
       NNEW(eleVol,double,ne_); 
 
+      double *volFracSens = NULL;
+      /* allocate memory for element volume fraction sensitivity */
+      NNEW(volFracSens,double,ne_);
+
       /* allocate memory for filtered compliance gradient and initialize to zero */
       NNEW(gradComplFiltered,double,ne_);  //allocate memory to gradcompliance, initialize to 0
 
@@ -2289,8 +2293,12 @@ printf("|------------------------------------------------------------------|\n\n
       /*-------------------------------------VOLUME SENSITIVITY FILTERING AND I/O----------------------------------*/
 
       FILE *elV_file;
+
+      printf("  Evaluate volume fraction sensitivities...");
+      volumeSens(ne,eleVol,passiveIDs,numPassive,volFracSens);
+
       printf("  Filter element volume gradient ");
-      filterSensitivity_bin_buffered_mts(eleVol, eleVolFiltered, ne, filternnz);
+      filterSensitivity_bin_buffered_mts(volFracSens, eleVolFiltered, ne, filternnz);
       printf("done! \n");
 
       if (numPassive > 0)
@@ -2307,6 +2315,7 @@ printf("|------------------------------------------------------------------|\n\n
 
       
       SFREE(eleVolFiltered);
+      SFREE(volFracSens);
 
       ends = time(NULL);
       

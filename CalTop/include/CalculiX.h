@@ -108,6 +108,8 @@ void write_volume_sensitivities(int ne,
 		const double *eleVolFiltered);
 
 
+void volumeSens(int ne, const double *eleVol, const int *passiveIDs,
+                int numPassive, double *volFracSens);
 
 int* passiveElements(char *filename, int *numPassive);
 
