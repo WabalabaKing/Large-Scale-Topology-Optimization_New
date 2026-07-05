@@ -183,23 +183,32 @@ void compute_mass_cg_and_cg_sens(
     fflush(stdout);
 
 
-
-    free(is_skin);
-
     // ---------- 3) Sensitivities of CG wrt rho_k ----------
-    // d(CG)/d(rho_k) = (V_k / M) * (r_k - CG)
-    // Only fill if not NULL
-    if (dCGx_dRho)
+    /* NOTE: CG is computed using the full structure, including passive elements
+    However, passive/skin element sensitivities are set to zero */
+
+  if (dCGx_dRho)
+  {
+    #pragma omp parallel for schedule(static)
+    for (size_t k = 0; k < ne; ++k) 
     {
-      #pragma omp parallel for schedule(static)
-      for (size_t k = 0; k < ne; ++k) 
+      if (is_skin[k])
       {
-          const double scale = mat_dens * eleVol[k] * invM;        // V_k / M
-          dCGx_dRho[k] = scale * (elCG[3*k + 0] - CGx); // x_k - CGx
-          dCGy_dRho[k] = scale * (elCG[3*k + 1] - CGy); // y_k - CGy
-          dCGz_dRho[k] = scale * (elCG[3*k + 2] - CGz); // z_k - CGz
+          dCGx_dRho[k] = 0.0;
+          dCGy_dRho[k] = 0.0;
+          dCGz_dRho[k] = 0.0;
+      }
+      else
+      {
+          const double scale = mat_dens * eleVol[k] * invM;
+
+          dCGx_dRho[k] = scale * (elCG[3*k + 0] - CGx);
+          dCGy_dRho[k] = scale * (elCG[3*k + 1] - CGy);
+          dCGz_dRho[k] = scale * (elCG[3*k + 2] - CGz);
       }
     }
+  }
+  free(is_skin);
 }
 
 /*--------------------------------------------------------------------

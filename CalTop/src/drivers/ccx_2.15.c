@@ -2205,22 +2205,26 @@ printf("|------------------------------------------------------------------|\n\n
         filterSensitivity_bin_buffered_mts3(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
 
         printf("done\n");
+
+        /* NOTE: We do not call filterOutPassiveElems_sens() for CG* sens
+          since compute_mass_cg_and_cg_sens() already filters out passive elements and sets
+          the sensitivity to zero */
       
-        if (numPassive > 0)
-        {
+       // if (numPassive > 0)
+       // {
 
-          printf("  Setting CG sensitivites for skin elements to zero ...");
-          /* set the filtered CGx sens of passive elements to 0 */
-          filterOutPassiveElems_sens(dCGxFiltered, ne, passiveIDs, numPassive);
+       //   printf("  Setting CG sensitivites for skin elements to zero ...");
+       //   /* set the filtered CGx sens of passive elements to 0 */
+       //   filterOutPassiveElems_sens(dCGxFiltered, ne, passiveIDs, numPassive);
 
 
-          /* set the filtered CGy sens of passive elements to 0 */
-          filterOutPassiveElems_sens(dCGyFiltered, ne, passiveIDs, numPassive);
+      //    /* set the filtered CGy sens of passive elements to 0 */
+      //    filterOutPassiveElems_sens(dCGyFiltered, ne, passiveIDs, numPassive);
 
           /* set the filtered CGz sens of passive elements to 0 */
-          filterOutPassiveElems_sens(dCGzFiltered, ne, passiveIDs, numPassive);
-          printf("done\n");
-        }
+      //    filterOutPassiveElems_sens(dCGzFiltered, ne, passiveIDs, numPassive);
+      //    printf("done\n");
+      //  }
 
         printf("  Writing CG sensitivities to disk...");
         /* ... after you fill dCGx, dCGy, dCGz ... */
