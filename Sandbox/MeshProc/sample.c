@@ -522,6 +522,186 @@ void remove_existing_nam_files(void)
 }
 
 
+void extract_skin_elements(char *su2file,
+                           char *markername,
+                           char *outfile)
+{
+    FILE *fp;
+    FILE *out;
+
+    char line[MAXLINE];
+    char key[128];
+
+    int nnode = 0;
+    int nelem = 0;
+
+    sprintf(key, "MARKER_TAG= %s", markername);
+
+    /*
+       First pass: read NPOIN and NELEM.
+    */
+
+    fp = fopen(su2file, "r");
+
+    if (fp == NULL) {
+        printf("ERROR: Cannot open %s\n", su2file);
+        exit(EXIT_FAILURE);
+    }
+
+    while (fgets(line, MAXLINE, fp)) {
+        if (strstr(line, "NPOIN=") != NULL) {
+            sscanf(line, "NPOIN= %d", &nnode);
+        }
+
+        if (strstr(line, "NELEM=") != NULL) {
+            sscanf(line, "NELEM= %d", &nelem);
+        }
+    }
+
+    fclose(fp);
+
+    if (nnode <= 0 || nelem <= 0) {
+        printf("ERROR: Could not read NPOIN or NELEM\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int *skin_nodes = calloc((size_t)nnode, sizeof(int));
+    int *skin_elems = calloc((size_t)nelem, sizeof(int));
+
+    if (skin_nodes == NULL || skin_elems == NULL) {
+        printf("ERROR: Memory allocation failed in extract_skin_elements\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /*
+       Second pass: collect nodes on the chosen marker.
+
+       SU2 surface triangle format:
+           5 n1 n2 n3
+
+       The node IDs are kept 0-based here.
+    */
+
+    fp = fopen(su2file, "r");
+
+    int active = 0;
+    int found_marker = 0;
+
+    while (fgets(line, MAXLINE, fp)) {
+        if (strstr(line, key) != NULL) {
+            active = 1;
+            found_marker = 1;
+            continue;
+        }
+
+        if (active) {
+            if (strstr(line, "MARKER_TAG=") != NULL) {
+                break;
+            }
+
+            if (strstr(line, "MARKER_ELEMS=") != NULL) {
+                continue;
+            }
+
+            int type;
+            int a, b, c;
+
+            if (sscanf(line, "%d %d %d %d",
+                       &type, &a, &b, &c) == 4) {
+                skin_nodes[a] = 1;
+                skin_nodes[b] = 1;
+                skin_nodes[c] = 1;
+            }
+        }
+    }
+
+    fclose(fp);
+
+    if (!found_marker) {
+        printf("WARNING: MARKER_TAG= %s not found. No skinElementList.nam written.\n",
+               markername);
+
+        free(skin_nodes);
+        free(skin_elems);
+
+        return;
+    }
+
+    /*
+       Third pass: scan volume tetrahedra.
+
+       SU2 tetrahedron format:
+           10 n1 n2 n3 n4 elementID
+
+       If a tetrahedron contains at least one skin node,
+       it is marked as a skin/passive element.
+    */
+
+    fp = fopen(su2file, "r");
+
+    int element_section = 0;
+
+    while (fgets(line, MAXLINE, fp)) {
+        if (strstr(line, "NELEM=") != NULL) {
+            element_section = 1;
+            continue;
+        }
+
+        if (!element_section) {
+            continue;
+        }
+
+        int type;
+        int n1, n2, n3, n4;
+        int eid;
+
+        if (sscanf(line, "%d %d %d %d %d %d",
+                   &type, &n1, &n2, &n3, &n4, &eid) == 6) {
+            if (type != 10) {
+                continue;
+            }
+
+            if (skin_nodes[n1] ||
+                skin_nodes[n2] ||
+                skin_nodes[n3] ||
+                skin_nodes[n4]) {
+                skin_elems[eid] = 1;
+            }
+        }
+    }
+
+    fclose(fp);
+
+    /*
+       Write selected elements as 1-based IDs.
+    */
+
+    out = fopen(outfile, "w");
+
+    if (out == NULL) {
+        printf("ERROR: Cannot open %s for writing\n", outfile);
+        exit(EXIT_FAILURE);
+    }
+
+    int count = 0;
+
+    for (int e = 0; e < nelem; e++) {
+        if (skin_elems[e]) {
+            fprintf(out, "%d\n", e + 1);
+            count++;
+        }
+    }
+
+    fclose(out);
+
+    printf("%s written. Number of skin/passive elements = %d\n",
+           outfile,
+           count);
+
+    free(skin_nodes);
+    free(skin_elems);
+}
+
 
 
 
@@ -558,9 +738,8 @@ int main(void)
                    "surface",
                    "NSurface.nam");
 
-    extract_marker(su2file,
-                   "tank",
-                   "tank.nam");
+    extract_skin_elements(su2file, "surface", "skinElementList.nam");
+
 
 
 
