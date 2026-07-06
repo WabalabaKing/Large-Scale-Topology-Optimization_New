@@ -446,6 +446,85 @@ void print_su2_markers(char *su2file)
 }
 
 
+
+void remove_existing_nam_files(void)
+{
+
+    DIR *dir;
+    struct dirent *entry;
+
+
+    int count = 0;
+
+
+    dir = opendir(".");
+
+
+    if(dir == NULL){
+
+        printf("ERROR: Cannot open current directory\n");
+
+        exit(EXIT_FAILURE);
+    }
+
+
+
+    printf("Checking for old .nam files ...\n");
+
+
+
+    while((entry = readdir(dir)) != NULL){
+
+
+        /*
+           Check filename extension
+        */
+
+        if(strstr(entry->d_name,
+                  ".nam") != NULL){
+
+
+
+            printf("Removing old file: %s\n",
+                   entry->d_name);
+
+
+
+            if(remove(entry->d_name) != 0){
+
+
+                printf("WARNING: Could not remove %s\n",
+                       entry->d_name);
+
+            }
+
+
+            count++;
+
+        }
+
+    }
+
+
+    closedir(dir);
+
+
+
+    if(count == 0){
+
+        printf("No old .nam files found\n");
+
+    }
+
+
+    printf("\n");
+
+}
+
+
+
+
+
 int main(void)
 {
     char su2file[512];
@@ -478,6 +557,12 @@ int main(void)
     extract_marker(su2file,
                    "surface",
                    "NSurface.nam");
+
+    extract_marker(su2file,
+                   "tank",
+                   "tank.nam");
+
+
 
     printf("\nSU2 preprocessing complete.\n\n");
 
