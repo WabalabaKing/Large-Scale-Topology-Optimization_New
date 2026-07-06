@@ -26,6 +26,120 @@
 #define MAXLINE 512
 
 
+void write_deformed_su2_from_v(int nk, double *v)
+{
+    FILE *fp;
+    FILE *out;
+
+    char su2file[512];
+    char outfile[512];
+    char line[MAXLINE];
+
+    int nnode = 0;
+    int node_section = 0;
+    int node_counter = 0;
+
+    /* Locate .su2 file before aeroelastic equilibrium */
+    find_su2_file(su2file);
+
+    /* Create .su2 file post aeroelastic equilibrium */
+    sprintf(outfile, "deformed_%s", su2file);
+
+    /* Try opening the above two files */
+    fp = fopen(su2file, "r");
+    if (fp == NULL) {
+        printf("ERROR: Cannot open %s\n", su2file);
+        exit(EXIT_FAILURE);
+    }
+
+    out = fopen(outfile, "w");
+    if (out == NULL) {
+        printf("ERROR: Cannot open %s for writing\n", outfile);
+        fclose(fp);
+        exit(EXIT_FAILURE);
+    }
+
+    while (fgets(line, MAXLINE, fp)) 
+    {
+        /* Node count consistency between CalTop and .su2 */
+        if (strstr(line, "NPOIN=") != NULL) 
+        {
+            sscanf(line, "NPOIN= %d", &nnode);
+            fprintf(out, "%s", line);
+
+            if (nnode != nk) 
+            {
+                fprintf(stderr,
+                    "\nERROR: Mesh mismatch detected!\n"
+                    "       SU2 NPOIN : %d\n"
+                    "       CalTop nk : %d\n"
+                    "\n"
+                    "The SU2 mesh and CalTop displacement vector do not match.\n"
+                    "Cannot write deformed SU2 mesh.\n\n",
+                nnode, nk);
+
+                fclose(fp);
+                fclose(out);
+
+                exit(EXIT_FAILURE);
+            }
+
+            node_section = 1;
+            node_counter = 0;
+            continue;
+        }
+
+        if (node_section && node_counter < nnode) 
+        {
+            double x, y, z;
+            int offset = 0;
+
+            if (sscanf(line, "%lf %lf %lf %n",
+                       &x, &y, &z, &offset) < 3) 
+            {
+                printf("ERROR: Could not parse SU2 node line %d\n",
+                       node_counter + 1);
+                fclose(fp);
+                fclose(out);
+                exit(EXIT_FAILURE);
+            }
+            
+            /* Update nodal coordinates from aeroelastic solution */
+            x += v[4 * node_counter + 1];
+            y += v[4 * node_counter + 2];
+            z += v[4 * node_counter + 3];
+
+            fprintf(out, "%.15e %.15e %.15e", x, y, z);
+
+            if (offset > 0 && line[offset] != '\0') 
+            {
+                fprintf(out, " %s", line + offset);
+            }
+            else 
+            {
+                fprintf(out, "\n");
+            }
+
+            node_counter++;
+
+            if (node_counter == nnode) 
+            {
+                node_section = 0;
+            }
+
+            continue;
+        }
+
+        fprintf(out, "%s", line);
+    }
+
+    fclose(fp);
+    fclose(out);
+
+    printf("Updated SU2 mesh written: %s\n", outfile);
+}
+
+
 void find_su2_file(char *filename)
 {
     DIR *dir;
