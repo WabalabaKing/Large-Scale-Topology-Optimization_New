@@ -185,19 +185,23 @@ void convert_volume_mesh(char *su2file)
 
     fp = fopen(su2file, "r");
 
-    if (fp == NULL) {
+    if (fp == NULL) 
+    {
         printf("ERROR: Cannot open SU2 file %s\n", su2file);
         exit(EXIT_FAILURE);
     }
 
-    while (fgets(line, MAXLINE, fp)) {
-        if (strstr(line, "NPOIN=") != NULL) {
+    while (fgets(line, MAXLINE, fp)) 
+    {
+        if (strstr(line, "NPOIN=") != NULL) 
+        {
             sscanf(line, "NPOIN= %d", &nnode);
             break;
         }
     }
 
-    if (nnode <= 0) {
+    if (nnode <= 0) 
+    {
         printf("ERROR: Could not read NPOIN from SU2 file\n");
         fclose(fp);
         exit(EXIT_FAILURE);
@@ -209,14 +213,17 @@ void convert_volume_mesh(char *su2file)
 
     xyz = malloc((size_t)nnode * sizeof(*xyz));
 
-    if (xyz == NULL) {
+    if (xyz == NULL) 
+    {
         printf("ERROR: Memory allocation failed for node coordinates\n");
         fclose(fp);
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < nnode; i++) {
-        if (fgets(line, MAXLINE, fp) == NULL) {
+    for (int i = 0; i < nnode; i++) 
+    {
+        if (fgets(line, MAXLINE, fp) == NULL) 
+        {
             printf("ERROR: Unexpected end of file while reading nodes\n");
             free(xyz);
             fclose(fp);
@@ -234,7 +241,8 @@ void convert_volume_mesh(char *su2file)
 
     out = fopen("mesh.nam", "w");
 
-    if (out == NULL) {
+    if (out == NULL) 
+    {
         printf("ERROR: Cannot open mesh.nam for writing\n");
         free(xyz);
         exit(EXIT_FAILURE);
@@ -243,7 +251,8 @@ void convert_volume_mesh(char *su2file)
     fprintf(out, "** Generated from SU2 mesh\n");
     fprintf(out, "*NODE, NSET=NALL\n");
 
-    for (int i = 0; i < nnode; i++) {
+    for (int i = 0; i < nnode; i++) 
+    {
         fprintf(out,
                 "%d, %.10lf, %.10lf, %.10lf\n",
                 i + 1,
@@ -254,21 +263,25 @@ void convert_volume_mesh(char *su2file)
 
     fp = fopen(su2file, "r");
 
-    if (fp == NULL) {
+    if (fp == NULL) 
+    {
         printf("ERROR: Cannot reopen SU2 file %s\n", su2file);
         free(xyz);
         fclose(out);
         exit(EXIT_FAILURE);
     }
 
-    while (fgets(line, MAXLINE, fp)) {
-        if (strstr(line, "NELEM=") != NULL) {
+    while (fgets(line, MAXLINE, fp)) 
+    {
+        if (strstr(line, "NELEM=") != NULL) 
+        {
             sscanf(line, "NELEM= %d", &nelem);
             break;
         }
     }
 
-    if (nelem <= 0) {
+    if (nelem <= 0) 
+    {
         printf("ERROR: Could not read NELEM from SU2 file\n");
         free(xyz);
         fclose(fp);
@@ -280,12 +293,14 @@ void convert_volume_mesh(char *su2file)
 
     fprintf(out, "\n*ELEMENT, TYPE=C3D4, ELSET=EALL\n");
 
-    for (int e = 0; e < nelem; e++) {
+    for (int e = 0; e < nelem; e++) 
+    {
         int type;
         int n[4];
         int eid;
 
-        if (fgets(line, MAXLINE, fp) == NULL) {
+        if (fgets(line, MAXLINE, fp) == NULL) 
+        {
             printf("ERROR: Unexpected end of file while reading elements\n");
             free(xyz);
             fclose(fp);
@@ -300,13 +315,14 @@ void convert_volume_mesh(char *su2file)
                    &n[1],
                    &n[2],
                    &n[3],
-                   &eid) != 6) {
-            printf("ERROR: Could not parse element line %d\n", e + 1);
-            free(xyz);
-            fclose(fp);
-            fclose(out);
-            exit(EXIT_FAILURE);
-        }
+                   &eid) != 6) 
+            {
+                printf("ERROR: Could not parse element line %d\n", e + 1);
+                free(xyz);
+                fclose(fp);
+                fclose(out);
+                exit(EXIT_FAILURE);
+            }
 
         if (type != 10) {
             printf("ERROR: Non-tetrahedral element detected. Element type = %d\n", type);
@@ -316,12 +332,10 @@ void convert_volume_mesh(char *su2file)
             exit(EXIT_FAILURE);
         }
 
-        double vol = tet_volume(xyz[n[0]],
-                                xyz[n[1]],
-                                xyz[n[2]],
-                                xyz[n[3]]);
+        double vol = tet_volume(xyz[n[0]],xyz[n[1]],xyz[n[2]],xyz[n[3]]);
 
-        if (fabs(vol) < 1.0e-30) {
+        if (fabs(vol) < 1.0e-30) 
+        {
             printf("ERROR: Zero-volume tetrahedron detected at element %d\n", e + 1);
             free(xyz);
             fclose(fp);
@@ -329,7 +343,8 @@ void convert_volume_mesh(char *su2file)
             exit(EXIT_FAILURE);
         }
 
-        if (vol < 0.0) {
+        if (vol < 0.0) 
+        {
             int tmp = n[1];
             n[1] = n[2];
             n[2] = tmp;
@@ -352,9 +367,7 @@ void convert_volume_mesh(char *su2file)
     printf("mesh.nam written\n");
 }
 
-void extract_marker(char *su2file,
-                    char *marker,
-                    char *outfile)
+void extract_marker(char *su2file,char *marker,char *outfile)
 {
     FILE *fp;
     FILE *out;
@@ -370,19 +383,20 @@ void extract_marker(char *su2file,
 
     sprintf(key, "MARKER_TAG= %s", marker);
 
-    /*
-       First pass: read NPOIN so we can allocate a node flag array.
-    */
+    /*First pass: read NPOIN so we can allocate a node flag array. */
 
     fp = fopen(su2file, "r");
 
-    if (fp == NULL) {
+    if (fp == NULL) 
+    {
         printf("ERROR: Cannot open SU2 file %s\n", su2file);
         exit(EXIT_FAILURE);
     }
 
-    while (fgets(line, MAXLINE, fp)) {
-        if (strstr(line, "NPOIN=") != NULL) {
+    while (fgets(line, MAXLINE, fp)) 
+    {
+        if (strstr(line, "NPOIN=") != NULL) 
+        {
             sscanf(line, "NPOIN= %d", &nnode);
             break;
         }
@@ -390,43 +404,49 @@ void extract_marker(char *su2file,
 
     fclose(fp);
 
-    if (nnode <= 0) {
+    if (nnode <= 0) 
+    {
         printf("ERROR: Could not read NPOIN from SU2 file\n");
         exit(EXIT_FAILURE);
     }
 
     int *node_flag = calloc((size_t)nnode, sizeof(int));
 
-    if (node_flag == NULL) {
+    if (node_flag == NULL) 
+    {
         printf("ERROR: Memory allocation failed in extract_marker\n");
         exit(EXIT_FAILURE);
     }
 
-    /*
-       Second pass: mark nodes belonging to the requested marker.
-    */
+    /* Second pass: mark nodes belonging to the requested marker. */
 
     fp = fopen(su2file, "r");
 
-    if (fp == NULL) {
+    if (fp == NULL) 
+    {
         printf("ERROR: Cannot open SU2 file %s\n", su2file);
         free(node_flag);
         exit(EXIT_FAILURE);
     }
 
-    while (fgets(line, MAXLINE, fp)) {
-        if (strstr(line, key) != NULL) {
+    while (fgets(line, MAXLINE, fp)) 
+    {
+        if (strstr(line, key) != NULL) 
+        {
             active = 1;
             found_marker = 1;
             continue;
         }
 
-        if (active) {
-            if (strstr(line, "MARKER_TAG=") != NULL) {
+        if (active) 
+        {
+            if (strstr(line, "MARKER_TAG=") != NULL) 
+            {
                 break;
             }
 
-            if (strstr(line, "MARKER_ELEMS=") != NULL) {
+            if (strstr(line, "MARKER_ELEMS=") != NULL) 
+            {
                 continue;
             }
 
@@ -434,11 +454,8 @@ void extract_marker(char *su2file,
             int a, b, c;
 
             if (sscanf(line,
-                       "%d %d %d %d",
-                       &type,
-                       &a,
-                       &b,
-                       &c) == 4) {
+                       "%d %d %d %d",&type,&a,&b,&c) == 4) 
+            {
                 /*
                    SU2 surface triangle:
                        type a b c
@@ -463,20 +480,26 @@ void extract_marker(char *su2file,
 
     out = fopen(outfile, "w");
 
-    if (out == NULL) {
+    if (out == NULL) 
+    {
         printf("ERROR: Cannot open %s for writing\n", outfile);
         free(node_flag);
         exit(EXIT_FAILURE);
     }
 
-    if (strcmp(marker, "fixed") == 0) {
+    if (strcmp(marker, "fixed") == 0) 
+    {
         fprintf(out, "*NSET, NSET=Nfix1\n");
-    } else {
+    } 
+    else 
+    {
         fprintf(out, "*NSET, NSET=Nsurface\n");
     }
 
-    for (int i = 0; i < nnode; i++) {
-        if (node_flag[i]) {
+    for (int i = 0; i < nnode; i++) 
+    {
+        if (node_flag[i]) 
+        {
             fprintf(out, "%d\n", i + 1);
             unique_node_count++;
         }
@@ -484,11 +507,14 @@ void extract_marker(char *su2file,
 
     fclose(out);
 
-    if (!found_marker) {
+    if (!found_marker) 
+    {
         printf("WARNING: MARKER_TAG= %s not found. %s may be empty.\n",
                marker,
                outfile);
-    } else {
+    } 
+    else 
+    {
         printf("%s written using MARKER_TAG= %s, raw node entries = %d, unique nodes = %d\n",
                outfile,
                marker,
@@ -537,7 +563,6 @@ void print_su2_markers(char *su2file)
     {
         printf("No MARKER_TAG entries detected\n");
     }
-
     printf("--------------------------------\n\n");
 }
 
