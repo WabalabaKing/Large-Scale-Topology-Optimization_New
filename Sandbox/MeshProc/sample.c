@@ -262,7 +262,152 @@ void convert_volume_mesh(char *su2file)
 }
 
 
+void extract_marker(char *su2file,
+                    char *marker,
+                    char *outfile)
+{
+    FILE *fp;
+    FILE *out;
 
+    char line[MAXLINE];
+    char key[128];
+
+    int nnode = 0;
+    int active = 0;
+    int found_marker = 0;
+    int raw_node_count = 0;
+    int unique_node_count = 0;
+
+    sprintf(key, "MARKER_TAG= %s", marker);
+
+    /*
+       First pass: read NPOIN so we can allocate a node flag array.
+    */
+
+    fp = fopen(su2file, "r");
+
+    if (fp == NULL) {
+        printf("ERROR: Cannot open SU2 file %s\n", su2file);
+        exit(EXIT_FAILURE);
+    }
+
+    while (fgets(line, MAXLINE, fp)) {
+        if (strstr(line, "NPOIN=") != NULL) {
+            sscanf(line, "NPOIN= %d", &nnode);
+            break;
+        }
+    }
+
+    fclose(fp);
+
+    if (nnode <= 0) {
+        printf("ERROR: Could not read NPOIN from SU2 file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int *node_flag = calloc((size_t)nnode, sizeof(int));
+
+    if (node_flag == NULL) {
+        printf("ERROR: Memory allocation failed in extract_marker\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /*
+       Second pass: mark nodes belonging to the requested marker.
+    */
+
+    fp = fopen(su2file, "r");
+
+    if (fp == NULL) {
+        printf("ERROR: Cannot open SU2 file %s\n", su2file);
+        free(node_flag);
+        exit(EXIT_FAILURE);
+    }
+
+    while (fgets(line, MAXLINE, fp)) {
+        if (strstr(line, key) != NULL) {
+            active = 1;
+            found_marker = 1;
+            continue;
+        }
+
+        if (active) {
+            if (strstr(line, "MARKER_TAG=") != NULL) {
+                break;
+            }
+
+            if (strstr(line, "MARKER_ELEMS=") != NULL) {
+                continue;
+            }
+
+            int type;
+            int a, b, c;
+
+            if (sscanf(line,
+                       "%d %d %d %d",
+                       &type,
+                       &a,
+                       &b,
+                       &c) == 4) {
+                /*
+                   SU2 surface triangle:
+                       type a b c
+
+                   Keep SU2 nodes internally as 0-based.
+                */
+
+                if (a >= 0 && a < nnode) node_flag[a] = 1;
+                if (b >= 0 && b < nnode) node_flag[b] = 1;
+                if (c >= 0 && c < nnode) node_flag[c] = 1;
+
+                raw_node_count += 3;
+            }
+        }
+    }
+
+    fclose(fp);
+
+    /*
+       Write unique nodes as 1-based CalculiX IDs.
+    */
+
+    out = fopen(outfile, "w");
+
+    if (out == NULL) {
+        printf("ERROR: Cannot open %s for writing\n", outfile);
+        free(node_flag);
+        exit(EXIT_FAILURE);
+    }
+
+    if (strcmp(marker, "fixed") == 0) {
+        fprintf(out, "*NSET, NSET=Nfix1\n");
+    } else {
+        fprintf(out, "*NSET, NSET=Nsurface\n");
+    }
+
+    for (int i = 0; i < nnode; i++) {
+        if (node_flag[i]) {
+            fprintf(out, "%d\n", i + 1);
+            unique_node_count++;
+        }
+    }
+
+    fclose(out);
+
+    if (!found_marker) {
+        printf("WARNING: MARKER_TAG= %s not found. %s may be empty.\n",
+               marker,
+               outfile);
+    } else {
+        printf("%s written using MARKER_TAG= %s, raw node entries = %d, unique nodes = %d\n",
+               outfile,
+               marker,
+               raw_node_count,
+               unique_node_count);
+    }
+
+    free(node_flag);
+}
 
 /**********************************************************************
  *
