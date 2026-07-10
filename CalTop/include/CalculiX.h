@@ -18,6 +18,7 @@
 
 #include <pthread.h>
 #include <string.h>
+#include "preProcess/su2_preprocess.h"
 
 #define Linux 1
 #define IRIX 2

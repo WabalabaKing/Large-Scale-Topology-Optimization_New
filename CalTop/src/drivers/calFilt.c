@@ -21,6 +21,7 @@
 
 
 
+
 #ifdef CALCULIX_MPI
 ITG myid = 0, nproc = 0;
 #endif
@@ -312,11 +313,7 @@ int main(int argc,char *argv[])
   //int *passiveIDs = NULL;
   //int numPassive = 0;
   int numPassive = 0;
-  int *passiveIDs = passiveElements("skinElementList.nam", &numPassive);
-  if (numPassive > 0)
-      printf("Loaded %d passive elements from skinElementList.nam\n", numPassive);
-  else
-      printf("No passive elements found — running without skin exclusion\n");
+
   double ctrl[56]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,1.5,1.5,0.001,0.1,100.5,60.5};
 
   double fei[3];
@@ -334,6 +331,8 @@ int main(int argc,char *argv[])
   int     excludePassive = 0;   // ← ADD: default = include passive in filter
   double  volfrac=1.00; /**< volume fraction */
   double  qfilter = 3; /**< q-filter value */
+
+  char su2file[512];
 
   int eval_CG = 0;
   int eval_PNORM = 0;
@@ -454,6 +453,7 @@ int main(int argc,char *argv[])
     pstiff = pSupplied;
   }
 
+
   putenv("CCX_JOBNAME_GETJOBNAME=jobnamec");
 
     #ifdef BAM
@@ -483,6 +483,43 @@ int main(int argc,char *argv[])
 
 
 
+  /* Remove old .nam files (if any)*/
+  remove_existing_nam_files();
+
+  /* Fine su2 mesh in CWD */
+  find_su2_file(su2file);
+
+  printf("Found SU2 mesh:\n");
+  printf("%s\n\n", su2file);
+
+  /* Show all availbale markers  in the .su2 file */
+  print_su2_markers(su2file);
+
+  /* get mesh.nam */
+  convert_volume_mesh(su2file);
+
+  /* Extract .nam for fixed nodes*/
+  extract_marker(su2file,"fixed","Nfix1.nam");
+    
+  /* Extract .nam for traction nodes */
+  extract_marker(su2file,"surface","NSurface.nam");
+
+  /* Extract skin elements */
+  extract_skin_elements(su2file, "surface", "skinElementList.nam");
+
+  //  extract_skin_elements(su2file, "tank", "tankElementList.nam");
+
+  printf("\nSU2 preprocessing complete.\n\n");
+
+
+
+  /* Check for skinElementList.nam */
+  int *passiveIDs = passiveElements("skinElementList.nam", &numPassive);
+
+  if (numPassive > 0)
+      printf("Loaded %d passive elements from skinElementList.nam\n", numPassive);
+  else
+      printf("No passive elements found — running without skin exclusion\n");
     
     istep=0;
     istat=0;
