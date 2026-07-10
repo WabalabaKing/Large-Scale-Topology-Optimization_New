@@ -589,15 +589,6 @@ int main(int argc,char *argv[])
     /* get mesh.nam */
     convert_volume_mesh(su2file);
 
-    /* Extract .nam for fixed nodes*/
-    //extract_marker(su2file,"fixed","Nfix1.nam");
-    
-
-
-    /* Extract skin elements */
-    //extract_skin_elements(su2file, "surface", "skinElementList.nam");
-
-    //  extract_skin_elements(su2file, "tank", "tankElementList.nam");
 
     printf("\nExtracted CalTop/CalculiX mesh from SU2 mesh file\n\n");
   }
