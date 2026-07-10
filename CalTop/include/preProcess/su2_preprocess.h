@@ -50,6 +50,16 @@ void remove_existing_nam_files(void);
 void print_su2_markers(char *su2file);
 
 /**
+ * @brief Prints all boundary markers present in an SU2 mesh and returns a list of markers.
+ *
+ * Searches for all MARKER_TAG entries in the SU2 file, prints
+ * and returns the marker names.
+ *
+ * @param su2file Input SU2 mesh filename.
+ */
+char **get_su2_markers(char *su2file, int *marker_count);
+
+/**
  * @brief Computes signed tetrahedral volume.
  *
  * Computes the determinant-based volume of a tetrahedral element.

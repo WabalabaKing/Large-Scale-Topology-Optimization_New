@@ -566,6 +566,113 @@ void print_su2_markers(char *su2file)
     printf("--------------------------------\n\n");
 }
 
+char **get_su2_markers(char *su2file, int *marker_count)
+{
+    FILE *fp;
+    char line[MAXLINE];
+
+    char **markers = NULL;
+    int count = 0;
+
+    fp = fopen(su2file, "r");
+
+    if (fp == NULL)
+    {
+        fprintf(stderr,
+                "ERROR: Cannot open %s\n",
+                su2file);
+
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Detected SU2 boundary markers:\n");
+    printf("--------------------------------\n");
+
+    while (fgets(line, MAXLINE, fp))
+    {
+        if (strstr(line, "MARKER_TAG=") != NULL)
+        {
+            char tag[256];
+
+            if (sscanf(line, "MARKER_TAG= %255s", tag) == 1)
+            {
+                /*
+                 * Increase the marker pointer array by one entry.
+                 */
+                char **temporary = realloc(
+                    markers,
+                    (size_t)(count + 1) * sizeof(char *)
+                );
+
+                if (temporary == NULL)
+                {
+                    fprintf(stderr,
+                            "ERROR: Memory allocation failed while reading markers\n");
+
+                    fclose(fp);
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        free(markers[i]);
+                    }
+
+                    free(markers);
+
+                    exit(EXIT_FAILURE);
+                }
+
+                markers = temporary;
+
+                /*
+                 * Allocate memory for the marker name.
+                 */
+                markers[count] = malloc(strlen(tag) + 1);
+
+                if (markers[count] == NULL)
+                {
+                    fprintf(stderr,
+                            "ERROR: Memory allocation failed for marker name\n");
+
+                    fclose(fp);
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        free(markers[i]);
+                    }
+
+                    free(markers);
+
+                    exit(EXIT_FAILURE);
+                }
+
+                strcpy(markers[count], tag);
+
+                printf("  %d) %s\n",
+                       count + 1,
+                       markers[count]);
+
+                count++;
+            }
+        }
+    }
+
+    fclose(fp);
+
+    if (count == 0)
+    {
+        printf("No MARKER_TAG entries detected\n");
+    }
+
+    printf("--------------------------------\n\n");
+
+    /*
+     * Return the number of markers through marker_count.
+     */
+    *marker_count = count;
+
+    return markers;
+}
+
 void remove_existing_nam_files(void)
 {
     DIR *dir;

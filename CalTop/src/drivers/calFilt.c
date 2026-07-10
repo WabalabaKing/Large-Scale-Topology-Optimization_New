@@ -334,6 +334,8 @@ int main(int argc,char *argv[])
 
   char su2file[512];
 
+  int SU2_MESH =0; /* Default: do not use SU2 mesh */
+
   int eval_CG = 0;
   int eval_PNORM = 0;
 
@@ -360,7 +362,7 @@ int main(int argc,char *argv[])
   {
     /* Inadequate input arguments */
 
-    printf("Usage: Flags: -i jobname -r FILTER RADIUS -f FILTERNNZ -Passive 0/1 \n");
+    printf("Usage: Flags: -i jobname -r FILTER RADIUS -f FILTERNNZ -Passive 0/1 SU2_MESH True/False \n");
     FORTRAN(stop,());
   }
 
@@ -441,6 +443,17 @@ int main(int argc,char *argv[])
             break;
         }
     }
+
+    /* Read SU2 mesh flag */
+    for(i=1; i<argc; i++)
+    {
+      if(strcmp1(argv[i],"SU2_MESH")==0)
+      {
+        /* Set SU2_MESH =1 is True is passed */
+        SU2_MESH = (strcmp1(argv[i+1],"True")==0);
+        break;
+      }
+    }
   } // Done reading all input flags
 
   /* Assign a default value for penalty parameter */
@@ -482,37 +495,114 @@ int main(int argc,char *argv[])
     printf("* Georgia Institute of Technology\n");
 
 
+  
+  if (SU2_MESH)
+  {
 
-  /* Remove old .nam files (if any)*/
-  remove_existing_nam_files();
+    char ** marker_list;
+    int marker_count = 0;
+    int found_surface = 0;
+    int found_fixed = 0;
 
-  /* Fine su2 mesh in CWD */
-  find_su2_file(su2file);
+    printf("\n");
+    /* Remove old .nam files (if any)*/
+    remove_existing_nam_files();
 
-  printf("Found SU2 mesh:\n");
-  printf("%s\n\n", su2file);
+    /* Fine su2 mesh in CWD */
+    find_su2_file(su2file);
 
-  /* Show all availbale markers  in the .su2 file */
-  print_su2_markers(su2file);
+    printf("Found SU2 mesh:\n");
+    printf("%s\n\n", su2file);
 
-  /* get mesh.nam */
-  convert_volume_mesh(su2file);
+    /* get all availbale markers  in the .su2 file */
+    marker_list = get_su2_markers(su2file, &marker_count);
 
-  /* Extract .nam for fixed nodes*/
-  extract_marker(su2file,"fixed","Nfix1.nam");
+    /* loop over all markers and call specific nam file generators */
+    for (int i = 0; i < marker_count; i++)
+    {
+      if (strcmp(marker_list[i], "surface") == 0)
+      {
+        found_surface = 1;
+        /* Extract .nam for traction nodes */
+        extract_marker(su2file,"surface","NSurface.nam");
+
+        /* Write skin element list for surface elements */
+        extract_skin_elements(su2file, "surface", "skinElementList.nam");
+      }
+
+
+      else if (strcmp(marker_list[i], "fixed") == 0)
+      {
+        found_fixed = 1;
+        extract_marker(su2file,"fixed","Nfix1.nam");
+      }
+
+      else if (strcmp(marker_list[i], "tank") == 0)
+      {
+        /* Write skin element list for tank elements */
+        extract_skin_elements(su2file, "tank", "tankElementList.nam");
+      }
+    }
+
+    /* if marker surface is not found, exit */
+    if (!found_surface)
+    {
+      fprintf(stderr,
+            "\nERROR: Required SU2 marker 'surface' was not found.\n"
+            "       A marker named 'surface' is required to define\n"
+            "       the traction boundary.\n\n");
+
+      for (int i = 0; i < marker_count; i++)
+      {
+        free(marker_list[i]);
+      }
+
+      free(marker_list);
+      FORTRAN(stop,());
+    }
+
+    /* if marker fixed is not found, exit */
+    if (!found_fixed)
+    {
+      fprintf(stderr,
+            "\nERROR: Required SU2 marker 'fixed' was not found.\n"
+            "       A marker named 'fixed' is required to define\n"
+            "       the constrained boundary.\n\n");
+
+      for (int i = 0; i < marker_count; i++)
+      {
+        free(marker_list[i]);
+      }
+
+      free(marker_list);
+      FORTRAN(stop,());
+    }
+
+    /* Free marker list */
+    for (int i = 0; i < marker_count; i++)
+    {
+      free(marker_list[i]);
+    }
+    free(marker_list);
+
+
+    /* get mesh.nam */
+    convert_volume_mesh(su2file);
+
+    /* Extract .nam for fixed nodes*/
+    //extract_marker(su2file,"fixed","Nfix1.nam");
     
-  /* Extract .nam for traction nodes */
-  extract_marker(su2file,"surface","NSurface.nam");
-
-  /* Extract skin elements */
-  extract_skin_elements(su2file, "surface", "skinElementList.nam");
-
-  //  extract_skin_elements(su2file, "tank", "tankElementList.nam");
-
-  printf("\nSU2 preprocessing complete.\n\n");
 
 
+    /* Extract skin elements */
+    //extract_skin_elements(su2file, "surface", "skinElementList.nam");
 
+    //  extract_skin_elements(su2file, "tank", "tankElementList.nam");
+
+    printf("\nExtracted CalTop/CalculiX mesh from SU2 mesh file\n\n");
+  }
+
+  printf("\n");
   /* Check for skinElementList.nam */
   int *passiveIDs = passiveElements("skinElementList.nam", &numPassive);
 
