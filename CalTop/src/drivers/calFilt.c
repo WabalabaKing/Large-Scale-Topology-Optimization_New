@@ -362,7 +362,7 @@ int main(int argc,char *argv[])
   {
     /* Inadequate input arguments */
 
-    printf("Usage: Flags: -i jobname -r FILTER RADIUS -f FILTERNNZ -Passive 0/1 SU2_MESH True/False \n");
+    printf("Usage: Flags: -i jobname -r FILTER RADIUS -f FILTERNNZ -Passive 0/1 -SU2_MESH True/False \n");
     FORTRAN(stop,());
   }
 
@@ -447,7 +447,7 @@ int main(int argc,char *argv[])
     /* Read SU2 mesh flag */
     for(i=1; i<argc; i++)
     {
-      if(strcmp1(argv[i],"SU2_MESH")==0)
+      if(strcmp1(argv[i],"-SU2_MESH")==0)
       {
         /* Set SU2_MESH =1 is True is passed */
         SU2_MESH = (strcmp1(argv[i+1],"True")==0);

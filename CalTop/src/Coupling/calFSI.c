@@ -43,67 +43,67 @@ int main(int argc,char *argv[])
 
   FILE *f1;
 
-  char *sideload=NULL;    /**< load label for distributed loads. */
-  char *set=NULL;         /**< node set or element set */
-  char *matname=NULL;     /**< material name */
-  char *orname=NULL;      /**< name of orientation of element */
-  char *amname=NULL;      /**< amplitude name. */
-  char *filab=NULL;       /**< field label (U, S,..) */
-  char *lakon=NULL;       /**< element type string */
-  char *labmpc=NULL;      /**< MPC label. */
-  char *prlab=NULL;       /**< output request */
-  char *prset=NULL;       /**< node or element set assiciated with output request.*/
-  char  jobnamec[660]=""; /**< jobname */
-  char  jobnamef[132]=""; /**< jobname for fluid analysis. */
-  char  output[4]="asc";  /**< output type */
-  char  *typeboun=NULL;   /**< boundary condition type */
-  char  *inpc=NULL;       /**< processed inp file content */
-  char  *tieset=NULL;     /**< tie constraints */
-  char  *cbody=NULL;      /**< element set to which body load applies */
-  char  fneig[132]="";    /**< file name for eigenvalue calculations */
-  char  *sideloadtemp=NULL; /**< temperature value associated with a sideload. */
-  char  kind1[2]="T";     /**< decription. */
-  char  kind2[2]="T";     /**< decription. */
-  char  *heading=NULL;    /**< decription. */
-  char  *objectset=NULL;  /**< decription. */
+  char *sideload=         NULL;    /**< load label for distributed loads. */
+  char *set=              NULL;         /**< node set or element set */
+  char *matname=          NULL;     /**< material name */
+  char *orname=           NULL;      /**< name of orientation of element */
+  char *amname=           NULL;      /**< amplitude name. */
+  char *filab=            NULL;       /**< field label (U, S,..) */
+  char *lakon=            NULL;       /**< element type string */
+  char *labmpc=           NULL;      /**< MPC label. */
+  char *prlab=            NULL;       /**< output request */
+  char *prset=            NULL;       /**< node or element set assiciated with output request.*/
+  char  jobnamec[660]=    ""; /**< jobname */
+  char  jobnamef[132]=    ""; /**< jobname for fluid analysis. */
+  char  output[4]=        "asc";  /**< output type */
+  char  *typeboun=        NULL;   /**< boundary condition type */
+  char  *inpc=            NULL;       /**< processed inp file content */
+  char  *tieset=          NULL;     /**< tie constraints */
+  char  *cbody=           NULL;      /**< element set to which body load applies */
+  char  fneig[132]=       "";    /**< file name for eigenvalue calculations */
+  char  *sideloadtemp=    NULL; /**< temperature value associated with a sideload. */
+  char  kind1[2]=         "T";     /**< decription. */
+  char  kind2[2]=         "T";     /**< decription. */
+  char  *heading=         NULL;    /**< decription. */
+  char  *objectset=       NULL;  /**< decription. */
 
-  ITG *kon=NULL;          /**< element connectivity */
-  ITG *nodeboun=NULL;     /**< boundary nodes (SPC) */
-  ITG *ndirboun=NULL;     /**< directions of SPC at nodeboun */
-  ITG *ipompc=NULL;       /**< index of node with MPCs */ 
-  ITG *nodempc=NULL;      /**< node numbers with MPCs and DOFs */
-  ITG *nodeforc=NULL;     /**< node numbers where forces are applied */
-  ITG *ndirforc=NULL;     /**< direction of applied forces */
-  ITG  *nelemload=NULL;   /**< elements associated with facial distributed loads */
-  ITG im;                 /**< general purpose loop variable */
-  ITG *inodesd=NULL;      /**< node numbers associated with active D.O.Fs */
+  ITG *kon=               NULL;          /**< element connectivity */
+  ITG *nodeboun=          NULL;     /**< boundary nodes (SPC) */
+  ITG *ndirboun=          NULL;     /**< directions of SPC at nodeboun */
+  ITG *ipompc=            NULL;       /**< index of node with MPCs */ 
+  ITG *nodempc=           NULL;      /**< node numbers with MPCs and DOFs */
+  ITG *nodeforc=          NULL;     /**< node numbers where forces are applied */
+  ITG *ndirforc=          NULL;     /**< direction of applied forces */
+  ITG  *nelemload=        NULL;   /**< elements associated with facial distributed loads */
+  ITG im;                         /**< general purpose loop variable */
+  ITG *inodesd=           NULL;      /**< node numbers associated with active D.O.Fs */
   ITG nload1;             /**< number of facial distributed loads applied to elements */
-  ITG *idefforc=NULL;     /**< indicates whether a load is effectively applied to  specific node and direction */
-  ITG  *nactdof=NULL;     /**< active D.O.Fs for nodes in system */
-  ITG *icol=NULL;         /**<stores the column numbers for the sparse matrix storage of D.O.Fs */
-  ITG *ics=NULL;          /**< array for identifying whether a certain node belongs to a constraint set */
-  ITG  *jq=NULL;          /**< stores the row numbers for the spatse matrix structure of global stiffness matrix */
-  ITG *mast1=NULL;        /**< master D.O.Fs for the MPC system */
-  ITG *irow=NULL;         /**< row indices of non-zero entries in a sparse matrix represenation */
-  ITG *rig=NULL;          /**< rigid body modes */
-  ITG *idefbody=NULL;     /**< body force definition */
-  ITG  *ikmpc=NULL;       /**< global D.O.Fs of the dependent terms in MPCs */
-  ITG *ilmpc=NULL;        /**< MPICs indices in relation to their dependent terms */
-  ITG *ikboun=NULL;       /**< sorted D.O.Fs for SPCs */
-  ITG *ilboun=NULL;       /**< B.C node indices for SPCs */
-  ITG  *nreorder=NULL;    /**< Re-order node/element array for refinement */
-  ITG *ipointer=NULL;     /**< pointer for sparse matrix storage */
-  ITG *idefload=NULL;     /**< Load defined on same element/load label previously during analysis */
-  ITG  *istartset=NULL;   /**< stores starting position of element or node sets in certain operations */
-  ITG *iendset=NULL;      /**< stores starting position of element or node sets in certain operations */
-  ITG *ialset=NULL;       /**< information about the lements or nodes that belong to a set */
-  ITG *ielmat=NULL;       /**< material properties associated with each element */
-  ITG *ielorien=NULL;     /**< oreientation data for each element */
-  ITG *nrhcon=NULL;       /**< element heat conductivity values */
-  ITG *nodebounold=NULL;  /**< node numbers of SPCs from previous step/increment */
-  ITG *ndirbounold=NULL;  /**< node direction of SPCs from previous step/increment */
-  ITG *nelcon=NULL;        /**< elasticity constants for each element */
-  ITG *nalcon=NULL;       /**< load and boundary condition amplitude definition */
+  ITG *idefforc=          NULL;     /**< indicates whether a load is effectively applied to  specific node and direction */
+  ITG  *nactdof=          NULL;     /**< active D.O.Fs for nodes in system */
+  ITG *icol=              NULL;         /**<stores the column numbers for the sparse matrix storage of D.O.Fs */
+  ITG *ics=               NULL;          /**< array for identifying whether a certain node belongs to a constraint set */
+  ITG  *jq=               NULL;          /**< stores the row numbers for the spatse matrix structure of global stiffness matrix */
+  ITG *mast1=             NULL;        /**< master D.O.Fs for the MPC system */
+  ITG *irow=              NULL;         /**< row indices of non-zero entries in a sparse matrix represenation */
+  ITG *rig=               NULL;          /**< rigid body modes */
+  ITG *idefbody=          NULL;     /**< body force definition */
+  ITG  *ikmpc=            NULL;       /**< global D.O.Fs of the dependent terms in MPCs */
+  ITG *ilmpc=             NULL;        /**< MPICs indices in relation to their dependent terms */
+  ITG *ikboun=            NULL;       /**< sorted D.O.Fs for SPCs */
+  ITG *ilboun=            NULL;       /**< B.C node indices for SPCs */
+  ITG  *nreorder=         NULL;    /**< Re-order node/element array for refinement */
+  ITG *ipointer=          NULL;     /**< pointer for sparse matrix storage */
+  ITG *idefload=          NULL;     /**< Load defined on same element/load label previously during analysis */
+  ITG  *istartset=        NULL;   /**< stores starting position of element or node sets in certain operations */
+  ITG *iendset=           NULL;      /**< stores starting position of element or node sets in certain operations */
+  ITG *ialset=            NULL;       /**< information about the lements or nodes that belong to a set */
+  ITG *ielmat=            NULL;       /**< material properties associated with each element */
+  ITG *ielorien=          NULL;     /**< oreientation data for each element */
+  ITG *nrhcon=            NULL;       /**< element heat conductivity values */
+  ITG *nodebounold=       NULL;  /**< node numbers of SPCs from previous step/increment */
+  ITG *ndirbounold=       NULL;  /**< node direction of SPCs from previous step/increment */
+  ITG *nelcon=            NULL;        /**< elasticity constants for each element */
+  ITG *nalcon =           NULL;       /**< load and boundary condition amplitude definition */
   ITG *iamforc=NULL;      /**< concentrated force definition */
   ITG *iamload=NULL;     /**< amplitude definition for distributed loads */
   ITG *iamt1=NULL;      /**< amplitude definition for temperature loads */
@@ -384,6 +384,10 @@ int main(int argc,char *argv[])
   char configFilename[256] = "config.yml";
   int preciceUsed = 0;
 
+  char su2file[512];
+
+  int SU2_MESH=0;
+
 
 
 
@@ -396,7 +400,7 @@ int main(int argc,char *argv[])
   if(argc==1)
   { 
     /* Inadequate input arguments */
-    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION -precice-particiapant PARTICIPANT NAME  \n");
+    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION -precice-particiapant PARTICIPANT NAME -SU2_MESH True/False \n");
     FORTRAN(stop,());
   }
 
@@ -518,7 +522,20 @@ else
       }
     }
   }
+
+  /* Read SU2 mesh flag */
+  for(i=1; i<argc; i++)
+  {
+    if(strcmp1(argv[i],"-SU2_MESH")==0)
+    {
+      /* Set SU2_MESH =1 is True is passed */
+      SU2_MESH = (strcmp1(argv[i+1],"True")==0);
+      break;
+    }
+  }
 }
+
+
 
 /* precice-participant name must be passed */
 if (!preciceUsed) {
@@ -571,7 +588,115 @@ printf("************************************************************\n\n");
 printf("Original FEA source code: CalculiX by Guido Dhondt\n");
 printf("************************************************************\n\n");
 
+if (SU2_MESH)
+{
+  char ** marker_list;
+  int marker_count = 0;
+  int found_surface = 0;
+  int found_fixed = 0;
 
+  printf("\n");
+
+  /* Fine su2 mesh in CWD */
+  find_su2_file(su2file);
+
+  printf("Found SU2 mesh:\n");
+  printf("%s\n\n", su2file);
+
+  /* get all availbale markers  in the .su2 file */
+  marker_list = get_su2_markers(su2file, &marker_count);
+
+  /* loop over all markers and call specific nam file generators */
+  for (int i = 0; i < marker_count; i++)
+  {
+    if (strcmp(marker_list[i], "surface") == 0)
+    {
+      found_surface = 1;
+      /* Extract .nam for traction nodes */
+      extract_marker(su2file,"surface","NSurface.nam");
+
+      /* Write skin element list for surface elements */
+      extract_skin_elements(su2file, "surface", "skinElementList.nam");
+    }
+
+    else if (strcmp(marker_list[i], "fixed") == 0)
+    {
+      found_fixed = 1;
+      extract_marker(su2file,"fixed","Nfix1.nam");
+    }
+
+    else if (strcmp(marker_list[i], "tank") == 0)
+    {
+      /* Write skin element list for tank elements */
+      extract_skin_elements(su2file, "tank", "tankElementList.nam");
+    }
+  }
+
+  /* if marker surface is not found, exit */
+  if (!found_surface)
+  {
+    fprintf(stderr, "\nERROR: Required SU2 marker 'surface' was not found.\n"
+            "       A marker named 'surface' is required to define\n"
+            "       the traction boundary.\n\n"
+          );
+
+    for (int i = 0; i < marker_count; i++)
+    {
+      free(marker_list[i]);
+    }
+
+    free(marker_list);
+    FORTRAN(stop,());
+  }
+
+  /* if marker fixed is not found, exit */
+  if (!found_fixed)
+  {
+    fprintf(stderr,
+          "\nERROR: Required SU2 marker 'fixed' was not found.\n"
+          "       A marker named 'fixed' is required to define\n"
+          "       the constrained boundary.\n\n"
+        );
+
+    for (int i = 0; i < marker_count; i++)
+    {
+      free(marker_list[i]);
+    }
+    free(marker_list);
+    FORTRAN(stop,());
+  }
+
+  /* Free marker list */
+  for (int i = 0; i < marker_count; i++)
+  {
+    free(marker_list[i]);
+  }
+  free(marker_list);
+
+  /* get mesh.nam */
+  convert_volume_mesh(su2file);
+  printf("\nExtracted CalTop/CalculiX mesh from SU2 mesh file\n\n");
+
+
+  /* Move all mesh files to Solid*/
+  if (rename("mesh.nam", "Solid/mesh.nam") != 0)
+  {
+    perror("ERROR: Could not move mesh.nam to Solid/");
+    FORTRAN(stop,());
+  }
+
+  if (rename("Nfix1.nam", "Solid/Nfix1.nam") != 0)
+  {
+    perror("ERROR: Could not move Nfix1.nam to Solid/");
+    FORTRAN(stop,());
+  }
+
+  if (rename("NSurface.nam", "Solid/NSurface.nam") != 0)
+  {
+    perror("ERROR: Could not move Nfix1.nam to Solid/");
+    FORTRAN(stop,());
+  }
+}
 
 istep=0;
 istat=0;
