@@ -235,8 +235,8 @@ void mafillsmmain(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 
     /* calculating the stiffness/mass */
 
-    printf(" Using up to %" ITGFORMAT " cpu(s) for the symmetric stiffness/mass contributions.\n\n", num_cpus);
-
+    printf("Using up to %" ITGFORMAT " cpu(s) for the symmetric stiffness/mass contributions.\n", num_cpus);
+    fflush(stdout);
     /* create threads and wait */
 
     NNEW(ithread,ITG,num_cpus);

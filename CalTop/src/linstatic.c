@@ -314,7 +314,6 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		
   		if(*nmethod==11)
 		{
-
     		/* determining the nodes and the degrees of freedom in those nodes
        		belonging to the substructure */
 
@@ -371,11 +370,15 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 			/*############################################################################################*/
 			/* linear static calculation */
 
-			printf(" Starting linstatic calculation...\n");
+			printf("Starting linstatic calculation...\n");
 			fflush(stdout);
 
 			// Off-diagonal entries of stiffness matrix K
+			printf("Allocating memory for stiffness matrix diagonal terms...");
+			fflush(stdout);
       		NNEW(au,double,*nzs);
+			printf("done\n");
+			fflush(stdout);
       		nmethodl=*nmethod;
 
       		/* if submodel calculation with a global model obtained by
@@ -391,6 +394,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   		}
 
+		printf("Assembling stiffness matrix...\n");
+		fflush(stdout);
   		mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xbounact,nboun,
 	    ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
 	    nforc,nelemload,sideload,xloadact,nload,xbodyact,ipobody,
@@ -408,6 +413,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	    tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 	    pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
 	    iponoel,inoel,&network,ntrans,inotr,trab,design,penal, mat_dens);
+		printf("Stiffness matrix assembly complete.\n");
+		fflush(stdout);
 
   		/* check for negative Jacobians */
   		if(nmethodl==0) *nmethod=0;
@@ -441,7 +448,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   		/* determining the right hand side */
 
-		//printf(" Computing the Right Hand Side after mafillsmas...");
+		printf("Computing the Right Hand Side...");
+		fflush(stdout);
   		NNEW(b,double,*neq);
 		
 		double res_l2 = 0.0;   // ||b||_2
@@ -475,6 +483,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   		SFREE(fext);
   		SFREE(f);
+		printf("done\n");
+		fflush(stdout);
 
 		if(*nmethod!=0)
 		{
