@@ -114,36 +114,6 @@ void write_deformed_su2(int nk, double *v)
     printf("Updated SU2 mesh written: %s\n", outfile);
 }
 
-void find_su2_file(char *filename)
-{
-    DIR *dir;
-    struct dirent *entry;
-
-    dir = opendir(".");
-
-    if (dir == NULL) 
-    {
-        printf("ERROR: Cannot open current directory\n");
-        exit(EXIT_FAILURE);
-    }
-
-    while ((entry = readdir(dir)) != NULL) 
-    {
-        if (strstr(entry->d_name, ".su2") != NULL) 
-        {
-            strcpy(filename, entry->d_name);
-            closedir(dir);
-            return;
-        }
-    }
-
-    closedir(dir);
-
-    printf("ERROR: No .su2 mesh file found in current directory\n");
-    exit(EXIT_FAILURE);
-}
-
-
 double tet_volume(double a[3],
                   double b[3],
                   double c[3],
@@ -907,3 +877,43 @@ void extract_skin_elements(char *su2file,char *markername,char *outfile)
 
 
 
+void find_su2_file(char *filename)
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    const char *suffix = "Solid.su2";
+    size_t suffix_len = strlen(suffix);
+
+    dir = opendir(".");
+
+    if (dir == NULL)
+    {
+        printf("ERROR: Cannot open current directory\n");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        size_t len = strlen(entry->d_name);
+
+        /* Check whether the filename ends with "Solid.su2" */
+        if (len >= suffix_len &&
+            strcmp(entry->d_name + len - suffix_len, suffix) == 0)
+        {
+
+            printf("Detected SU2 mesh file: %s\n",filename);
+            fflush(stdout);
+            strcpy(filename, entry->d_name);
+
+            closedir(dir);
+            return;
+        }
+    }
+
+    closedir(dir);
+
+    printf("ERROR: No file ending with \"%s\" found in current directory\n",
+           suffix);
+    exit(EXIT_FAILURE);
+}
