@@ -299,9 +299,19 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   		/* determining the system matrix and the external forces */
 
 		// Diagonal entries of stiffness matrix K
+		printf("Allocating memory for stiffness matrix diagonal terms...");
+		fflush(stdout);
   		NNEW(ad,double,*neq);
-  		NNEW(fext,double,*neq);
+		printf("done\n");
 
+		printf("Allocating memeory for exteranl force vector...");
+		fflush(stdout);
+  
+		NNEW(fext, double, *neq);
+
+		printf("done\n");
+		fflush(stdout);
+		
   		if(*nmethod==11)
 		{
 
@@ -362,6 +372,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 			/* linear static calculation */
 
 			printf(" Starting linstatic calculation...\n");
+			fflush(stdout);
 
 			// Off-diagonal entries of stiffness matrix K
       		NNEW(au,double,*nzs);

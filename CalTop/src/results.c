@@ -364,7 +364,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     */
 
 
-    fflush(stdout);
+    //fflush(stdout);
 
     //printf("Current exponent in results(): %f", *pexp1);
 
@@ -382,6 +382,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     {
         // NOTE: No penalization of xstiff here
         printf(" Initializing fields...");
+        fflush(stdout);
         for(i=0; i<num_cpus; i++)  
         {
 	        ithread[i]=i;
@@ -393,7 +394,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
         SFREE(neapar);
         SFREE(nebpar);
         printf("done!\n");
-
+        fflush(stdout);
     }
 
     if (get_adjoint == 1)
@@ -774,9 +775,14 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     }
 
     /* calculating the matrix system internal force vector */
+    printf("Setting up internal force vector...");
+    fflush(stdout);
 
     FORTRAN(resultsforc,(nk,f,fn,nactdof,ipompc,nodempc,
 	    coefmpc,labmpc,nmpc,mi,fmpc,&calcul_fn,&calcul_f));
+
+    printf("done\n");
+    fflush(stdout);
 
     /* storing results in the .dat file
        extrapolation of integration point values to the nodes

@@ -153,8 +153,7 @@ void extract_skin_elements(char *su2file,
  * @param nk Number of nodes.
  * @param v CalculiX displacement vector.
  */
-void write_deformed_su2(int nk,
-                               double *v);
+void write_deformed_su2(int nk, double *v);
 
 
 #endif

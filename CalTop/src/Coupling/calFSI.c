@@ -2279,6 +2279,12 @@ while(istat>=0)
       SFREE(gradCompl);
     }
 
+    printf("Updaing solud .su2 file with aeroelastic nodal coordinates...");
+    fflush(stdout);
+    write_deformed_su2(nk, vold);
+    printf("done\n");
+    fflush(stdout);
+
   
     /* adjoint sensitivity calculation */
     if(pSupplied!=0)
