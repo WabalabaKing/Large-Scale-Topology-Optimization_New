@@ -315,7 +315,7 @@ $(SRC_DIR)/e_c3d_cs_se.f \
 $(SRC_DIR)/e_c3d_em.f \
 $(SRC_DIR)/e_c3d_rhs.f \
 $(SRC_DIR)/e_c3d_rhs_th.f \
-$(SRC_DIR)/e_c3d_se.f \
+$(SRC_DIR)/sensitivity/singleDiscipline/compliance/e_c3d_se.f \
 $(SRC_DIR)/e_c3d_se2.f \
 $(SRC_DIR)/e_c3d_th.f \
 $(SRC_DIR)/e_c3d_u.f \
@@ -979,7 +979,7 @@ $(SRC_DIR)/mafillsmmain.c \
 $(SRC_DIR)/mafillsmmain_filter.c\
 $(SRC_DIR)/mafillsmmain_filter2.c\
 $(SRC_DIR)/mafillsmmain_Vectorfilter.c\
-$(SRC_DIR)/mafillsmmain_se.c \
+$(SRC_DIR)/sensitivity/singleDiscipline/compliance/mafillsmmain_se.c \
 $(SRC_DIR)/mafillsmmain_se2.c \
 $(SRC_DIR)/mafilltcompmain.c \
 $(SRC_DIR)/mafilltmain.c \
@@ -1021,10 +1021,10 @@ $(SRC_DIR)/reorderlhsmain.c \
 $(SRC_DIR)/results.c \
 $(SRC_DIR)/resultsinduction.c \
 $(SRC_DIR)/resultsstr.c \
-$(SRC_DIR)/results_se.c \
+$(SRC_DIR)/sensitivity/singleDiscipline/driver/results_se.c \
 $(SRC_DIR)/rhspmain.c \
 $(SRC_DIR)/rhspcompmain.c \
-$(SRC_DIR)/sensitivity.c \
+$(SRC_DIR)/sensitivity/singleDiscipline/driver/sensitivity.c \
 $(SRC_DIR)/sensitivity_out.c \
 $(SRC_DIR)/sgi.c \
 $(SRC_DIR)/spooles.c \
