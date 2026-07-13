@@ -229,12 +229,18 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
               shcon,nshcon,rhcon,nrhcon,cocon,ncocon,ntmat_,lakon));
 
   		/* determining the internal forces and the stiffness coefficients */
-
+		printf("Allocating memory for force vector...");
+		fflush(stdout);
   		NNEW(f,double,*neq);
+		printf("done\n");
+		fflush(stdout);
 
-  		/* allocating a field for the stiffness matrix */
-
+  		/* allocating a field for the constitutive matrix */
+		printf("Allocating memory for constitutive matrix...");
+		fflush(stdout);
   		NNEW(xstiff,double,(long long)27*mi[0]**ne);
+		printf("done\n");
+		fflush(stdout);
 
   		/* for a *STATIC,PERTURBATION analysis with submodel boundary
      	conditions from a *FREQUENCY analysis iperturb[0]=1 has to be
@@ -256,6 +262,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   		NNEW(inum,ITG,*nk);
 
 	
+	
   		results(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
 	  	elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
 	  	ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
@@ -275,14 +282,9 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  	islavsurf,ielprop,prop,energyini,energy,&kscale,iponoel,
     	inoel,nener,orname,&network,ipobody,xbodyact,ibody,typeboun, design, penal, sigma0, eps, rhomin, pexp, brhs, djdrho_expl, Pnorm, 0);
 
+
 		// NOTE: At this point xstiff is not penalized
-		
-
-
-
 	
-
-
   		SFREE(v);
 		SFREE(fn);
 		SFREE(brhs);
@@ -304,11 +306,9 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   		NNEW(ad,double,*neq);
 		printf("done\n");
 
-		printf("Allocating memeory for exteranl force vector...");
+		printf("Allocating memory for external force vector...");
 		fflush(stdout);
-  
 		NNEW(fext, double, *neq);
-
 		printf("done\n");
 		fflush(stdout);
 		
@@ -374,7 +374,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 			fflush(stdout);
 
 			// Off-diagonal entries of stiffness matrix K
-			printf("Allocating memory for stiffness matrix diagonal terms...");
+			printf("Allocating memory for stiffness matrix (upper) off-diagonal terms...");
 			fflush(stdout);
       		NNEW(au,double,*nzs);
 			printf("done\n");
@@ -394,7 +394,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   		}
 
-		printf("Assembling stiffness matrix...\n");
+		printf("Assembling stiffness matrix entries...\n");
 		fflush(stdout);
   		mafillsmmain(co,nk,kon,ipkon,lakon,ne,nodeboun,ndirboun,xbounact,nboun,
 	    ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
@@ -413,7 +413,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	    tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
 	    pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,&kscale,
 	    iponoel,inoel,&network,ntrans,inotr,trab,design,penal, mat_dens);
-		printf("Stiffness matrix assembly complete.\n");
+		printf("Stiffness matrix term assembly complete.\n");
 		fflush(stdout);
 
   		/* check for negative Jacobians */
@@ -561,9 +561,12 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		   		//&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 				
 
-				printf("Caling PARDISO @ second pass..\n");
+				printf("Caling PARDISO...\n");
+				fflush(stdout);
 				pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,neq,nzs,
 		   		&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+				printf("Linear solution complete.\n");
+				fflush(stdout);
 
 				//printf(" PARDISO: factorizing K...\n");
 				//pardiso_factor(ad,au,adb,aub,&sigma,  /* adb/aub may be NULL if unused */
