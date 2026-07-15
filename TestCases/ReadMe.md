@@ -45,7 +45,8 @@ The first step is to construct the filtering matrix for the topology optimizatio
 ### RunOptim.py
 1. Before running the problem configure `RunOptim.py`. The input section is between the `Line22-Line41`. A few things to note is MeshDir should be the ABSOLUTE directory pointing to the Mesh directory that we are working with in the previous section.
 2. Depending on the problem we are running, the objective function and constraints are formatted as `Functions`. For instance for the volume fraction minimization problem:
-```   fun1 = Function("Topop","Direct/objectives.csv",TableReader(0,3,(1,0),(None,None),","))
+```
+   fun1 = Function("Topop","Direct/objectives.csv",TableReader(0,3,(1,0),(None,None),","))
    fun1.addInputVariable(var,"Direct/volume_sens.csv",TableReader(None,2,(1,0),(None,None),","))
    fun1.addValueEvalStep(evalFun1)
 
