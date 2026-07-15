@@ -71,4 +71,18 @@ The `objectives.csv` is formatted as such:
   After modifications and configurations outlined by the previous steps, run:
   `python RunOptim.py >log.opt &` to run the optimization problem. The `>log.opt` is optional, but very helpful in observing optimizer behaviour during the run.
   Similarly, you may run `export OMP_NUM_THREADS=<NUMofTHREADS>` before to use multiple threads.
-  
+
+## Results:
+After running both problem, another folder `FinalCounter1` should appear. (If you are doing continuation, a `FinalCounter*` should appear for each step taken during continuation. This directory stores the last iteration's output from `calTop.exe`. Inside this director `FinalCounter1\Direct` There are the following that is worth investigating:
+```
+elastic_Field_active.vtu is the post-processing of the design domain
+elastic_Field_passive.vtu is the post-processing of the passive domain (skin)
+objectives.csv is the summary of objective value and constraint values
+density.dat is the material distribution. It might be useful when doing other forms of post-processing or restarting the problem. It has to be used together with the meshes and skinelements as it constains no geometry definition and element index information
+```
+
+The compliance minimization is run first. The compliance resulted from the compliance-minimization problem is strategically applied to the volume fraction minimization problem as the compliance constraint. As we would expect, the two resulted in the almost the same material distribution. 
+
+<img width="1514" height="625" alt="image" src="https://github.com/user-attachments/assets/9d655a61-a9a2-49eb-a34c-d91ff57287a3" />
+
+It is also interesting to observe the convergence history of the two problems. 
