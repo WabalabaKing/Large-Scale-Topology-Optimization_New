@@ -85,4 +85,4 @@ The compliance minimization is run first. The compliance resulted from the compl
 
 <img width="1514" height="625" alt="image" src="https://github.com/user-attachments/assets/9d655a61-a9a2-49eb-a34c-d91ff57287a3" />
 
-It is also interesting to observe the convergence history of the two problems. 
+It is also interesting to observe the convergence history of the two problems. A helpful python code is provided with calTop under `HelperFiles\ReadIPOPT.py`. Running that function with the log file as input with translate the log file into a csv file containing objective, optimality, feasibility, step size, and other informations for each iteration. Plotting these variables will provide insights on convergence behavior of the optimizer. 
