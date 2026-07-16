@@ -1887,7 +1887,7 @@ while(istat>=0)
 
     endl = time(NULL);
 
-	  printf("\n Time taken for linstatic() is %.8f seconds \n", difftime(endl, startl));
+	  printf("\nTime taken for linstatic() is %.8f seconds \n", difftime(endl, startl));
     fflush(stdout); 
       
     /* Note:  stress adjoint is calculated in linstatic()
@@ -1897,7 +1897,7 @@ while(istat>=0)
 
     if (eval_PNORM == 1)
     {
-      printf(" Filter element stress (P-norm) gradient ");
+      printf("Filtering element stress (P-norm) gradient...");
       fflush(stdout);
 
       /* Allocate memory for P-norm stress sensitivities */  
@@ -1907,7 +1907,7 @@ while(istat>=0)
       int rs = write_Stress_sens("stress_sens.csv", ne, dPnorm_drhoFiltered);
       if (rs != 0) 
       {
-        printf(" Unable to write P-norm sensitivities to disk!\n");
+        printf("Unable to write P-norm sensitivities to disk!\n");
         fflush(stdout);
       }
       
@@ -1918,9 +1918,6 @@ while(istat>=0)
     // Free this sens outside for now
     SFREE(dPnorm_drho);
 
-    printf("|------------------------------------------------------------|\n");
-
-    printf("|------------------------------------------------------------|\\n");
 
     for(i=0;i<3;i++) nzsprevstep[i]=nzs[i];
     memmpc_=mpcinfo[0]; mpcfree=mpcinfo[1];
@@ -2194,7 +2191,7 @@ while(istat>=0)
 	      &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
         jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
-      printf("done\n");
+      printf("Finished evaluating compliance sensitivities.\n");
       fflush(stdout);
 
       /* Define variables for mass and center of gravity */

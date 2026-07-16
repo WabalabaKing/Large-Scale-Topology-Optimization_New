@@ -1,7 +1,6 @@
-#include "su2_preprocess.h"
+#include "CalculiX.h"
 
-
-void write_deformed_su2_from_v(int nk, double *v)
+void write_deformed_su2(int nk, double *v)
 {
     FILE *fp;
     FILE *out;
@@ -119,19 +118,30 @@ void find_su2_file(char *filename)
     DIR *dir;
     struct dirent *entry;
 
+    const char *suffix = "Solid.su2";
+    size_t suffix_len = strlen(suffix);
+
     dir = opendir(".");
 
-    if (dir == NULL) 
+    if (dir == NULL)
     {
         printf("ERROR: Cannot open current directory\n");
         exit(EXIT_FAILURE);
     }
 
-    while ((entry = readdir(dir)) != NULL) 
+    while ((entry = readdir(dir)) != NULL)
     {
-        if (strstr(entry->d_name, ".su2") != NULL) 
+        size_t len = strlen(entry->d_name);
+
+        /* Check whether the filename ends with "Solid.su2" */
+        if (len >= suffix_len &&
+            strcmp(entry->d_name + len - suffix_len, suffix) == 0)
         {
+
+            printf("Detected SU2 mesh file: %s\n",filename);
+            fflush(stdout);
             strcpy(filename, entry->d_name);
+
             closedir(dir);
             return;
         }
@@ -139,7 +149,8 @@ void find_su2_file(char *filename)
 
     closedir(dir);
 
-    printf("ERROR: No .su2 mesh file found in current directory\n");
+    printf("ERROR: No file ending with \"%s\" found in current directory\n",
+           suffix);
     exit(EXIT_FAILURE);
 }
 
