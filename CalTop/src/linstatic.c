@@ -678,7 +678,8 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 				//printf("Current symmetry flag: %d", symmetryflag);
 
-				
+		if (*eval_PNORM==1)
+		{	
 				double *b_adj = NULL;
 				NNEW(b_adj,double,*neq); // Adjoint variabels in equation space
 				DMEMSET(b_adj,0,*neq,0.0);
@@ -930,4 +931,5 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   			(*ttime)+=(*tper);
   			return;
 		}
+	}
 	}
