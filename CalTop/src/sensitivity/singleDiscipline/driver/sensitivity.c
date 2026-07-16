@@ -339,11 +339,13 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
             }
             SFREE(inum);SFREE(extnor);      
         } // end ifcoordinate == 1
+
         else if(iorientation==1)
         {
             printf("\nWARNING: This iorientation==1 flag has been disabled in CalTop\n");
 
         } // end iorientation == 1
+
       
         /* storing the design variables per element (including 0 for the unperturbed state) */
       
@@ -417,6 +419,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         NNEW(jqs,ITG,ndesi+1);
         NNEW(ipointer,ITG,ndesi);
 
+       
         mastructse(kon,ipkon,lakon,ne,ipompc,nodempc,nmpc,nactdof,jqs,
             &mast1,&irows,ipointer,&nzss,mi,mortar,nodedesi,&ndesi,
             &icoordinate,ielorien,istartdesi,ialdesi);
@@ -433,173 +436,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         /* reading the stiffness matrix, mass matrix, eigenfrequencies and eigenmodes */
         if(ieigenfrequency==1)
         {
-            /* reading the eigenvalues / eigenmodes */
-            if(!cyclicsymmetry)
-            {
-	            if(fread(&nev,sizeof(ITG),1,f1)!=1)
-                {
-	                printf(" *ERROR in sensitivity reading the number of eigenvalues in the eigenvalue file");
-	                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-	                printf("        1) the nonexistence of the .eig file\n");
-	                printf("        2) other boundary conditions than in the input deck\n");
-	                printf("           which created the .eig file\n\n");
-	                exit(0);
-	            }
-	            NNEW(d,double,nev);
-	            if(fread(d,sizeof(double),nev,f1)!=nev)
-                {
-	                printf(" *ERROR in sensitivity reading the eigenvalues in the eigenvalue file");
-	                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-	                printf("        1) the nonexistence of the .eig file\n");
-	                printf("        2) other boundary conditions than in the input deck\n");
-	                printf("           which created the .eig file\n\n");
-	                exit(0);
-	            }
-	            NNEW(ad,double,neq[1]);
-	            NNEW(adb,double,neq[1]);
-	            NNEW(au,double,nzsprevstep[2]);
-	            NNEW(aub,double,nzs[1]);
-	  
-	            if(fread(ad,sizeof(double),neq[1],f1)!=neq[1])
-                {
-	                printf(" *ERROR in sensitivity reading the diagonal of the stiffness matrix in the eigenvalue file");
-	                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-	                printf("        1) the nonexistence of the .eig file\n");
-	                printf("        2) other boundary conditions than in the input deck\n");
-	                printf("           which created the .eig file\n\n");
-	                exit(0);
-	            }
-	            if(fread(au,sizeof(double),nzsprevstep[2],f1)!=nzsprevstep[2])
-                {
-	                printf(" *ERROR in sensitivity reading the off-diagonals of the stiffness matrix in the eigenvalue file");
-	                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-	                printf("        1) the nonexistence of the .eig file\n");
-	                printf("        2) other boundary conditions than in the input deck\n");
-	                printf("           which created the .eig file\n\n");
-	                exit(0);
-	            }
-	            if(fread(adb,sizeof(double),neq[1],f1)!=neq[1])
-                {
-	                printf(" *ERROR in sensitivity reading the diagonal of the mass matrix in the eigenvalue file");
-	                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-	                printf("        1) the nonexistence of the .eig file\n");
-	                printf("        2) other boundary conditions than in the input deck\n");
-	                printf("           which created the .eig file\n\n");
-	                exit(0);
-	            }
-	            if(fread(aub,sizeof(double),nzs[1],f1)!=nzs[1])
-                {
-	                printf(" *ERROR in sensitivity reading the off-diagonals of the mass matrix in the  eigenvalue file");
-	                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-	                printf("        1) the nonexistence of the .eig file\n");
-	                printf("        2) other boundary conditions than in the input deck\n");
-	                printf("           which created the .eig file\n\n");
-	                exit(0);
-	            }
-	            NNEW(z,double,neq[1]*nev);
-	            if(fread(z,sizeof(double),neq[1]*nev,f1)!=neq[1]*nev)
-                {
-	                printf(" *ERROR in sensitivity reading the eigenvectors in the eigenvalue file");
-	                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-	                printf("        1) the nonexistence of the .eig file\n");
-	                printf("        2) other boundary conditions than in the input deck\n");
-	                printf("           which created the .eig file\n\n");
-	                exit(0);
-	            }
-            } // end !cyclicsymmetry
-            else
-            {
-	            nev=0;
-	            do
-                {
-	                if(fread(&nmd,sizeof(ITG),1,f1)!=1)
-                    {
-		                break;
-	                }
-	                if(fread(&nevd,sizeof(ITG),1,f1)!=1)
-                    {
-		                printf(" *ERROR in sensitivity reading the number of eigenvalues for nodal diameter %" ITGFORMAT " in the eigenvalue file",nmd);
-		                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-		                printf("        1) the nonexistence of the .eig file\n");
-		                printf("        2) other boundary conditions than in the input deck\n");
-		                printf("           which created the .eig file\n\n");
-		                exit(0);
-	                }
-	                if(nev==0)
-                    {
-		                NNEW(d,double,nevd);
-		                NNEW(nm,ITG,nevd);
-	                }
-                    else
-                    {
-		                RENEW(d,double,nev+nevd);
-		                RENEW(nm,ITG,nev+nevd);
-	                }
-	                if(fread(&d[nev],sizeof(double),nevd,f1)!=nevd)
-                    {
-		                printf(" *ERROR in sensitivity reading the eigenvalues for nodal diameter %" ITGFORMAT " in the eigenvalue file",nmd);
-		                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-		                printf("        1) the nonexistence of the .eig file\n");
-		                printf("        2) other boundary conditions than in the input deck\n");
-		                printf("              which created the .eig file\n\n");
-		                exit(0);
-	                }
-	                for(i=nev;i<nev+nevd;i++)
-                    {
-                        nm[i]=nmd;
-                    }
-	                if(nev==0)
-                    {
-                        /* reading stiffness and mass matrix; these are not kept */
-		                NNEW(adb,double,neq[1]);
-		                NNEW(aub,double,nzs[1]);
-		  
-		                if(fread(adb,sizeof(double),neq[1],f1)!=neq[1])
-                        {
-		                    printf(" *ERROR in sensitivity reading the diagonal of the mass matrix in the eigenvalue file");
-		                    printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-		                    printf("        1) the nonexistence of the .eig file\n");
-		                    printf("        2) other boundary conditions than in the input deck\n");
-		                    printf("           which created the .eig file\n\n");
-		                    exit(0);
-		                }
-		  
-		                if(fread(aub,sizeof(double),nzs[1],f1)!=nzs[1])
-                        {
-		                    printf(" *ERROR in sensitivity reading the off-diagonals of the mass matrix in the eigenvalue file");
-		                    printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-		                    printf("        1) the nonexistence of the .eig file\n");
-		                    printf("        2) other boundary conditions than in the input deck\n");
-		                    printf("           which created the .eig file\n\n");
-		                    exit(0);
-		                }
-
-		                SFREE(adb);SFREE(aub);
-	                }
-	      
-	                if(nev==0)
-                    {
-		                NNEW(z,double,neq[1]*nevd);
-	                }
-                    else
-                    {
-		                RENEW(z,double,(long long)neq[1]*(nev+nevd));
-	                }
-	      
-	                if(fread(&z[(long long)neq[1]*nev],sizeof(double),neq[1]*nevd,f1)!=neq[1]*nevd)
-                    {
-		                printf(" *ERROR in sensitivity reading the eigenvectors for nodal diameter %" ITGFORMAT " in the eigenvalue file",nmd);
-		                printf(" *INFO  in sensitivity: if there are problems reading the .eig file this may be due to:\n");
-		                printf("        1) the nonexistence of the .eig file\n");
-		                printf("        2) other boundary conditions than in the input deck\n");
-		                printf("           which created the .eig file\n\n");
-		                exit(0);
-	                }
-	                nev+=nevd;
-	            }
-                while(1);
-            }
-            fclose(f1);
+            printf("CALTOP SKIPS EIGEN FREQUENCY FLAG\n");
         }
         else
         {
@@ -699,7 +536,6 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
             if(iread==0)
             {
-
                 /* for cyclic symmetry calculations only the odd modes are calculated
                     (modes occur in phase-shifted pairs) */
 
@@ -816,51 +652,18 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 /* v contains the values dK/dx has to be multiplied with */
                 if(ieigenfrequency==0)
                 {
+                    printf("\nDone caling results_se, this is ieigenfrequency ==0\n");
 	                NNEW(v,double,mt**nk);
 	                memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
                 }
                 else
                 {
-	                if(!cyclicsymmetry)
-                    {
-	                    NNEW(v,double,mt**nk);
-	                    FORTRAN(resultsnoddir,(nk,v,nactdof,&z[iev*neq[1]],ipompc,
-				        nodempc,coefmpc,nmpc,mi));
-	                }
-                    else
-                    {
-	                    NNEW(v,double,2*mt**nk);
-
-	                    FORTRAN(resultsnoddir,(nk,v,nactdof,&z[iev*neq[1]],ipompc,
-				            nodempc,coefmpc,nmpc,mi));
-
-	                    FORTRAN(resultsnoddir,(nk,&v[mt**nk],nactdof,&z[iev*neq[1]+neq[1]/2],ipompc,
-				            nodempc,coefmpc,nmpc,mi));
-	                }
-	  
-	                ptime=d[iev];
-	                if(ptime>0)
-                    {
-                        ptime=sqrt(ptime)/6.283185308;
-                    }
-                    else
-                    {
-                        ptime=0.;
-                    }
-
-                    /* for an eigenfrequency objective (K-eigenvalue*M) is
-                        taken instead of K (not for ORIENTATION as design 
-                        variable since the mass does not change with orientation)*/
-
-	                if(icoordinate==1)
-                    {
-	                    sigma=d[iev];
-	                    mass[0]=1;
-	                }
+                    printf("THIS IS THE ELESE CONDITION FOR eigen FREQUENCY\n");
                 } //end ifieigenfrequency!=0
 
-                //printf("Calling mafilsmmain se...");
-                /* determining the system matrix and the external forces */
+                printf("Evaluating element-wise compliance sensitivity...\n");
+                fflush(stdout);
+                /* mafillsmmain_se -> mafillsmse -> e_c3d_se() */
                 mafillsmmain_se(co,nk,kon,ipkon,lakon,ne,nodeboun,
                     ndirboun,xbounact,nboun,
                     ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
@@ -882,55 +685,15 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	                &icoordinate,dxstiff,xdesi,istartelem,ialelem,v,&sigma,
 	                &cyclicsymmetry,labmpc,ics,cs,mcs,&ieigenfrequency,design,penal,
                     gradCompl,elCompl,elCG,eleVol,fn0_out,fint);
-                printf("done with mafilsmmain se...\n");
+               // printf("done with mafilsmmain se...\n");
+               printf("Compliance sensitivity evaluation complete!\n");
+               fflush(stdout);
 
                 /* second order derivative */
 
                 if(i2ndorder==1)
                 {
-	                NNEW(dgdxdy,double,ndesi*ndesi**nobject);
-
-                    /* determining the structure of the df2 matrix */
-	                nzss2=20000000;
-	                NNEW(mast1,ITG,nzss);
-	                NNEW(irows2,ITG,1);
-	                NNEW(jqs2,ITG,ndesi*(ndesi+1)/2+1);
-	                NNEW(ipointer,ITG,ndesi);
-	  
-	                mastructse2(kon,ipkon,lakon,ne,ipompc,nodempc,nmpc,nactdof,jqs2,
-                        &mast1,&irows2,ipointer,&nzss2,mi,mortar,nodedesi,&ndesi,
-	                    &icoordinate,ielorien,istartdesi,ialdesi);
-
-	                SFREE(ipointer);SFREE(mast1);
-	                RENEW(irows2,ITG,nzss2);
-
-                    /* determining the system matrix and the external forces */
-
-	                if(!cyclicsymmetry)
-                    {
-	                    NNEW(df2,double,nzss2);
-	                }
-      
-	                mafillsmmain_se2(co,nk,kon,ipkon,lakon,ne,nodeboun,
-                        ndirboun,xbounact,nboun,
-                        ipompc,nodempc,coefmpc,nmpc,nodeforc,ndirforc,xforcact,
-                        nforc,nelemload,sideload,xloadact,nload,xbodyact,ipobody,
-                        nbody,cgr,nactdof,neq,&nmethodl,
-                        ikmpc,ilmpc,ikboun,ilboun,
-                        elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
-                        ielorien,norien,orab,ntmat_,
-                        t0,t1act,ithermal,prestr,iprestr,vold,iperturb,sti,
-                        stx,iexpl,plicon,nplicon,plkcon,nplkcon,
-                        xstiff,npmat_,&dtime,matname,mi,
-                        ncmat_,mass,&stiffness,&buckling,&rhsi,&intscheme,physcon,
-                        shcon,nshcon,cocon,ncocon,ttime,&time,istep,&iinc,&coriolis,
-                        ibody,xloadold,&reltime,veold,springarea,nstate_,
-                        xstateini,xstate,thicke,integerglob,doubleglob,
-                        tieset,istartset,iendset,ialset,ntie,&nasym,pslavsurf,
-                        pmastsurf,mortar,clearini,ielprop,prop,&ne0,fnext,
-	                    &distmin,&ndesi,nodedesi,df2,&nzss2,jqs2,irows2,
-	                    &icoordinate,dxstiff,xdesi,istartelem,ialelem,v,&sigma,
-	                    &cyclicsymmetry,labmpc,ics,cs,mcs,&ieigenfrequency);
+                    printf("CALTOP does not compute second derivative\n\n");
                 }
       
                 if(iorientation==1) SFREE(dxstiff);
@@ -950,7 +713,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 SFREE(dgdxglob);
             }
             
-        } // end loop over nev
+        } // end loop over nev =1
 
         SFREE(iponoel);
         SFREE(inoel);
