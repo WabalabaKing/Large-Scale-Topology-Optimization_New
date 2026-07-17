@@ -886,7 +886,8 @@ $(SRC_DIR)/pnorm_value_from_stx.f \
 $(SRC_DIR)/mechmodel_simp.f \
 $(SRC_DIR)/linel_simp.f \
 $(SRC_DIR)/resultsiniAdjoint.f \
-$(SRC_DIR)/adjointRHS_nodes_2_eq.f
+$(SRC_DIR)/adjointRHS_nodes_2_eq.f \
+$(SRC_DIR)/sensitivity/singleDiscipline/compliance/linearCompliance.f
 
 
 

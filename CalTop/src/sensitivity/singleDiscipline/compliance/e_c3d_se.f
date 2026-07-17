@@ -191,11 +191,6 @@
       ycg=0.d0
       zcg=0.d0
 
-c      open (unit=200,file="Jacdet.dat")
- !     open (unit=300,file="coords.dat")
-
-
-!
       indexe=ipkon(nelem)
 c     Bernhardi start
       if(lakonl(1:5).eq.'C3D8I') then
@@ -241,7 +236,6 @@ c     Bernhardi end
       endif
 !
 !     material and orientation
-!
       if(lakonl(7:8).ne.'LC') then
 !
          imat=ielmat(1,nelem)
@@ -260,7 +254,6 @@ c     Bernhardi end
       elseif(lakonl(4:5).eq.'20') then
 !
 !        composite materials
-!
 !        determining the number of layers
 !
          nlayer=0
@@ -328,7 +321,7 @@ c     Bernhardi end
             enddo
          enddo
          iflag=3
-!
+
          ilayer=0
          do i=1,3
             dlayer(i)=0.d0
@@ -414,7 +407,6 @@ c     Bernhardi end
       endif
 !
 !     displacements for 2nd order static and modal theory
-!
       if(((iperturb(1).eq.1).or.(iperturb(2).eq.1)).and.
      &          (stiffness.eq.1).and.(buckling.eq.0)) then
          do i1=1,nope
@@ -434,40 +426,6 @@ c     Bernhardi end
       ku(i)=0.d0
       uelem(i)=0.d0
       enddo
-
-
-
- !!     do ij=istartelem(nelem),istartelem(nelem+1)-1
-!!!         idesvar=ialelem(ij)
-!!!         idesloc=ij+1-istartelem(nelem)
-!
-!     check whether a design variable belongs to the element
-!
-!!!      if(idesvar.gt.0) then
-!
- !!!        if(icoordinate.eq.1) then
-!
-!           the coordinates are the design variables
-!
-!!!            do i=1,nope
-!!!               node=kon(indexe+i)
-!!!               if(node.eq.nodedesi(idesvar)) then
-!!!                  iactive=i
- !!!                 do j=1,60
- !!!                    dfl(idesloc,j)=0.d0
- !!!                 enddo
-!!!                  exit
- !!!              endif
- !!!           enddo
- !!!        else
-!
-!           the orientations are the design variables
-!
- !!!           do j=1,60
- !!!              dfl(idesloc,j)=0.d0
- !!!           enddo
-!!         endif
- !!!     endif
 !
 !     initialisation of the local coordinates
 !
