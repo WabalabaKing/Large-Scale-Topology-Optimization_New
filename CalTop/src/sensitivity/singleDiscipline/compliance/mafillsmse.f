@@ -320,7 +320,7 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           lambda, nactdof, neq)  
             else
    !              Compliance + sensitivity for small deformation (linear elasticity)
-   !            call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
+   !              call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
    !  &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
    !  &           alzero,ielmat,ielorien,norien,orab,ntmat_,
    !  &           t0,t1,ithermal,vold,iperturb,nelemload,sideload,xload,
@@ -338,7 +338,8 @@ c           ndof=ichar(lakon(i)(6:6))-48
    !  &           ecompli,elvol,xcg,ycg,zcg, fn0_out,
    !  &           lambda, nactdof, neq)
 
-            call linearCompliance(co,kon,lakon(i),p1,p2,om,
+               if(lakon(i)(4:4).eq.'4') then
+                  call linearCompliance_C3D4(co,kon,lakon(i),p1,p2,om,
      &     bodyf,nbody,s,sm,ff,i,nmethod,elcon,nelcon,
      &     rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
      &     ielorien,norien,orab,ntmat_,t0,t1,ithermal,
