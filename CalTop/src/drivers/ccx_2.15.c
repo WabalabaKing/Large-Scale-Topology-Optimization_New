@@ -2170,7 +2170,7 @@ while(istat>=0)
 
 
       /* Evaluate sensitivities */
-      printf("Evaluating compliance sensitivities...");
+      //printf("Evaluating compliance sensitivities...");
       fflush(stdout);
 	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	      xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
@@ -2191,7 +2191,7 @@ while(istat>=0)
 	      &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
         jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
 
-      printf("Finished evaluating compliance sensitivities.\n");
+      //printf("Finished evaluating compliance sensitivities.\n");
       fflush(stdout);
 
       /* Define variables for mass and center of gravity */
