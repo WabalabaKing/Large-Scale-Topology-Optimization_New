@@ -223,8 +223,8 @@ void mafillsmmain_se(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,
 	eleVol1=eleVol, fn0_out1=fn0_out,lambda1=lambda; nactdof1=nactdof; neq1=neq;
     /* calculating the stiffness/mass sensitivity */
 
-    printf(" Using up to %" ITGFORMAT " cpu(s) for the calculation of the sensitivity of the external forces \n and/or the element stiffness matrices.\n\n", num_cpus);
-
+    printf("Using up to %" ITGFORMAT " cpu(s) for compliance sensitivity calculation of the sensitivity of the external forces\n", num_cpus);
+    fflush(stdout);
     /* create threads and wait */
 
     NNEW(ithread,ITG,num_cpus);

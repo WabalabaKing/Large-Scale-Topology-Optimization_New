@@ -652,7 +652,6 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 /* v contains the values dK/dx has to be multiplied with */
                 if(ieigenfrequency==0)
                 {
-                    printf("\nDone caling results_se, this is ieigenfrequency ==0\n");
 	                NNEW(v,double,mt**nk);
 	                memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
                 }
@@ -690,7 +689,6 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                fflush(stdout);
 
                 /* second order derivative */
-
                 if(i2ndorder==1)
                 {
                     printf("CALTOP does not compute second derivative\n\n");
@@ -719,25 +717,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
         SFREE(inoel);
         SFREE(nodedesiinv);
 
-        if(ieigenfrequency==1)
-        {
-            if(!cyclicsymmetry)
-            {
-                SFREE(d);
-                SFREE(ad);
-                SFREE(adb);
-                SFREE(au);
-	            SFREE(aub);
-                SFREE(z);
-            }
-            else
-            {
-	            SFREE(d);
-                SFREE(z);
-                SFREE(nm);
-            }
-        }
-        else if(idisplacement==1)
+        if(idisplacement==1)
         {
             SFREE(ad);
             SFREE(au);

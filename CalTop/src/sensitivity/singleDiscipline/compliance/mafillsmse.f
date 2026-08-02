@@ -299,6 +299,8 @@ c           ndof=ichar(lakon(i)(6:6))-48
             endif
 !
             if(iperturb(2).eq.1) then
+!               Compliance + sensitivity for large deformation
+!               call flush(6)
                call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
      &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
      &           alzero,ielmat,ielorien,norien,orab,ntmat_,
@@ -317,23 +319,75 @@ c           ndof=ichar(lakon(i)(6:6))-48
      &           ecompli,elvol,xcg,ycg,zcg, fn0_out,
      &           lambda, nactdof, neq)  
             else
-               call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
-     &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
-     &           alzero,ielmat,ielorien,norien,orab,ntmat_,
-     &           t0,t1,ithermal,vold,iperturb,nelemload,sideload,xload,
-     &           nload,idist,sti,stx,iexpl,plicon,
-     &           nplicon,plkcon,nplkcon,xstiff,npmat_,
-     &           dtime,matname,mi(1),ncmat_,mass(1),stiffness,buckling,
-     &           rhsi,intscheme,ttime,time,istep,iinc,coriolis,xloadold,
-     &           reltime,ipompc,nodempc,coefmpc,nmpc,ikmpc,ilmpc,veold,
-     &           springarea,nstate_,xstateini,xstate,ne0,ipkon,thicke,
-     &           integerglob,doubleglob,tieset,istartset,
-     &           iendset,ialset,ntie,nasym,pslavsurf,pmastsurf,mortar,
-     &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
-     &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
-     &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
-     &           ecompli,elvol,xcg,ycg,zcg, fn0_out,
-     &           lambda, nactdof, neq) 
+
+   !              Compliance + sensitivity for small deformation (linear elasticity)
+   !              call e_c3d_se(co,kon,lakon(i),p1,p2,om,bodyf,nbody,s,sm,
+   !  &           ff, i,nmethod,elcon,nelcon,rhcon,nrhcon,alcon,nalcon,
+   !  &           alzero,ielmat,ielorien,norien,orab,ntmat_,
+   !  &           t0,t1,ithermal,vold,iperturb,nelemload,sideload,xload,
+   !  &           nload,idist,sti,stx,iexpl,plicon,
+   !  &           nplicon,plkcon,nplkcon,xstiff,npmat_,
+   !  &           dtime,matname,mi(1),ncmat_,mass(1),stiffness,buckling,
+   !  &           rhsi,intscheme,ttime,time,istep,iinc,coriolis,xloadold,
+   !  &           reltime,ipompc,nodempc,coefmpc,nmpc,ikmpc,ilmpc,veold,
+   !  &           springarea,nstate_,xstateini,xstate,ne0,ipkon,thicke,
+   !  &           integerglob,doubleglob,tieset,istartset,
+   !  &           iendset,ialset,ntie,nasym,pslavsurf,pmastsurf,mortar,
+   !  &           clearini,ielprop,prop,distmin,ndesi,nodedesi,
+   !  &           dfl,icoordinate,dxstiff,ne,xdesi,istartelem,
+   !  &           ialelem,v,sigma,ieigenfrequency,rhoi,penal,sensi,
+   !  &           ecompli,elvol,xcg,ycg,zcg, fn0_out,
+   !  &           lambda, nactdof, neq)
+
+               if(lakon(i)(4:4).eq.'4') then
+                  write(*,*) 'Calling C3D4 compliance'
+                  call flush(6)
+                  call linearCompliance_C3D4(co,kon,lakon(i),p1,p2,om,
+     &     bodyf,nbody,s,sm,ff,i,nmethod,elcon,nelcon,
+     &     rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
+     &     ielorien,norien,orab,ntmat_,t0,t1,ithermal,
+     &     vold,iperturb,nelemload,sideload,xload,nload,
+     &     idist,sti,stx,iexpl,plicon,nplicon,plkcon,
+     &     nplkcon,xstiff,npmat_,dtime,matname,mi(1),
+     &     ncmat_,mass(1),stiffness,buckling,rhsi,
+     &     intscheme,ttime,time,istep,iinc,coriolis,
+     &     xloadold,reltime,ipompc,nodempc,coefmpc,nmpc,
+     &     ikmpc,ilmpc,veold,springarea,nstate_,
+     &     xstateini,xstate,ne0,ipkon,thicke,integerglob,
+     &     doubleglob,tieset,istartset,iendset,ialset,
+     &     ntie,nasym,pslavsurf,pmastsurf,mortar,clearini,
+     &     ielprop,prop,distmin,ndesi,nodedesi,dfl,
+     &     icoordinate,dxstiff,ne,xdesi,istartelem,
+     &     ialelem,v,sigma,ieigenfrequency,rhoi,penal,
+     &     sensi,ecompli,elvol,xcg,ycg,zcg,fn0_out,
+     &     lambda,nactdof,neq)
+
+               elseif(lakon(i)(4:5).eq.'10') then
+                  call linearCompliance_C3D10(co,kon,lakon(i),p1,p2,om,
+     &     bodyf,nbody,s,sm,ff,i,nmethod,elcon,nelcon,
+     &     rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
+     &     ielorien,norien,orab,ntmat_,t0,t1,ithermal,
+     &     vold,iperturb,nelemload,sideload,xload,nload,
+     &     idist,sti,stx,iexpl,plicon,nplicon,plkcon,
+     &     nplkcon,xstiff,npmat_,dtime,matname,mi(1),
+     &     ncmat_,mass(1),stiffness,buckling,rhsi,
+     &     intscheme,ttime,time,istep,iinc,coriolis,
+     &     xloadold,reltime,ipompc,nodempc,coefmpc,nmpc,
+     &     ikmpc,ilmpc,veold,springarea,nstate_,
+     &     xstateini,xstate,ne0,ipkon,thicke,integerglob,
+     &     doubleglob,tieset,istartset,iendset,ialset,
+     &     ntie,nasym,pslavsurf,pmastsurf,mortar,clearini,
+     &     ielprop,prop,distmin,ndesi,nodedesi,dfl,
+     &     icoordinate,dxstiff,ne,xdesi,istartelem,
+     &     ialelem,v,sigma,ieigenfrequency,rhoi,penal,
+     &     sensi,ecompli,elvol,xcg,ycg,zcg,fn0_out,
+     &     lambda,nactdof,neq)
+               else
+                  write(*,'(A,I10,A,A8)')
+     &      ' *ERROR: unsupported element ',i,
+     &      ', type = ',lakon(i)
+               endif
+
             endif
 !
             elCompl(i)=ecompli
