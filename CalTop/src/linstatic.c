@@ -678,8 +678,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
 				//printf("Current symmetry flag: %d", symmetryflag);
 
-		if (*eval_PNORM)==1
-		{		
+			
 				double *b_adj = NULL;
 				NNEW(b_adj,double,*neq); // Adjoint variabels in equation space
 				DMEMSET(b_adj,0,*neq,0.0);
@@ -702,13 +701,14 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     				}
 				}
 
-
+			if (*eval_PNORM)==1
+			{	
       		#ifdef PARDISO
 			printf("PARSIDO: adjoint solve \n");
       			pardiso_main(ad,au,adb,aub,&sigma,b_adj,icol,irow,neq,nzs,
 		   			&symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
 			#endif
-
+			}
 				//printf(" SKIPPING PARSIDO: adjoint solve \n");
       			//pardiso_solve(b_adj, neq, &symmetryflag, &nrhs);
 	
@@ -829,7 +829,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 				SFREE(brhs);
 				SFREE(djdrho_expl);
 				SFREE(djdrho_impl);
-		}
+		
     			if(strcmp1(&filab[261],"E   ")==0) SFREE(een);
     			if(strcmp1(&filab[2697],"ME  ")==0) SFREE(emn);
     			if(strcmp1(&filab[522],"ENER")==0) SFREE(enern);
