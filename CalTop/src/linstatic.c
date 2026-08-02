@@ -701,7 +701,7 @@ void linstatic(double *co, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
     				}
 				}
 
-			if (*eval_PNORM)==1
+			if (*eval_PNORM==1)
 			{	
       		#ifdef PARDISO
 			printf("PARSIDO: adjoint solve \n");
