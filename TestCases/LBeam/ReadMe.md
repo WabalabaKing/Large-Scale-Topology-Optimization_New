@@ -74,7 +74,8 @@ density.dat is the material distribution. It might be useful when doing other fo
 ```
 
 For a mass minimization problem, the target compliance is set to 160 Joule, and if stress constraint is used, the maximum allowable stress is set to 156.66MPa. The resultant structure using LOQO, with and without stress constaint, are shown below:
-<img width="1333" height="622" alt="image" src="https://github.com/user-attachments/assets/4e69141c-fea6-4dc0-a750-d92c67f8b052" />
+<img width="1141" height="592" alt="image" src="https://github.com/user-attachments/assets/0336b32d-e042-4cf9-a544-75e60dae4e23" />
+
 
 
 
