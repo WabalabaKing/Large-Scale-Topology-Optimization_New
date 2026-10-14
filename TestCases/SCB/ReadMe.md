@@ -42,7 +42,7 @@ The `objectives.csv` is formatted as such:
 2. The optimizer setup is toward the later part of the code using `nlp.set()`. For more references, checkout https://coin-or.github.io/Ipopt/OPTIONS.html
 
 ### SCB.inp 
-  The `*.inp` file are written similar in style of NASTRAN input files. Before running, make sure the 2nd line `*INCLUDE, INPUT=` points to the absolute location of the mesh file in `\Mesh`
+  The `*.inp` file are written similar in style of NASTRAN input files. Before running, make sure the 2-4 line `*INCLUDE, INPUT=` points to the absolute location of the mesh file in `\Mesh`
 
 ### Running:
   After modifications and configurations outlined by the previous steps, run:

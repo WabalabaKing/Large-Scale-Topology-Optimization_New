@@ -69,7 +69,7 @@ The `objectives.csv` is formatted as such:
   Similarly, you may run `export OMP_NUM_THREADS=<NUMofTHREADS>` before to use multiple threads.
 
 ## Results:
-After running both problem, another folder `FinalCounter1` should appear. (If you are doing continuation, a `FinalCounter*` should appear for each step taken during continuation. This directory stores the last iteration's output from `calTop.exe`. Inside this director `FinalCounter1\Direct` There are the following that is worth investigating:
+After running both problem, another folder `__WORKDIR__` should appear. This directory stores the last iteration's output from `calTop.exe`. There are the following that is worth investigating:
 ```
 elastic_Field_active.vtu is the post-processing of the design domain
 elastic_Field_passive.vtu is the post-processing of the passive domain (skin)
