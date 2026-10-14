@@ -1,0 +1,50 @@
+**Block file for optimization
+*INCLUDE, INPUT=//scratch/bcrx/wz10/LBeam/Mesh/LBeam_12mm.nam
+** Node set Nfixed1 has DOF 1(X), DOF 2(Y), DOF 3(Z) fixeded
+*BOUNDARY 
+fixed,1
+fixed,2
+fixed,3
+
+
+**Add material named EL with elastic properties
+*MATERIAL,NAME=EL
+*ELASTIC
+67000000000,0.333
+*DENSITY
+2700
+
+
+** Apply material EL to element set EALL
+*SOLID SECTION, ELSET=EALL, MATERIAL=EL
+
+** Design variable definition
+*NSET, NSET=DES
+1
+
+*DESIGNVARIABLES, TYPE=COORDINATE
+DES
+
+*SOLID SECTION, ELSET=EALL, MATERIAL=EL
+*STEP
+*STATIC
+**Begin setup for static analysis
+
+** Define concentrated load on <nodeset>, <dof>, <magnitude>
+*CLOAD
+surface, 3, -115.94
+*END STEP
+s
+
+*NODE FILE
+ U
+***EL FILE
+** S, E
+*END STEP
+
+
+*STEP
+*SENSITIVITY
+*OBJECTIVE
+STRAINENERGY
+*END STEP
