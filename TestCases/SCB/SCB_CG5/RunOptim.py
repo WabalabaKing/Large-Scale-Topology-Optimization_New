@@ -24,6 +24,7 @@ penalty = 5
 rmin = 0.25
 volfrac=0.30
 InputFileName="SCB"
+MeshDir = "/Meshes"
 nDV =118511
 nnz = 1000
 RESTART = False
