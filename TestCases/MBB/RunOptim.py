@@ -21,9 +21,9 @@ import subprocess
 NCPU = 16
 
 ########### Filter
-rmin = 0.010
+rmin = 0.04
 nnz = 1000
-MeshDir = "//scratch/bcrx/pranjan2/TopOpt/MBB/7MM/Filter/R_0.010/"
+MeshDir = "/Mesh"
 
 ###########Constraint
 sigmax = 1  #Not used if no stress con
@@ -33,7 +33,7 @@ volfrac = 0.12
 
 ############Problem
 InputFileName="MBB"
-nDV = 3484876
+nDV = 192955
 penaltyStart = 5  #This really means problem start with initial penalty of 1, the increment is done within the for loop
 penaltyEnd = 5
 penaltyInc = 1

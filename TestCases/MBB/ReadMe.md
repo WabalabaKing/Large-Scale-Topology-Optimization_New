@@ -2,17 +2,12 @@
 ## Problem Description 
 This is a demonstration of Compliance minimization with volume fraction constraint and the Mass minimization with compliance constraint topology optimization problem. The original description of the problem can be found in _On CAD-integrated structural topology and design optimization_ by Niels Olhoff et.al. 
 
-CalTop currently only works with tetrahedral elements, therefore the original problem is extended in the depth dimension and the elastic modulus of the material is scaled down such that the reference structure has the same stiffness as that described by Olhoff.
-
-This demonstration uses a mesh with 192,955 elements with average edge length of 20mm. In light of the original description of the problem that "Upper and lower surface must be planar", a 1mm skin is added on the top and bottom surface of the beam and is considered as passive element to the topology optimization problem.
-
-The results demonstrated are solved using filter radius `rmin=0.04 ` and non-zero element `nnz=1000`. The SIMP factor is chosen to be 3, and 300 iterations are solved.
 ## File Structure
 The files are structured as follows:
 ```
 MBB
 |-Mesh
-|  |-MBB_20MM-C3D4.nam
+|  |-MBB_20MM_C3D4.nam
 |  |-skinElementList.nam
 |  |-RunFilt.inp
 |-MBB_Comp
@@ -31,9 +26,9 @@ The first step is to construct the filtering matrix for the topology optimizatio
 1. Navigate to  `Mesh`
 2. Open `RunFilt.inp` and make sure that the second line points to the location of the mesh file.
 3. Make sure `skinElementList.nam` is present in the same directory, `calFilt.exe` will automatically detect and create skinsets if there is a file named `skinElementList.nam` in the directory.
-4. Run `calFilt.exe <INPNAME> -r <RMIN> -f <NNZ> -Passive <0 or 1>`
+4. Run `calFilt.exe <INPNAME> -r <RMIN> -f <NNZ> -Passive <0 or 1> -SU2_MESH False`
    
-   4.1 For this case, run `calFilt.exe RunFilt -r 0.04 -f 1000 -Passive 1`
+   4.1 For this case, run `calFilt.exe RunFilt -r 0.04 -f 1000 -Passive 1 -SU2_MESH False`
    
    4.2 For parallel filtering, run `export OMP_NUM_THREADS=<NUMofTHREADS>` prior to running `calFilt`.
    
@@ -82,8 +77,5 @@ objectives.csv is the summary of objective value and constraint values
 density.dat is the material distribution. It might be useful when doing other forms of post-processing or restarting the problem. It has to be used together with the meshes and skinelements as it constains no geometry definition and element index information
 ```
 
-The compliance minimization is run first. The compliance resulted from the compliance-minimization problem is strategically applied to the volume fraction minimization problem as the compliance constraint. As we would expect, the two resulted in the almost the same material distribution. 
-
-<img width="1514" height="625" alt="image" src="https://github.com/user-attachments/assets/9d655a61-a9a2-49eb-a34c-d91ff57287a3" />
 
 It is also interesting to observe the convergence history of the two problems. A helpful python code is provided with calTop under `HelperFiles\ReadIPOPT.py`. Running that function with the log file as input with translate the log file into a csv file containing objective, optimality, feasibility, step size, and other informations for each iteration. Plotting these variables will provide insights on convergence behavior of the optimizer. 

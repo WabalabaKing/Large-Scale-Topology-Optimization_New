@@ -1,5 +1,5 @@
 **Block file for optimization
-*INCLUDE, INPUT=//scratch/bcrx/pranjan2/TopOpt/MBB/7MM/Filter/R_0.010/MBB_7MM_C3D4.nam 
+*INCLUDE, INPUT=/Mesh/MBB_20MM_C3D4.nam 
 ** Node set Nfix1 has DOF 1(X), DOF 2(Y), DOF 3(Z) fixed
 *BOUNDARY 
 Fix,1
