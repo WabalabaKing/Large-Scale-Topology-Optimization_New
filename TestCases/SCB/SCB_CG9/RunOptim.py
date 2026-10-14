@@ -21,10 +21,10 @@ import os
 # this defines initial value and how they are written to an arbitrary file
 NCPU = 16
 penalty = 5
-rmin = 0.19
+rmin = 0.25
 volfrac=0.30
 InputFileName="SCB"
-nDV =4620179
+nDV =118511
 nnz = 1000
 RESTART = False
 optIter = 40
@@ -54,11 +54,11 @@ evalFun1 = ExternalRun("Direct",f"calTop.exe {InputFileName} -p {penalty} -r {rm
 evalFun1.addConfig("density.dat")
 
 # Add filter files in advance
-evalFun1.addData("//scratch/bcrx/pranjan2/TopOpt/SCB/New/60MM/R_0.19/F1000/Filter/dnnz.bin")
-evalFun1.addData("//scratch/bcrx/pranjan2/TopOpt/SCB/New/60MM/R_0.19/F1000/Filter/dcol.bin")
-evalFun1.addData("//scratch/bcrx/pranjan2/TopOpt/SCB/New/60MM/R_0.19/F1000/Filter/drow.bin")
-evalFun1.addData("//scratch/bcrx/pranjan2/TopOpt/SCB/New/60MM/R_0.19/F1000/Filter/dval.bin")
-evalFun1.addData("//scratch/bcrx/pranjan2/TopOpt/SCB/New/60MM/R_0.19/F1000/Filter/dsum.bin")
+evalFun1.addData(MeshDir + "dnnz.bin")
+evalFun1.addData(MeshDir +"drow.bin")
+evalFun1.addData(MeshDir +"dval.bin")
+evalFun1.addData(MeshDir +"dcol.bin")
+evalFun1.addData(MeshDir +"dsum.bin")
 evalFun1.addData(InputFileName+".inp")
 
 fun1 = Function("Topop","Direct/objectives.csv",TableReader(0,0,(1,0),(None,None),","))
@@ -93,9 +93,9 @@ driver = IpoptDriver()
 driver.addObjective("min", fun1, 1)
 driver.addUpperBound(con1,volfrac)
 
-# Constrain CG-x between 0.01 and 5.01 m
-driver.addUpperBound(con2,5.01, 1)
-driver.addLowerBound(con2,4.99, 1)
+# Constrain CG-x between 8.9 and 9.1 m
+driver.addUpperBound(con2,9.1, 1)
+driver.addLowerBound(con2,8.9, 1)
 
 # Constrain CG-y between 4.99 and 5.01 m
 driver.addUpperBound(con3,5.01, 1)

@@ -75,15 +75,6 @@ while penalty <=penaltyEnd:
    con = Function("Topop","Direct/objectives.csv",TableReader(0,3,(1,0),(None,None),","))
    con.addInputVariable(var,"Direct/volume_sens.csv",TableReader(None,2,(1,0),(None,None),","))
 
-   #strcon = Function("Topop","Direct/objectives.csv",TableReader(0,9,(1,0),(None,None),","))
-   #strcon.addInputVariable(var,"Direct/stress_sens.csv",TableReader(None,0,(1,0),(None,None),","))
-
-   #fun1 = Function("Topop","Direct/objectives.csv",TableReader(0,3,(1,0),(None,None),","))
-   #fun1.addInputVariable(var,"Direct/volume_sens.csv",TableReader(None,2,(1,0),(None,None),","))
-   #fun1.addValueEvalStep(evalFun1)
-   #con = Function("Topop","Direct/objectives.csv",TableReader(0,0,(1,0),(None,None),","))
-   #con.addInputVariable(var,"Direct/compliance_sens.csv",TableReader(None,1,(1,0),(None,None),","))
-   #strcon.addValueEvalStep(evalFun1)
 
    driver = IpoptDriver()
    driver.addObjective("min", fun1, 1)
