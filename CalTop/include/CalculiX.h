@@ -3537,7 +3537,8 @@ void nonlingeo(double **co,ITG *nk,ITG **konp,ITG **ipkonp,char **lakonp,
 	     ITG *network,char *orname,double *vel,ITG *nef,
 	     double *velo,double *veloo, double *design,double *penal,
             double *sigma0, double *eps_relax, double *rhomin,
-            double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM, double *mat_dens);
+            double *pexp, double *Pnorm, double *dPnorm_drho, int *eval_PNORM, double *mat_dens,
+            double *stx_vtu);
 
 void FORTRAN(nonlinmpc,(double *co,double *vold,ITG *ipompc,ITG *nodempc,
 		   double *coefmpc,char *labmpc,ITG *nmpc,ITG *ikboun,
