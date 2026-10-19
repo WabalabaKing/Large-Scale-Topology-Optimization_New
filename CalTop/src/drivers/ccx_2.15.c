@@ -400,7 +400,7 @@ int main(int argc,char *argv[])
   if(argc==1)
   { 
     /* Inadequate input arguments */
-    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION --cg_eval YES\n");
+    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION --cg_eval YES --NK False\n");
     FORTRAN(stop,());
   }
 
@@ -513,6 +513,26 @@ else
           (strcmp1(argv[i+1],"YES")==0 || strcmp1(argv[i+1],"yes")==0))
       {
         eval_CG = 1;
+      }
+      break;
+    }
+  }
+
+  /* Newton-Krylov for the NLGEOM sensitivity solves (default: PARDISO direct) */
+  for(i=1; i<argc; i++)
+  {
+    if(strcmp(argv[i],"--NK")==0)
+    {
+      if (i+1 < argc &&
+          (strcmp(argv[i+1],"true")==0 || strcmp(argv[i+1],"True")==0 ||
+           strcmp(argv[i+1],"TRUE")==0))
+      {
+#ifdef PARDISO
+        g_useNK = 1;
+        printf(" Newton solver: Newton-Krylov (PARDISO factor as preconditioner)\n\n");
+#else
+        printf(" *WARNING: --NK needs PARDISO; ignored\n\n");
+#endif
       }
       break;
     }

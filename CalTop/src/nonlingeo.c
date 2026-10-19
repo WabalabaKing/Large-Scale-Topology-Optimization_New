@@ -2237,8 +2237,16 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	  else if(*isolver==7){
 #ifdef PARDISO
 	      if(*ithermal<2){
-		  pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[0],&nzs[0],
+		  if(g_useNK&&isensitivity&&(*nmethod!=4)){
+		      /* Newton-Krylov: current K_T solved by FGMRES on the
+		         last factor; refactor only if FGMRES fails */
+		      pardiso_factor_solve(ad,au,adb,aub,&sigma,b,icol,irow,
+			       &neq[0],&nzs[0],&symmetryflag,&inputformat,
+			       jq,&nzs[2],&nrhs);
+		  }else{
+		      pardiso_main(ad,au,adb,aub,&sigma,b,icol,irow,&neq[0],&nzs[0],
 			       &symmetryflag,&inputformat,jq,&nzs[2],&nrhs);
+		  }
 	      }else if((*ithermal==2)&&(uncoupled)){
 		  n1=neq[1]-neq[0];
 		  n2=nzs[1]-nzs[0];
@@ -2986,8 +2994,9 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   }
     
 #ifdef PARDISO
-  /* converged K_T, factored once and kept for the adjoint solves
-     (P-norm below, compliance in sensitivity()); also written to .stm */
+  /* converged K_T, factored once (--NK: stored, solved by FGMRES) and
+     kept for the adjoint solves (P-norm below, compliance in
+     sensitivity()); also written to .stm */
   if(isensitivity&&(*isolver==7)&&(*ithermal<2)&&(*iexpl<=1)&&
      (*nmethod!=4)&&(idamping==0)&&(nasym==0)){
       NNEW(ad,double,neq[1]);
@@ -3011,9 +3020,14 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 		  iponoel,inoel,network,ntrans,inotr,trab, design,penal,mat_dens);
       memcpy(&adcpy[0],&ad[0],sizeof(double)*neq[1]);
       memcpy(&aucpy[0],&au[0],sizeof(double)*nzs[1]);
-      pardiso_release();
-      pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[0],&nzs[0],
-		     &symmetryflag,&inputformat,jq,&nzs[2]);
+      if(g_useNK){
+	  pardiso_set_matrix(ad,au,adb,aub,&sigma,icol,irow,&neq[0],&nzs[0],
+			     &symmetryflag,&inputformat,jq,&nzs[2]);
+      }else{
+	  pardiso_release();
+	  pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[0],&nzs[0],
+			 &symmetryflag,&inputformat,jq,&nzs[2]);
+      }
       SFREE(ad);SFREE(au);
   }
 #endif
