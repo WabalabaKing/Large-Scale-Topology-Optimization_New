@@ -42,11 +42,13 @@ static ITG factor_alive=0,alive_neq=0,alive_symmetryflag=0;
 
 /* Newton-Krylov state (separate PARDISO handle, see end of file) */
 static ITG nk_alive=0;
-static void nk_solve(double *b,ITG *neq,ITG *symmetryflag,ITG *nrhs,ITG L);
+static void nk_solve(double *b,ITG *neq,ITG *symmetryflag,ITG *nrhs,double tol);
 static void nk_release(void);
-#define NK_TOL_NEWTON    3   /* FGMRES rel. residual 1e-3, Newton solves      */
-#define NK_TOL_SOLVE     8   /* FGMRES rel. residual 1e-8, adjoint solves     */
+#define NK_TOL_NEWTON 1.e-3  /* FGMRES rel. residual, Newton solves           */
+#define NK_TOL_SOLVE  1.e-8  /* FGMRES rel. residual, other solves            */
 #define NK_KRYLOV_MAXIT 30   /* FGMRES iterations before refactoring          */
+#define NK_GIVEUP_MIN   10   /* earliest iteration to give up on FGMRES when  */
+                             /*   the residual trend needs > MAXIT iterations */
 #define NK_KRYLOV_M     15   /* restart length (memory ~ (2m+1)*neq doubles)  */
 #define NK_ORDERING      3   /* iparm[1]: 2 METIS, 3 parallel METIS           */
 /* char envMKL[32];   moved to pardiso.h */
@@ -488,7 +490,7 @@ void pardiso_solve(double *b, ITG *neq,ITG *symmetryflag,ITG *nrhs)
     	msglvl=0,i,error=0;
   double *x=NULL;
 
-  /* matrix stored by pardiso_set_matrix / pardiso_factor_solve */
+  /* matrix stored by pardiso_store_factor / pardiso_factor_solve */
   if(!factor_alive&&nk_alive)
   {
     nk_solve(b,neq,symmetryflag,nrhs,NK_TOL_SOLVE);
@@ -699,10 +701,11 @@ void pardiso_main(double *ad, double *au, double *adb, double *aub,
  *    changes (FNV-1a hash); numerical factorization is phase 22
  *  - a new matrix is solved by right-preconditioned FGMRES(m) with the
  *    last factorization as preconditioner (phase 33); refactor only if
- *    FGMRES does not converge in NK_KRYLOV_MAXIT iterations
- *  - pardiso_factor_solve: Newton step (tol 1e-NK_TOL_NEWTON)
- *    pardiso_set_matrix:   store the converged K_T without factoring;
- *    pardiso_solve then solves with it to 1e-NK_TOL_SOLVE
+ *    FGMRES does not converge in NK_KRYLOV_MAXIT iterations, or its
+ *    residual trend shows it would not (checked from NK_GIVEUP_MIN on)
+ *  - pardiso_factor_solve: Newton step (FGMRES tol NK_TOL_NEWTON)
+ *    pardiso_store_factor: store and factor the converged K_T in this
+ *    handle (symbolic analysis reused); pardiso_solve then back-solves
  * ----------------------------------------------------------------------
  */
 
@@ -864,10 +867,10 @@ static void nk_matvec(ITG n,const double *x,double *y)
  * phase 33). Returns the iteration count on ||b-Ax|| <= 10^-L ||b||
  * (true residual), or -1.
  */
-static ITG nk_fgmres(ITG *neq,const double *b,double *x,ITG L)
+static ITG nk_fgmres(ITG *neq,const double *b,double *x,double tol)
 {
-  ITG n=*neq,m=NK_KRYLOV_M,maxit=NK_KRYLOV_MAXIT,it=0,i,j,k,jl;
-  double tol=pow(10.,-(double)L),bnorm,beta,rnorm,tmp,*V=NULL,*Z=NULL,
+  ITG n=*neq,m=NK_KRYLOV_M,maxit=NK_KRYLOV_MAXIT,it=0,i,j,k,jl,giveup=0;
+  double bnorm,beta,rnorm,tmp,*V=NULL,*Z=NULL,
          *H=NULL,*cs=NULL,*sn=NULL,*g=NULL,*y=NULL,*w=NULL;
 
   bnorm=sqrt(vdot(n,b,b));
@@ -918,6 +921,14 @@ static ITG nk_fgmres(ITG *neq,const double *b,double *x,ITG L)
       }
       it++;jl=j;
       if(fabs(g[j+1])<=tol*bnorm||tmp==0.) break;
+      /* give up early: at the rate reached so far the tolerance needs
+         more than maxit iterations (or the residual stagnates) */
+      if(it>=NK_GIVEUP_MIN){
+        double red=fabs(g[j+1])/bnorm;
+        if(red>=1.||(double)it*log(tol)/log(red)>(double)maxit){
+          giveup=1;break;
+        }
+      }
     }
 
     for(k=jl;k>=0;k--){                       /* x += Z y,  H y = g */
@@ -936,7 +947,7 @@ static ITG nk_fgmres(ITG *neq,const double *b,double *x,ITG L)
     for(i=0;i<n;i++) V[i]=b[i]-w[i];
     rnorm=sqrt(vdot(n,V,V));
     if(rnorm<=tol*bnorm) break;
-    if(it>=maxit||rnorm!=rnorm){it=-1;break;}
+    if(giveup||it>=maxit||rnorm!=rnorm){it=-1;break;}
     beta=rnorm;                               /* restart */
   }
 
@@ -946,7 +957,7 @@ static ITG nk_fgmres(ITG *neq,const double *b,double *x,ITG L)
 
 /* solve with the stored matrix: back-solve if the factor is current,
    FGMRES on the stale factor otherwise (refactor if FGMRES fails) */
-static void nk_solve(double *b,ITG *neq,ITG *symmetryflag,ITG *nrhs,ITG L)
+static void nk_solve(double *b,ITG *neq,ITG *symmetryflag,ITG *nrhs,double tol)
 {
   ITG i,r,it,mtype=(*symmetryflag==0) ? -2 : 11;
   double *x=NULL,t0,dt;
@@ -960,17 +971,17 @@ static void nk_solve(double *b,ITG *neq,ITG *symmetryflag,ITG *nrhs,ITG L)
     double *br=&b[(size_t)r**neq],*xr=&x[(size_t)r**neq];
     if(nk_stale){
       t0=omp_get_wtime();
-      it=nk_fgmres(neq,br,xr,L);
+      it=nk_fgmres(neq,br,xr,tol);
       dt=omp_get_wtime()-t0;t_krylov+=dt;
       if(it>0){
         n_kry_ok++;n_kry_iter+=it;
-        printf(" PARDISO: old factor reused, FGMRES %d it to 1e-%d, %.2f s\n",
-               (int)it,(int)L,dt);
+        printf(" PARDISO: old factor reused, FGMRES %d it to %.1e, %.2f s\n",
+               (int)it,tol,dt);
         continue;
       }
       n_kry_fail++;
-      printf(" PARDISO: FGMRES not converged in %d it (%.2f s) -> refactor\n",
-             (int)NK_KRYLOV_MAXIT,dt);
+      printf(" PARDISO: FGMRES not converging to %.1e (%.2f s) -> refactor\n",
+             tol,dt);
       nk_numeric(neq);
     }
     t0=omp_get_wtime();
@@ -997,19 +1008,16 @@ void pardiso_factor_solve(double *ad, double *au, double *adb, double *aub,
   nk_solve(b,neq,symmetryflag,nrhs,NK_TOL_NEWTON);
 }
 
-/* store a matrix without factoring it; pardiso_solve then solves with
-   it by FGMRES on the last factor (factors if there is none) */
-void pardiso_set_matrix(double *ad, double *au, double *adb, double *aub,
+/* store the converged K_T and factor it (symbolic analysis reused);
+   pardiso_solve then back-solves the adjoints with it */
+void pardiso_store_factor(double *ad, double *au, double *adb, double *aub,
                 double *sigma,ITG *icol, ITG *irow,
 		ITG *neq, ITG *nzs, ITG *symmetryflag, ITG *inputformat,
 		ITG *jq, ITG *nzs3)
 {
-  if(nk_store(ad,au,adb,aub,sigma,icol,irow,neq,nzs,symmetryflag,
-	      inputformat,jq,nzs3)||!nk_valid){
-    nk_numeric(neq);
-  }else{
-    nk_stale=1;
-  }
+  nk_store(ad,au,adb,aub,sigma,icol,irow,neq,nzs,symmetryflag,
+	   inputformat,jq,nzs3);
+  nk_numeric(neq);
 }
 
 #endif

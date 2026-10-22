@@ -2994,9 +2994,8 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
   }
     
 #ifdef PARDISO
-  /* converged K_T, factored once (--NK: stored, solved by FGMRES) and
-     kept for the adjoint solves (P-norm below, compliance in
-     sensitivity()); also written to .stm */
+  /* converged K_T, factored once and kept for the adjoint solves
+     (P-norm below, compliance in sensitivity()); also written to .stm */
   if(isensitivity&&(*isolver==7)&&(*ithermal<2)&&(*iexpl<=1)&&
      (*nmethod!=4)&&(idamping==0)&&(nasym==0)){
       NNEW(ad,double,neq[1]);
@@ -3021,8 +3020,8 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       memcpy(&adcpy[0],&ad[0],sizeof(double)*neq[1]);
       memcpy(&aucpy[0],&au[0],sizeof(double)*nzs[1]);
       if(g_useNK){
-	  pardiso_set_matrix(ad,au,adb,aub,&sigma,icol,irow,&neq[0],&nzs[0],
-			     &symmetryflag,&inputformat,jq,&nzs[2]);
+	  pardiso_store_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[0],&nzs[0],
+			       &symmetryflag,&inputformat,jq,&nzs[2]);
       }else{
 	  pardiso_release();
 	  pardiso_factor(ad,au,adb,aub,&sigma,icol,irow,&neq[0],&nzs[0],

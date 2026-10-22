@@ -39,7 +39,7 @@ void pardiso_factor_solve(double *ad, double *au, double *adb, double *aub,
 		ITG *neq, ITG *nzs, ITG *symmetryflag, ITG *inputformat,
 		ITG *jq, ITG *nzs3,ITG *nrhs);
 
-void pardiso_set_matrix(double *ad, double *au, double *adb, double *aub,
+void pardiso_store_factor(double *ad, double *au, double *adb, double *aub,
                 double *sigma,ITG *icol, ITG *irow,
 		ITG *neq, ITG *nzs, ITG *symmetryflag, ITG *inputformat,
 		ITG *jq, ITG *nzs3);
