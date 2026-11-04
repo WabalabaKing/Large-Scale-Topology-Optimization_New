@@ -32,10 +32,32 @@
 #include <stdio.h>
 #include <string.h>
 #include "CalculiX.h"
+#include "bddc.h"
+#ifdef PARDISO
+#include "pardiso.h"
+#endif
 #include <time.h>
 #include <unistd.h>
 #include <sys/stat.h> 
 #include <omp.h>
+
+/* wall-clock phase marks: " [time] <phase>  <since last mark>  (total)" */
+static double ct_t0=-1.,ct_tp=0.;
+/* sub-phase timer inside a phase: " [time]   <part>  <seconds>" (does not move the phase mark) */
+static double ct_tsub=0.;
+static void ct_part(const char *label)
+{
+  printf(" [time]   %-42s %9.1f s\n",label,omp_get_wtime()-ct_tsub);
+  fflush(stdout);
+}
+static void ct_mark(const char *label)
+{
+  double t=omp_get_wtime();
+  if(ct_t0<0.||label==NULL){ct_t0=ct_tp=t;return;}
+  printf(" [time] %-44s %9.1f s   (total %9.1f s)\n",label,t-ct_tp,t-ct_t0);
+  fflush(stdout);
+  ct_tp=t;
+}
 
 #ifdef CALCULIX_MPI
 ITG myid = 0, nproc = 0;
@@ -43,6 +65,8 @@ ITG myid = 0, nproc = 0;
 
 int main(int argc,char *argv[])
 {
+  /* CALTOP_SOLVER=bddc: relaunch under MPI / become a solver worker */
+  bddc_launch(&argc,&argv);
 
   // Initialize TAU profiling for the main process in OpenMP/Pthreads runs
   #ifdef PROFILING_ON
@@ -395,10 +419,11 @@ int main(int argc,char *argv[])
   MPI_Comm_size(MPI_COMM_WORLD, &nproc) ;
   #endif
 
+  ct_mark(NULL);
   if(argc==1)
   { 
     /* Inadequate input arguments */
-    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION --cg_eval YES\n");
+    printf("Usage: Flags: -i jobname -p PENALTY -r RADIUS -f FILTERNNZ --pexp PNORM EXPONENT --sigmin SIGMA MINIMUM --sigrelax STRESS RELAXATION --cg_eval YES --NK False --MG False\n");
     FORTRAN(stop,());
   }
 
@@ -511,6 +536,47 @@ else
           (strcmp1(argv[i+1],"YES")==0 || strcmp1(argv[i+1],"yes")==0))
       {
         eval_CG = 1;
+      }
+      break;
+    }
+  }
+
+  /* Newton-Krylov for the NLGEOM sensitivity solves (default: PARDISO direct) */
+  for(i=1; i<argc; i++)
+  {
+    if(strcmp(argv[i],"--NK")==0)
+    {
+      if (i+1 < argc &&
+          (strcmp(argv[i+1],"true")==0 || strcmp(argv[i+1],"True")==0 ||
+           strcmp(argv[i+1],"TRUE")==0))
+      {
+#ifdef PARDISO
+        g_useNK = 1;
+        printf(" Newton solver: Newton-Krylov (PARDISO factor as preconditioner)\n\n");
+#else
+        printf(" *WARNING: --NK needs PARDISO; ignored\n\n");
+#endif
+      }
+      break;
+    }
+  }
+
+  /* p-multigrid CG for the NLGEOM sensitivity solves (default: off) */
+  for(i=1; i<argc; i++)
+  {
+    if(strcmp(argv[i],"--MG")==0)
+    {
+      if (i+1 < argc &&
+          (strcmp(argv[i+1],"true")==0 || strcmp(argv[i+1],"True")==0 ||
+           strcmp(argv[i+1],"TRUE")==0))
+      {
+#ifdef PARDISO
+        g_useMG = 1;
+        printf(" Newton solver: p-multigrid CG (C3D10 -> C3D4, PARDISO"
+               " coarse solve)\n\n");
+#else
+        printf(" *WARNING: --MG needs PARDISO; ignored\n\n");
+#endif
       }
       break;
     }
@@ -1153,6 +1219,12 @@ while(istat>=0)
     filterOutPassiveElems_density(design, ne, passiveIDs, numPassive);
     printf("done\n");
   }
+
+#ifdef PARDISO
+  /* --MG: the skin keeps quadratic interpolation on the coarse level */
+  if (g_useMG && numPassive > 0)
+    pardiso_mg_skin(passiveIDs, numPassive);
+#endif
 
   #ifdef PROFILING_ON
     TAU_PROFILE_STOP(t_preProc_CalTop);
@@ -1841,6 +1913,7 @@ while(istat>=0)
       TAU_PROFILE_START(t_filter_CalTop);
     #endif
 
+    ct_mark("input, mesh, matrix structure");
     NNEW(filternnzElems, ITG, ne_);
     NNEW(designFiltered, double, ne_);
     printf("Filtering element densities...");
@@ -1889,10 +1962,10 @@ while(istat>=0)
 
   printf("Wrote %d filtered element densities to densityFiltered.bin\n", (int)ne_);
 
-
     rhoPhys = designFiltered;
     printf("Density filtering complete!\n");
     fflush(stdout);
+    ct_mark("density filter");
 
     #ifdef PROFILING_ON
       TAU_PROFILE_STOP(t_filter_CalTop);
@@ -2006,19 +2079,10 @@ while(istat>=0)
 
       /* Allocate memory for P-norm stress sensitivities */  
       NNEW(dPnorm_drhoFiltered, double, ne_);
-
-      double t_start = omp_get_wtime();
-
-      // Legacy COO-based filtering
-      //filterSensitivity_bin_buffered_mts(dPnorm_drho, dPnorm_drhoFiltered, ne, filternnz);
-
-      // CSR-based transpose sensitivity filtering
-      filterSensitivity_bin_buffered_mts_csr(dPnorm_drho,dPnorm_drhoFiltered,ne,filternnz);
-
-      double t_end = omp_get_wtime();
-
-      printf("Compliance sensitivity filtering time: %.6f seconds\n",
-       t_end - t_start);
+      ct_tsub=omp_get_wtime();
+      // Legacy COO-based filtering: filterSensitivity_bin_buffered_mts(dPnorm_drho, dPnorm_drhoFiltered, ne, filternnz);
+      filterSensitivity_bin_buffered_mts_csr(dPnorm_drho, dPnorm_drhoFiltered, ne, filternnz);
+      ct_part("stress (P-norm) gradient filter");
 
       #ifdef PROFILING_ON
         TAU_PROFILE_STOP(t_filter_CalTop);
@@ -2107,10 +2171,36 @@ while(istat>=0)
            &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
            xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
            velo,veloo,rhoPhys,&pstiff,
-           &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho, &eval_PNORM,&mat_dens);
+           &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho, &eval_PNORM,&mat_dens,
+           stx);
+    ct_mark("nonlingeo (Newton solve, P-norm adjoint)");
 
     memmpc_=mpcinfo[0]; mpcfree=mpcinfo[1];
     icascade=mpcinfo[2]; maxlenmpc=mpcinfo[3];
+
+    if (eval_PNORM == 2)
+    {
+      printf("Filtering element stress (P-norm) gradient...");
+      fflush(stdout);
+
+      NNEW(dPnorm_drhoFiltered, double, ne_);
+      ct_tsub=omp_get_wtime();
+      // Legacy COO-based filtering: filterSensitivity_bin_buffered_mts(dPnorm_drho, dPnorm_drhoFiltered, ne, filternnz);
+      filterSensitivity_bin_buffered_mts_csr(dPnorm_drho, dPnorm_drhoFiltered, ne, filternnz);
+      ct_part("stress (P-norm) gradient filter");
+
+      int rs = write_Stress_sens("stress_sens.csv", ne, dPnorm_drhoFiltered);
+      if (rs != 0)
+      {
+        printf("Unable to write P-norm sensitivities to disk!\n");
+        fflush(stdout);
+      }
+
+      SFREE(dPnorm_drhoFiltered);
+      printf("done \n");
+    }
+
+    SFREE(dPnorm_drho);
 
     for(i=0;i<3;i++) nzsprevstep[i]=nzs[i];
 
@@ -2224,6 +2314,7 @@ while(istat>=0)
       printf("done\n");
 
       
+      ct_tsub=omp_get_wtime();
       sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	     xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
              ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
@@ -2242,6 +2333,7 @@ while(istat>=0)
 	     ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
 	     &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
              jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
+      ct_part("sensitivity() total");
 
       
 
@@ -2314,6 +2406,7 @@ while(istat>=0)
         TAU_PROFILE_START(t_compGrad_total);
       #endif
 
+	    ct_tsub=omp_get_wtime();
 	    sensitivity(co,&nk,&kon,&ipkon,&lakon,&ne,nodeboun,ndirboun,
 	      xboun,&nboun, ipompc,nodempc,coefmpc,labmpc,&nmpc,nodeforc,
         ndirforc,xforc,&nforc, nelemload,sideload,xload,&nload,
@@ -2332,6 +2425,7 @@ while(istat>=0)
 	      ielprop,prop,typeboun,&mortar,mpcinfo,tietol,ics,&icontact,
 	      &nobject,&objectset,&istat,orname,nzsprevstep,&nlabel,physcon,
         jobnamef,rhoPhys,&pstiff,gradCompl,elCompl,elCG,eleVol, &eval_PNORM);
+	    ct_part("sensitivity() total");
 
         #ifdef PROFILING_ON
         TAU_PROFILE_STOP(t_compGrad_total);
@@ -2349,15 +2443,10 @@ while(istat>=0)
 
       printf("Filter compliance gradient ");
       fflush(stdout);
-
-    
-      // Legacy COO-based sensitivity filtering
-      //filterSensitivity_bin_buffered_mts(gradCompl, gradComplFiltered, ne, filternnz);
-        
-    
-      // CSR-based sensitivity filtering 
+      ct_tsub=omp_get_wtime();
+      // Legacy COO-based filtering: filterSensitivity_bin_buffered_mts(gradCompl, gradComplFiltered, ne, filternnz);
       filterSensitivity_bin_buffered_mts_csr(gradCompl, gradComplFiltered, ne, filternnz);
-
+      ct_part("compliance gradient filter");
       printf("done! \n");
       fflush(stdout);
       
@@ -2440,13 +2529,9 @@ while(istat>=0)
         #endif
 
         printf("\nFilter CG gradient");
-        // Legacy COO-based grouped sensitivity filtering
-        //filterSensitivity_bin_buffered_mts3(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
-
-        // CSR-based grouped sensitivity filtering
-        filterSensitivity_bin_buffered_mts3_csr(dCGx, dCGy, dCGz,dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
+        // Legacy COO-based filtering: filterSensitivity_bin_buffered_mts3(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
+        filterSensitivity_bin_buffered_mts3_csr(dCGx, dCGy, dCGz, dCGxFiltered, dCGyFiltered, dCGzFiltered,ne, filternnz);
         
-
         fflush(stdout);
 
         #ifdef PROFILING_ON
@@ -2540,13 +2625,10 @@ while(istat>=0)
 
       printf("Filter volume fraction gradient ");
       fflush(stdout);
-
-
-      // Legacy COO-based sensitivity filtering
-      //filterSensitivity_bin_buffered_mts(volFracSens, volFracSensFiltered, ne, filternnz);
-
-      // CSR-based sensitivity filtering
+      ct_tsub=omp_get_wtime();
+      // Legacy COO-based filtering: filterSensitivity_bin_buffered_mts(volFracSens, volFracSensFiltered, ne, filternnz);
       filterSensitivity_bin_buffered_mts_csr(volFracSens, volFracSensFiltered, ne, filternnz);
+      ct_part("volume gradient filter");
 
       #ifdef PROFILING_ON
         TAU_PROFILE_STOP(t_filter_CalTop);
@@ -2577,6 +2659,7 @@ while(istat>=0)
       ends = time(NULL);
       
       
+      ct_mark("sensitivities, filtering, CSV output");
       printf("\n========================================\n");
       printf("OUTPUT\n");
       printf("========================================\n");
@@ -2872,6 +2955,11 @@ while(istat>=0)
   }
 
  } // end while(istat>=0)
+
+  ct_mark("objectives, densities, VTU output");
+#ifdef PARDISO
+  pardiso_release();   /* K_T factor kept for the adjoint solves */
+#endif
 
   printf("Removing filter files...");
   fflush(stdout);
