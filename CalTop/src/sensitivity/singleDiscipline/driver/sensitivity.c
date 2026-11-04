@@ -19,6 +19,12 @@
 #include <math.h>
 #include <stdlib.h>
 #include "CalculiX.h"
+#include <omp.h>
+static void ct_part_se(const char *label,double t0)
+{
+  printf(" [time]     %-40s %9.1f s\n",label,omp_get_wtime()-t0);
+  fflush(stdout);
+}
 #ifdef SPOOLES
    #include "spooles.h"
 #endif
@@ -584,7 +590,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 NNEW(v,double,mt**nk);
 
                 if(iperturb[1]==1) memcpy(&v[0],&vold[0],sizeof(double)*mt**nk);
-                
+                double ct_t1=omp_get_wtime();
                 results_se(co,nk,kon,ipkon,lakon,ne,v,stn,inum,stx,
                 elcon,nelcon,rhcon,nrhcon,alcon,nalcon,alzero,ielmat,
                 ielorien,norien,orab,ntmat_,t0,t1act,ithermal,
@@ -606,6 +612,8 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 	            &icoordinate,dxstiff,istartdesi,ialdesi,xdesi,
 	            &ieigenfrequency,fint,&ishapeenergy,typeboun,fn0_out,
                 design,penal);
+                ct_part_se("sensitivity of the internal forces",ct_t1);
+                ct_t1=omp_get_wtime();
 
 	            /* Compute lambda = K_T^{-1} * f_ext for Buhl adjoint */
                 if((iperturb[1]==1)&&(fint!=NULL))
@@ -651,6 +659,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                         #endif
                     }
                 }
+                ct_part_se("compliance adjoint solve",ct_t1);
                 iout=1;
                 SFREE(v);
                 SFREE(fn);
@@ -670,6 +679,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
                 printf("\nEvaluating element-wise compliance sensitivity...\n");
                 fflush(stdout);
+                ct_t1=omp_get_wtime();
                 /* mafillsmmain_se -> mafillsmse -> e_c3d_se() */
                 mafillsmmain_se(co,nk,kon,ipkon,lakon,ne,nodeboun,
                     ndirboun,xbounact,nboun,
@@ -694,6 +704,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                     gradCompl,elCompl,elCG,eleVol,fn0_out,fint);
                // printf("done with mafilsmmain se...\n");
                printf("Compliance sensitivity evaluation complete!\n");
+               ct_part_se("element compliance sensitivities",ct_t1);
                fflush(stdout);
 
                 /* second order derivative */

@@ -1,4 +1,5 @@
 SRC_DIR = src
+OPT = -O2 
 SCCXF = \
 $(SRC_DIR)/absolute_relative.f \
 $(SRC_DIR)/acctube.f \
@@ -895,6 +896,7 @@ $(SRC_DIR)/sensitivity/singleDiscipline/compliance/linearCompliance_C3D10.f \
 
 
 SCCXC = \
+$(SRC_DIR)/bddc.c \
 $(SRC_DIR)/rho.c \
 $(SRC_DIR)/arpack.c \
 $(SRC_DIR)/arpackbu.c \
@@ -1066,16 +1068,20 @@ $(SRC_DIR)/filter/makeDistanceMatrix.c \
 $(SRC_DIR)/filter/expand_filter.c \
 $(SRC_DIR)/utils.c \
 $(SRC_DIR)/filter/filterDensity_bin_mt.c \
+$(SRC_DIR)/filter/filterDensity_csr_mt.c \
 $(SRC_DIR)/filter/densityfilterFast.c \
 $(SRC_DIR)/filter/assembleDensityFilter_txt_mt.c \
 $(SRC_DIR)/filter/assembleDensityFilter_bin_mt.c \
+$(SRC_DIR)/filter/assembleDensityFilter_csr_mt.c \
 $(SRC_DIR)/filter/filterSens_mt.c \
 $(SRC_DIR)/filter/filterSens_dat_mt_s.c \
 $(SRC_DIR)/filter/filterSens_bin_mt_s.c \
+$(SRC_DIR)/filter/filterSens_bin_mt_csr.c \
 $(SRC_DIR)/objectives/massCG.c \
 $(SRC_DIR)/objectives/compliance.c \
 $(SRC_DIR)/output/write_CGSens.c \
 $(SRC_DIR)/filter/filterSens_bin_mt_s_group.c \
+$(SRC_DIR)/filter/filterSens_bin_mt_csr_group.c \
 $(SRC_DIR)/output/write_StressSens.c \
 $(SRC_DIR)/preProcess/su2_preprocess.c \
 $(SRC_DIR)/preProcess/extract_slat_hardpoints.c \

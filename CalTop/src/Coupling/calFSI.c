@@ -29,6 +29,9 @@
 #include <string.h>
 #include "CalFSI.h"
 #include "CalculiX.h"
+#ifdef PARDISO
+#include "pardiso.h"
+#endif
 
 #include <time.h>
 #include <unistd.h>
@@ -528,6 +531,47 @@ else
     {
       /* Set SU2_MESH =1 is True is passed */
       SU2_MESH = (strcmp1(argv[i+1],"True")==0);
+      break;
+    }
+  }
+
+  /* Newton-Krylov for the NLGEOM sensitivity solves (default: PARDISO direct) */
+  for(i=1; i<argc; i++)
+  {
+    if(strcmp(argv[i],"--NK")==0)
+    {
+      if (i+1 < argc &&
+          (strcmp(argv[i+1],"true")==0 || strcmp(argv[i+1],"True")==0 ||
+           strcmp(argv[i+1],"TRUE")==0))
+      {
+#ifdef PARDISO
+        g_useNK = 1;
+        printf(" Newton solver: Newton-Krylov (PARDISO factor as preconditioner)\n\n");
+#else
+        printf(" *WARNING: --NK needs PARDISO; ignored\n\n");
+#endif
+      }
+      break;
+    }
+  }
+
+  /* p-multigrid CG for the NLGEOM sensitivity solves (default: off) */
+  for(i=1; i<argc; i++)
+  {
+    if(strcmp(argv[i],"--MG")==0)
+    {
+      if (i+1 < argc &&
+          (strcmp(argv[i+1],"true")==0 || strcmp(argv[i+1],"True")==0 ||
+           strcmp(argv[i+1],"TRUE")==0))
+      {
+#ifdef PARDISO
+        g_useMG = 1;
+        printf(" Newton solver: p-multigrid CG (C3D10 -> C3D4, PARDISO"
+               " coarse solve)\n\n");
+#else
+        printf(" *WARNING: --MG needs PARDISO; ignored\n\n");
+#endif
+      }
       break;
     }
   }
@@ -2214,7 +2258,8 @@ while(istat>=0)
            &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
            xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
            velo,veloo,rhoPhys,&pstiff,
-           &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho, &eval_PNORM,&mat_dens, preciceParticipantName,configFilename);
+           &sigma0,&eps_relax,&rhomin,&pexp,&Pnorm,dPnorm_drho, &eval_PNORM,&mat_dens, preciceParticipantName,configFilename,
+           stx);
 
 	      memmpc_=mpcinfo[0];
         mpcfree=mpcinfo[1];
@@ -3178,6 +3223,9 @@ while(istat>=0)
   #ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
   calculix_freeExternalBehaviours();
   #endif /* CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT */
+#ifdef PARDISO
+  pardiso_release();   /* K_T factor kept for the adjoint solves */
+#endif
   printf("done! \n");
   return 0;
 }

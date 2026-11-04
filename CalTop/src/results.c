@@ -22,6 +22,7 @@
 #include <string.h>
 #include <pthread.h>
 #include "CalculiX.h"
+#include "bddc.h"
 
 static char *lakon1,*matname1,*sideload1;
 
@@ -140,6 +141,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
        
        {
 
+    ITG ct_nfn=1;  /* copies of the internal forces (1 when distributed) */
     ITG intpointvarm,calcul_fn,calcul_f,calcul_qa,calcul_cauchy,ikin,
         intpointvart,mt=mi[1]+1,i,j;
 
@@ -259,7 +261,11 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
     	NNEW(nebpar,ITG,num_cpus);
 	    elementcpuload(neapar,nebpar,ne,ipkon,&num_cpus);
 
-	    NNEW(fn1,double,num_cpus*mt**nk);
+	    /* distributed element work (CALTOP_SOLVER=bddc): the BDDC ranks return
+	       the internal forces already summed, so one copy instead of one per
+	       thread */
+	    ct_nfn=((get_adjoint==0)&&bddc_dist_on()) ? 1 : num_cpus;
+	    NNEW(fn1,double,(long long)ct_nfn*mt**nk);
 	    NNEW(qa1,double,num_cpus*4);
 	    NNEW(nal,ITG,num_cpus);
 
@@ -296,6 +302,19 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
             // NOTE: No penalization of xstiff here
             printf("Initializing fields for constitutive matrix...");
             fflush(stdout);
+            /* CALTOP_SOLVER=bddc, distributed element work: the BDDC ranks
+               compute their own elements; the result is in thread slot 0 */
+            bddc_eargs ea;
+            memset(&ea,0,sizeof(ea));
+            ea.co=co;ea.nk=nk;ea.kon=kon;ea.ipkon=ipkon;ea.lakon=lakon;ea.ne=ne;ea.mi=mi;
+            ea.v=v;ea.vold=vold;ea.stx=stx;ea.eme=eme;ea.xstiff=xstiff;ea.stiini=stiini;ea.ener=ener;
+            ea.eei=eei;ea.enerini=enerini;ea.emeini=emeini;ea.rhomin=rhomin;ea.penal=penal;
+            ea.iout=iout1;ea.nmethod=nmethod;ea.iperturb=iperturb;ea.ielas=ielas;ea.icmd=icmd;
+            ea.istep=istep;ea.iinc=iinc;ea.calcul_fn=calcul_fn;ea.calcul_qa=calcul_qa;
+            ea.calcul_cauchy=calcul_cauchy;ea.nener=nener;ea.ikin=ikin;ea.kscale=kscale;
+            ea.dtime=dtime;ea.time=time;ea.ttime=ttime;ea.reltime=reltime;
+            ea.fn=fn1;ea.qa=qa1;ea.nal=nal;
+            if(!bddc_dist_res(&ea)){
             for(i=0; i<num_cpus; i++)  
             {
 	            ithread[i]=i;
@@ -303,6 +322,7 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
                 //pthread_create(&tid[i], NULL, (void *)stresspnormmt, (void *)&ithread[i]);
     	    }
             for(i=0; i<num_cpus; i++)  pthread_join(tid[i], NULL);
+            }
 
             SFREE(neapar);
             SFREE(nebpar);
@@ -381,9 +401,9 @@ void results(double *co,ITG *nk,ITG *kon,ITG *ipkon,char *lakon,ITG *ne,
 
 	    for(i=0;i<mt**nk;i++)
         {
-	        for(j=1;j<num_cpus;j++)
+	        for(j=1;j<ct_nfn;j++)
             {
-		        fn[i]+=fn1[i+j*mt**nk];
+		        fn[i]+=fn1[i+(long long)j*mt**nk];
 	        }
 	    }
 
