@@ -39,13 +39,22 @@ void pardiso_factor_solve(double *ad, double *au, double *adb, double *aub,
 		ITG *neq, ITG *nzs, ITG *symmetryflag, ITG *inputformat,
 		ITG *jq, ITG *nzs3,ITG *nrhs);
 
-void pardiso_set_matrix(double *ad, double *au, double *adb, double *aub,
+void pardiso_store_factor(double *ad, double *au, double *adb, double *aub,
                 double *sigma,ITG *icol, ITG *irow,
 		ITG *neq, ITG *nzs, ITG *symmetryflag, ITG *inputformat,
 		ITG *jq, ITG *nzs3);
 
 extern int g_useNK;
 
+/* --MG: p-multigrid CG (C3D10 -> C3D4) for the NLGEOM sensitivity solves;
+   nonlingeo passes its mesh before each solve */
+extern int g_useMG;
+void pardiso_mg_mesh(ITG *kon,ITG *ipkon,char *lakon,ITG *ne,ITG *nactdof,
+		     ITG *mi,ITG *nk);
+void pardiso_mg_atol(double atol);
+void pardiso_mg_skin(int *ids,int n);
+void pardiso_mg_coords(double *co);
+void pardiso_mg_guess(double *vold);
 void FORTRAN(pardiso,(long long *pt,ITG *maxfct,ITG *mnum,ITG *mtype,ITG *phase,
                    ITG *neq,double *aupardiso,ITG *pointers,ITG *irowpardiso,
                    ITG *perm,ITG *nrhs,ITG *iparm,ITG *msglvl,double *b,
