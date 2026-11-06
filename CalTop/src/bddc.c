@@ -53,6 +53,17 @@
 #include <omp.h>
 #include "CalculiX.h"
 #include "bddc.h"
+/* TAU regions (profiling build): see the category list in nonlingeo.c.
+   Every rank writes its own profile (node id = rank); rank 0's profile is
+   the run's breakdown. */
+#ifdef PROFILING_ON
+#include <TAU.h>
+#define TAU_REGION_START(n) TAU_START(n)
+#define TAU_REGION_STOP(n) do{TAU_TRACK_MEMORY_FOOTPRINT_HERE();TAU_STOP(n);}while(0)
+#else
+#define TAU_REGION_START(n) ((void)0)
+#define TAU_REGION_STOP(n) ((void)0)
+#endif
 
 #ifdef CALTOP_BDDC
 #include <petscksp.h>
@@ -220,6 +231,9 @@ void bddc_launch(int *argc, char ***argv)
   }
   MPI_Comm_rank(PETSC_COMM_WORLD, &bd_rank);
   MPI_Comm_size(PETSC_COMM_WORLD, &bd_size);
+#ifdef PROFILING_ON
+  TAU_PROFILE_SET_NODE(bd_rank);   /* profile.<rank>.0.<thread>: ranks do not overwrite each other */
+#endif
   if (getd("CALTOP_BDDC_PROFILE", 0.) > 0.) PetscLogDefaultBegin();   /* per-rank setup report */
   if (bd_size == 1 && getd("CALTOP_BDDC_NP", 24.) > 1.) {
     /* every process thinks it is alone: the launcher belongs to a different
@@ -541,6 +555,7 @@ static PetscErrorCode matrix_collective(double *tsetup)
   PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
   PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
   if (!pc_ready) {
+    TAU_REGION_START("Forward analysis: Preconditioner construction");
     double t0;
     char   thr[32];
     /* flags exactly as the standalone test: A marked SPD before it is
@@ -636,6 +651,7 @@ static PetscErrorCode matrix_collective(double *tsetup)
                mmax / 1e9, m / 1e9);
     }
     pc_ready = 1;
+    TAU_REGION_STOP("Forward analysis: Preconditioner construction");
   }
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -650,6 +666,7 @@ static PetscErrorCode pmat_collective(double *tsetup)
   PC       pc;
   double   t0;
   PetscFunctionBeginUser;
+  TAU_REGION_START("Forward analysis: Preconditioner construction");
   PetscCall(MatZeroEntries(B));
   for (c = 0; c < nown; c++) {
     for (j = 0; j < bd_s; j++) li[j] = ledof[bd_s * c + j];
@@ -671,6 +688,7 @@ static PetscErrorCode pmat_collective(double *tsetup)
   PetscCallMPI(MPI_Barrier(PETSC_COMM_WORLD));
   if (tsetup) *tsetup = MPI_Wtime() - t0;
   PetscCall(KSPSetReusePreconditioner(ksp, PETSC_TRUE));
+  TAU_REGION_STOP("Forward analysis: Preconditioner construction");
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -806,7 +824,8 @@ static void d_build_local(bddc_eargs *a, int r, int nmat, dmodel_t *o)
     memcpy(o->lakon + 8 * (size_t)k, a->lakon + 8 * (size_t)e, 8);
     for (c = 0; c < m3; c++) {
       o->ielmat[(size_t)m3 * k + c] = a->ielmat[(size_t)m3 * e + c];
-      o->ielorien[(size_t)m3 * k + c] = (a->ielorien != NULL) ? a->ielorien[(size_t)m3 * e + c] : 0;
+      /* norien == 0: CalTop has freed ielorien (SFREE does not reset the pointer) */
+      o->ielorien[(size_t)m3 * k + c] = (*a->norien > 0 && a->ielorien != NULL) ? a->ielorien[(size_t)m3 * e + c] : 0;
     }
     o->ielprop[k] = -1;
     o->design[k] = a->design[e];
@@ -991,7 +1010,7 @@ static int d_setup(bddc_eargs *a)
   dm.alzero = D_OR0(a->alzero, dm.nmat, double); dm.plicon = D_OR0(a->plicon, D_PLICON, double);
   dm.nplicon = D_OR0(a->nplicon, D_NPLICON, ITG); dm.plkcon = D_OR0(a->plkcon, D_PLICON, double);
   dm.nplkcon = D_OR0(a->nplkcon, D_NPLICON, ITG); dm.matname = a->matname;
-  dm.orab = D_OR0(a->orab, 7 * dm.norien, double);
+  dm.orab = (dm.norien > 0) ? D_OR0(a->orab, 7 * dm.norien, double) : calloc(1, sizeof(double));   /* freed when norien == 0 */
 #undef D_OR0
   memcpy(dm.physcon, a->physcon, sizeof(dm.physcon));
   dm.penal = *a->penal; dm.matdens = *a->matdens;
@@ -1012,22 +1031,26 @@ static void d_scatter(double *g, MPI_Datatype *t, double *l, int nl, int tag)
 {
   MPI_Request *rq = malloc(sizeof(MPI_Request) * (bd_size + 1));
   int          n = 0, r;
+  TAU_REGION_START("Forward analysis: Data exchange");
   MPI_Irecv(l, nl, MPI_DOUBLE, 0, tag, PETSC_COMM_WORLD, &rq[n++]);
   if (bd_rank == 0)
     for (r = 0; r < bd_size; r++) MPI_Isend(g, 1, t[r], r, tag, PETSC_COMM_WORLD, &rq[n++]);
   MPI_Waitall(n, rq, MPI_STATUSES_IGNORE);
   free(rq);
+  TAU_REGION_STOP("Forward analysis: Data exchange");
 }
 /* gather the local element arrays into rank 0's global array (disjoint elements) */
 static void d_gather(double *g, MPI_Datatype *t, double *l, int nl, int tag)
 {
   MPI_Request *rq = malloc(sizeof(MPI_Request) * (bd_size + 1));
   int          n = 0, r;
+  TAU_REGION_START("Forward analysis: Data exchange");
   if (bd_rank == 0)
     for (r = 0; r < bd_size; r++) MPI_Irecv(g, 1, t[r], r, tag, PETSC_COMM_WORLD, &rq[n++]);
   MPI_Isend(l, nl, MPI_DOUBLE, 0, tag, PETSC_COMM_WORLD, &rq[n++]);
   MPI_Waitall(n, rq, MPI_STATUSES_IGNORE);
   free(rq);
+  TAU_REGION_STOP("Forward analysis: Data exchange");
 }
 
 /* element matrices of this rank's elements into lK (all ranks) */
@@ -1184,7 +1207,13 @@ int bddc_dist_asm(bddc_eargs *a)
   int    nt, nm;
   double t0;
   if (!bddc_active() || !bd_topo || bd_dist < 0 || *a->stiffness != 1) return 0;
-  if (bd_dist == 0 && !d_setup(a)) return 0;
+  if (bd_dist == 0) {
+    int ok;
+    TAU_REGION_START("Domain decomposition");   /* local models sent to the ranks (once) */
+    ok = d_setup(a);
+    TAU_REGION_STOP("Domain decomposition");
+    if (!ok) return 0;
+  }
   t0 = MPI_Wtime();
   nt = omp_get_max_threads(); nm = mkl_get_max_threads();
   pin_own(); omp_set_num_threads(1);
@@ -1244,8 +1273,10 @@ static void worker_loop(void)
     } else if ((int)msg[0] == CMD_LPMAT) {
       if (pmat_collective(NULL)) MPI_Abort(PETSC_COMM_WORLD, 1);
     } else if ((int)msg[0] == CMD_DMODEL) {
+      TAU_REGION_START("Domain decomposition");
       d_recv_local();
       d_bcast_materials();
+      TAU_REGION_STOP("Domain decomposition");
     } else if ((int)msg[0] == CMD_DASM) {
       d_asm_collective(NULL);
     } else if ((int)msg[0] == CMD_DRES) {
@@ -1287,6 +1318,7 @@ void bddc_capture_end(ITG *kon, ITG *ipkon, ITG ne, ITG *nactdof, ITG *mi, ITG n
   bd_capturing = 0;
   bd_dirty = 1;
   if (bd_topo) return;
+  TAU_REGION_START("Domain decomposition");
   /* every element in use must have handed over its matrix */
   bd_nel = 0;
   bd_el = malloc(sizeof(int) * (size_t)ne);
@@ -1500,6 +1532,7 @@ void bddc_capture_end(ITG *kon, ITG *ipkon, ITG ne, ITG *nactdof, ITG *mi, ITG n
 #endif
          (int)neq, omp_get_wtime() - t0);
   free(cnt);
+  TAU_REGION_STOP("Domain decomposition");
 }
 
 static int ship_matrix(void)

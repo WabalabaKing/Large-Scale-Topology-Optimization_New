@@ -42,18 +42,38 @@ static double nl_tstart=0.,nl_tasm=0.,nl_tres=0.,nl_tsol=0.;
 static long nl_nasm=0,nl_nres=0,nl_nsol=0;
 extern double ct_t_asm_reduce;   /* mafillsmmain.c */
 static double nl_tred0=0.;
-#define NL_TIMED(acc,cnt,call) do{double t_=omp_get_wtime();call;\
+
+/* TAU regions (profiling build, -DPROFILING_ON): the category names of the
+   run-time breakdown. Regions nest; time is attributed to the innermost one.
+   After the Newton loop (nl_adj=1) the solves belong to the adjoint and the
+   element routines to the sensitivity evaluation around them. */
+#ifdef PROFILING_ON
+#include <TAU.h>
+#define TAU_REGION_START(n) TAU_START(n)
+#define TAU_REGION_STOP(n) do{TAU_TRACK_MEMORY_FOOTPRINT_HERE();TAU_STOP(n);}while(0)
+#else
+#define TAU_REGION_START(n) ((void)0)
+#define TAU_REGION_STOP(n) ((void)0)
+#endif
+static int nl_adj=0;
+#define NL_ASM (nl_adj?NULL:"Forward analysis: Element computations")
+#define NL_RES (nl_adj?NULL:"Forward analysis: Element computations")
+#define NL_SOL (nl_adj?"Sensitivity analysis: Adjoint solves":"Forward analysis: Linear solves")
+#define NL_TIMED(acc,cnt,name,call) do{const char *n_=name;double t_=omp_get_wtime();\
+    if(n_!=NULL) TAU_REGION_START(n_);\
+    call;\
+    if(n_!=NULL) TAU_REGION_STOP(n_);\
     acc+=omp_get_wtime()-t_;cnt++;}while(0)
-#define mafillsmmain(...) NL_TIMED(nl_tasm,nl_nasm,mafillsmmain(__VA_ARGS__))
-#define results(...) NL_TIMED(nl_tres,nl_nres,results(__VA_ARGS__))
+#define mafillsmmain(...) NL_TIMED(nl_tasm,nl_nasm,NL_ASM,mafillsmmain(__VA_ARGS__))
+#define results(...) NL_TIMED(nl_tres,nl_nres,NL_RES,results(__VA_ARGS__))
 #ifdef PARDISO
-#define pardiso_main(...) NL_TIMED(nl_tsol,nl_nsol,pardiso_main(__VA_ARGS__))
+#define pardiso_main(...) NL_TIMED(nl_tsol,nl_nsol,NL_SOL,pardiso_main(__VA_ARGS__))
 #define pardiso_factor_solve(...) \
-  NL_TIMED(nl_tsol,nl_nsol,pardiso_factor_solve(__VA_ARGS__))
+  NL_TIMED(nl_tsol,nl_nsol,NL_SOL,pardiso_factor_solve(__VA_ARGS__))
 #define pardiso_store_factor(...) \
-  NL_TIMED(nl_tsol,nl_nsol,pardiso_store_factor(__VA_ARGS__))
-#define pardiso_factor(...) NL_TIMED(nl_tsol,nl_nsol,pardiso_factor(__VA_ARGS__))
-#define pardiso_solve(...) NL_TIMED(nl_tsol,nl_nsol,pardiso_solve(__VA_ARGS__))
+  NL_TIMED(nl_tsol,nl_nsol,NL_SOL,pardiso_store_factor(__VA_ARGS__))
+#define pardiso_factor(...) NL_TIMED(nl_tsol,nl_nsol,NL_SOL,pardiso_factor(__VA_ARGS__))
+#define pardiso_solve(...) NL_TIMED(nl_tsol,nl_nsol,NL_SOL,pardiso_solve(__VA_ARGS__))
 #endif
 /*
      nmethod: -1:visco (=static+creep) 
@@ -244,6 +264,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   nl_tstart=omp_get_wtime();
   nl_tasm=nl_tres=nl_tsol=0.;nl_nasm=nl_nres=nl_nsol=0;
+  nl_adj=0;
   nl_tred0=ct_t_asm_reduce;
   tinc=&timepar[0];
   tper=&timepar[1];
@@ -3065,6 +3086,10 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
 
   }
     
+  /* from here on: adjoint preparation, P-norm and its adjoint */
+  nl_adj=1;
+  TAU_REGION_START("Sensitivity analysis: Sensitivity evaluation");
+
 #ifdef PARDISO
   /* converged K_T, factored once and kept for the adjoint solves
      (P-norm below, compliance in sensitivity()); also written to .stm */
@@ -3213,6 +3238,7 @@ void nonlingeo(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **lakonp,
       FORTRAN(stop,());
 #endif
   }
+  TAU_REGION_STOP("Sensitivity analysis: Sensitivity evaluation");
 
   /* writing out the latest stiffness matrix for a subsequent
      sensitivity analysis */

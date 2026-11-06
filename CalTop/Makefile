@@ -241,6 +241,12 @@ ifeq ($(BDDC),1)
   # instead of MKL (3x slower BDDC setup).
   BDDC_LIBS = -Wl,--exclude-libs,ALL $(PETSC_WITH_EXTERNAL_LIB)
   LINKER    = $(FC_LINKER)
+  # PROFILING=1: the BDDC link uses PETSc's linker, not tau_f90.sh, so TAU's
+  # library is added here (the TAU regions are in every C file)
+  ifeq ($(PROFILING),1)
+    include $(TAU_MAKEFILE)
+    BDDC_LIBS += $(TAU_SHLIBS)
+  endif
   ifeq ($(strip $(FC_LINKER)),)
     $(error PETSc in $(PETSC_DIR)/$(PETSC_ARCH) was built without Fortran (no MUMPS): set PETSC_ARCH to the MUMPS build)
   endif

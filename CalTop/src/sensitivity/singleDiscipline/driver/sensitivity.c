@@ -20,6 +20,15 @@
 #include <stdlib.h>
 #include "CalculiX.h"
 #include <omp.h>
+/* TAU region (profiling build): see the category list in nonlingeo.c */
+#ifdef PROFILING_ON
+#include <TAU.h>
+#define TAU_REGION_START(n) TAU_START(n)
+#define TAU_REGION_STOP(n) do{TAU_TRACK_MEMORY_FOOTPRINT_HERE();TAU_STOP(n);}while(0)
+#else
+#define TAU_REGION_START(n) ((void)0)
+#define TAU_REGION_STOP(n) ((void)0)
+#endif
 static void ct_part_se(const char *label,double t0)
 {
   printf(" [time]     %-40s %9.1f s\n",label,omp_get_wtime()-t0);
@@ -614,6 +623,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                 design,penal);
                 ct_part_se("sensitivity of the internal forces",ct_t1);
                 ct_t1=omp_get_wtime();
+                TAU_REGION_START("Sensitivity analysis: Adjoint solves");
 
 	            /* Compute lambda = K_T^{-1} * f_ext for Buhl adjoint */
                 if((iperturb[1]==1)&&(fint!=NULL))
@@ -659,6 +669,7 @@ void sensitivity(double *co, int *nk, ITG **konp, ITG **ipkonp, char **lakonp,
                         #endif
                     }
                 }
+                TAU_REGION_STOP("Sensitivity analysis: Adjoint solves");
                 ct_part_se("compliance adjoint solve",ct_t1);
                 iout=1;
                 SFREE(v);
